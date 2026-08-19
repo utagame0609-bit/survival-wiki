@@ -45,7 +45,13 @@ export function TimelineTab({
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-4" aria-hidden="true" />
+      <div className="h-[45px] mb-4 rounded-2xl bg-stone-800 px-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-sm font-semibold tracking-[0.18em] text-white">WORLD LOG</span>
+          <span className="h-4 w-px bg-stone-500" />
+          <span className="text-xs text-stone-300 truncate">この世界で記録された出来事</span>
+        </div>
+      </div>
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
       {!loading && groups.length === 0 && (
