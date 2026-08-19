@@ -45,6 +45,7 @@ export function TimelineTab({
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
+      <div className="h-[45px] mb-4" aria-hidden="true" />
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
       {!loading && groups.length === 0 && (
@@ -76,7 +77,7 @@ function DayCard({
   onToggle: () => void;
 }) {
   return (
-    <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative">
+    <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative min-h-[104px]">
       {group.bgPhoto && (
         <div className="absolute inset-0 z-0">
           <img
@@ -88,7 +89,7 @@ function DayCard({
       )}
       <button
         onClick={onToggle}
-        className="relative z-10 w-full text-left p-4 flex items-center justify-between"
+        className="relative z-10 w-full min-h-[104px] text-left p-4 flex items-center justify-between"
       >
         <div>
           <p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p>
