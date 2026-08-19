@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Globe, Users } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
-import { fetchWorlds } from '@/lib/db';
+import { fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
@@ -18,13 +18,18 @@ export function WorldListScreen({
   goBack: () => void;
 }) {
   const [worlds, setWorlds] = useState<WorldWithMembers[]>([]);
+  const [lastLocationDates, setLastLocationDates] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const load = () => {
     setLoading(true);
     fetchWorlds(gameId)
-      .then(setWorlds)
+      .then(async (data) => {
+        setWorlds(data);
+        const dates = await fetchLatestLocationDates(data.map((w) => w.id));
+        setLastLocationDates(dates);
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   };
@@ -56,6 +61,7 @@ export function WorldListScreen({
               <WorldCard
                 key={w.id}
                 world={w}
+                lastLocationDate={lastLocationDates[w.id]}
                 onOpen={() => navigate({ name: 'world', worldId: w.id, worldName: w.name })}
               />
             ))}
@@ -66,7 +72,25 @@ export function WorldListScreen({
   );
 }
 
-function WorldCard({ world, onOpen }: { world: WorldWithMembers; onOpen: () => void }) {
+function WorldCard({
+  world,
+  lastLocationDate,
+  onOpen,
+}: {
+  world: WorldWithMembers;
+  lastLocationDate?: string | null;
+  onOpen: () => void;
+}) {
+  const formattedLastLocationDate = lastLocationDate
+    ? new Date(lastLocationDate).toLocaleString('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
   return (
     <button
       onClick={onOpen}
@@ -84,6 +108,11 @@ function WorldCard({ world, onOpen }: { world: WorldWithMembers; onOpen: () => v
             <span>{world.members.length}名</span>
             {world.memo && <span className="truncate">· {world.memo}</span>}
           </div>
+          {formattedLastLocationDate && (
+            <p className="text-xs text-stone-400 mt-2 text-right">
+              最終ロケーション：{formattedLastLocationDate}
+            </p>
+          )}
         </div>
       </div>
     </button>
