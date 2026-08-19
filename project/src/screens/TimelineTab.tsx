@@ -62,7 +62,11 @@ function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded:
     <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative">
       {group.bgPhoto && (
         <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden pointer-events-none">
-          <img src={group.bgPhoto} alt="" className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35]" />
+          <img
+            src={group.bgPhoto}
+            alt=""
+            className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35] [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)]"
+          />
         </div>
       )}
       <button onClick={onToggle} className="relative z-10 w-full min-h-[104px] text-left p-4 flex items-center justify-between bg-transparent">
