@@ -200,7 +200,7 @@ function LocationCard({
             </p>
             {loc.members.length > 0 && (
               <p className="text-xs text-stone-400 mt-1 truncate">
-                {loc.members.map((m) => m.name).join('・')}
+                仲間：{loc.members.map((m) => m.name).join('・')}
               </p>
             )}
           </div>
