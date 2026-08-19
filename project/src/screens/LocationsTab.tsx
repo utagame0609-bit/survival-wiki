@@ -187,11 +187,6 @@ function LocationCard({
             <p className="text-sm text-stone-500 font-mono mt-0.5">
               X {loc.x}　Y {loc.y}　Z {loc.z}
             </p>
-            {loc.members.length > 0 && (
-              <p className="text-xs text-stone-400 mt-1 truncate">
-                仲間：{loc.members.map((m) => m.name).join('・')}
-              </p>
-            )}
           </div>
           <ChevronDown
             className={`w-5 h-5 text-stone-400 self-center flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
