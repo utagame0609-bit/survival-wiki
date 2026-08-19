@@ -206,20 +206,28 @@ function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGrou
     map.set(key, arr);
   }
 
+  // 最古の日付を1日目とする
+  const sortedKeysAsc = Array.from(map.keys()).sort((a, b) => a.localeCompare(b));
+  const dateKeyToDayNum = new Map<string, number>();
+  sortedKeysAsc.forEach((key, index) => {
+    dateKeyToDayNum.set(key, index + 1);
+  });
+
   const groups: DayGroup[] = [];
-  let dayNumber = 1;
 
   for (const [key, locs] of map) {
     const d = new Date(key);
     const dateLabel = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
     const dayLabel = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
     const dayText = `${dateLabel}（${dayLabel}）`;
+    const dayNum = dateKeyToDayNum.get(key) ?? 1;
+
     const label =
       mode === 'day'
-        ? `${dayNumber}日目`
+        ? `${dayNum}日目`
         : mode === 'date'
           ? dayText
-          : `Day ${dayNumber}\n${dayText}`;
+          : `Day ${dayNum}\n${dayText}`;
 
     const firstWithPhoto = [...locs]
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
@@ -229,7 +237,7 @@ function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGrou
     groups.push({
       dateKey: key,
       label,
-      dayNumber,
+      dayNumber: dayNum,
       dateLabel,
       dayLabel,
       locations: [...locs].sort(
@@ -237,8 +245,6 @@ function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGrou
       ),
       bgPhoto: bgPhoto ? getPhotoUrl(bgPhoto.storage_path) : undefined,
     });
-
-    dayNumber += 1;
   }
 
   return groups;
