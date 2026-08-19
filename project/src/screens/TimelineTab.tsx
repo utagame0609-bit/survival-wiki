@@ -4,15 +4,7 @@ import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 
-type DayGroup = {
-  dateKey: string;
-  label: string;
-  dayNumber: number;
-  dateLabel: string;
-  dayLabel: string;
-  locations: LocationWithPhotos[];
-  bgPhoto?: string;
-};
+type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhoto?: string };
 
 export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
@@ -51,21 +43,14 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
 function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded: boolean; onToggle: () => void }) {
   return (
-    <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative min-h-[104px]">
+    <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative">
       {group.bgPhoto && (
-        <div className="absolute top-0 left-0 right-0 h-[104px] z-0 overflow-visible pointer-events-none">
-          <img
-            src={group.bgPhoto}
-            alt=""
-            className="absolute top-1/2 left-0 w-full h-auto max-w-none -translate-y-1/2 opacity-[0.35]"
-          />
+        <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden pointer-events-none">
+          <img src={group.bgPhoto} alt="" className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35]" />
         </div>
       )}
       <button onClick={onToggle} className="relative z-10 w-full min-h-[104px] text-left p-4 flex items-center justify-between bg-transparent">
-        <div>
-          <p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p>
-          <p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p>
-        </div>
+        <div><p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p><p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p></div>
         <ChevronDown className={`w-5 h-5 text-stone-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
       </button>
       {isExpanded && (
@@ -82,7 +67,6 @@ function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded:
 function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
   const time = new Date(loc.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
   const mainPhoto = loc.photos.find((p) => p.is_main);
-
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_minmax(180px,2fr)_auto_auto] md:items-center gap-2 md:gap-4 py-1">
       <span className="absolute -left-[1.5rem] top-[1.4rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white" />
