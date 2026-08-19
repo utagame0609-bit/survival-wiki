@@ -75,6 +75,7 @@ export function WorldListScreen({
                   localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, w.id);
                   navigate({ name: 'world', worldId: w.id, worldName: w.name });
                 }}
+                onEdit={() => navigate({ name: 'worldCreate', gameId, gameName, worldId: w.id })}
               />
             ))}
           </div>
@@ -90,12 +91,14 @@ function WorldCard({
   expanded,
   onToggle,
   onOpen,
+  onEdit,
 }: {
   world: WorldWithMembers;
   lastLocationDate?: string | null;
   expanded: boolean;
   onToggle: () => void;
   onOpen: () => void;
+  onEdit: () => void;
 }) {
   const formattedLastLocationDate = lastLocationDate
     ? new Date(lastLocationDate).toLocaleString('ja-JP', {
@@ -142,12 +145,18 @@ function WorldCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-stone-100 p-3">
+        <div className="border-t border-stone-100 p-3 flex gap-2">
           <button
             onClick={onOpen}
-            className="w-full py-2.5 rounded-xl bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 active:scale-[0.99] transition-all"
           >
             このワールドを開く
+          </button>
+          <button
+            onClick={onEdit}
+            className="flex-1 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 active:scale-[0.99] transition-all"
+          >
+            編集
           </button>
         </div>
       )}
