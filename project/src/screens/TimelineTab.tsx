@@ -10,7 +10,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -19,9 +19,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
   const groups = useMemo(() => groupByDay(locations), [locations]);
   const toggle = (key: string) => {
-    const next = new Set(expanded);
-    if (next.has(key)) next.delete(key); else next.add(key);
-    setExpanded(next);
+    setExpanded((prev) => (prev === key ? null : key));
   };
 
   return (
@@ -36,7 +34,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
       {!loading && groups.length === 0 && <EmptyState message="タイムラインがありません。ロケーションを記録すると自動生成されます。" />}
-      {!loading && groups.length > 0 && <div className="space-y-3">{groups.map((g) => <DayCard key={g.dateKey} group={g} isExpanded={expanded.has(g.dateKey)} onToggle={() => toggle(g.dateKey)} />)}</div>}
+      {!loading && groups.length > 0 && <div className="space-y-3">{groups.map((g) => <DayCard key={g.dateKey} group={g} isExpanded={expanded === g.dateKey} onToggle={() => toggle(g.dateKey)} />)}</div>}
     </div>
   );
 }
