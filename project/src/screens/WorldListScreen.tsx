@@ -26,7 +26,13 @@ export function WorldListScreen({
     setLoading(true);
     fetchWorlds(gameId)
       .then(async (data) => {
-        setWorlds(data);
+        const lastOpenedWorldId = localStorage.getItem(`survival-wiki:last-opened-world:${gameId}`);
+        const sortedWorlds = [...data].sort((a, b) => {
+          if (a.id === lastOpenedWorldId) return -1;
+          if (b.id === lastOpenedWorldId) return 1;
+          return 0;
+        });
+        setWorlds(sortedWorlds);
         const dates = await fetchLatestLocationDates(data.map((w) => w.id));
         setLastLocationDates(dates);
       })
@@ -62,7 +68,10 @@ export function WorldListScreen({
                 key={w.id}
                 world={w}
                 lastLocationDate={lastLocationDates[w.id]}
-                onOpen={() => navigate({ name: 'world', worldId: w.id, worldName: w.name })}
+                onOpen={() => {
+                  localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, w.id);
+                  navigate({ name: 'world', worldId: w.id, worldName: w.name });
+                }}
               />
             ))}
           </div>
