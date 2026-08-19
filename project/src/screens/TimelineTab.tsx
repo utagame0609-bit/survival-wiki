@@ -45,11 +45,11 @@ export function TimelineTab({
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-4 rounded-2xl bg-stone-800 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-4 flex items-center justify-center shadow-sm">
+        <div className="flex items-center gap-3 min-w-0 justify-center">
           <span className="text-sm font-semibold tracking-[0.18em] text-white">WORLD LOG</span>
-          <span className="h-4 w-px bg-stone-500" />
-          <span className="text-xs text-stone-300 truncate">この世界で記録された出来事</span>
+          <span className="h-4 w-px bg-emerald-300" />
+          <span className="text-xs text-white truncate">この世界で記録された出来事</span>
         </div>
       </div>
       {error && <ErrorBanner message={error} />}
@@ -132,7 +132,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
       <div className="min-w-0">
         <h4 className="font-medium text-stone-900 truncate">{loc.name}</h4>
         <p className="text-xs text-stone-500 font-mono mt-0.5">
-          {loc.x}, {loc.y}, {loc.z}
+          X {loc.x}　Y {loc.y}　Z {loc.z}
         </p>
       </div>
 
