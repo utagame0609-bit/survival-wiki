@@ -206,7 +206,6 @@ function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGrou
     map.set(key, arr);
   }
 
-  // 最古の日付を1日目とする
   const sortedKeysAsc = Array.from(map.keys()).sort((a, b) => a.localeCompare(b));
   const dateKeyToDayNum = new Map<string, number>();
   sortedKeysAsc.forEach((key, index) => {
