@@ -50,11 +50,16 @@ export function WorldScreen({
       {loading && <Spinner label="ワールドを読み込み中" />}
       {!loading && world && (
         <>
-          {/* Tab bar: all tabs keep identical dimensions so switching tabs does not shift the layout */}
           <div className="sticky top-14 z-20 bg-white/90 backdrop-blur-md border-b border-stone-200">
             <div className="flex max-w-3xl mx-auto h-12">
               {tabs.map((t) => {
                 const Icon = t.icon;
+                const label =
+                  t.id === 'locations'
+                    ? 'ロケーション'
+                    : t.id === 'timeline'
+                      ? 'タイムライン'
+                      : 'Wiki';
                 return (
                   <button
                     key={t.id}
@@ -66,7 +71,7 @@ export function WorldScreen({
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span>{t.label}</span>
+                    <span>{label}</span>
                     {tab === t.id && (
                       <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600" />
                     )}
@@ -76,7 +81,6 @@ export function WorldScreen({
             </div>
           </div>
 
-          {/* Tab content */}
           <div className="flex-1">
             {tab === 'locations' && (
               <LocationsTab world={world} reloadKey={reloadKey} onReload={reload} />
@@ -85,7 +89,6 @@ export function WorldScreen({
             {tab === 'wiki' && <WikiTab world={world} reloadKey={reloadKey} />}
           </div>
 
-          {/* Settings FAB */}
           <button
             onClick={() =>
               navigate({
