@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, MapPin } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
@@ -117,7 +117,7 @@ function DayCard({
           <img
             src={group.bgPhoto}
             alt=""
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-[0.35]"
           />
         </div>
       )}
@@ -127,10 +127,10 @@ function DayCard({
       >
         <div>
           <p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p>
-          <p className="text-xs text-stone-500 mt-0.5">{group.locations.length}件の記録</p>
+          <p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p>
         </div>
         <ChevronDown
-          className={`w-5 h-5 text-stone-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-stone-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -156,22 +156,22 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
 
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_minmax(180px,2fr)_auto_auto] md:items-center gap-2 md:gap-4 py-1">
-      <div className="absolute -left-[1.35rem] top-2 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+      <MapPin className="absolute -left-[1.5rem] top-1.5 w-4 h-4 text-emerald-600 bg-white rounded-full" />
       <div className="min-w-0">
         <h4 className="font-medium text-stone-900 truncate">{loc.name}</h4>
-        <p className="text-xs text-stone-400 font-mono mt-0.5">
+        <p className="text-xs text-stone-500 font-mono mt-0.5">
           {loc.x}, {loc.y}, {loc.z}
         </p>
       </div>
 
       <div className="min-w-0">
         {loc.detail_memo ? (
-          <p className="text-sm text-stone-600 whitespace-pre-wrap break-words">{loc.detail_memo}</p>
+          <p className="text-sm text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p>
         ) : (
-          <p className="text-sm text-stone-400">メモなし</p>
+          <p className="text-sm text-stone-500">メモなし</p>
         )}
         {loc.members.length > 0 && (
-          <p className="text-xs text-stone-400 mt-1 truncate">{loc.members.map((m) => m.name).join('・')}</p>
+          <p className="text-xs text-stone-500 mt-1 truncate">{loc.members.map((m) => m.name).join('・')}</p>
         )}
       </div>
 
@@ -187,7 +187,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
         )}
       </div>
 
-      <span className="text-xs text-stone-400 font-mono md:text-right">{time}</span>
+      <span className="text-xs text-stone-500 font-mono md:text-right">{time}</span>
     </div>
   );
 }
