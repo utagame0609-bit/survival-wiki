@@ -20,8 +20,8 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
   return (
     <div className="min-h-screen bg-stone-50">
       <div className="px-5 pt-12 pb-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-stone-900 tracking-tight">記録 → タイムライン → Wiki</h1>
-        <p className="mt-1 text-sm text-stone-500">ゲームを選んで記録を始めよう</p>
+        <h1 className="text-2xl font-bold text-stone-900 tracking-tight">ゲームを選択</h1>
+        <p className="mt-1 text-sm text-stone-500">記録を始めるゲームを選んでください</p>
       </div>
 
       <div className="px-5 max-w-3xl mx-auto">
