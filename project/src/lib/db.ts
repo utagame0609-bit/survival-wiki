@@ -36,6 +36,30 @@ export async function fetchWorlds(gameId: string): Promise<WorldWithMembers[]> {
   }));
 }
 
+export async function fetchLatestLocationDates(
+  worldIds: string[]
+): Promise<Record<string, string | null>> {
+  if (worldIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from('locations')
+    .select('world_id, created_at')
+    .in('world_id', worldIds)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+
+  const latest: Record<string, string | null> = {};
+  for (const worldId of worldIds) latest[worldId] = null;
+
+  for (const row of data ?? []) {
+    if (latest[row.world_id] === null) {
+      latest[row.world_id] = row.created_at;
+    }
+  }
+
+  return latest;
+}
+
 export async function fetchWorld(id: string): Promise<WorldWithMembers | null> {
   const { data, error } = await supabase
     .from('worlds')
