@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings } from 'lucide-react';
+import { BookOpen, Clock3, MapPin, Settings } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { fetchWorld } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -37,38 +37,42 @@ export function WorldScreen({
       .finally(() => setLoading(false));
   }, [worldId, reloadKey]);
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'locations', label: 'ロケーション' },
-    { id: 'timeline', label: 'タイムライン' },
-    { id: 'wiki', label: 'Wiki' },
+  const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
+    { id: 'locations', label: 'ロケーション', icon: MapPin },
+    { id: 'timeline', label: 'タイムライン', icon: Clock3 },
+    { id: 'wiki', label: 'Wiki', icon: BookOpen },
   ];
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen overflow-y-scroll bg-stone-50 flex flex-col">
       <Header title={worldName} onBack={goBack} />
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ワールドを読み込み中" />}
       {!loading && world && (
         <>
-          {/* Tab bar */}
+          {/* Tab bar: all tabs keep identical dimensions so switching tabs does not shift the layout */}
           <div className="sticky top-14 z-20 bg-white/90 backdrop-blur-md border-b border-stone-200">
-            <div className="flex max-w-3xl mx-auto">
-              {tabs.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setTab(t.id)}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
-                    tab === t.id
-                      ? 'text-emerald-600'
-                      : 'text-stone-500 hover:text-stone-700'
-                  }`}
-                >
-                  {t.label}
-                  {tab === t.id && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-emerald-600 rounded-full" />
-                  )}
-                </button>
-              ))}
+            <div className="flex max-w-3xl mx-auto h-12">
+              {tabs.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${
+                      tab === t.id
+                        ? 'text-emerald-600'
+                        : 'text-stone-500 hover:text-stone-700'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span>{t.label}</span>
+                    {tab === t.id && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
