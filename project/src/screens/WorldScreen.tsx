@@ -44,7 +44,7 @@ export function WorldScreen({
   ];
 
   return (
-    <div className="min-h-screen overflow-y-scroll bg-stone-50 flex flex-col">
+    <div className="min-h-screen overflow-y-scroll [scrollbar-gutter:stable] bg-stone-50 flex flex-col">
       <Header title={worldName} onBack={goBack} />
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ワールドを読み込み中" />}
