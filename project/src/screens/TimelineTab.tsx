@@ -4,8 +4,6 @@ import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 
-type DisplayMode = 'day' | 'date' | 'both';
-
 type DayGroup = {
   dateKey: string;
   label: string;
@@ -15,8 +13,6 @@ type DayGroup = {
   locations: LocationWithPhotos[];
   bgPhoto?: string;
 };
-
-const DISPLAY_MODE_PREFIX = 'survival-wiki:timeline-display-mode:';
 
 export function TimelineTab({
   world,
@@ -28,7 +24,6 @@ export function TimelineTab({
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('both');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -39,21 +34,7 @@ export function TimelineTab({
       .finally(() => setLoading(false));
   }, [world.id, reloadKey]);
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem(`${DISPLAY_MODE_PREFIX}${world.id}`);
-    if (saved === 'day' || saved === 'date' || saved === 'both') {
-      setDisplayMode(saved);
-    } else {
-      setDisplayMode('both');
-    }
-    setExpanded(new Set());
-  }, [world.id]);
-
-  useEffect(() => {
-    window.localStorage.setItem(`${DISPLAY_MODE_PREFIX}${world.id}`, displayMode);
-  }, [world.id, displayMode]);
-
-  const groups = useMemo(() => groupByDay(locations, displayMode), [locations, displayMode]);
+  const groups = useMemo(() => groupByDay(locations), [locations]);
 
   const toggle = (key: string) => {
     const next = new Set(expanded);
@@ -64,22 +45,6 @@ export function TimelineTab({
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="flex gap-2 mb-4">
-        {(['day', 'date', 'both'] as DisplayMode[]).map((m) => (
-          <button
-            key={m}
-            onClick={() => setDisplayMode(m)}
-            className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
-              displayMode === m
-                ? 'bg-emerald-600 text-white'
-                : 'bg-white text-stone-600 border border-stone-200'
-            }`}
-          >
-            {m === 'day' ? 'Day表示' : m === 'date' ? '日付表示' : '両方'}
-          </button>
-        ))}
-      </div>
-
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
       {!loading && groups.length === 0 && (
@@ -192,7 +157,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
   );
 }
 
-function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGroup[] {
+function groupByDay(locations: LocationWithPhotos[]): DayGroup[] {
   const sorted = [...locations].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -218,15 +183,9 @@ function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGrou
     const d = new Date(key);
     const dateLabel = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
     const dayLabel = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
-    const dayText = `${dateLabel}（${dayLabel}）`;
     const dayNum = dateKeyToDayNum.get(key) ?? 1;
 
-    const label =
-      mode === 'day'
-        ? `${dayNum}日目`
-        : mode === 'date'
-          ? dayText
-          : `Day ${dayNum}\n${dayText}`;
+    const label = `${dayNum}日目`;
 
     const firstWithPhoto = [...locs]
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
