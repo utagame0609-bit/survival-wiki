@@ -120,13 +120,15 @@ export function LocationsTab({
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <button
-        onClick={() => setMode({ type: 'create' })}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all mb-4"
-      >
-        <Plus className="w-5 h-5" />
-        ロケーションを追加
-      </button>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setMode({ type: 'create' })}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all"
+        >
+          <Plus className="w-5 h-5" />
+          ロケーションを追加
+        </button>
+      </div>
 
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ロケーションを読み込み中" />}
