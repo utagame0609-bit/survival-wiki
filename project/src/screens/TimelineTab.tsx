@@ -89,7 +89,7 @@ function DayCard({
           <img
             src={group.bgPhoto}
             alt=""
-            className="w-full h-full object-cover opacity-[0.35]"
+            className="absolute top-0 left-0 w-full h-full object-cover opacity-[0.35]"
           />
         </div>
       )}
