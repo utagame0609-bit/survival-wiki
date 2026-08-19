@@ -143,7 +143,9 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
           <p className="text-sm text-stone-500">メモなし</p>
         )}
         {loc.members.length > 0 && (
-          <p className="text-xs text-stone-500 mt-1 truncate">{loc.members.map((m) => m.name).join('・')}</p>
+          <p className="text-xs text-stone-500 mt-1 truncate">
+            仲間：{loc.members.map((m) => m.name).join('・')}
+          </p>
         )}
       </div>
 
