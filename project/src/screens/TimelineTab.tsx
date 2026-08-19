@@ -128,7 +128,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
 
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_minmax(180px,2fr)_auto_auto] md:items-center gap-2 md:gap-4 py-1">
-      <span className="absolute -left-[1.5rem] top-[1.15rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white" />
+      <span className="absolute -left-[1.5rem] top-[1.4rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white" />
       <div className="min-w-0">
         <h4 className="font-medium text-stone-900 truncate">{loc.name}</h4>
         <p className="text-xs text-stone-500 font-mono mt-0.5">
