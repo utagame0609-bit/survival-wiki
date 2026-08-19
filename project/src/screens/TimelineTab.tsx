@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, MapPin } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
@@ -128,7 +128,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
 
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_minmax(180px,2fr)_auto_auto] md:items-center gap-2 md:gap-4 py-1">
-      <MapPin className="absolute -left-[1.5rem] top-1.5 w-4 h-4 text-emerald-600 bg-white rounded-full" />
+      <span className="absolute -left-[1.5rem] top-[1.15rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white" />
       <div className="min-w-0">
         <h4 className="font-medium text-stone-900 truncate">{loc.name}</h4>
         <p className="text-xs text-stone-500 font-mono mt-0.5">
