@@ -30,7 +30,7 @@ export function LocationsTab({
   const [error, setError] = useState('');
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -78,11 +78,7 @@ export function LocationsTab({
     if (!confirm(`「${loc.name}」を削除しますか？`)) return;
     try {
       await deleteLocation(loc.id);
-      setExpanded((prev) => {
-        const next = new Set(prev);
-        next.delete(loc.id);
-        return next;
-      });
+      setExpanded((prev) => (prev === loc.id ? null : prev));
       onReload();
     } catch (e) {
       setError((e as Error).message);
@@ -141,15 +137,8 @@ export function LocationsTab({
             <LocationCard
               key={loc.id}
               loc={loc}
-              isExpanded={expanded.has(loc.id)}
-              onToggle={() =>
-                setExpanded((prev) => {
-                  const next = new Set(prev);
-                  if (next.has(loc.id)) next.delete(loc.id);
-                  else next.add(loc.id);
-                  return next;
-                })
-              }
+              isExpanded={expanded === loc.id}
+              onToggle={() => setExpanded((prev) => (prev === loc.id ? null : loc.id))}
               onEdit={() => setMode({ type: 'edit', location: loc })}
               onDelete={() => handleDelete(loc)}
             />
