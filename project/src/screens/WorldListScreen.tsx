@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Globe, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
-import { fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
+import { deleteWorld, fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
@@ -45,6 +45,22 @@ export function WorldListScreen({
     load();
   }, [gameId]);
 
+  const handleDelete = async (world: WorldWithMembers) => {
+    const confirmed = window.confirm(
+      `「${world.name}」を削除しますか？\nこの操作は元に戻せません。`
+    );
+    if (!confirmed) return;
+
+    try {
+      setError('');
+      await deleteWorld(world.id);
+      setExpandedWorldId(null);
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'ワールドの削除に失敗しました');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-stone-50">
       <Header title={gameName} onBack={goBack} />
@@ -76,6 +92,7 @@ export function WorldListScreen({
                   navigate({ name: 'world', worldId: w.id, worldName: w.name });
                 }}
                 onEdit={() => navigate({ name: 'worldCreate', gameId, gameName, worldId: w.id })}
+                onDelete={() => handleDelete(w)}
               />
             ))}
           </div>
@@ -92,6 +109,7 @@ function WorldCard({
   onToggle,
   onOpen,
   onEdit,
+  onDelete,
 }: {
   world: WorldWithMembers;
   lastLocationDate?: string | null;
@@ -99,6 +117,7 @@ function WorldCard({
   onToggle: () => void;
   onOpen: () => void;
   onEdit: () => void;
+  onDelete: () => void;
 }) {
   const formattedLastLocationDate = lastLocationDate
     ? new Date(lastLocationDate).toLocaleString('ja-JP', {
@@ -157,6 +176,12 @@ function WorldCard({
             className="flex-1 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 active:scale-[0.99] transition-all"
           >
             編集
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex-1 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 active:scale-[0.99] transition-all"
+          >
+            削除
           </button>
         </div>
       )}
