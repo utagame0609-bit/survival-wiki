@@ -219,14 +219,6 @@ export function LocationForm({ members, editing, onSave, onCancel, saving }: Pro
                           : 'bg-white text-stone-600 border-stone-300'
                       }`}
                     >
-                      <span
-                        aria-hidden="true"
-                        className={`inline-block align-[-1px] mr-1.5 w-[0.78em] h-[0.78em] rounded-[3px] border ${
-                          checked
-                            ? 'border-white bg-white'
-                            : 'border-stone-400 bg-white'
-                        }`}
-                      />
                       {m.name}
                     </button>
                   );
