@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Users } from 'lucide-react';
+import { Plus, Globe, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -21,6 +21,7 @@ export function WorldListScreen({
   const [lastLocationDates, setLastLocationDates] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedWorldId, setExpandedWorldId] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -68,6 +69,8 @@ export function WorldListScreen({
                 key={w.id}
                 world={w}
                 lastLocationDate={lastLocationDates[w.id]}
+                expanded={expandedWorldId === w.id}
+                onToggle={() => setExpandedWorldId((current) => (current === w.id ? null : w.id))}
                 onOpen={() => {
                   localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, w.id);
                   navigate({ name: 'world', worldId: w.id, worldName: w.name });
@@ -84,10 +87,14 @@ export function WorldListScreen({
 function WorldCard({
   world,
   lastLocationDate,
+  expanded,
+  onToggle,
   onOpen,
 }: {
   world: WorldWithMembers;
   lastLocationDate?: string | null;
+  expanded: boolean;
+  onToggle: () => void;
   onOpen: () => void;
 }) {
   const formattedLastLocationDate = lastLocationDate
@@ -101,29 +108,49 @@ function WorldCard({
     : null;
 
   return (
-    <button
-      onClick={onOpen}
-      className="w-full text-left p-4 rounded-2xl bg-white border border-stone-200 shadow-sm hover:shadow-md active:scale-[0.99] transition-all"
-    >
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-          <Globe className="w-6 h-6 text-emerald-600" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-stone-900 truncate">{world.name}</h3>
-          {world.player && <p className="text-sm text-stone-500 truncate">プレイヤー: {world.player}</p>}
-          <div className="flex items-center gap-1 mt-1 text-xs text-stone-400">
-            <Users className="w-3.5 h-3.5" />
-            <span>{world.members.length}名</span>
-            {world.memo && <span className="truncate">· {world.memo}</span>}
+    <div className="w-full rounded-2xl bg-white border border-stone-200 shadow-sm overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full text-left p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors"
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <Globe className="w-6 h-6 text-emerald-600" />
           </div>
-          {formattedLastLocationDate && (
-            <p className="text-xs text-stone-400 mt-2 text-right">
-              最終ロケーション：{formattedLastLocationDate}
-            </p>
-          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-stone-900 truncate">{world.name}</h3>
+              {expanded ? (
+                <ChevronUp className="w-4 h-4 text-stone-400 flex-shrink-0" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0" />
+              )}
+            </div>
+            {world.player && <p className="text-sm text-stone-500 truncate">プレイヤー: {world.player}</p>}
+            <div className="flex items-center gap-1 mt-1 text-xs text-stone-400">
+              <Users className="w-3.5 h-3.5" />
+              <span>{world.members.length}名</span>
+              {world.memo && <span className="truncate">· {world.memo}</span>}
+            </div>
+            {formattedLastLocationDate && (
+              <p className="text-xs text-stone-400 mt-2 text-right">
+                最終ロケーション：{formattedLastLocationDate}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-    </button>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-stone-100 p-3">
+          <button
+            onClick={onOpen}
+            className="w-full py-2.5 rounded-xl bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 active:scale-[0.99] transition-all"
+          >
+            このワールドを開く
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
