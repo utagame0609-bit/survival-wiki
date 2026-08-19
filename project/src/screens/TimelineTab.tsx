@@ -126,7 +126,7 @@ function DayCard({
         className="relative z-10 w-full text-left p-4 flex items-center justify-between"
       >
         <div>
-          <p className="font-semibold text-stone-900">{group.label}</p>
+          <p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p>
           <p className="text-xs text-stone-500 mt-0.5">{group.locations.length}件の記録</p>
         </div>
         <ChevronDown
@@ -213,12 +213,13 @@ function groupByDay(locations: LocationWithPhotos[], mode: DisplayMode): DayGrou
     const d = new Date(key);
     const dateLabel = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
     const dayLabel = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+    const dayText = `${dateLabel}（${dayLabel}）`;
     const label =
       mode === 'day'
         ? `${dayNumber}日目`
         : mode === 'date'
-          ? `${dateLabel}（${dayLabel}）`
-          : `Day ${dayNumber}`;
+          ? dayText
+          : `Day ${dayNumber}\n${dayText}`;
 
     const firstWithPhoto = [...locs]
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
