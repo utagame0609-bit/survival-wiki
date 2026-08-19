@@ -5,31 +5,49 @@ import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 
 type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhoto?: string };
+type SortOrder = 'newest' | 'oldest';
 
 export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
 
   useEffect(() => {
     setLoading(true);
     fetchLocations(world.id).then(setLocations).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [world.id, reloadKey]);
 
-  const groups = useMemo(() => groupByDay(locations), [locations]);
+  const groups = useMemo(() => {
+    const grouped = groupByDay(locations);
+    return sortOrder === 'newest' ? grouped : [...grouped].reverse();
+  }, [locations, sortOrder]);
+
   const toggle = (key: string) => {
     setExpanded((prev) => (prev === key ? null : key));
   };
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-4 flex items-center justify-center shadow-sm">
-        <div className="flex items-center gap-3 min-w-0 justify-center">
-          <span className="text-sm font-semibold tracking-[0.18em] text-white">WORLD LOG</span>
+      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-sm font-semibold tracking-[0.18em] text-white whitespace-nowrap">WORLD LOG</span>
           <span className="h-4 w-px bg-emerald-300" />
           <span className="text-xs text-white truncate">この世界で記録された出来事</span>
         </div>
+        <label className="relative shrink-0 ml-3">
+          <span className="sr-only">並び順</span>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            className="appearance-none bg-transparent text-xs text-white font-medium pr-5 pl-1 py-1 focus:outline-none cursor-pointer"
+          >
+            <option value="newest" className="text-stone-900 bg-white">新しい順</option>
+            <option value="oldest" className="text-stone-900 bg-white">古い順</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white" />
+        </label>
       </div>
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
