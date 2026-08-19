@@ -196,7 +196,7 @@ function LocationCard({
               <h3 className="font-semibold text-stone-900 truncate">{loc.name}</h3>
             </div>
             <p className="text-sm text-stone-500 font-mono mt-0.5">
-              {loc.x}, {loc.y}, {loc.z}
+              X {loc.x}　Y {loc.y}　Z {loc.z}
             </p>
             {loc.members.length > 0 && (
               <p className="text-xs text-stone-400 mt-1 truncate">
