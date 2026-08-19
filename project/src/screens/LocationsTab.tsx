@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil, ChevronLeft, Clock3 } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil, ChevronDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import {
   fetchLocations,
@@ -14,8 +14,7 @@ import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 type Mode =
   | { type: 'list' }
   | { type: 'create' }
-  | { type: 'edit'; location: LocationWithPhotos }
-  | { type: 'detail'; location: LocationWithPhotos };
+  | { type: 'edit'; location: LocationWithPhotos };
 
 export function LocationsTab({
   world,
@@ -31,6 +30,7 @@ export function LocationsTab({
   const [error, setError] = useState('');
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const load = () => {
     setLoading(true);
@@ -78,7 +78,11 @@ export function LocationsTab({
     if (!confirm(`「${loc.name}」を削除しますか？`)) return;
     try {
       await deleteLocation(loc.id);
-      setMode({ type: 'list' });
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        next.delete(loc.id);
+        return next;
+      });
       onReload();
     } catch (e) {
       setError((e as Error).message);
@@ -114,17 +118,6 @@ export function LocationsTab({
     );
   }
 
-  if (mode.type === 'detail') {
-    return (
-      <LocationDetail
-        location={mode.location}
-        onBack={() => setMode({ type: 'list' })}
-        onEdit={() => setMode({ type: 'edit', location: mode.location })}
-        onDelete={() => handleDelete(mode.location)}
-      />
-    );
-  }
-
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
       <button
@@ -146,7 +139,15 @@ export function LocationsTab({
             <LocationCard
               key={loc.id}
               loc={loc}
-              onOpen={() => setMode({ type: 'detail', location: loc })}
+              isExpanded={expanded.has(loc.id)}
+              onToggle={() =>
+                setExpanded((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(loc.id)) next.delete(loc.id);
+                  else next.add(loc.id);
+                  return next;
+                })
+              }
               onEdit={() => setMode({ type: 'edit', location: loc })}
               onDelete={() => handleDelete(loc)}
             />
@@ -159,20 +160,30 @@ export function LocationsTab({
 
 function LocationCard({
   loc,
-  onOpen,
+  isExpanded,
+  onToggle,
   onEdit,
   onDelete,
 }: {
   loc: LocationWithPhotos;
-  onOpen: () => void;
+  isExpanded: boolean;
+  onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
+  const nearbyPhotos = loc.photos.filter((p) => !p.is_main).slice(0, 5);
+  const createdAt = new Date(loc.created_at).toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return (
     <div className="rounded-2xl bg-white border border-stone-200 shadow-sm overflow-hidden">
-      <button onClick={onOpen} className="w-full text-left active:scale-[0.99] transition-transform">
+      <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform">
         <div className="flex gap-3 p-3">
           {mainPhoto ? (
             <img
@@ -199,94 +210,34 @@ function LocationCard({
               </p>
             )}
           </div>
+          <ChevronDown
+            className={`w-5 h-5 text-stone-400 self-center flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          />
         </div>
       </button>
-      <div className="flex border-t border-stone-100">
-        <button
-          onClick={onEdit}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm text-stone-600 hover:bg-stone-50"
-        >
-          <Pencil className="w-4 h-4" /> 編集
-        </button>
-        <button
-          onClick={onDelete}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm text-red-500 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4" /> 削除
-        </button>
-      </div>
-    </div>
-  );
-}
 
-function LocationDetail({
-  location,
-  onBack,
-  onEdit,
-  onDelete,
-}: {
-  location: LocationWithPhotos;
-  onBack: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const mainPhoto = location.photos.find((p) => p.is_main);
-  const nearbyPhotos = location.photos.filter((p) => !p.is_main).slice(0, 5);
-  const createdAt = new Date(location.created_at).toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+      {isExpanded && (
+        <div className="border-t border-stone-100 px-4 pb-4 space-y-4">
+          {mainPhoto && (
+            <img
+              src={getPhotoUrl(mainPhoto.storage_path)}
+              alt={loc.name}
+              className="w-full max-h-80 object-cover rounded-2xl mt-4"
+            />
+          )}
 
-  return (
-    <div className="min-h-full bg-stone-50 pb-8">
-      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-stone-200">
-        <div className="flex items-center gap-2 px-4 h-12 max-w-3xl mx-auto">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900 -ml-2 px-2 py-1 rounded-lg hover:bg-stone-100"
-          >
-            <ChevronLeft className="w-5 h-5" /> 戻る
-          </button>
-          <h2 className="font-semibold text-stone-900 truncate flex-1 text-center">ロケーション詳細</h2>
-          <div className="w-12" />
-        </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
-        {mainPhoto && (
-          <img
-            src={getPhotoUrl(mainPhoto.storage_path)}
-            alt={location.name}
-            className="w-full max-h-80 object-cover rounded-2xl"
-          />
-        )}
-
-        <div className="rounded-2xl bg-white border border-stone-200 shadow-sm p-4 space-y-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-emerald-600" />
-              <h1 className="text-xl font-semibold text-stone-900">{location.name}</h1>
-            </div>
-            <p className="mt-2 text-sm text-stone-500 font-mono">
-              {location.x}, {location.y}, {location.z}
-            </p>
-          </div>
-
-          {location.detail_memo && (
-            <div>
+          {loc.detail_memo && (
+            <div className="pt-4">
               <h3 className="text-sm font-medium text-stone-500 mb-1">詳細メモ</h3>
-              <p className="text-stone-800 whitespace-pre-wrap">{location.detail_memo}</p>
+              <p className="text-stone-800 whitespace-pre-wrap">{loc.detail_memo}</p>
             </div>
           )}
 
-          {location.members.length > 0 && (
+          {loc.members.length > 0 && (
             <div>
               <h3 className="text-sm font-medium text-stone-500 mb-2">関連メンバー</h3>
               <div className="flex flex-wrap gap-2">
-                {location.members.map((member) => (
+                {loc.members.map((member) => (
                   <span key={member.id} className="px-3 py-1.5 rounded-full bg-stone-100 text-sm text-stone-700">
                     {member.name}
                   </span>
@@ -295,42 +246,42 @@ function LocationDetail({
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-xs text-stone-400 pt-1">
-            <Clock3 className="w-4 h-4" /> 登録日時 {createdAt}
-          </div>
-        </div>
-
-        {nearbyPhotos.length > 0 && (
-          <div className="rounded-2xl bg-white border border-stone-200 shadow-sm p-4">
-            <h3 className="text-sm font-medium text-stone-500 mb-3">近隣写真</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {nearbyPhotos.map((photo) => (
-                <img
-                  key={photo.id}
-                  src={getPhotoUrl(photo.storage_path)}
-                  alt=""
-                  className="w-full aspect-square object-cover rounded-xl"
-                />
-              ))}
+          {nearbyPhotos.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-stone-500 mb-3">近隣写真</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {nearbyPhotos.map((photo) => (
+                  <img
+                    key={photo.id}
+                    src={getPhotoUrl(photo.storage_path)}
+                    alt=""
+                    className="w-full aspect-square object-cover rounded-xl"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="flex gap-3 pt-1">
-          <button
-            onClick={onEdit}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-stone-800 text-white font-medium hover:bg-stone-900 active:scale-[0.98] transition-all"
-          >
-            <Pencil className="w-4 h-4" /> 編集
-          </button>
-          <button
-            onClick={onDelete}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white text-red-500 border border-red-200 font-medium hover:bg-red-50 active:scale-[0.98] transition-all"
-          >
-            <Trash2 className="w-4 h-4" /> 削除
-          </button>
+          <p className="text-xs text-stone-400">
+            登録日時 {createdAt}
+          </p>
+
+          <div className="flex gap-3 pt-1">
+            <button
+              onClick={onEdit}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-stone-800 text-white font-medium hover:bg-stone-900 active:scale-[0.98] transition-all"
+            >
+              <Pencil className="w-4 h-4" /> 編集
+            </button>
+            <button
+              onClick={onDelete}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white text-red-500 border border-red-200 font-medium hover:bg-red-50 active:scale-[0.98] transition-all"
+            >
+              <Trash2 className="w-4 h-4" /> 削除
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
