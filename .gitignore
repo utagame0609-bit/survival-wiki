@@ -1,0 +1,10 @@
+# Ignore environment files
+project/.env
+project/.env.local
+project/.env.*.local
+
+# Ignore dependencies
+project/node_modules/
+
+# Ignore build output
+project/dist/
