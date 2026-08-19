@@ -71,7 +71,7 @@ export function WorldScreen({
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span>{t.id === 'locations' ? 'ロケーション' : label}</span>
+                    <span>{label}</span>
                     {tab === t.id && (
                       <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600" />
                     )}
