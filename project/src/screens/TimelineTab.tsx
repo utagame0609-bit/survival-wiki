@@ -53,11 +53,11 @@ function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded:
   return (
     <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative min-h-[104px]">
       {group.bgPhoto && (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-[104px] z-0 overflow-visible pointer-events-none">
           <img
             src={group.bgPhoto}
             alt=""
-            className="absolute top-0 left-0 w-full h-auto block max-w-none opacity-[0.35]"
+            className="absolute top-1/2 left-0 w-full h-auto max-w-none -translate-y-1/2 opacity-[0.35]"
           />
         </div>
       )}
