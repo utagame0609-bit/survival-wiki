@@ -103,7 +103,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
       {!loading && locations.length > 0 && (
         <div className="space-y-2.5">
           {locations.map((loc) => (
-            <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} onEdit={() => setMode({ type: 'edit', location: loc })} onDelete={() => handleDelete(loc)} />
+            <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />
           ))}
         </div>
       )}
@@ -175,7 +175,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   );
 }
 
-function LocationCard({ loc, onToggle, onEdit, onDelete }: { loc: LocationWithPhotos; onToggle: () => void; onEdit: () => void; onDelete: () => void }) {
+function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: () => void }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
   return (
     <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
@@ -188,11 +188,6 @@ function LocationCard({ loc, onToggle, onEdit, onDelete }: { loc: LocationWithPh
           </div>
         </div>
       </button>
-      <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity md:flex hidden">
-        <button onClick={onEdit} aria-label="編集" className="w-8 h-8 rounded-lg bg-[#292b24]/95 text-stone-200 flex items-center justify-center hover:bg-[#34382e] transition-colors"><Pencil className="w-4 h-4" /></button>
-        <button onClick={onDelete} aria-label="削除" className="w-8 h-8 rounded-lg bg-red-950/80 text-red-200 flex items-center justify-center hover:bg-red-900 transition-colors"><Trash2 className="w-4 h-4" /></button>
-      </div>
-      <div className="md:hidden border-t border-[#2d3028] px-3 py-2.5 bg-[#171813]"><div className="flex gap-2"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div></div>
     </div>
   );
 }
