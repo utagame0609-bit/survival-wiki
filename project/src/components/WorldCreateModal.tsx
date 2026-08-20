@@ -77,7 +77,7 @@ export function WorldCreateModal({
             />
           </Field>
 
-          <Field label="プレイヤー" required>
+          <Field label="プレイヤー">
             <input
               type="text"
               value={player}
