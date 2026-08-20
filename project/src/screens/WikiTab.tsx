@@ -6,7 +6,6 @@ import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
-
 type WikiStyleId = string;
 
 export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
@@ -21,22 +20,13 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = async (nextStyle: WikiStyleId | null = style) => {
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
-      const locs = await fetchLocations(world.id);
-      setLocations(locs);
-      if (nextStyle === null) {
-        setArticle(null);
-        return;
-      }
-      const art = await fetchWikiArticle(world.id, nextStyle);
-      setArticle(art?.content ?? null);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
+      const locs = await fetchLocations(world.id); setLocations(locs);
+      if (nextStyle === null) { setArticle(null); return; }
+      const art = await fetchWikiArticle(world.id, nextStyle); setArticle(art?.content ?? null);
+    } catch (e) { setError((e as Error).message); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
@@ -44,23 +34,17 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
     return () => { if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current); };
   }, [world.id, style, reloadKey]);
 
-  const handleStyleSelect = (nextStyle: WikiStyleId) => {
-    if (generating || resetting) return;
-    setStyle(nextStyle);
-  };
+  const handleStyleSelect = (nextStyle: WikiStyleId) => { if (!generating && !resetting) setStyle(nextStyle); };
 
   const handleGenerate = async () => {
     const now = Date.now();
     if (generating || now < cooldownUntil || locations.length === 0 || style === null) return;
-    setGenerating(true);
-    setError('');
+    setGenerating(true); setError('');
     try {
       const result = await generateWiki({ world, locations, style });
-      await saveWikiArticle(world.id, style, result.content);
-      setArticle(result.content);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
+      await saveWikiArticle(world.id, style, result.content); setArticle(result.content);
+    } catch (e) { setError((e as Error).message); }
+    finally {
       const nextCooldownUntil = Date.now() + WIKI_GENERATE_COOLDOWN_MS;
       setCooldownUntil(nextCooldownUntil);
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
@@ -73,17 +57,10 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
     if (!style || !article || resetting) return;
     const confirmed = window.confirm('この記事を削除して、Wikiを初期状態に戻しますか？\n記事と現在のスタイル選択が解除されます。');
     if (!confirmed) return;
-    setResetting(true);
-    setError('');
-    try {
-      await resetWikiArticle(world.id, style);
-      setArticle(null);
-      setStyle(null);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setResetting(false);
-    }
+    setResetting(true); setError('');
+    try { await resetWikiArticle(world.id, style); setArticle(null); setStyle(null); }
+    catch (e) { setError((e as Error).message); }
+    finally { setResetting(false); }
   };
 
   const styleConfig = style ? WIKI_STYLES.find((s) => s.id === style) : null;
@@ -93,17 +70,11 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
 
   return (
     <div className={isGeneratedWikipedia ? 'w-full' : 'w-full px-4 py-4 max-w-3xl mx-auto'}>
-      {!isGeneratedWikipedia && (
-        <div className="mb-4">
-          <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {WIKI_STYLES.map((s) => (
-              <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>
-            ))}
-          </div>
-          {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
-        </div>
-      )}
+      {!isGeneratedWikipedia && <div className="mb-4">
+        <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
+        <div className="flex gap-2 overflow-x-auto pb-1">{WIKI_STYLES.map((s) => <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>)}</div>
+        {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
+      </div>}
       {error && <ErrorBanner message={error} />}
       {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} locationCount={locations.length} isGeneratedWikipedia={isGeneratedWikipedia} />}
     </div>
@@ -111,116 +82,44 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
 }
 
 function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount, isGeneratedWikipedia }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number; isGeneratedWikipedia: boolean }) {
-  const isWikipedia = style === 'wikipedia';
-  const isScp = style === 'scp';
-  const isAncient = style === 'ancient';
+  const isWikipedia = style === 'wikipedia'; const isScp = style === 'scp'; const isAncient = style === 'ancient';
+  const pageClass = isWikipedia ? 'bg-white text-stone-800 border-stone-300' : isScp ? 'bg-stone-100 text-stone-900 border-stone-700' : isAncient ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]' : '';
+  const headerClass = isWikipedia ? 'bg-stone-50 border-stone-200 text-stone-700' : isScp ? 'bg-stone-200 border-stone-500 text-stone-900' : isAncient ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]' : '';
+  const articleClass = isWikipedia ? 'bg-white border-stone-200 text-stone-800' : isScp ? 'bg-[#eeeeee] border-stone-500 text-stone-900' : isAncient ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]' : 'bg-white border-stone-200 text-stone-800';
 
-  const pageClass = isWikipedia
-    ? 'bg-white text-stone-800 border-stone-300'
-    : isScp
-      ? 'bg-stone-100 text-stone-900 border-stone-700'
-      : isAncient
-        ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]'
-        : '';
+  const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6">
+    <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
+      {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
+    </button>
+    <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
+  </div>;
 
-  const headerClass = isWikipedia
-    ? 'bg-stone-50 border-stone-200 text-stone-700'
-    : isScp
-      ? 'bg-stone-200 border-stone-500 text-stone-900'
-      : isAncient
-        ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]'
-        : '';
+  if (style === null) return <div>{actionButtons}<EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" /></div>;
 
-  const articleClass = isWikipedia
-    ? 'bg-white border-stone-200 text-stone-800'
-    : isScp
-      ? 'bg-[#eeeeee] border-stone-500 text-stone-900'
-      : isAncient
-        ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]'
-        : 'bg-white border-stone-200 text-stone-800';
-
-  const actionButtons = (
-    <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6">
-      <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
-        {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
-      </button>
-      <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
-    </div>
-  );
-
-  if (style === null) {
-    return (
-      <div>
-        {actionButtons}
-        <EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" />
-      </div>
-    );
-  }
-
-  if (isGeneratedWikipedia) {
-    return (
-      <div className="min-h-screen bg-white text-[#202122]">
-        {actionButtons}
-        <article className="w-full border-t border-[#a2a9b1] bg-white px-4 py-6 sm:px-8 sm:py-8">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="border-b border-[#a2a9b1] pb-2">
-              <h1 className="text-2xl sm:text-3xl font-normal leading-tight">{world.name}</h1>
-            </div>
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
-              <div className="min-w-0">
-                <article className="prose prose-stone max-w-none whitespace-pre-wrap text-[15px] leading-7">
-                  {article}
-                </article>
-              </div>
-              <aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit">
-                <div className="h-36 bg-[#eaecf0] border border-[#c8ccd1]" />
-                <div className="mt-3 space-y-2 text-sm">
-                  <div className="border-b border-[#c8ccd1] pb-1 font-semibold">基本情報</div>
-                  <div>名称　{world.name}</div>
-                  <div>記録地点　{locationCount}</div>
-                </div>
-              </aside>
-            </div>
-          </div>
-        </article>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
-      <div className={`px-5 py-4 border-b ${headerClass}`}>
-        <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 opacity-70" />
-          <div>
-            <p className="text-sm font-semibold">{isWikipedia ? 'Wikipedia' : isScp ? 'SCP FOUNDATION' : '古文書'}</p>
-            <p className="text-xs opacity-60">{isWikipedia ? '百科事典風' : isScp ? '機密記録風' : '絶望的な古文書風'}</p>
-          </div>
+  if (isGeneratedWikipedia) return <div className="min-h-screen bg-white text-[#202122]">
+    {actionButtons}
+    <article className="w-full bg-white px-4 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto w-full max-w-6xl">
+        <header className="border-b border-[#a2a9b1] pb-3">
+          <h1 className="text-[28px] sm:text-[32px] font-normal leading-tight text-[#202122]">{world.name}</h1>
+          <p className="mt-1 text-xs text-[#54595d]">この世界についての記録</p>
+        </header>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
+          <div className="min-w-0"><article className="prose prose-stone max-w-none whitespace-pre-wrap text-[15px] leading-7">{article}</article></div>
+          <aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit"><div className="h-36 bg-[#eaecf0] border border-[#c8ccd1]" /><div className="mt-3 space-y-2 text-sm"><div className="border-b border-[#c8ccd1] pb-1 font-semibold">基本情報</div><div>名称　{world.name}</div><div>記録地点　{locationCount}</div></div></aside>
         </div>
       </div>
-      <div className={`px-5 py-6 sm:px-8 sm:py-8 ${articleClass}`}>
-        <div className={`border-l-4 pl-5 sm:pl-6 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>
-          {actionButtons}
-          {locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
-          {hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}
-          {!hasArticle && locationCount > 0 && isWikipedia && <WikipediaPreviewSkeleton worldName={world.name} />}
-        </div>
-      </div>
-    </div>
-  );
+    </article>
+  </div>;
+
+  return <div className={`border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
+    <div className={`px-5 py-4 border-b ${headerClass}`}><div className="flex items-center gap-2"><BookOpen className="w-5 h-5 opacity-70" /><div><p className="text-sm font-semibold">{isWikipedia ? 'Wikipedia' : isScp ? 'SCP FOUNDATION' : '古文書'}</p><p className="text-xs opacity-60">{isWikipedia ? '百科事典風' : isScp ? '機密記録風' : '絶望的な古文書風'}</p></div></div></div>
+    <div className={`px-5 py-6 sm:px-8 sm:py-8 ${articleClass}`}><div className={`border-l-4 pl-5 sm:pl-6 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>
+      {actionButtons}{locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}{hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}{!hasArticle && locationCount > 0 && isWikipedia && <WikipediaPreviewSkeleton worldName={world.name} />}
+    </div></div>
+  </div>;
 }
 
 function WikipediaPreviewSkeleton({ worldName }: { worldName: string }) {
-  return (
-    <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8">
-      <div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1></div>
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6">
-        <div className="space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div>
-        <div className="border border-stone-300 bg-stone-50 p-2"><div className="h-28 bg-stone-200" /><div className="mt-3 space-y-2"><div className="h-3 w-full bg-stone-200" /><div className="h-3 w-4/5 bg-stone-200" /><div className="h-3 w-5/6 bg-stone-200" /></div></div>
-      </div>
-      <div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm"><div className="h-4 w-16 bg-stone-300 mb-3" /><div className="space-y-2"><div className="h-3 w-32 bg-stone-200" /><div className="h-3 w-40 bg-stone-200" /><div className="h-3 w-28 bg-stone-200" /><div className="h-3 w-36 bg-stone-200" /></div></div>
-      <div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-40 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-5/6 bg-stone-100" /><div className="h-4 w-3/4 bg-stone-100" /></div>
-      <div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-32 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-10/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div>
-    </section>
-  );
+  return <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8"><div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1></div><div className="mt-5 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6"><div className="space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div><div className="border border-stone-300 bg-stone-50 p-2"><div className="h-28 bg-stone-200" /><div className="mt-3 space-y-2"><div className="h-3 w-full bg-stone-200" /><div className="h-3 w-4/5 bg-stone-200" /><div className="h-3 w-5/6 bg-stone-200" /></div></div></div><div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm"><div className="h-4 w-16 bg-stone-300 mb-3" /><div className="space-y-2"><div className="h-3 w-32 bg-stone-200" /><div className="h-3 w-40 bg-stone-200" /><div className="h-3 w-28 bg-stone-200" /><div className="h-3 w-36 bg-stone-200" /></div></div><div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-40 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-5/6 bg-stone-100" /><div className="h-4 w-3/4 bg-stone-100" /></div><div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-32 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-10/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div></section>;
 }
