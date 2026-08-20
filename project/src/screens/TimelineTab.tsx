@@ -82,7 +82,7 @@ function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded:
     <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative">
       {group.bgPhoto && <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35] [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)]" /></div>}
       <button onClick={onToggle} className="relative z-10 w-full min-h-[104px] text-left p-4 pl-6 flex items-center justify-between bg-transparent">
-        <div><p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p><p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p></div>
+        <div><p className="text-lg font-semibold text-stone-900 whitespace-pre-line">{group.label}</p><p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p></div>
         <ChevronDown className={`w-5 h-5 text-stone-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
       </button>
       {isExpanded && <div className="relative z-10 px-4 pb-4 bg-transparent"><div className="border-l-2 border-emerald-300 ml-3 pl-4 space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>}
