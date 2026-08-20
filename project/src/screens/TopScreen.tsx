@@ -18,7 +18,13 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#11120f] text-stone-100">
+    <div
+      className="min-h-screen text-stone-100"
+      style={{
+        background:
+          'radial-gradient(circle at 15% 30%, rgba(35, 70, 25, 0.22), transparent 38%), radial-gradient(circle at 85% 75%, rgba(80, 60, 25, 0.08), transparent 35%), #11120f',
+      }}
+    >
       <div className="px-5 pt-12 pb-6 max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-stone-100 tracking-tight">ゲームを選択</h1>
         <p className="mt-1 text-sm text-stone-400">記録を始めるゲームを選んでください</p>
