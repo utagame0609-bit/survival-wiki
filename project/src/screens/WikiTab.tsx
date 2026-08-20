@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
-import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
+import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
@@ -115,9 +115,9 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
   const pageClass = isWikipedia
     ? 'bg-white text-stone-800 border-stone-300'
     : isScp
-      ? 'bg-stone-100 text-stone-900 border-stone-700 rounded-2xl shadow-sm overflow-hidden'
+      ? 'bg-stone-100 text-stone-900 border-stone-700'
       : isAncient
-        ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d] rounded-2xl shadow-sm overflow-hidden'
+        ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]'
         : '';
 
   const headerClass = isWikipedia
@@ -155,8 +155,8 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
   }
 
   return (
-    <div className={`border ${pageClass}`}>
-      <div className={`px-4 py-4 border-b ${headerClass}`}>
+    <div className={`border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
+      <div className={`px-5 py-4 border-b ${headerClass}`}>
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 opacity-70" />
           <div>
@@ -166,13 +166,72 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
         </div>
       </div>
 
-      <div className={`px-4 py-5 sm:px-6 sm:py-7 ${articleClass}`}>
-        <div className={`border-l-4 pl-4 sm:pl-5 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>
+      <div className={`px-5 py-6 sm:px-8 sm:py-8 ${articleClass}`}>
+        <div className={`border-l-4 pl-5 sm:pl-6 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>
           {actionButtons}
           {locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
-          {hasArticle && article && <article className={`rounded-xl border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}
+          {hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}
+
+          {!hasArticle && locationCount > 0 && isWikipedia && (
+            <WikipediaPreviewSkeleton />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function WikipediaPreviewSkeleton() {
+  return (
+    <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8">
+      <div className="border-b border-stone-400 pb-2">
+        <div className="h-7 sm:h-8 w-2/3 bg-stone-200" />
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6">
+        <div className="space-y-3">
+          <div className="h-4 w-full bg-stone-100" />
+          <div className="h-4 w-11/12 bg-stone-100" />
+          <div className="h-4 w-4/5 bg-stone-100" />
+        </div>
+        <div className="border border-stone-300 bg-stone-50 p-2">
+          <div className="h-28 bg-stone-200" />
+          <div className="mt-3 space-y-2">
+            <div className="h-3 w-full bg-stone-200" />
+            <div className="h-3 w-4/5 bg-stone-200" />
+            <div className="h-3 w-5/6 bg-stone-200" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm">
+        <div className="h-4 w-16 bg-stone-300 mb-3" />
+        <div className="space-y-2">
+          <div className="h-3 w-32 bg-stone-200" />
+          <div className="h-3 w-40 bg-stone-200" />
+          <div className="h-3 w-28 bg-stone-200" />
+          <div className="h-3 w-36 bg-stone-200" />
+        </div>
+      </div>
+
+      <div className="mt-8 border-b border-stone-400 pb-1">
+        <div className="h-5 w-40 bg-stone-200" />
+      </div>
+      <div className="mt-4 space-y-3">
+        <div className="h-4 w-full bg-stone-100" />
+        <div className="h-4 w-11/12 bg-stone-100" />
+        <div className="h-4 w-5/6 bg-stone-100" />
+        <div className="h-4 w-3/4 bg-stone-100" />
+      </div>
+
+      <div className="mt-8 border-b border-stone-400 pb-1">
+        <div className="h-5 w-32 bg-stone-200" />
+      </div>
+      <div className="mt-4 space-y-3">
+        <div className="h-4 w-full bg-stone-100" />
+        <div className="h-4 w-10/12 bg-stone-100" />
+        <div className="h-4 w-4/5 bg-stone-100" />
+      </div>
+    </section>
   );
 }
