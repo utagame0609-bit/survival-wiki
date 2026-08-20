@@ -107,7 +107,6 @@ export async function updateWorld(
     .eq('id', id);
   if (error) throw error;
 
-  // Replace members
   const { error: dErr } = await supabase.from('world_members').delete().eq('world_id', id);
   if (dErr) throw dErr;
 
@@ -148,7 +147,6 @@ export async function fetchLocations(worldId: string): Promise<LocationWithPhoto
     })),
   })));
 
-  // Fetch members per location via location_members join table
   const { data: lmData, error: lmErr } = await supabase
     .from('location_members')
     .select('location_id, world_members(*)')
@@ -392,4 +390,13 @@ export async function saveWikiArticle(
     .single();
   if (error) throw error;
   return data as WikiArticle;
+}
+
+export async function resetWikiArticle(worldId: string, style: string): Promise<void> {
+  const { error } = await supabase
+    .from('wiki_articles')
+    .delete()
+    .eq('world_id', worldId)
+    .eq('style', style);
+  if (error) throw error;
 }
