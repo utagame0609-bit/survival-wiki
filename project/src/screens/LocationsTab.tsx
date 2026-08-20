@@ -16,7 +16,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   const [error, setError] = useState('');
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
   const loadRequestRef = useRef(0);
 
   const load = async () => {
@@ -67,7 +67,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
     if (!confirm(`「${loc.name}」を削除しますか？`)) return;
     try {
       await deleteLocation(loc.id);
-      setExpanded((prev) => (prev === loc.id ? null : prev));
+      setSelectedLocation((prev) => (prev?.id === loc.id ? null : prev));
       onReload();
     } catch (e) {
       setError((e as Error).message);
@@ -77,6 +77,17 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   const closeModal = () => {
     if (saving) return;
     setMode({ type: 'list' });
+  };
+
+  const closeLocationDetail = () => {
+    setSelectedLocation(null);
+  };
+
+  const handleDetailEdit = () => {
+    if (!selectedLocation) return;
+    const location = selectedLocation;
+    setSelectedLocation(null);
+    setMode({ type: 'edit', location });
   };
 
   return (
@@ -92,8 +103,47 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
       {!loading && locations.length > 0 && (
         <div className="space-y-2.5">
           {locations.map((loc) => (
-            <LocationCard key={loc.id} loc={loc} isExpanded={expanded === loc.id} onToggle={() => setExpanded((prev) => (prev === loc.id ? null : loc.id))} onEdit={() => setMode({ type: 'edit', location: loc })} onDelete={() => handleDelete(loc)} />
+            <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} onEdit={() => setMode({ type: 'edit', location: loc })} onDelete={() => handleDelete(loc)} />
           ))}
+        </div>
+      )}
+
+      {selectedLocation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+          <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeLocationDetail} />
+          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]">
+              <h2 className="text-sm sm:text-base font-semibold text-stone-100">ロケーション</h2>
+              <button onClick={closeLocationDetail} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto overscroll-contain">
+              {(() => {
+                const mainPhoto = selectedLocation.photos.find((p) => p.is_main);
+                return (
+                  <div className="p-4 sm:p-5 space-y-4">
+                    {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-56 sm:h-72 object-cover rounded-xl" /> : <div className="w-full h-56 sm:h-72 rounded-xl bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
+                    <div>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-stone-100 break-words">{selectedLocation.name}</h3>
+                      <div className="mt-4 rounded-xl bg-[#20221d] border border-[#34372f] p-4 sm:p-5">
+                        <div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div>
+                        <div className="grid grid-cols-3 gap-3 text-center font-mono">
+                          <div><div className="text-xs text-stone-500">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
+                          <div><div className="text-xs text-stone-500">Y</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.y}</div></div>
+                          <div><div className="text-xs text-stone-500">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-1">
+                      <button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button>
+                      <button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </div>
       )}
 
@@ -125,7 +175,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   );
 }
 
-function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: LocationWithPhotos; isExpanded: boolean; onToggle: () => void; onEdit: () => void; onDelete: () => void }) {
+function LocationCard({ loc, onToggle, onEdit, onDelete }: { loc: LocationWithPhotos; onToggle: () => void; onEdit: () => void; onDelete: () => void }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
   return (
     <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
