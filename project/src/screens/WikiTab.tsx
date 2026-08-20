@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, RefreshCw, BookOpen } from 'lucide-react';
+import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
-import { fetchLocations, fetchWikiArticle, saveWikiArticle } from '@/lib/db';
+import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
 import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 
@@ -19,6 +19,7 @@ export function WikiTab({
   const [article, setArticle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [error, setError] = useState('');
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,13 +69,29 @@ export function WikiTab({
     }
   };
 
+  const handleReset = async () => {
+    if (!article || resetting) return;
+    const confirmed = window.confirm('このスタイルの記事をリセットして、未生成の状態に戻しますか？');
+    if (!confirmed) return;
+
+    setResetting(true);
+    setError('');
+    try {
+      await resetWikiArticle(world.id, style);
+      setArticle(null);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const styleConfig = WIKI_STYLES.find((s) => s.id === style);
   const hasArticle = article !== null;
   const cooldownActive = cooldownUntil > Date.now();
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      {/* Style selector */}
       <div className="mb-4">
         <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -107,8 +124,10 @@ export function WikiTab({
           hasArticle={hasArticle}
           article={article}
           generating={generating}
+          resetting={resetting}
           cooldownActive={cooldownActive}
           onGenerate={handleGenerate}
+          onReset={handleReset}
           locationCount={locations.length}
         />
       )}
@@ -121,16 +140,20 @@ function WikiContent({
   hasArticle,
   article,
   generating,
+  resetting,
   cooldownActive,
   onGenerate,
+  onReset,
   locationCount,
 }: {
   style: string;
   hasArticle: boolean;
   article: string | null;
   generating: boolean;
+  resetting: boolean;
   cooldownActive: boolean;
   onGenerate: () => void;
+  onReset: () => void;
   locationCount: number;
 }) {
   const themeClass =
@@ -142,35 +165,43 @@ function WikiContent({
 
   return (
     <div>
-      {/* Generate / Update button */}
-      <button
-        onClick={onGenerate}
-        disabled={generating || cooldownActive || locationCount === 0}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50 mb-4"
-      >
-        {generating ? (
-          <>
-            <Spinner />
-            <span>生成中...</span>
-          </>
-        ) : hasArticle ? (
-          <>
-            <RefreshCw className="w-5 h-5" />
-            更新
-          </>
-        ) : (
-          <>
-            <Sparkles className="w-5 h-5" />
-            記事を生成
-          </>
-        )}
-      </button>
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={onGenerate}
+          disabled={generating || resetting || cooldownActive || locationCount === 0}
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50"
+        >
+          {generating ? (
+            <>
+              <Spinner />
+              <span>生成中...</span>
+            </>
+          ) : hasArticle ? (
+            <>
+              <RefreshCw className="w-5 h-5" />
+              更新
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              記事を生成
+            </>
+          )}
+        </button>
+        <button
+          onClick={onReset}
+          disabled={!hasArticle || generating || resetting}
+          className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"
+        >
+          <RotateCcw className="w-4 h-4" />
+          リセット
+        </button>
+      </div>
 
       {locationCount === 0 && !hasArticle && (
         <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />
       )}
 
-      {/* Article display */}
       {hasArticle && article && (
         <div className={`rounded-2xl border p-5 ${themeClass}`}>
           <div className="flex items-center gap-2 mb-3 pb-3 border-b border-current/20">
