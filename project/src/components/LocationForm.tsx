@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ChevronDown, Camera, X } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
-import { uploadPhoto, getPhotoUrl } from '@/lib/db';
+import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
 
 type SaveInput = {
   name: string;
@@ -37,11 +37,11 @@ export function LocationForm({ members, editing, onSave, onCancel, saving }: Pro
   const [createdAt, setCreatedAt] = useState(
     editing ? toLocalInput(editing.created_at) : toLocalInput(new Date().toISOString())
   );
+  const existingMain = editing?.photos.find((p) => p.is_main) ?? null;
+  const [existingMainPhoto, setExistingMainPhoto] = useState(existingMain);
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [mainPreview, setMainPreview] = useState<string | null>(
-    editing?.photos.find((p) => p.is_main)
-      ? getPhotoUrl(editing.photos.find((p) => p.is_main)!.storage_path)
-      : null
+    existingMain ? getPhotoUrl(existingMain.storage_path) : null
   );
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,7 +83,14 @@ export function LocationForm({ members, editing, onSave, onCancel, saving }: Pro
     });
 
     if (mainFile) {
+      if (existingMainPhoto) {
+        await deletePhoto(existingMainPhoto.id, existingMainPhoto.storage_path);
+        setExistingMainPhoto(null);
+      }
       await uploadPhoto(locationId, mainFile, true);
+    } else if (editing && !mainPreview && existingMainPhoto) {
+      await deletePhoto(existingMainPhoto.id, existingMainPhoto.storage_path);
+      setExistingMainPhoto(null);
     }
   };
 
