@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Gamepad2, Lock } from 'lucide-react';
+import { Box, Dna, Lock } from 'lucide-react';
 import type { Game } from '@/lib/types';
 import { fetchGames } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
@@ -34,7 +34,7 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
             ))}
             <div className="aspect-square rounded-3xl bg-[#1b1c18] border border-[#2d3028] flex flex-col items-center justify-center text-stone-500">
               <div className="w-14 h-14 rounded-2xl bg-[#25261f] flex items-center justify-center mb-3">
-                <Gamepad2 className="w-9 h-9 text-stone-400" />
+                <Dna className="w-9 h-9 text-stone-400" />
               </div>
               <p className="text-sm font-medium text-stone-400">カスタムワールド</p>
               <p className="text-xs mt-1">準備中</p>
