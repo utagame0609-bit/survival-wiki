@@ -108,31 +108,66 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
 }
 
 function WikiContent({ style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount }: { style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number }) {
-  const neutralTheme = 'bg-white text-stone-800 border-stone-300';
+  const isWikipedia = style === 'wikipedia';
+  const isScp = style === 'scp';
+  const isAncient = style === 'ancient';
+  const isNeutral = style === null;
+
+  const pageClass = isWikipedia
+    ? 'bg-white text-stone-800 border-stone-300'
+    : isScp
+      ? 'bg-stone-100 text-stone-900 border-stone-700'
+      : isAncient
+        ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]'
+        : 'bg-white text-stone-800 border-stone-300';
+
+  const headerClass = isWikipedia
+    ? 'bg-stone-50 border-stone-200 text-stone-700'
+    : isScp
+      ? 'bg-stone-200 border-stone-500 text-stone-900'
+      : isAncient
+        ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]'
+        : 'bg-stone-50 border-stone-200 text-stone-700';
+
+  const articleClass = isWikipedia
+    ? 'bg-white border-stone-200 text-stone-800'
+    : isScp
+      ? 'bg-[#eeeeee] border-stone-500 text-stone-900'
+      : isAncient
+        ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]'
+        : 'bg-white border-stone-200 text-stone-800';
 
   return (
-    <div>
-      <div className="flex gap-2 mb-4">
-        <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
-          {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
-        </button>
-        <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
+    <div className={`rounded-2xl border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
+      <div className={`px-4 py-4 border-b ${headerClass}`}>
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-5 h-5 opacity-70" />
+          <div>
+            <p className="text-sm font-semibold">
+              {isWikipedia ? 'Wikipedia' : isScp ? 'SCP FOUNDATION' : isAncient ? '古文書' : 'Wiki'}
+            </p>
+            <p className="text-xs opacity-60">
+              {isWikipedia ? '百科事典風' : isScp ? '機密記録風' : isAncient ? '絶望的な古文書風' : 'スタイル未選択'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {style === null && <EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" />}
-      {style !== null && locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
-
-      {hasArticle && article && (
-        <div className={`rounded-xl border ${neutralTheme} shadow-sm overflow-hidden`}>
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-200 bg-stone-50">
-            <BookOpen className="w-5 h-5 text-stone-600" />
-            <span className="text-sm font-semibold text-stone-700">百科事典</span>
+      <div className={`px-4 py-5 sm:px-6 sm:py-7 ${articleClass}`}>
+        <div className={`border-l-4 pl-4 sm:pl-5 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : isAncient ? 'border-[#8f7654]' : 'border-stone-200'}`}>
+          <div className="flex gap-2 mb-4">
+            <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
+              {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
+            </button>
+            <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
           </div>
-          <article className="relative bg-white border-l-4 border-stone-200 px-5 py-6 sm:px-7 sm:py-8 font-serif leading-relaxed">
-            <pre className="whitespace-pre-wrap font-serif text-[15px] leading-7 text-stone-800">{article}</pre>
-          </article>
+
+          {style === null && <EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" />}
+          {style !== null && locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
+
+          {hasArticle && article && <article className={`rounded-xl border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}
         </div>
-      )}
+      </div>
     </div>
   );
 }
