@@ -3,6 +3,7 @@ import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { WIKI_STYLES } from '@/lib/wiki';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
@@ -122,7 +123,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
           <p className="mt-1 text-xs text-[#54595d]">この世界についての記録</p>
         </header>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
-          <div className="min-w-0"><article className="prose prose-stone max-w-none whitespace-pre-wrap text-[15px] leading-7">{article}</article></div>
+          <div className="min-w-0"><MarkdownRenderer content={article ?? ''} /></div>
           <aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit"><div className="h-36 bg-[#eaecf0] border border-[#c8ccd1]" /><div className="mt-3 space-y-2 text-sm"><div className="border-b border-[#c8ccd1] pb-1 font-semibold">基本情報</div><div>名称　{world.name}</div><div>記録地点　{locationCount}</div></div></aside>
         </div>
       </div>
@@ -132,7 +133,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   return <div className={`border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
     <div className={`px-5 py-4 border-b ${headerClass}`}><div className="flex items-center gap-2"><BookOpen className="w-5 h-5 opacity-70" /><div><p className="text-sm font-semibold">{isWikipedia ? 'Wikipedia' : isScp ? 'SCP FOUNDATION' : '古文書'}</p><p className="text-xs opacity-60">{isWikipedia ? '百科事典風' : isScp ? '機密記録風' : '絶望的な古文書風'}</p></div></div></div>
     <div className={`px-5 py-6 sm:px-8 sm:py-8 ${articleClass}`}><div className={`border-l-4 pl-5 sm:pl-6 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>
-      {actionButtons}{locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}{hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}{!hasArticle && locationCount > 0 && isWikipedia && <WikipediaPreviewSkeleton worldName={world.name} />}
+      {actionButtons}{locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}{hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><MarkdownRenderer content={article} className={isAncient ? 'font-serif' : 'font-sans'} /></article>}{!hasArticle && locationCount > 0 && isWikipedia && <WikipediaPreviewSkeleton worldName={world.name} />}
     </div></div>
   </div>;
 }
