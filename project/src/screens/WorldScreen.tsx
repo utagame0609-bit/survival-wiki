@@ -44,13 +44,13 @@ export function WorldScreen({
   ];
 
   return (
-    <div className="min-h-screen overflow-y-scroll [scrollbar-gutter:stable] bg-stone-50 flex flex-col">
+    <div className="min-h-screen overflow-y-scroll [scrollbar-gutter:stable] bg-[#11120f] text-stone-100 flex flex-col">
       <Header title={worldName} onBack={goBack} />
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ワールドを読み込み中" />}
       {!loading && world && (
         <>
-          <div className="sticky top-14 z-20 bg-white/90 backdrop-blur-md border-b border-stone-200">
+          <div className="sticky top-14 z-20 bg-[#151611]/95 backdrop-blur-md border-b border-[#2d3028]">
             <div className="flex max-w-3xl mx-auto h-12">
               {tabs.map((t) => {
                 const Icon = t.icon;
@@ -66,14 +66,14 @@ export function WorldScreen({
                     onClick={() => setTab(t.id)}
                     className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${
                       tab === t.id
-                        ? 'text-emerald-600'
-                        : 'text-stone-500 hover:text-stone-700'
+                        ? 'text-emerald-400'
+                        : 'text-stone-500 hover:text-stone-300'
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     <span>{label}</span>
                     {tab === t.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500" />
                     )}
                   </button>
                 );
@@ -98,7 +98,7 @@ export function WorldScreen({
                 worldId: world.id,
               })
             }
-            className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-stone-800 text-white shadow-lg flex items-center justify-center hover:bg-stone-900 active:scale-95 transition-all"
+            className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all"
           >
             <Settings className="w-5 h-5" />
           </button>
