@@ -24,9 +24,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   useEffect(() => {
     if (!sortMenuOpen) return;
     const handlePointerDown = (event: PointerEvent) => {
-      if (!sortMenuRef.current?.contains(event.target as Node)) {
-        setSortMenuOpen(false);
-      }
+      if (!sortMenuRef.current?.contains(event.target as Node)) setSortMenuOpen(false);
     };
     document.addEventListener('pointerdown', handlePointerDown);
     return () => document.removeEventListener('pointerdown', handlePointerDown);
@@ -37,10 +35,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     return sortOrder === 'newest' ? grouped : [...grouped].reverse();
   }, [locations, sortOrder]);
 
-  const toggle = (key: string) => {
-    setExpanded((prev) => (prev === key ? null : key));
-  };
-
+  const toggle = (key: string) => setExpanded((prev) => (prev === key ? null : key));
   const selectSortOrder = (value: SortOrder) => {
     setSortOrder(value);
     setSortMenuOpen(false);
@@ -48,7 +43,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-8 flex items-center justify-between shadow-sm">
+      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-sm font-semibold tracking-[0.18em] text-white whitespace-nowrap">WORLD LOG</span>
           <span className="h-4 w-px bg-emerald-300" />
@@ -68,22 +63,8 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
           </button>
           {sortMenuOpen && (
             <div className="absolute right-0 top-full mt-1 z-30 min-w-[92px] overflow-hidden rounded-lg border border-emerald-700/20 bg-white shadow-lg ring-1 ring-black/5" role="menu">
-              <button
-                type="button"
-                onClick={() => selectSortOrder('newest')}
-                className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'newest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`}
-                role="menuitem"
-              >
-                新しい順
-              </button>
-              <button
-                type="button"
-                onClick={() => selectSortOrder('oldest')}
-                className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'oldest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`}
-                role="menuitem"
-              >
-                古い順
-              </button>
+              <button type="button" onClick={() => selectSortOrder('newest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'newest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`} role="menuitem">新しい順</button>
+              <button type="button" onClick={() => selectSortOrder('oldest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'oldest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`} role="menuitem">古い順</button>
             </div>
           )}
         </div>
@@ -99,26 +80,12 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded: boolean; onToggle: () => void }) {
   return (
     <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative">
-      {group.bgPhoto && (
-        <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden pointer-events-none">
-          <img
-            src={group.bgPhoto}
-            alt=""
-            className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35] [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)]"
-          />
-        </div>
-      )}
+      {group.bgPhoto && <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35] [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)]" /></div>}
       <button onClick={onToggle} className="relative z-10 w-full min-h-[104px] text-left p-4 flex items-center justify-between bg-transparent">
         <div><p className="font-semibold text-stone-900 whitespace-pre-line">{group.label}</p><p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p></div>
         <ChevronDown className={`w-5 h-5 text-stone-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
       </button>
-      {isExpanded && (
-        <div className="relative z-10 px-4 pb-4 bg-transparent">
-          <div className="border-l-2 border-emerald-300 ml-3 pl-4 space-y-4">
-            {group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}
-          </div>
-        </div>
-      )}
+      {isExpanded && <div className="relative z-10 px-4 pb-4 bg-transparent"><div className="border-l-2 border-emerald-300 ml-3 pl-4 space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>}
     </div>
   );
 }
