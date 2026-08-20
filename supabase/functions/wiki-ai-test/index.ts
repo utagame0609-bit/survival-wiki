@@ -18,6 +18,7 @@ Deno.serve(async (req: Request) => {
   }
 
   let body: { message?: string };
+
   try {
     body = await req.json();
   } catch {
@@ -27,10 +28,53 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  const apiKey = Deno.env.get("OPENROUTER_API_KEY");
+
+  if (!apiKey) {
+    return new Response(JSON.stringify({
+      error: "OPENROUTER_API_KEY is not configured",
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const openRouterResponse = await fetch(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "openrouter/free",
+        messages: [
+          {
+            role: "user",
+            content: body.message ?? "接続テストです。短く返答してください。",
+          },
+        ],
+      }),
+    },
+  );
+
+  const data = await openRouterResponse.json();
+
+  if (!openRouterResponse.ok) {
+    return new Response(JSON.stringify({
+      error: "OpenRouter request failed",
+      details: data,
+    }), {
+      status: openRouterResponse.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   return new Response(
     JSON.stringify({
       ok: true,
-      message: body.message ?? "",
+      message: data.choices?.[0]?.message?.content ?? "",
     }),
     {
       status: 200,
