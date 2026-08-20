@@ -123,7 +123,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
                 const mainPhoto = selectedLocation.photos.find((p) => p.is_main);
                 return (
                   <div className="p-4 sm:p-5 space-y-4">
-                    {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-56 sm:h-72 object-cover rounded-xl" /> : <div className="w-full h-56 sm:h-72 rounded-xl bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
+                    {mainPhoto ? <div className="group w-full h-56 sm:h-72 rounded-xl overflow-hidden bg-[#24271f]"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-110" /></div> : <div className="w-full h-56 sm:h-72 rounded-xl bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
                     <div>
                       <h3 className="text-2xl sm:text-3xl font-bold text-stone-100 break-words">{selectedLocation.name}</h3>
                       <div className="mt-4 rounded-xl bg-[#20221d] border border-[#34372f] p-4 sm:p-5">
