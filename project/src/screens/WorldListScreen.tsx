@@ -130,14 +130,14 @@ function WorldCard({
     : null;
 
   return (
-    <div className="w-full rounded-2xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
+    <div className="w-full rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full text-left p-4 hover:bg-[#20231c] active:bg-[#24271f] transition-colors"
+        className="w-full text-left p-3.5 hover:bg-[#20231c] active:bg-[#24271f] transition-colors"
       >
-        <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#1f3a20] flex items-center justify-center flex-shrink-0">
-            <Globe className="w-6 h-6 text-emerald-400" />
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-lg bg-[#1f3a20] flex items-center justify-center flex-shrink-0">
+            <Globe className="w-5 h-5 text-emerald-400" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ function WorldCard({
               {world.memo && <span className="truncate">· {world.memo}</span>}
             </div>
             {formattedLastLocationDate && (
-              <p className="text-xs text-stone-500 mt-2 text-right">
+              <p className="text-xs text-stone-500 mt-1.5 text-right">
                 最終ロケーション：{formattedLastLocationDate}
               </p>
             )}
@@ -164,22 +164,22 @@ function WorldCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-[#2d3028] p-3 flex gap-2 bg-[#171813]">
+        <div className="border-t border-[#2d3028] p-2.5 flex gap-2 bg-[#171813]">
           <button
             onClick={onOpen}
-            className="flex-1 py-2.5 rounded-xl bg-stone-100 text-stone-900 text-sm font-medium hover:bg-white active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-lg bg-stone-100 text-stone-900 text-sm font-medium hover:bg-white active:scale-[0.99] transition-all"
           >
             このワールドを開く
           </button>
           <button
             onClick={onEdit}
-            className="flex-1 py-2.5 rounded-xl bg-[#292b24] text-stone-200 text-sm font-medium hover:bg-[#32352c] active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-lg bg-[#292b24] text-stone-200 text-sm font-medium hover:bg-[#32352c] active:scale-[0.99] transition-all"
           >
             編集
           </button>
           <button
             onClick={onDelete}
-            className="flex-1 py-2.5 rounded-xl bg-red-950/40 text-red-300 text-sm font-medium hover:bg-red-950/60 active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-lg bg-red-950/40 text-red-300 text-sm font-medium hover:bg-red-950/60 active:scale-[0.99] transition-all"
           >
             削除
           </button>
