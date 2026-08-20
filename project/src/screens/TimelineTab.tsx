@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
@@ -13,11 +13,24 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [error, setError] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLoading(true);
     fetchLocations(world.id).then(setLocations).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [world.id, reloadKey]);
+
+  useEffect(() => {
+    if (!sortMenuOpen) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!sortMenuRef.current?.contains(event.target as Node)) {
+        setSortMenuOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [sortMenuOpen]);
 
   const groups = useMemo(() => {
     const grouped = groupByDay(locations);
@@ -28,26 +41,52 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     setExpanded((prev) => (prev === key ? null : key));
   };
 
+  const selectSortOrder = (value: SortOrder) => {
+    setSortOrder(value);
+    setSortMenuOpen(false);
+  };
+
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-4 flex items-center justify-between shadow-sm">
+      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-8 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-sm font-semibold tracking-[0.18em] text-white whitespace-nowrap">WORLD LOG</span>
           <span className="h-4 w-px bg-emerald-300" />
           <span className="text-xs text-white truncate">この世界で記録された出来事</span>
         </div>
-        <label className="relative shrink-0 ml-3">
+        <div ref={sortMenuRef} className="relative shrink-0 ml-3">
           <span className="sr-only">並び順</span>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-            className="appearance-none bg-transparent text-xs text-white font-medium pr-5 pl-1 py-1 focus:outline-none cursor-pointer"
+          <button
+            type="button"
+            onClick={() => setSortMenuOpen((prev) => !prev)}
+            aria-haspopup="menu"
+            aria-expanded={sortMenuOpen}
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
-            <option value="newest" className="text-stone-900 bg-white">新しい順</option>
-            <option value="oldest" className="text-stone-900 bg-white">古い順</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white" />
-        </label>
+            {sortOrder === 'newest' ? '新しい順' : '古い順'}
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {sortMenuOpen && (
+            <div className="absolute right-0 top-full mt-1 z-30 min-w-[92px] overflow-hidden rounded-lg border border-emerald-700/20 bg-white shadow-lg ring-1 ring-black/5" role="menu">
+              <button
+                type="button"
+                onClick={() => selectSortOrder('newest')}
+                className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'newest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`}
+                role="menuitem"
+              >
+                新しい順
+              </button>
+              <button
+                type="button"
+                onClick={() => selectSortOrder('oldest')}
+                className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'oldest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`}
+                role="menuitem"
+              >
+                古い順
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
