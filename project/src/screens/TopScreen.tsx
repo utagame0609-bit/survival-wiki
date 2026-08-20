@@ -33,8 +33,8 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
               <GameCard key={game.id} game={game} navigate={navigate} />
             ))}
             <div className="aspect-square rounded-3xl bg-[#1b1c18] border border-[#2d3028] flex flex-col items-center justify-center text-stone-500">
-              <div className="w-14 h-14 rounded-2xl bg-[#25261f] flex items-center justify-center mb-3">
-                <Dna className="w-9 h-9 text-stone-400" />
+              <div className="w-14 h-14 rounded-2xl bg-[#3a2a12] flex items-center justify-center mb-3">
+                <Dna className="w-9 h-9 text-amber-600" />
               </div>
               <p className="text-sm font-medium text-stone-400">カスタムワールド</p>
               <p className="text-xs mt-1">準備中</p>
