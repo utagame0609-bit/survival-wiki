@@ -62,12 +62,12 @@ export function WorldListScreen({
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-[#11120f] text-stone-100">
       <Header title={gameName} onBack={goBack} />
       <div className="px-4 py-4 max-w-3xl mx-auto">
         <button
           onClick={() => navigate({ name: 'worldCreate', gameId, gameName })}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-700 text-white font-medium shadow-sm hover:bg-emerald-600 active:scale-[0.98] transition-all"
         >
           <Plus className="w-5 h-5" />
           新規ワールドを作成
@@ -130,32 +130,32 @@ function WorldCard({
     : null;
 
   return (
-    <div className="w-full rounded-2xl bg-white border border-stone-200 shadow-sm overflow-hidden">
+    <div className="w-full rounded-2xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full text-left p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors"
+        className="w-full text-left p-4 hover:bg-[#20231c] active:bg-[#24271f] transition-colors"
       >
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-            <Globe className="w-6 h-6 text-emerald-600" />
+          <div className="w-12 h-12 rounded-xl bg-[#1f3a20] flex items-center justify-center flex-shrink-0">
+            <Globe className="w-6 h-6 text-emerald-400" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-stone-900 truncate">{world.name}</h3>
+              <h3 className="font-semibold text-stone-100 truncate">{world.name}</h3>
               {expanded ? (
                 <ChevronUp className="w-4 h-4 text-stone-400 flex-shrink-0" />
               ) : (
                 <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0" />
               )}
             </div>
-            {world.player && <p className="text-sm text-stone-500 truncate">プレイヤー: {world.player}</p>}
-            <div className="flex items-center gap-1 mt-1 text-xs text-stone-400">
+            {world.player && <p className="text-sm text-stone-400 truncate">プレイヤー: {world.player}</p>}
+            <div className="flex items-center gap-1 mt-1 text-xs text-stone-500">
               <Users className="w-3.5 h-3.5" />
               <span>{world.members.length}名</span>
               {world.memo && <span className="truncate">· {world.memo}</span>}
             </div>
             {formattedLastLocationDate && (
-              <p className="text-xs text-stone-400 mt-2 text-right">
+              <p className="text-xs text-stone-500 mt-2 text-right">
                 最終ロケーション：{formattedLastLocationDate}
               </p>
             )}
@@ -164,22 +164,22 @@ function WorldCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-stone-100 p-3 flex gap-2">
+        <div className="border-t border-[#2d3028] p-3 flex gap-2 bg-[#171813]">
           <button
             onClick={onOpen}
-            className="flex-1 py-2.5 rounded-xl bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-stone-100 text-stone-900 text-sm font-medium hover:bg-white active:scale-[0.99] transition-all"
           >
             このワールドを開く
           </button>
           <button
             onClick={onEdit}
-            className="flex-1 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-[#292b24] text-stone-200 text-sm font-medium hover:bg-[#32352c] active:scale-[0.99] transition-all"
           >
             編集
           </button>
           <button
             onClick={onDelete}
-            className="flex-1 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 active:scale-[0.99] transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-red-950/40 text-red-300 text-sm font-medium hover:bg-red-950/60 active:scale-[0.99] transition-all"
           >
             削除
           </button>
