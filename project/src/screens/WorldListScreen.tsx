@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Globe, Users, Pencil, Trash2 } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld, fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -21,7 +21,6 @@ export function WorldListScreen({
   const [lastLocationDates, setLastLocationDates] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [expandedWorldId, setExpandedWorldId] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -54,7 +53,6 @@ export function WorldListScreen({
     try {
       setError('');
       await deleteWorld(world.id);
-      setExpandedWorldId(null);
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'ワールドの削除に失敗しました');
@@ -85,8 +83,6 @@ export function WorldListScreen({
                 key={w.id}
                 world={w}
                 lastLocationDate={lastLocationDates[w.id]}
-                expanded={expandedWorldId === w.id}
-                onToggle={() => setExpandedWorldId((current) => (current === w.id ? null : w.id))}
                 onOpen={() => {
                   localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, w.id);
                   navigate({ name: 'world', worldId: w.id, worldName: w.name });
@@ -105,16 +101,12 @@ export function WorldListScreen({
 function WorldCard({
   world,
   lastLocationDate,
-  expanded,
-  onToggle,
   onOpen,
   onEdit,
   onDelete,
 }: {
   world: WorldWithMembers;
   lastLocationDate?: string | null;
-  expanded: boolean;
-  onToggle: () => void;
   onOpen: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -130,11 +122,11 @@ function WorldCard({
     : null;
 
   return (
-    <div className="w-full rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
-      <button
-        onClick={onToggle}
-        className="w-full text-left p-3.5 hover:bg-[#20231c] active:bg-[#24271f] transition-colors"
-      >
+    <div
+      onClick={onOpen}
+      className="group w-full rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden cursor-pointer hover:border-emerald-700/70 hover:bg-[#1e201b] transition-all"
+    >
+      <div className="p-3.5">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-lg bg-[#1f3a20] flex items-center justify-center flex-shrink-0">
             <Globe className="w-5 h-5 text-emerald-400" />
@@ -142,11 +134,6 @@ function WorldCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-stone-100 truncate">{world.name}</h3>
-              {expanded ? (
-                <ChevronUp className="w-4 h-4 text-stone-400 flex-shrink-0" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0" />
-              )}
             </div>
             {world.player && <p className="text-sm text-stone-400 truncate">プレイヤー: {world.player}</p>}
             <div className="flex items-center gap-1 mt-1 text-xs text-stone-500">
@@ -160,31 +147,34 @@ function WorldCard({
               </p>
             )}
           </div>
+          <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:pointer-events-none sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto sm:group-focus-within:opacity-100 sm:group-focus-within:pointer-events-auto transition-opacity">
+            <button
+              type="button"
+              aria-label={`${world.name}を編集`}
+              title="編集"
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit();
+              }}
+              className="w-8 h-8 rounded-lg bg-[#292b24] text-stone-300 hover:bg-[#34372e] hover:text-white flex items-center justify-center transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              aria-label={`${world.name}を削除`}
+              title="削除"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete();
+              }}
+              className="w-8 h-8 rounded-lg bg-red-950/40 text-red-300 hover:bg-red-950/60 hover:text-red-200 flex items-center justify-center transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      </button>
-
-      {expanded && (
-        <div className="border-t border-[#2d3028] p-2.5 flex gap-2 bg-[#171813]">
-          <button
-            onClick={onOpen}
-            className="flex-1 py-2.5 rounded-lg bg-stone-100 text-stone-900 text-sm font-medium hover:bg-white active:scale-[0.99] transition-all"
-          >
-            このワールドを開く
-          </button>
-          <button
-            onClick={onEdit}
-            className="flex-1 py-2.5 rounded-lg bg-[#292b24] text-stone-200 text-sm font-medium hover:bg-[#32352c] active:scale-[0.99] transition-all"
-          >
-            編集
-          </button>
-          <button
-            onClick={onDelete}
-            className="flex-1 py-2.5 rounded-lg bg-red-950/40 text-red-300 text-sm font-medium hover:bg-red-950/60 active:scale-[0.99] transition-all"
-          >
-            削除
-          </button>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
