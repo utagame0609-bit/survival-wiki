@@ -100,7 +100,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   };
 
   return (
-    <div className="px-4 py-4 max-w-3xl mx-auto space-y-4 pb-24">
+    <div className="px-4 py-4 max-w-3xl mx-auto space-y-4 pb-4">
       {error && (
         <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
