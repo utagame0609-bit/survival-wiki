@@ -28,7 +28,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   const [coordsText, setCoordsText] = useState(editing ? formatCoords({ x: editing.x, y: editing.y, z: editing.z }) : '');
   const [coordsError, setCoordsError] = useState('');
   const [name, setName] = useState(editing?.name ?? '');
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(Boolean(editing));
   const [detailMemo, setDetailMemo] = useState(editing?.detail_memo ?? '');
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set(editing?.members.map((m) => m.id) ?? []));
   const [createdAt, setCreatedAt] = useState(editing ? toLocalInput(editing.created_at) : toLocalInput(new Date().toISOString()));
