@@ -28,18 +28,18 @@ export function Header({
   onBack?: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-stone-200">
+    <header className="sticky top-0 z-30 bg-[#11120f]/90 backdrop-blur-md border-b border-[#2d3028]">
       <div className="flex items-center gap-2 px-4 h-14 max-w-3xl mx-auto">
         {onBack && (
           <button
             onClick={onBack}
-            className="flex items-center gap-1 text-stone-600 hover:text-stone-900 -ml-2 px-2 py-1 rounded-lg hover:bg-stone-100 transition-colors"
+            className="flex items-center gap-1 text-stone-400 hover:text-stone-100 -ml-2 px-2 py-1 rounded-lg hover:bg-[#20231c] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="text-sm">戻る</span>
           </button>
         )}
-        <h1 className="text-base font-semibold text-stone-900 truncate flex-1 text-center">
+        <h1 className="text-base font-semibold text-stone-100 truncate flex-1 text-center">
           {title}
         </h1>
         {onBack && <div className="w-16" />}
