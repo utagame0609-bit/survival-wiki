@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
-import { ChevronDown, Camera, X, Image as ImageIcon } from 'lucide-react';
+import { ChevronDown, Camera, X } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
-import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
+import { uploadPhoto, getPhotoUrl } from '@/lib/db';
 
 type SaveInput = {
   name: string;
@@ -43,38 +43,13 @@ export function LocationForm({ members, editing, onSave, onCancel, saving }: Pro
       ? getPhotoUrl(editing.photos.find((p) => p.is_main)!.storage_path)
       : null
   );
-  const [nearbyFiles, setNearbyFiles] = useState<File[]>([]);
-  const [nearbyPreviews, setNearbyPreviews] = useState<string[]>(
-    editing
-      ? editing.photos
-          .filter((p) => !p.is_main)
-          .slice(0, 5)
-          .map((p) => getPhotoUrl(p.storage_path))
-      : []
-  );
-  const [existingNearby, setExistingNearby] = useState(
-    editing ? editing.photos.filter((p) => !p.is_main).slice(0, 5) : []
-  );
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const nearbyInputRef = useRef<HTMLInputElement>(null);
 
   const handleMainSelect = (file: File | null) => {
     if (!file) return;
     setMainFile(file);
     setMainPreview(URL.createObjectURL(file));
-  };
-
-  const handleNearbySelect = (files: FileList | null) => {
-    if (!files) return;
-    const newFiles = Array.from(files).slice(0, 5 - nearbyFiles.length - existingNearby.length);
-    setNearbyFiles([...nearbyFiles, ...newFiles]);
-    setNearbyPreviews([...nearbyPreviews, ...newFiles.map((f) => URL.createObjectURL(f))]);
-  };
-
-  const removeNearbyNew = (idx: number) => {
-    setNearbyFiles(nearbyFiles.filter((_, i) => i !== idx));
-    setNearbyPreviews(nearbyPreviews.filter((_, i) => i !== idx));
   };
 
   const toggleMember = (id: string) => {
@@ -109,9 +84,6 @@ export function LocationForm({ members, editing, onSave, onCancel, saving }: Pro
 
     if (mainFile) {
       await uploadPhoto(locationId, mainFile, true);
-    }
-    for (const f of nearbyFiles) {
-      await uploadPhoto(locationId, f, false);
     }
   };
 
@@ -226,53 +198,6 @@ export function LocationForm({ members, editing, onSave, onCancel, saving }: Pro
               </div>
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">
-              近隣写真（最大5枚）
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {nearbyPreviews.map((url, idx) => (
-                <div key={idx} className="relative aspect-square">
-                  <img src={url} alt="" className="w-full h-full object-cover rounded-lg" />
-                  <button
-                    onClick={() => {
-                      if (idx < nearbyFiles.length) {
-                        removeNearbyNew(idx);
-                      } else {
-                        const eIdx = idx - nearbyFiles.length;
-                        const photo = existingNearby[eIdx];
-                        if (photo) {
-                          deletePhoto(photo.id, photo.storage_path);
-                          setExistingNearby(existingNearby.filter((_, i) => i !== eIdx));
-                          setNearbyPreviews(nearbyPreviews.filter((_, i) => i !== idx));
-                        }
-                      }
-                    }}
-                    className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-              {nearbyFiles.length + existingNearby.length < 5 && (
-                <button
-                  onClick={() => nearbyInputRef.current?.click()}
-                  className="aspect-square rounded-lg border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 hover:border-emerald-400"
-                >
-                  <ImageIcon className="w-6 h-6" />
-                </button>
-              )}
-            </div>
-            <input
-              ref={nearbyInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleNearbySelect(e.target.files)}
-            />
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-1.5">作成日時</label>
