@@ -102,12 +102,12 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
         {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
       </div>
       {error && <ErrorBanner message={error} />}
-      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} locationCount={locations.length} />}
+      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} locationCount={locations.length} />}
     </div>
   );
 }
 
-function WikiContent({ style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount }: { style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number }) {
+function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number }) {
   const isWikipedia = style === 'wikipedia';
   const isScp = style === 'scp';
   const isAncient = style === 'ancient';
@@ -173,7 +173,7 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
           {hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}
 
           {!hasArticle && locationCount > 0 && isWikipedia && (
-            <WikipediaPreviewSkeleton />
+            <WikipediaPreviewSkeleton worldName={world.name} />
           )}
         </div>
       </div>
@@ -181,11 +181,11 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
   );
 }
 
-function WikipediaPreviewSkeleton() {
+function WikipediaPreviewSkeleton({ worldName }: { worldName: string }) {
   return (
     <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8">
       <div className="border-b border-stone-400 pb-2">
-        <div className="h-7 sm:h-8 w-2/3 bg-stone-200" />
+        <h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1>
       </div>
 
       <div className="mt-5 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6">
