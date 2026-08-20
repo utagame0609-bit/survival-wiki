@@ -4,6 +4,7 @@ import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld, fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
+import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
 
 export function WorldListScreen({
@@ -21,6 +22,7 @@ export function WorldListScreen({
   const [lastLocationDates, setLastLocationDates] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -64,7 +66,7 @@ export function WorldListScreen({
       <Header title={gameName} onBack={goBack} />
       <div className="px-4 py-4 max-w-3xl mx-auto">
         <button
-          onClick={() => navigate({ name: 'worldCreate', gameId, gameName })}
+          onClick={() => setShowCreateModal(true)}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-700 text-white font-medium shadow-md shadow-emerald-950/30 hover:bg-emerald-600 active:scale-[0.99] transition-all"
         >
           <Plus className="w-5 h-5" />
@@ -94,6 +96,14 @@ export function WorldListScreen({
           </div>
         )}
       </div>
+
+      {showCreateModal && (
+        <WorldCreateModal
+          gameId={gameId}
+          onClose={() => setShowCreateModal(false)}
+          onCreated={load}
+        />
+      )}
     </div>
   );
 }
