@@ -19,22 +19,19 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   const [expanded, setExpanded] = useState<string | null>(null);
   const loadRequestRef = useRef(0);
 
-  const load = () => {
+  const load = async () => {
     const requestId = ++loadRequestRef.current;
     setLoading(true);
-    fetchLocations(world.id)
-      .then((nextLocations) => {
-        if (requestId !== loadRequestRef.current) return;
-        setLocations(nextLocations);
-      })
-      .catch((e) => {
-        if (requestId !== loadRequestRef.current) return;
-        setError(e.message);
-      })
-      .finally(() => {
-        if (requestId !== loadRequestRef.current) return;
-        setLoading(false);
-      });
+    try {
+      const nextLocations = await fetchLocations(world.id);
+      if (requestId !== loadRequestRef.current) return;
+      setLocations(nextLocations);
+    } catch (e) {
+      if (requestId !== loadRequestRef.current) return;
+      setError((e as Error).message);
+    } finally {
+      if (requestId === loadRequestRef.current) setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [world.id, reloadKey]);
@@ -56,9 +53,14 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
     }
   };
 
-  const handleComplete = () => {
-    setMode({ type: 'list' });
-    onReload();
+  const handleComplete = async () => {
+    try {
+      await load();
+      setMode({ type: 'list' });
+      onReload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
   };
 
   const handleDelete = async (loc: LocationWithPhotos) => {
