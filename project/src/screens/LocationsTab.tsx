@@ -129,9 +129,9 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
                       <div className="mt-4 rounded-xl bg-[#20221d] border border-[#34372f] p-4 sm:p-5">
                         <div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div>
                         <div className="grid grid-cols-3 gap-3 text-center font-mono">
-                          <div><div className="text-xs text-stone-500">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
-                          <div><div className="text-xs text-stone-500">Y</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.y}</div></div>
-                          <div><div className="text-xs text-stone-500">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
+                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
+                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Y</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.y}</div></div>
+                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
                         </div>
                       </div>
                     </div>
@@ -192,7 +192,7 @@ function LocationCard({ loc, onToggle, onEdit, onDelete }: { loc: LocationWithPh
         <button onClick={onEdit} aria-label="編集" className="w-8 h-8 rounded-lg bg-[#292b24]/95 text-stone-200 flex items-center justify-center hover:bg-[#34382e] transition-colors"><Pencil className="w-4 h-4" /></button>
         <button onClick={onDelete} aria-label="削除" className="w-8 h-8 rounded-lg bg-red-950/80 text-red-200 flex items-center justify-center hover:bg-red-900 transition-colors"><Trash2 className="w-4 h-4" /></button>
       </div>
-      <div className="md:hidden border-t border-[#2d3028] px-3 py-2.5 bg-[#171813]"><div className="flex gap-2"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" /> 削除</button></div></div>
+      <div className="md:hidden border-t border-[#2d3028] px-3 py-2.5 bg-[#171813]"><div className="flex gap-2"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div></div>
     </div>
   );
 }
