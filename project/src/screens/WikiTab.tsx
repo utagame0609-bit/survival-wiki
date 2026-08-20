@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sparkles, RefreshCw, BookOpen } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, saveWikiArticle } from '@/lib/db';
 import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
+
+const WIKI_GENERATE_COOLDOWN_MS = 5000;
 
 export function WikiTab({
   world,
@@ -17,7 +19,9 @@ export function WikiTab({
   const [article, setArticle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
   const [error, setError] = useState('');
+  const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -38,9 +42,15 @@ export function WikiTab({
 
   useEffect(() => {
     load();
+    return () => {
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+    };
   }, [world.id, style, reloadKey]);
 
   const handleGenerate = async () => {
+    const now = Date.now();
+    if (generating || now < cooldownUntil || locations.length === 0) return;
+
     setGenerating(true);
     setError('');
     try {
@@ -50,12 +60,17 @@ export function WikiTab({
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      const nextCooldownUntil = Date.now() + WIKI_GENERATE_COOLDOWN_MS;
+      setCooldownUntil(nextCooldownUntil);
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+      cooldownTimerRef.current = setTimeout(() => setCooldownUntil(0), WIKI_GENERATE_COOLDOWN_MS);
       setGenerating(false);
     }
   };
 
   const styleConfig = WIKI_STYLES.find((s) => s.id === style);
   const hasArticle = article !== null;
+  const cooldownActive = cooldownUntil > Date.now();
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
@@ -92,6 +107,7 @@ export function WikiTab({
           hasArticle={hasArticle}
           article={article}
           generating={generating}
+          cooldownActive={cooldownActive}
           onGenerate={handleGenerate}
           locationCount={locations.length}
         />
@@ -105,6 +121,7 @@ function WikiContent({
   hasArticle,
   article,
   generating,
+  cooldownActive,
   onGenerate,
   locationCount,
 }: {
@@ -112,6 +129,7 @@ function WikiContent({
   hasArticle: boolean;
   article: string | null;
   generating: boolean;
+  cooldownActive: boolean;
   onGenerate: () => void;
   locationCount: number;
 }) {
@@ -127,7 +145,7 @@ function WikiContent({
       {/* Generate / Update button */}
       <button
         onClick={onGenerate}
-        disabled={generating || locationCount === 0}
+        disabled={generating || cooldownActive || locationCount === 0}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50 mb-4"
       >
         {generating ? (
