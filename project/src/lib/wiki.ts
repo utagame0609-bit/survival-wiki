@@ -26,6 +26,38 @@ export type WikiProvider = {
   generate(input: WikiGenerationInput): Promise<WikiGenerationResult>;
 };
 
+const MAX_WIKI_AI_PHOTOS = 5;
+
+/**
+ * Keep each location's text/timeline context intact while limiting only the
+ * photos supplied to the AI generation layer to a maximum of five.
+ */
+function prepareWikiGenerationInput(input: WikiGenerationInput): WikiGenerationInput {
+  const sortedLocations = [...input.locations].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+
+  let remainingPhotos = MAX_WIKI_AI_PHOTOS;
+  const locations = sortedLocations.map((location) => {
+    const photos = location.photos
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .slice(0, remainingPhotos);
+
+    remainingPhotos -= photos.length;
+
+    return {
+      ...location,
+      photos,
+    };
+  });
+
+  return {
+    ...input,
+    locations,
+  };
+}
+
 // Placeholder provider — generates a structured article from the recorded data
 // without calling any external AI. This keeps the AI layer swappable: replace
 // this function (or inject a different WikiProvider) to connect OpenRouter,
@@ -35,10 +67,6 @@ export const placeholderProvider: WikiProvider = {
     const { world, locations, style } = input;
     const memberNames = world.members.map((m) => m.name);
     const player = world.player || 'プレイヤー';
-
-    const sorted = [...locations].sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
 
     const styleHeader =
       style === 'scp'
@@ -57,12 +85,12 @@ export const placeholderProvider: WikiProvider = {
     lines.push(`記録されたロケーション数: ${locations.length}`);
     lines.push('');
 
-    if (sorted.length === 0) {
+    if (locations.length === 0) {
       lines.push('（ロケーションが記録されていません。記録を追加すると記事が充実します。）');
     } else {
       lines.push('== 記録された地点 ==');
       lines.push('');
-      for (const loc of sorted) {
+      for (const loc of locations) {
         const time = new Date(loc.created_at).toLocaleString('ja-JP', {
           month: 'numeric',
           day: 'numeric',
@@ -91,5 +119,6 @@ export function setWikiProvider(p: WikiProvider) {
 }
 
 export async function generateWiki(input: WikiGenerationInput): Promise<WikiGenerationResult> {
-  return currentProvider.generate(input);
+  const preparedInput = prepareWikiGenerationInput(input);
+  return currentProvider.generate(preparedInput);
 }
