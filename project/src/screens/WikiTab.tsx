@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
-import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
+import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 
+type WikiStyleId = string;
+
 export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
-  const [style, setStyle] = useState(WIKI_STYLES[0].id);
+  const [style, setStyle] = useState<WikiStyleId | null>(null);
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [article, setArticle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -18,12 +20,17 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   const [error, setError] = useState('');
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const load = async () => {
+  const load = async (nextStyle: WikiStyleId | null = style) => {
     setLoading(true);
     setError('');
     try {
-      const [locs, art] = await Promise.all([fetchLocations(world.id), fetchWikiArticle(world.id, style)]);
+      const locs = await fetchLocations(world.id);
       setLocations(locs);
+      if (nextStyle === null) {
+        setArticle(null);
+        return;
+      }
+      const art = await fetchWikiArticle(world.id, nextStyle);
       setArticle(art?.content ?? null);
     } catch (e) {
       setError((e as Error).message);
@@ -33,13 +40,18 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   };
 
   useEffect(() => {
-    load();
+    load(style);
     return () => { if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current); };
   }, [world.id, style, reloadKey]);
 
+  const handleStyleSelect = (nextStyle: WikiStyleId) => {
+    if (generating || resetting) return;
+    setStyle(nextStyle);
+  };
+
   const handleGenerate = async () => {
     const now = Date.now();
-    if (generating || now < cooldownUntil || locations.length === 0) return;
+    if (generating || now < cooldownUntil || locations.length === 0 || style === null) return;
     setGenerating(true);
     setError('');
     try {
@@ -58,14 +70,15 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   };
 
   const handleReset = async () => {
-    if (!article || resetting) return;
-    const confirmed = window.confirm('このスタイルの記事をリセットして、未生成の状態に戻しますか？');
+    if (!style || !article || resetting) return;
+    const confirmed = window.confirm('この記事を削除して、Wikiを初期状態に戻しますか？\n記事と現在のスタイル選択が解除されます。');
     if (!confirmed) return;
     setResetting(true);
     setError('');
     try {
       await resetWikiArticle(world.id, style);
       setArticle(null);
+      setStyle(null);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -73,7 +86,7 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
     }
   };
 
-  const styleConfig = WIKI_STYLES.find((s) => s.id === style);
+  const styleConfig = style ? WIKI_STYLES.find((s) => s.id === style) : null;
   const hasArticle = article !== null;
   const cooldownActive = cooldownUntil > Date.now();
 
@@ -83,7 +96,7 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
         <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {WIKI_STYLES.map((s) => (
-            <button key={s.id} onClick={() => setStyle(s.id)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>
+            <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>
           ))}
         </div>
         {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
@@ -94,22 +107,23 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   );
 }
 
-function WikiContent({ style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount }: { style: string; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number }) {
-  const themeClass = style === 'scp' ? 'bg-stone-900 text-stone-200 border-stone-700' : style === 'psycho' ? 'bg-purple-950 text-purple-100 border-purple-800' : 'bg-white text-stone-800 border-stone-300';
+function WikiContent({ style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount }: { style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number }) {
+  const neutralTheme = 'bg-white text-stone-800 border-stone-300';
 
   return (
     <div>
       <div className="flex gap-2 mb-4">
-        <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
+        <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
           {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
         </button>
-        <button onClick={onReset} disabled={!hasArticle || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
+        <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
       </div>
 
-      {locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
+      {style === null && <EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" />}
+      {style !== null && locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
 
       {hasArticle && article && (
-        <div className="rounded-xl border border-stone-300 bg-white text-stone-900 shadow-sm overflow-hidden">
+        <div className={`rounded-xl border ${neutralTheme} shadow-sm overflow-hidden`}>
           <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-200 bg-stone-50">
             <BookOpen className="w-5 h-5 text-stone-600" />
             <span className="text-sm font-semibold text-stone-700">百科事典</span>
