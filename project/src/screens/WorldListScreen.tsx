@@ -155,7 +155,7 @@ function WorldCard({
               {world.memo && <span className="truncate">· {world.memo}</span>}
             </div>
             {formattedLastLocationDate && (
-              <p className="text-xs text-stone-500 mt-1.5 text-right">
+              <p className="text-[11px] text-stone-600 mt-1.5 text-right">
                 最終ロケーション：{formattedLastLocationDate}
               </p>
             )}
