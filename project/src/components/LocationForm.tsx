@@ -79,35 +79,35 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     }
   };
 
-  const inputClass = 'w-full px-3 py-3 rounded-xl border border-[#3a3d34] bg-[#20221d] text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/70';
+  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-[#3a3d34] bg-[#20221d] text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/70';
 
   return (
-    <div className="px-4 py-4 max-w-3xl mx-auto space-y-4 pb-4 bg-[#1b1c18] text-stone-100">
+    <div className="px-4 py-3 max-w-3xl mx-auto space-y-3 pb-3 bg-[#1b1c18] text-stone-100">
       {error && <div className="p-3 rounded-xl bg-red-950/40 border border-red-900/60 text-red-300 text-sm">{error}</div>}
       <div>
-        <label className="block text-sm font-medium text-stone-300 mb-1.5">座標</label>
+        <label className="block text-sm font-medium text-stone-300 mb-1">座標</label>
         <input type="text" inputMode="numeric" value={coordsText} onChange={(e) => setCoordsText(e.target.value)} placeholder="100 64 -20" className={`${inputClass} text-lg font-mono`} />
         {coordsError && <p className="mt-1 text-xs text-red-400">{coordsError}</p>}
       </div>
       <div>
-        <label className="block text-sm font-medium text-stone-300 mb-1.5">ロケーション名</label>
+        <label className="block text-sm font-medium text-stone-300 mb-1">ロケーション名</label>
         <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="例: 拠点" className={inputClass} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-stone-300 mb-1.5">メイン写真</label>
+        <label className="block text-sm font-medium text-stone-300 mb-1">メイン写真</label>
         {mainPreview ? (
           <div className="relative">
-            <img src={mainPreview} alt="メイン写真" className="w-full h-48 object-cover rounded-xl" />
+            <img src={mainPreview} alt="メイン写真" className="w-full h-44 object-cover rounded-xl" />
             <button onClick={() => { setMainFile(null); setMainPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80"><X className="w-4 h-4" /></button>
           </div>
         ) : (
-          <button onClick={() => fileInputRef.current?.click()} className="w-full h-32 rounded-xl border-2 border-dashed border-[#3a3d34] bg-[#20221d] flex flex-col items-center justify-center text-stone-500 hover:border-emerald-500 hover:text-emerald-400 transition-colors"><Camera className="w-8 h-8 mb-1" /><span className="text-sm">撮影・選択</span></button>
+          <button onClick={() => fileInputRef.current?.click()} className="w-full h-28 rounded-xl border-2 border-dashed border-[#3a3d34] bg-[#20221d] flex flex-col items-center justify-center text-stone-500 hover:border-emerald-500 hover:text-emerald-400 transition-colors"><Camera className="w-8 h-8 mb-1" /><span className="text-sm">撮影・選択</span></button>
         )}
         <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleMainSelect(e.target.files?.[0] ?? null)} />
       </div>
       <button onClick={() => setDetailOpen(!detailOpen)} className="flex items-center gap-1 text-sm font-medium text-stone-400 hover:text-stone-100 transition-colors"><ChevronDown className={`w-4 h-4 transition-transform ${detailOpen ? 'rotate-180' : ''}`} />詳細{detailOpen ? '▲' : '▼'}</button>
-      {detailOpen && <div className="space-y-4 p-4 rounded-2xl bg-[#20221d] border border-[#34372f]"><div><label className="block text-sm font-medium text-stone-300 mb-1.5">詳細メモ</label><textarea value={detailMemo} onChange={(e) => setDetailMemo(e.target.value)} placeholder="この場所についてのメモ" rows={3} className={`${inputClass} py-2.5 resize-none`} /></div>{members.length > 0 && <div><label className="block text-sm font-medium text-stone-300 mb-1.5">関連メンバー</label><div className="flex flex-wrap gap-2">{members.map((m) => { const checked = selectedMembers.has(m.id); return <button key={m.id} onClick={() => toggleMember(m.id)} className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${checked ? 'bg-emerald-700 text-white border-emerald-600' : 'bg-[#292b24] text-stone-300 border-[#3a3d34] hover:bg-[#34382e]'}`}>{m.name}</button>; })}</div></div>}<div><label className="block text-sm font-medium text-stone-300 mb-1.5">作成日時</label><input type="datetime-local" value={createdAt} onChange={(e) => setCreatedAt(e.target.value)} className={`${inputClass} py-2.5`} /></div></div>}
-      <div className="flex gap-3 pt-2"><button onClick={onCancel} className="flex-1 py-3 rounded-2xl bg-[#292b24] border border-[#3a3d34] text-stone-300 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all">キャンセル</button><button onClick={handleSubmit} disabled={saving} className="flex-1 py-3 rounded-2xl bg-emerald-700 text-white font-medium shadow-sm hover:bg-emerald-600 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? '保存中...' : '保存'}</button></div>
+      {detailOpen && <div className="space-y-3 p-3 rounded-2xl bg-[#20221d] border border-[#34372f]"><div><label className="block text-sm font-medium text-stone-300 mb-1">詳細メモ</label><textarea value={detailMemo} onChange={(e) => setDetailMemo(e.target.value)} placeholder="この場所についてのメモ" rows={3} className={`${inputClass} py-2.5 resize-none`} /></div>{members.length > 0 && <div><label className="block text-sm font-medium text-stone-300 mb-1">関連メンバー</label><div className="flex flex-wrap gap-2">{members.map((m) => { const checked = selectedMembers.has(m.id); return <button key={m.id} onClick={() => toggleMember(m.id)} className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${checked ? 'bg-emerald-700 text-white border-emerald-600' : 'bg-[#292b24] text-stone-300 border-[#3a3d34] hover:bg-[#34382e]'}`}>{m.name}</button>; })}</div></div>}<div><label className="block text-sm font-medium text-stone-300 mb-1">作成日時</label><input type="datetime-local" value={createdAt} onChange={(e) => setCreatedAt(e.target.value)} className={`${inputClass} py-2.5`} /></div></div>}
+      <div className="flex gap-3 pt-1"><button onClick={onCancel} className="flex-1 py-2.5 rounded-2xl bg-[#292b24] border border-[#3a3d34] text-stone-300 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all">キャンセル</button><button onClick={handleSubmit} disabled={saving} className="flex-1 py-2.5 rounded-2xl bg-emerald-700 text-white font-medium shadow-sm hover:bg-emerald-600 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? '保存中...' : '保存'}</button></div>
     </div>
   );
 }
