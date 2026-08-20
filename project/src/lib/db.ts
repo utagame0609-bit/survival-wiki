@@ -260,17 +260,62 @@ export async function deleteLocation(id: string): Promise<void> {
 
 // ---- Photos ----
 
+const MAX_IMAGE_SIZE = 1280;
+const WEBP_QUALITY = 0.82;
+
+async function resizeAndConvertToWebP(file: File): Promise<Blob> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('画像ファイルを選択してください');
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('画像を読み込めませんでした'));
+      img.src = objectUrl;
+    });
+
+    const scale = Math.min(1, MAX_IMAGE_SIZE / Math.max(image.naturalWidth, image.naturalHeight));
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('画像処理を開始できませんでした');
+    context.drawImage(image, 0, 0, width, height);
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (result) => {
+          if (result) resolve(result);
+          else reject(new Error('WebPへの変換に失敗しました'));
+        },
+        'image/webp',
+        WEBP_QUALITY
+      );
+    });
+
+    return blob;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export async function uploadPhoto(
   locationId: string,
   file: File,
   isMain: boolean
 ): Promise<LocationPhoto> {
-  const ext = file.name.split('.').pop() || 'jpg';
-  const path = `${locationId}/${crypto.randomUUID()}.${ext}`;
+  const imageBlob = await resizeAndConvertToWebP(file);
+  const path = `${locationId}/${crypto.randomUUID()}.webp`;
 
   const { error: upErr } = await supabase.storage
     .from(PHOTOS_BUCKET)
-    .upload(path, file, { contentType: file.type });
+    .upload(path, imageBlob, { contentType: 'image/webp' });
   if (upErr) throw upErr;
 
   const { data, error } = await supabase
