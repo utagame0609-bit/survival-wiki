@@ -130,7 +130,7 @@ function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: Lo
   return (
     <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
       <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]">
-        <div className="flex gap-3 p-3 pr-14">
+        <div className="flex gap-3 p-3 pr-16">
           {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-[72px] h-[72px] rounded-lg object-cover flex-shrink-0" /> : <div className="w-[72px] h-[72px] rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-7 h-7 text-stone-600" /></div>}
           <div className="flex-1 min-w-0 flex flex-col justify-center">
             <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div>
@@ -138,7 +138,7 @@ function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: Lo
           </div>
         </div>
       </button>
-      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity md:flex hidden">
+      <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity md:flex hidden">
         <button onClick={onEdit} aria-label="編集" className="w-8 h-8 rounded-lg bg-[#292b24]/95 text-stone-200 flex items-center justify-center hover:bg-[#34382e] transition-colors"><Pencil className="w-4 h-4" /></button>
         <button onClick={onDelete} aria-label="削除" className="w-8 h-8 rounded-lg bg-red-950/80 text-red-200 flex items-center justify-center hover:bg-red-900 transition-colors"><Trash2 className="w-4 h-4" /></button>
       </div>
