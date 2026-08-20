@@ -108,7 +108,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
       {loading && <Spinner label="ロケーションを読み込み中" />}
       {!loading && locations.length === 0 && <EmptyState message="ロケーションがありません。追加ボタンから記録を始めよう。" />}
       {!loading && locations.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {locations.map((loc) => (
             <LocationCard key={loc.id} loc={loc} isExpanded={expanded === loc.id} onToggle={() => setExpanded((prev) => (prev === loc.id ? null : loc.id))} onEdit={() => setMode({ type: 'edit', location: loc })} onDelete={() => handleDelete(loc)} />
           ))}
@@ -123,8 +123,8 @@ function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: Lo
   return (
     <div className="rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
       <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]">
-        <div className="flex gap-3 p-3.5">
-          {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" /> : <div className="w-20 h-20 rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-8 h-8 text-stone-600" /></div>}
+        <div className="flex gap-3 p-3">
+          {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-[72px] h-[72px] rounded-lg object-cover flex-shrink-0" /> : <div className="w-[72px] h-[72px] rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-7 h-7 text-stone-600" /></div>}
           <div className="flex-1 min-w-0 flex flex-col justify-center">
             <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div>
             <p className="text-sm text-stone-400 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
@@ -132,7 +132,7 @@ function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: Lo
           <ChevronDown className={`w-5 h-5 text-stone-500 self-center flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </div>
       </button>
-      {isExpanded && <div className="border-t border-[#2d3028] px-3.5 py-3 bg-[#171813]"><div className="flex gap-3"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" /> 削除</button></div></div>}
+      {isExpanded && <div className="border-t border-[#2d3028] px-3 py-2.5 bg-[#171813]"><div className="flex gap-2"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" /> 削除</button></div></div>}
     </div>
   );
 }
