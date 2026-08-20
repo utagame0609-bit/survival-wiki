@@ -89,25 +89,28 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   const styleConfig = style ? WIKI_STYLES.find((s) => s.id === style) : null;
   const hasArticle = article !== null;
   const cooldownActive = cooldownUntil > Date.now();
+  const isGeneratedWikipedia = hasArticle && style === 'wikipedia';
 
   return (
-    <div className="w-full px-4 py-4 max-w-3xl mx-auto">
-      <div className="mb-4">
-        <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {WIKI_STYLES.map((s) => (
-            <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>
-          ))}
+    <div className={isGeneratedWikipedia ? 'w-full' : 'w-full px-4 py-4 max-w-3xl mx-auto'}>
+      {!isGeneratedWikipedia && (
+        <div className="mb-4">
+          <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {WIKI_STYLES.map((s) => (
+              <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>
+            ))}
+          </div>
+          {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
         </div>
-        {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
-      </div>
+      )}
       {error && <ErrorBanner message={error} />}
-      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} locationCount={locations.length} />}
+      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} locationCount={locations.length} isGeneratedWikipedia={isGeneratedWikipedia} />}
     </div>
   );
 }
 
-function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number }) {
+function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount, isGeneratedWikipedia }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number; isGeneratedWikipedia: boolean }) {
   const isWikipedia = style === 'wikipedia';
   const isScp = style === 'scp';
   const isAncient = style === 'ancient';
@@ -137,7 +140,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
         : 'bg-white border-stone-200 text-stone-800';
 
   const actionButtons = (
-    <div className="flex gap-2 mb-4">
+    <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6">
       <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
         {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
       </button>
@@ -154,6 +157,36 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
     );
   }
 
+  if (isGeneratedWikipedia) {
+    return (
+      <div className="min-h-screen bg-white text-[#202122]">
+        {actionButtons}
+        <article className="w-full border-t border-[#a2a9b1] bg-white px-4 py-6 sm:px-8 sm:py-8">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="border-b border-[#a2a9b1] pb-2">
+              <h1 className="text-2xl sm:text-3xl font-normal leading-tight">{world.name}</h1>
+            </div>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
+              <div className="min-w-0">
+                <article className="prose prose-stone max-w-none whitespace-pre-wrap text-[15px] leading-7">
+                  {article}
+                </article>
+              </div>
+              <aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit">
+                <div className="h-36 bg-[#eaecf0] border border-[#c8ccd1]" />
+                <div className="mt-3 space-y-2 text-sm">
+                  <div className="border-b border-[#c8ccd1] pb-1 font-semibold">基本情報</div>
+                  <div>名称　{world.name}</div>
+                  <div>記録地点　{locationCount}</div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </article>
+      </div>
+    );
+  }
+
   return (
     <div className={`border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
       <div className={`px-5 py-4 border-b ${headerClass}`}>
@@ -165,16 +198,12 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
           </div>
         </div>
       </div>
-
       <div className={`px-5 py-6 sm:px-8 sm:py-8 ${articleClass}`}>
         <div className={`border-l-4 pl-5 sm:pl-6 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>
           {actionButtons}
           {locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}
           {hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><pre className={`whitespace-pre-wrap text-[15px] leading-7 ${isAncient ? 'font-serif' : 'font-sans'}`}>{article}</pre></article>}
-
-          {!hasArticle && locationCount > 0 && isWikipedia && (
-            <WikipediaPreviewSkeleton worldName={world.name} />
-          )}
+          {!hasArticle && locationCount > 0 && isWikipedia && <WikipediaPreviewSkeleton worldName={world.name} />}
         </div>
       </div>
     </div>
@@ -184,54 +213,14 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
 function WikipediaPreviewSkeleton({ worldName }: { worldName: string }) {
   return (
     <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8">
-      <div className="border-b border-stone-400 pb-2">
-        <h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1>
-      </div>
-
+      <div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1></div>
       <div className="mt-5 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6">
-        <div className="space-y-3">
-          <div className="h-4 w-full bg-stone-100" />
-          <div className="h-4 w-11/12 bg-stone-100" />
-          <div className="h-4 w-4/5 bg-stone-100" />
-        </div>
-        <div className="border border-stone-300 bg-stone-50 p-2">
-          <div className="h-28 bg-stone-200" />
-          <div className="mt-3 space-y-2">
-            <div className="h-3 w-full bg-stone-200" />
-            <div className="h-3 w-4/5 bg-stone-200" />
-            <div className="h-3 w-5/6 bg-stone-200" />
-          </div>
-        </div>
+        <div className="space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div>
+        <div className="border border-stone-300 bg-stone-50 p-2"><div className="h-28 bg-stone-200" /><div className="mt-3 space-y-2"><div className="h-3 w-full bg-stone-200" /><div className="h-3 w-4/5 bg-stone-200" /><div className="h-3 w-5/6 bg-stone-200" /></div></div>
       </div>
-
-      <div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm">
-        <div className="h-4 w-16 bg-stone-300 mb-3" />
-        <div className="space-y-2">
-          <div className="h-3 w-32 bg-stone-200" />
-          <div className="h-3 w-40 bg-stone-200" />
-          <div className="h-3 w-28 bg-stone-200" />
-          <div className="h-3 w-36 bg-stone-200" />
-        </div>
-      </div>
-
-      <div className="mt-8 border-b border-stone-400 pb-1">
-        <div className="h-5 w-40 bg-stone-200" />
-      </div>
-      <div className="mt-4 space-y-3">
-        <div className="h-4 w-full bg-stone-100" />
-        <div className="h-4 w-11/12 bg-stone-100" />
-        <div className="h-4 w-5/6 bg-stone-100" />
-        <div className="h-4 w-3/4 bg-stone-100" />
-      </div>
-
-      <div className="mt-8 border-b border-stone-400 pb-1">
-        <div className="h-5 w-32 bg-stone-200" />
-      </div>
-      <div className="mt-4 space-y-3">
-        <div className="h-4 w-full bg-stone-100" />
-        <div className="h-4 w-10/12 bg-stone-100" />
-        <div className="h-4 w-4/5 bg-stone-100" />
-      </div>
+      <div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm"><div className="h-4 w-16 bg-stone-300 mb-3" /><div className="space-y-2"><div className="h-3 w-32 bg-stone-200" /><div className="h-3 w-40 bg-stone-200" /><div className="h-3 w-28 bg-stone-200" /><div className="h-3 w-36 bg-stone-200" /></div></div>
+      <div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-40 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-5/6 bg-stone-100" /><div className="h-4 w-3/4 bg-stone-100" /></div>
+      <div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-32 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-10/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div>
     </section>
   );
 }
