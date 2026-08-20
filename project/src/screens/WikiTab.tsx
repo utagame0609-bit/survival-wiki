@@ -115,9 +115,9 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
   const pageClass = isWikipedia
     ? 'bg-white text-stone-800 border-stone-300'
     : isScp
-      ? 'bg-stone-100 text-stone-900 border-stone-700'
+      ? 'bg-stone-100 text-stone-900 border-stone-700 rounded-2xl shadow-sm overflow-hidden'
       : isAncient
-        ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]'
+        ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d] rounded-2xl shadow-sm overflow-hidden'
         : '';
 
   const headerClass = isWikipedia
@@ -155,7 +155,7 @@ function WikiContent({ style, hasArticle, article, generating, resetting, cooldo
   }
 
   return (
-    <div className={`rounded-2xl border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}>
+    <div className={`border ${pageClass}`}>
       <div className={`px-4 py-4 border-b ${headerClass}`}>
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 opacity-70" />
