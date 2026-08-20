@@ -100,10 +100,10 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
       {mode.type !== 'list' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeModal} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#f8f7f3] text-stone-900 shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-stone-200 bg-white">
-              <h2 className="text-sm sm:text-base font-semibold text-stone-900">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2>
-              <button onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-stone-900 disabled:opacity-40">
+          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]">
+              <h2 className="text-sm sm:text-base font-semibold text-stone-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2>
+              <button onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100 disabled:opacity-40">
                 <X className="w-5 h-5" />
               </button>
             </div>
