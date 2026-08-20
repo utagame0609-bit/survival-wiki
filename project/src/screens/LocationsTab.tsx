@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil, X } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -74,28 +74,10 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
     }
   };
 
-  if (mode.type === 'create' || mode.type === 'edit') {
-    return (
-      <div className="min-h-full bg-[#11120f] text-stone-100">
-        <div className="sticky top-0 z-20 bg-[#171813]/90 backdrop-blur-md border-b border-[#2d3028]">
-          <div className="flex items-center justify-between px-4 h-12 max-w-3xl mx-auto">
-            <button onClick={() => setMode({ type: 'list' })} className="text-sm text-stone-400 hover:text-stone-100">キャンセル</button>
-            <span className="text-sm font-medium text-stone-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</span>
-            <div className="w-16" />
-          </div>
-        </div>
-        <LocationForm
-          worldId={world.id}
-          members={world.members}
-          editing={mode.type === 'edit' ? mode.location : null}
-          onSave={handleSave}
-          onComplete={handleComplete}
-          onCancel={() => setMode({ type: 'list' })}
-          saving={saving}
-        />
-      </div>
-    );
-  }
+  const closeModal = () => {
+    if (saving) return;
+    setMode({ type: 'list' });
+  };
 
   return (
     <div className="min-h-full bg-[#11120f] text-stone-100 px-4 py-4 max-w-3xl mx-auto">
@@ -112,6 +94,31 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
           {locations.map((loc) => (
             <LocationCard key={loc.id} loc={loc} isExpanded={expanded === loc.id} onToggle={() => setExpanded((prev) => (prev === loc.id ? null : loc.id))} onEdit={() => setMode({ type: 'edit', location: loc })} onDelete={() => handleDelete(loc)} />
           ))}
+        </div>
+      )}
+
+      {mode.type !== 'list' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+          <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeModal} />
+          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#f8f7f3] text-stone-900 shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-stone-200 bg-white">
+              <h2 className="text-sm sm:text-base font-semibold text-stone-900">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2>
+              <button onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-stone-900 disabled:opacity-40">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto overscroll-contain">
+              <LocationForm
+                worldId={world.id}
+                members={world.members}
+                editing={mode.type === 'edit' ? mode.location : null}
+                onSave={handleSave}
+                onComplete={handleComplete}
+                onCancel={closeModal}
+                saving={saving}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
