@@ -3,7 +3,8 @@ import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
-import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
+import { WIKI_STYLES } from '@/lib/wiki';
+import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
@@ -42,7 +43,7 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
     if (generating || now < cooldownUntil || locations.length === 0 || style === null) return;
     setGenerating(true); setError('');
     try {
-      const result = await generateWiki({ world, locations, style });
+      const result = await openRouterTestProvider.generate({ world, locations, style });
       await saveWikiArticle(world.id, style, result.content); setArticle(result.content);
     } catch (e) { setError((e as Error).message); }
     finally {
