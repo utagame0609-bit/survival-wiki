@@ -32,12 +32,14 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
             {games.map((game) => (
               <GameCard key={game.id} game={game} navigate={navigate} />
             ))}
-            <div className="aspect-square rounded-3xl bg-[#1b1c18] border border-[#2d3028] flex flex-col items-center justify-center text-stone-500">
-              <div className="w-14 h-14 rounded-2xl bg-[#3a2a12] flex items-center justify-center mb-3">
+            <div className="min-h-36 rounded-2xl bg-[#1b1c18] border border-[#2d3028] flex items-center px-5 text-stone-500">
+              <div className="w-14 h-14 shrink-0 rounded-xl bg-[#3a2a12] flex items-center justify-center mr-4">
                 <Dna className="w-9 h-9 text-amber-600" />
               </div>
-              <p className="text-sm font-medium text-stone-400">カスタムワールド</p>
-              <p className="text-xs mt-1">準備中</p>
+              <div>
+                <p className="text-sm font-medium text-stone-400">カスタムワールド</p>
+                <p className="text-xs mt-1">準備中</p>
+              </div>
             </div>
           </div>
         )}
@@ -49,10 +51,12 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
 function GameCard({ game, navigate }: { game: Game; navigate: NavigateFn }) {
   if (!game.available) {
     return (
-      <div className="aspect-square rounded-3xl bg-[#1b1c18] border border-[#2d3028] flex flex-col items-center justify-center text-stone-500">
-        <Lock className="w-8 h-8 mb-2" />
-        <p className="text-sm font-medium text-stone-400">{game.name}</p>
-        <p className="text-xs mt-1">準備中</p>
+      <div className="min-h-36 rounded-2xl bg-[#1b1c18] border border-[#2d3028] flex items-center px-5 text-stone-500">
+        <Lock className="w-8 h-8 mr-4 shrink-0" />
+        <div>
+          <p className="text-sm font-medium text-stone-400">{game.name}</p>
+          <p className="text-xs mt-1">準備中</p>
+        </div>
       </div>
     );
   }
@@ -60,13 +64,15 @@ function GameCard({ game, navigate }: { game: Game; navigate: NavigateFn }) {
   return (
     <button
       onClick={() => navigate({ name: 'worldList', gameId: game.id, gameName: game.name })}
-      className="aspect-square rounded-3xl bg-[#1b1c18] border border-emerald-800/80 flex flex-col items-center justify-center text-stone-100 shadow-lg shadow-black/20 hover:border-emerald-600 hover:bg-[#20231c] hover:scale-[1.02] active:scale-[0.98] transition-all"
+      className="min-h-36 rounded-2xl bg-[#1b1c18] border border-emerald-800/80 flex items-center px-5 text-left text-stone-100 shadow-lg shadow-black/20 hover:border-emerald-600 hover:bg-[#20231c] active:scale-[0.99] transition-all"
     >
-      <div className="w-14 h-14 rounded-2xl bg-[#1f3a20] flex items-center justify-center mb-3">
+      <div className="w-14 h-14 shrink-0 rounded-xl bg-[#1f3a20] flex items-center justify-center mr-4">
         <Box className="w-9 h-9 text-emerald-400" />
       </div>
-      <p className="text-lg font-bold">{game.name}</p>
-      <p className="text-xs mt-1 text-emerald-400">タップして開始</p>
+      <div>
+        <p className="text-lg font-bold">{game.name}</p>
+        <p className="text-xs mt-1 text-emerald-400">タップして開始</p>
+      </div>
     </button>
   );
 }
