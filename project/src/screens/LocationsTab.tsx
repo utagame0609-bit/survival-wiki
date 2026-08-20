@@ -131,7 +131,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
                         <div className="grid grid-cols-3 gap-3 text-center font-mono">
                           <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
                           <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Y</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.y}</div></div>
-                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
+                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
                         </div>
                       </div>
                     </div>
