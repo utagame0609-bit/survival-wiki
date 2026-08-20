@@ -76,11 +76,11 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
 
   if (mode.type === 'create' || mode.type === 'edit') {
     return (
-      <div className="min-h-full bg-stone-50">
-        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-stone-200">
+      <div className="min-h-full bg-[#11120f] text-stone-100">
+        <div className="sticky top-0 z-20 bg-[#171813]/90 backdrop-blur-md border-b border-[#2d3028]">
           <div className="flex items-center justify-between px-4 h-12 max-w-3xl mx-auto">
-            <button onClick={() => setMode({ type: 'list' })} className="text-sm text-stone-600 hover:text-stone-900">キャンセル</button>
-            <span className="text-sm font-medium text-stone-900">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</span>
+            <button onClick={() => setMode({ type: 'list' })} className="text-sm text-stone-400 hover:text-stone-100">キャンセル</button>
+            <span className="text-sm font-medium text-stone-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</span>
             <div className="w-16" />
           </div>
         </div>
@@ -98,9 +98,9 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   }
 
   return (
-    <div className="px-4 py-4 max-w-3xl mx-auto">
+    <div className="min-h-full bg-[#11120f] text-stone-100 px-4 py-4 max-w-3xl mx-auto">
       <div className="mb-4">
-        <button onClick={() => setMode({ type: 'create' })} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all">
+        <button onClick={() => setMode({ type: 'create' })} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-medium shadow-md shadow-emerald-950/30 hover:bg-emerald-600 active:scale-[0.99] transition-all">
           <Plus className="w-5 h-5" /> ロケーションを追加
         </button>
       </div>
@@ -121,18 +121,18 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
 function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: LocationWithPhotos; isExpanded: boolean; onToggle: () => void; onEdit: () => void; onDelete: () => void }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
   return (
-    <div className="rounded-2xl bg-white border border-stone-200 shadow-sm overflow-hidden">
-      <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform">
-        <div className="flex gap-3 p-3">
-          {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" /> : <div className="w-20 h-20 rounded-xl bg-stone-100 flex items-center justify-center flex-shrink-0"><MapPin className="w-8 h-8 text-stone-300" /></div>}
+    <div className="rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
+      <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]">
+        <div className="flex gap-3 p-3.5">
+          {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" /> : <div className="w-20 h-20 rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-8 h-8 text-stone-600" /></div>}
           <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" /><h3 className="font-semibold text-stone-900 truncate">{loc.name}</h3></div>
-            <p className="text-sm text-stone-500 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
+            <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div>
+            <p className="text-sm text-stone-400 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
           </div>
-          <ChevronDown className={`w-5 h-5 text-stone-400 self-center flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-5 h-5 text-stone-500 self-center flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </div>
       </button>
-      {isExpanded && <div className="border-t border-stone-100 px-4 py-3"><div className="flex gap-3"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-stone-800 text-white font-medium hover:bg-stone-900 active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white text-red-500 border border-red-200 font-medium hover:bg-red-50 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" /> 削除</button></div></div>}
+      {isExpanded && <div className="border-t border-[#2d3028] px-3.5 py-3 bg-[#171813]"><div className="flex gap-3"><button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-stone-100 text-stone-900 font-medium hover:bg-white active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /> 編集</button><button onClick={onDelete} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" /> 削除</button></div></div>}
     </div>
   );
 }
