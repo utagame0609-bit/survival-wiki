@@ -67,7 +67,7 @@ export function WorldListScreen({
       <div className="px-4 py-4 max-w-3xl mx-auto">
         <button
           onClick={() => navigate({ name: 'worldCreate', gameId, gameName })}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-700 text-white font-medium shadow-sm hover:bg-emerald-600 active:scale-[0.98] transition-all"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-700 text-white font-medium shadow-md shadow-emerald-950/30 hover:bg-emerald-600 active:scale-[0.99] transition-all"
         >
           <Plus className="w-5 h-5" />
           新規ワールドを作成
