@@ -4,6 +4,7 @@ import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { WIKI_STYLES, generateWiki } from '@/lib/wiki';
+import { supabase } from '@/lib/supabase';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
@@ -63,6 +64,20 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
     finally { setResetting(false); }
   };
 
+  const handleAiTest = async () => {
+    setError('');
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke('wiki-ai-test', {
+        body: { message: 'wiki-ai-connectivity-test' },
+      });
+      if (invokeError) throw invokeError;
+      if (!data?.ok) throw new Error('AIテストFunctionから正常な応答がありません。');
+      window.alert(`AI接続テスト成功: ${data.message}`);
+    } catch (e) {
+      setError(`AI接続テスト失敗: ${(e as Error).message}`);
+    }
+  };
+
   const styleConfig = style ? WIKI_STYLES.find((s) => s.id === style) : null;
   const hasArticle = article !== null;
   const cooldownActive = cooldownUntil > Date.now();
@@ -76,12 +91,12 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
         {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
       </div>}
       {error && <ErrorBanner message={error} />}
-      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} locationCount={locations.length} isGeneratedWikipedia={isGeneratedWikipedia} />}
+      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} onAiTest={handleAiTest} locationCount={locations.length} isGeneratedWikipedia={isGeneratedWikipedia} />}
     </div>
   );
 }
 
-function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, locationCount, isGeneratedWikipedia }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; locationCount: number; isGeneratedWikipedia: boolean }) {
+function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, onAiTest, locationCount, isGeneratedWikipedia }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; onAiTest: () => void; locationCount: number; isGeneratedWikipedia: boolean }) {
   const isWikipedia = style === 'wikipedia'; const isScp = style === 'scp'; const isAncient = style === 'ancient';
   const pageClass = isWikipedia ? 'bg-white text-stone-800 border-stone-300' : isScp ? 'bg-stone-100 text-stone-900 border-stone-700' : isAncient ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]' : '';
   const headerClass = isWikipedia ? 'bg-stone-50 border-stone-200 text-stone-700' : isScp ? 'bg-stone-200 border-stone-500 text-stone-900' : isAncient ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]' : '';
@@ -92,6 +107,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
       {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
     </button>
     <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
+    {style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}
   </div>;
 
   if (style === null) return <div>{actionButtons}<EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" /></div>;
