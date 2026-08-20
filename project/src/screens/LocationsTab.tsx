@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil, ChevronDown } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -123,13 +123,12 @@ function LocationCard({ loc, isExpanded, onToggle, onEdit, onDelete }: { loc: Lo
   return (
     <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
       <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]">
-        <div className="flex gap-3 p-3">
+        <div className="flex gap-3 p-3 pr-14">
           {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-[72px] h-[72px] rounded-lg object-cover flex-shrink-0" /> : <div className="w-[72px] h-[72px] rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-7 h-7 text-stone-600" /></div>}
-          <div className="flex-1 min-w-0 flex flex-col justify-center pr-12">
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
             <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div>
             <p className="text-sm text-stone-400 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
           </div>
-          <ChevronDown className={`w-5 h-5 text-stone-500 self-center flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </div>
       </button>
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity md:flex hidden">
