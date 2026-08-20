@@ -9,7 +9,7 @@ export type WikiStyle = {
 export const WIKI_STYLES: WikiStyle[] = [
   { id: 'wikipedia', name: 'Wikipedia風', description: '百科事典風の客観的な記述' },
   { id: 'scp', name: 'SCP財団風', description: '機密文書風の冷徹な報告書' },
-  { id: 'psycho', name: 'サイコ研究員風', description: '狂気をはらんだ研究記録' },
+  { id: 'ancient', name: '絶望古文書風', description: '滅びゆく世界の古文書風の記録' },
 ];
 
 export type WikiGenerationInput = {
@@ -43,8 +43,8 @@ export const placeholderProvider: WikiProvider = {
     const styleHeader =
       style === 'scp'
         ? '【SCP財団 内部記録】'
-        : style === 'psycho'
-          ? '【研究記録・極秘】'
+        : style === 'ancient'
+          ? '【絶望古文書・記録】'
           : '【百科事典記事】';
 
     const lines: string[] = [];
