@@ -139,6 +139,15 @@ export async function fetchLocations(worldId: string): Promise<LocationWithPhoto
 
   const locations = (data ?? []) as (Location & { location_photos: LocationPhoto[] })[];
 
+  console.debug('[Survival Wiki] fetched location photos', locations.map((location) => ({
+    location: location.name,
+    photos: (location.location_photos ?? []).map((photo) => ({
+      id: photo.id,
+      path: photo.storage_path,
+      isMain: photo.is_main,
+    })),
+  })));
+
   // Fetch members per location via location_members join table
   const { data: lmData, error: lmErr } = await supabase
     .from('location_members')
