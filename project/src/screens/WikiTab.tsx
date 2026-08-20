@@ -91,7 +91,7 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   const cooldownActive = cooldownUntil > Date.now();
 
   return (
-    <div className={`w-full ${style === 'wikipedia' ? 'px-0 py-0' : 'px-4 py-4 max-w-3xl mx-auto'}`}>
+    <div className="w-full px-4 py-4 max-w-3xl mx-auto">
       <div className="mb-4">
         <p className="text-sm font-medium text-stone-700 mb-2">スタイル</p>
         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -183,7 +183,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
 
 function WikipediaPreviewSkeleton({ worldName }: { worldName: string }) {
   return (
-    <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8 w-full">
+    <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8">
       <div className="border-b border-stone-400 pb-2">
         <h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1>
       </div>
