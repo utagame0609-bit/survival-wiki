@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus, MapPin, Trash2, Pencil, ChevronDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
@@ -17,10 +17,24 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const loadRequestRef = useRef(0);
 
   const load = () => {
+    const requestId = ++loadRequestRef.current;
     setLoading(true);
-    fetchLocations(world.id).then(setLocations).catch((e) => setError(e.message)).finally(() => setLoading(false));
+    fetchLocations(world.id)
+      .then((nextLocations) => {
+        if (requestId !== loadRequestRef.current) return;
+        setLocations(nextLocations);
+      })
+      .catch((e) => {
+        if (requestId !== loadRequestRef.current) return;
+        setError(e.message);
+      })
+      .finally(() => {
+        if (requestId !== loadRequestRef.current) return;
+        setLoading(false);
+      });
   };
 
   useEffect(() => { load(); }, [world.id, reloadKey]);
