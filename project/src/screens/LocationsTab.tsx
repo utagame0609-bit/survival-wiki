@@ -10,7 +10,7 @@ type Mode =
   | { type: 'create' }
   | { type: 'edit'; location: LocationWithPhotos };
 
-export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithMembers; reloadKey: number; onReload: () => void }) {
+export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpenLocationHandled }: { world: WorldWithMembers; reloadKey: number; onReload: () => void; openLocationId?: string | null; onOpenLocationHandled?: () => void }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,6 +35,14 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
   };
 
   useEffect(() => { load(); }, [world.id, reloadKey]);
+
+  useEffect(() => {
+    if (!openLocationId || loading) return;
+    const location = locations.find((loc) => loc.id === openLocationId);
+    if (!location) return;
+    setSelectedLocation(location);
+    onOpenLocationHandled?.();
+  }, [openLocationId, loading, locations, onOpenLocationHandled]);
 
   const handleSave = async (input: { name: string; x: number; y: number; z: number; detail_memo: string; created_at: string; member_ids: string[] }): Promise<string> => {
     setSaving(true);
@@ -79,9 +87,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
     setMode({ type: 'list' });
   };
 
-  const closeLocationDetail = () => {
-    setSelectedLocation(null);
-  };
+  const closeLocationDetail = () => setSelectedLocation(null);
 
   const handleDetailEdit = () => {
     if (!selectedLocation) return;
@@ -100,13 +106,7 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ロケーションを読み込み中" />}
       {!loading && locations.length === 0 && <EmptyState message="ロケーションがありません。追加ボタンから記録を始めよう。" />}
-      {!loading && locations.length > 0 && (
-        <div className="space-y-2.5">
-          {locations.map((loc) => (
-            <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />
-          ))}
-        </div>
-      )}
+      {!loading && locations.length > 0 && <div className="space-y-2.5">{locations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div>}
 
       {selectedLocation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
@@ -114,80 +114,43 @@ export function LocationsTab({ world, reloadKey, onReload }: { world: WorldWithM
           <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]">
               <h2 className="text-sm sm:text-base font-semibold text-stone-100">ロケーション</h2>
-              <button onClick={closeLocationDetail} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={closeLocationDetail} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100"><X className="w-5 h-5" /></button>
             </div>
             <div className="overflow-y-auto overscroll-contain">
               {(() => {
                 const mainPhoto = selectedLocation.photos.find((p) => p.is_main);
-                return (
-                  <div className="p-4 sm:p-5 space-y-4">
-                    {mainPhoto ? <div className="group w-full h-56 sm:h-72 rounded-xl overflow-hidden bg-[#24271f]"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-110" /></div> : <div className="w-full h-56 sm:h-72 rounded-xl bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
-                    <div>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-stone-100 break-words">{selectedLocation.name}</h3>
-                      <div className="mt-4 rounded-xl bg-[#20221d] border border-[#34372f] p-4 sm:p-5">
-                        <div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div>
-                        <div className="grid grid-cols-3 gap-3 text-center font-mono">
-                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
-                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Y</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.y}</div></div>
-                          <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-1">
-                      <button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button>
-                      <button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button>
-                    </div>
+                return <div className="p-4 sm:p-5 space-y-4">
+                  {mainPhoto ? <div className="group w-full h-56 sm:h-72 rounded-xl overflow-hidden bg-[#24271f]"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-110" /></div> : <div className="w-full h-56 sm:h-72 rounded-xl bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
+                  <div><h3 className="text-2xl sm:text-3xl font-bold text-stone-100 break-words">{selectedLocation.name}</h3>
+                    <div className="mt-4 rounded-xl bg-[#20221d] border border-[#34372f] p-4 sm:p-5"><div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div><div className="grid grid-cols-3 gap-3 text-center font-mono">
+                      <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
+                      <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Y</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.y}</div></div>
+                      <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
+                    </div></div>
                   </div>
-                );
+                  <div className="flex gap-3 pt-1"><button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button><button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div>
+                </div>;
               })()}
             </div>
           </div>
         </div>
       )}
 
-      {mode.type !== 'list' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
-          <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeModal} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]">
-              <h2 className="text-sm sm:text-base font-semibold text-stone-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2>
-              <button onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100 disabled:opacity-40">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="overflow-y-auto overscroll-contain">
-              <LocationForm
-                worldId={world.id}
-                members={world.members}
-                editing={mode.type === 'edit' ? mode.location : null}
-                onSave={handleSave}
-                onComplete={handleComplete}
-                onCancel={closeModal}
-                saving={saving}
-              />
-            </div>
-          </div>
+      {mode.type !== 'list' && <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+        <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeModal} />
+        <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
+          <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]"><h2 className="text-sm sm:text-base font-semibold text-stone-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2><button onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100 disabled:opacity-40"><X className="w-5 h-5" /></button></div>
+          <div className="overflow-y-auto overscroll-contain"><LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} /></div>
         </div>
-      )}
+      </div>}
     </div>
   );
 }
 
 function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: () => void }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
-  return (
-    <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden">
-      <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]">
-        <div className="flex gap-3 p-3 pr-16">
-          {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-[72px] h-[72px] rounded-lg object-cover flex-shrink-0" /> : <div className="w-[72px] h-[72px] rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-7 h-7 text-stone-600" /></div>}
-          <div className="flex-1 min-w-0 flex flex-col justify-center">
-            <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div>
-            <p className="text-sm text-stone-400 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
-          </div>
-        </div>
-      </button>
-    </div>
-  );
+  return <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden"><button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]"><div className="flex gap-3 p-3 pr-16">
+    {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-[72px] h-[72px] rounded-lg object-cover flex-shrink-0" /> : <div className="w-[72px] h-[72px] rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-7 h-7 text-stone-600" /></div>}
+    <div className="flex-1 min-w-0 flex flex-col justify-center"><div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div><p className="text-sm text-stone-400 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div>
+  </div></button></div>;
 }
