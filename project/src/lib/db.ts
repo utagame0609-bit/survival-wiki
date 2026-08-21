@@ -122,6 +122,30 @@ export async function updateWorld(
 }
 
 export async function deleteWorld(id: string): Promise<void> {
+  // A world deletion must also remove every photo belonging to its locations
+  // from Storage. Database cascade rules handle the related DB rows.
+  const { data: locations, error: lErr } = await supabase
+    .from('locations')
+    .select('id')
+    .eq('world_id', id);
+  if (lErr) throw lErr;
+
+  const locationIds = (locations ?? []).map((location) => location.id);
+
+  if (locationIds.length > 0) {
+    const { data: photos, error: pErr } = await supabase
+      .from('location_photos')
+      .select('storage_path')
+      .in('location_id', locationIds);
+    if (pErr) throw pErr;
+
+    const paths = (photos ?? []).map((photo) => photo.storage_path);
+    if (paths.length > 0) {
+      const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove(paths);
+      if (storageErr) throw storageErr;
+    }
+  }
+
   const { error } = await supabase.from('worlds').delete().eq('id', id);
   if (error) throw error;
 }
@@ -258,7 +282,8 @@ export async function deleteLocation(id: string): Promise<void> {
 
   if (photos && photos.length > 0) {
     const paths = photos.map((p) => p.storage_path);
-    await supabase.storage.from(PHOTOS_BUCKET).remove(paths);
+    const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove(paths);
+    if (storageErr) throw storageErr;
   }
 
   const { error } = await supabase.from('locations').delete().eq('id', id);
@@ -336,7 +361,8 @@ export async function uploadPhoto(
 }
 
 export async function deletePhoto(photoId: string, storagePath: string): Promise<void> {
-  await supabase.storage.from(PHOTOS_BUCKET).remove([storagePath]);
+  const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove([storagePath]);
+  if (storageErr) throw storageErr;
   const { error } = await supabase.from('location_photos').delete().eq('id', photoId);
   if (error) throw error;
 }
