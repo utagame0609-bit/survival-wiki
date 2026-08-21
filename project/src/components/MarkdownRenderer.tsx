@@ -70,7 +70,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
     }
     const header = splitTableRow(tableLines[0]);
     const bodyLines = tableLines.slice(2);
-    blocks.push(<div key={`table-${blocks.length}`} className="my-5 overflow-x-auto border border-[#a2a9b1]"><table className="w-full border-collapse text-left text-sm"><thead className="bg-[#eaecf0]"><tr>{header.map((cell, index) => <th key={index} className="border border-[#c8ccd1] px-3 py-2 font-semibold">{inlineMarkdown(cell, locationLinks)}</th>)}</tr></thead><tbody>{bodyLines.map((line, rowIndex) => { const cells = splitTableRow(line); return <tr key={rowIndex}>{header.map((_, cellIndex) => <td key={cellIndex} className="border border-[#c8ccd1] px-3 py-2 align-top">{inlineMarkdown(cells[cellIndex] ?? '', locationLinks)}</td>); })}</tbody></table></div>);
+    blocks.push(<div key={`table-${blocks.length}`} className="my-5 overflow-x-auto border border-[#a2a9b1]"><table className="w-full border-collapse text-left text-sm"><thead className="bg-[#eaecf0]"><tr>{header.map((cell, index) => <th key={index} className="border border-[#c8ccd1] px-3 py-2 font-semibold">{inlineMarkdown(cell, locationLinks)}</th>)}</tr></thead><tbody>{bodyLines.map((line, rowIndex) => { const cells = splitTableRow(line); return <tr key={rowIndex}>{header.map((_, cellIndex) => <td key={cellIndex} className="border border-[#c8ccd1] px-3 py-2 align-top">{inlineMarkdown(cells[cellIndex] ?? '', locationLinks)}</td>)}</tr>; })}</tbody></table></div>);
     tableLines = [];
   };
 
