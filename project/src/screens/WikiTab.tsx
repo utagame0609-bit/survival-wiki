@@ -13,11 +13,9 @@ type WikiStyleId = string;
 
 function addWikiPhotoMarkers(content: string, photos: { storage_path: string }[]) {
   if (!content || photos.length === 0) return content;
-
   const blocks = content.replace(/\r\n/g, '\n').split(/\n\s*\n/);
   const maxInsertions = Math.min(photos.length, Math.max(0, blocks.length - 1));
   if (maxInsertions === 0) return content;
-
   const positions: number[] = [];
   if (maxInsertions === blocks.length - 1) {
     for (let index = 1; index < blocks.length; index += 1) positions.push(index);
@@ -33,13 +31,11 @@ function addWikiPhotoMarkers(content: string, photos: { storage_path: string }[]
       previous = position;
     }
   }
-
   const insertions = positions.map((position, index) => ({ position, photo: photos[index] }));
   for (let index = insertions.length - 1; index >= 0; index -= 1) {
     const { position, photo } = insertions[index];
     blocks.splice(position, 0, `<!--WIKI_PHOTO:${getPhotoUrl(photo.storage_path)}-->`);
   }
-
   return blocks.join('\n\n');
 }
 
@@ -125,9 +121,9 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const pageClass = isWikipedia ? 'bg-white text-stone-800 border-stone-300' : isScp ? 'bg-stone-100 text-stone-900 border-stone-700' : isAncient ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]' : '';
   const headerClass = isWikipedia ? 'bg-stone-50 border-stone-200 text-stone-700' : isScp ? 'bg-stone-200 border-stone-500 text-stone-900' : isAncient ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]' : '';
   const articleClass = isWikipedia ? 'bg-white border-stone-200 text-stone-800' : isScp ? 'bg-[#eeeeee] border-stone-500 text-stone-900' : isAncient ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]' : 'bg-white border-stone-200 text-stone-800';
-  const primaryPhoto = locations[0]?.photos.find((photo) => photo.is_main) ?? locations[0]?.photos[0] ?? null;
-  const additionalPhotos = locations
-    .flatMap((location) => location.photos)
+  const primaryLocation = locations[0] ?? null;
+  const primaryPhoto = primaryLocation?.photos.find((photo) => photo.is_main) ?? primaryLocation?.photos[0] ?? null;
+  const additionalPhotos = (primaryLocation?.photos ?? [])
     .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index)
     .filter((photo) => photo.id !== primaryPhoto?.id && photo.storage_path !== primaryPhoto?.storage_path && !photo.is_main)
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
