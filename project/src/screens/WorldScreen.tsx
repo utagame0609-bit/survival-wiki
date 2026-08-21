@@ -11,22 +11,13 @@ import type { NavigateFn } from '@/components/Navigation';
 
 type Tab = 'locations' | 'timeline' | 'wiki';
 
-export function WorldScreen({
-  worldId,
-  worldName,
-  navigate,
-  goBack,
-}: {
-  worldId: string;
-  worldName: string;
-  navigate: NavigateFn;
-  goBack: () => void;
-}) {
+export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId: string; worldName: string; navigate: NavigateFn; goBack: () => void }) {
   const [world, setWorld] = useState<WorldWithMembers | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('locations');
   const [reloadKey, setReloadKey] = useState(0);
+  const [openLocationId, setOpenLocationId] = useState<string | null>(null);
 
   const reload = () => setReloadKey((k) => k + 1);
 
@@ -36,6 +27,11 @@ export function WorldScreen({
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [worldId, reloadKey]);
+
+  const handleOpenLocation = (locationId: string) => {
+    setOpenLocationId(locationId);
+    setTab('locations');
+  };
 
   const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
     { id: 'locations', label: 'ロケーション', icon: MapPin },
@@ -54,27 +50,12 @@ export function WorldScreen({
             <div className="flex max-w-3xl mx-auto h-12">
               {tabs.map((t) => {
                 const Icon = t.icon;
-                const label =
-                  t.id === 'locations'
-                    ? 'ロケーション'
-                    : t.id === 'timeline'
-                      ? 'タイムライン'
-                      : 'Wiki';
+                const label = t.id === 'locations' ? 'ロケーション' : t.id === 'timeline' ? 'タイムライン' : 'Wiki';
                 return (
-                  <button
-                    key={t.id}
-                    onClick={() => setTab(t.id)}
-                    className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${
-                      tab === t.id
-                        ? 'text-emerald-400'
-                        : 'text-stone-500 hover:text-stone-300'
-                    }`}
-                  >
+                  <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${tab === t.id ? 'text-emerald-400' : 'text-stone-500 hover:text-stone-300'}`}>
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     <span>{label}</span>
-                    {tab === t.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500" />
-                    )}
+                    {tab === t.id && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500" />}
                   </button>
                 );
               })}
@@ -82,24 +63,12 @@ export function WorldScreen({
           </div>
 
           <div className="flex-1">
-            {tab === 'locations' && (
-              <LocationsTab world={world} reloadKey={reloadKey} onReload={reload} />
-            )}
+            {tab === 'locations' && <LocationsTab world={world} reloadKey={reloadKey} onReload={reload} openLocationId={openLocationId} onOpenLocationHandled={() => setOpenLocationId(null)} />}
             {tab === 'timeline' && <TimelineTab world={world} reloadKey={reloadKey} />}
-            {tab === 'wiki' && <WikiTab world={world} reloadKey={reloadKey} />}
+            {tab === 'wiki' && <WikiTab world={world} reloadKey={reloadKey} onOpenLocation={handleOpenLocation} />}
           </div>
 
-          <button
-            onClick={() =>
-              navigate({
-                name: 'worldCreate',
-                gameId: world.game_id,
-                gameName: '',
-                worldId: world.id,
-              })
-            }
-            className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all"
-          >
+          <button onClick={() => navigate({ name: 'worldCreate', gameId: world.game_id, gameName: '', worldId: world.id })} className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all">
             <Settings className="w-5 h-5" />
           </button>
         </>
