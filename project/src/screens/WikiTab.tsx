@@ -11,6 +11,38 @@ import { supabase } from '@/lib/supabase';
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
 
+function addWikiPhotoMarkers(content: string, photos: { storage_path: string }[]) {
+  if (!content || photos.length === 0) return content;
+
+  const blocks = content.replace(/\r\n/g, '\n').split(/\n\s*\n/);
+  const maxInsertions = Math.min(photos.length, Math.max(0, blocks.length - 1));
+  if (maxInsertions === 0) return content;
+
+  const positions: number[] = [];
+  if (maxInsertions === blocks.length - 1) {
+    for (let index = 1; index < blocks.length; index += 1) positions.push(index);
+  } else {
+    const available = blocks.length - 1;
+    let previous = 0;
+    for (let index = 0; index < maxInsertions; index += 1) {
+      let position = Math.floor(((index + 1) * available) / (maxInsertions + 1));
+      position = Math.max(1, position);
+      if (position <= previous) position = previous + 1;
+      position = Math.min(available, position);
+      positions.push(position);
+      previous = position;
+    }
+  }
+
+  const insertions = positions.map((position, index) => ({ position, photo: photos[index] }));
+  for (let index = insertions.length - 1; index >= 0; index -= 1) {
+    const { position, photo } = insertions[index];
+    blocks.splice(position, 0, `<!--WIKI_PHOTO:${getPhotoUrl(photo.storage_path)}-->`);
+  }
+
+  return blocks.join('\n\n');
+}
+
 export function WikiTab({ world, reloadKey, onOpenLocation }: { world: WorldWithMembers; reloadKey: number; onOpenLocation?: (locationId: string) => void }) {
   const [style, setStyle] = useState<WikiStyleId | null>(null);
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
@@ -99,13 +131,14 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
     .filter((photo) => !photo.is_main)
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
     .slice(0, 4);
+  const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
 
   const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
 
   if (style === null) return <div>{actionButtons}<EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" /></div>;
 
-  if (isGeneratedWikipedia) return <div className="min-h-screen bg-white text-[#202122]">{actionButtons}<article className="w-full bg-white px-4 py-6 sm:px-8 sm:py-8"><div className="mx-auto w-full max-w-6xl"><div className="mt-2 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8"><div className="min-w-0"><MarkdownRenderer content={article ?? ''} locationLinks={locationLinks} /></div><aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit text-sm">{mainPhoto && <img src={getPhotoUrl(mainPhoto.storage_path)} alt="代表写真" className="w-full aspect-[4/3] object-cover border border-[#c8ccd1] mb-3" />}{additionalPhotos.length > 0 && <div className={`grid ${additionalPhotos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2 ${mainPhoto ? 'mt-1' : ''} mb-3`}>{additionalPhotos.map((photo) => <img key={photo.id} src={getPhotoUrl(photo.storage_path)} alt="記録写真" className="w-full aspect-[4/3] object-cover border border-[#c8ccd1]" />)}</div>}<div className="border-b border-[#c8ccd1] pb-2 font-semibold text-base">基本情報</div><div className="mt-3 divide-y divide-[#c8ccd1]"><div className="py-2"><span className="font-semibold">名称</span><div className="mt-1">{world.name}</div></div><div className="py-2"><span className="font-semibold">プレイヤー</span><div className="mt-1">{world.player ?? '不明'}</div></div><div className="py-2"><span className="font-semibold">記録地点</span><div className="mt-1">{locationCount}</div></div><div className="py-2"><span className="font-semibold">参加メンバー</span><div className="mt-1">{world.members.length}</div></div><div className="py-2"><span className="font-semibold">記録開始</span><div className="mt-1">{new Date(world.created_at).toLocaleDateString('ja-JP')}</div></div></div>{locations.length > 0 && <div className="mt-4 border-t border-[#c8ccd1] pt-3"><div className="font-semibold text-base mb-2">関連ロケーション</div><div className="space-y-1.5">{locations.map((location) => <button type="button" key={location.id} onClick={() => onOpenLocation?.(location.id)} className="w-full text-left py-1.5 border-b border-[#eaecf0] last:border-b-0 hover:bg-[#eaecf0] rounded-sm px-1 transition-colors"><div className="font-medium text-[#36c]">{location.name}</div><div className="text-xs text-[#54595d] font-mono">X {location.x} / Y {location.y} / Z {location.z}</div></button>)}</div></div>}</aside></div></div></article></div>;
+  if (isGeneratedWikipedia) return <div className="min-h-screen bg-white text-[#202122]">{actionButtons}<article className="w-full bg-white px-4 py-6 sm:px-8 sm:py-8"><div className="mx-auto w-full max-w-6xl"><div className="mt-2 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8"><div className="min-w-0"><MarkdownRenderer content={articleWithPhotoMarkers} locationLinks={locationLinks} /></div><aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit text-sm">{mainPhoto && <img src={getPhotoUrl(mainPhoto.storage_path)} alt="代表写真" className="w-full aspect-[4/3] object-cover border border-[#c8ccd1] mb-3" />}<div className="border-b border-[#c8ccd1] pb-2 font-semibold text-base">基本情報</div><div className="mt-3 divide-y divide-[#c8ccd1]"><div className="py-2"><span className="font-semibold">名称</span><div className="mt-1">{world.name}</div></div><div className="py-2"><span className="font-semibold">プレイヤー</span><div className="mt-1">{world.player ?? '不明'}</div></div><div className="py-2"><span className="font-semibold">記録地点</span><div className="mt-1">{locationCount}</div></div><div className="py-2"><span className="font-semibold">参加メンバー</span><div className="mt-1">{world.members.length}</div></div><div className="py-2"><span className="font-semibold">記録開始</span><div className="mt-1">{new Date(world.created_at).toLocaleDateString('ja-JP')}</div></div></div>{locations.length > 0 && <div className="mt-4 border-t border-[#c8ccd1] pt-3"><div className="font-semibold text-base mb-2">関連ロケーション</div><div className="space-y-1.5">{locations.map((location) => <button type="button" key={location.id} onClick={() => onOpenLocation?.(location.id)} className="w-full text-left py-1.5 border-b border-[#eaecf0] last:border-b-0 hover:bg-[#eaecf0] rounded-sm px-1 transition-colors"><div className="font-medium text-[#36c]">{location.name}</div><div className="text-xs text-[#54595d] font-mono">X {location.x} / Y {location.y} / Z {location.z}</div></button>)}</div></div>}</aside></div></div></article></div>;
 
   return <div className={`border shadow-sm overflow-hidden transition-colors duration-300 ${pageClass}`}><div className={`px-5 py-4 border-b ${headerClass}`}><div className="flex items-center gap-2"><BookOpen className="w-5 h-5 opacity-70" /><div><p className="text-sm font-semibold">{isWikipedia ? 'Wikipedia' : isScp ? 'SCP FOUNDATION' : '古文書'}</p><p className="text-xs opacity-60">{isWikipedia ? '百科事典風' : isScp ? '機密記録風' : '絶望的な古文書風'}</p></div></div></div><div className={`px-5 py-6 sm:px-8 sm:py-8 ${articleClass}`}><div className={`border-l-4 pl-5 sm:pl-6 ${isWikipedia ? 'border-stone-300' : isScp ? 'border-stone-700' : 'border-[#8f7654]'}`}>{actionButtons}{locationCount === 0 && !hasArticle && <EmptyState message="ロケーションを記録すると、Wiki記事を生成できます。" />}{hasArticle && article && <article className={`border p-5 sm:p-7 shadow-sm ${articleClass}`}><MarkdownRenderer content={article} locationLinks={locationLinks} className={isAncient ? 'font-serif' : 'font-sans'} /></article>}{!hasArticle && locationCount > 0 && isWikipedia && <WikipediaPreviewSkeleton worldName={world.name} />}</div></div></div>;
 }
