@@ -47,6 +47,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   let paragraph: string[] = [];
   let listItems: string[] = [];
   let tableLines: string[] = [];
+  let photoCount = 0;
 
   const flushParagraph = () => {
     if (paragraph.length === 0) return;
@@ -82,7 +83,21 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
     const photoMatch = trimmed.match(/^<!--WIKI_PHOTO:(.+)-->$/);
     if (photoMatch) {
       flushAll();
-      blocks.push(<figure key={`photo-${index}`} className="my-7 flex justify-center"><img src={photoMatch[1]} alt="記録写真" className="w-full max-w-2xl h-auto border border-[#c8ccd1] object-contain" /></figure>);
+      const layout = photoCount % 4;
+      const figureClass = layout === 1
+        ? 'my-7 flex justify-start'
+        : layout === 2
+          ? 'my-7 flex justify-end'
+          : 'my-7 flex justify-center';
+      const imageClass = layout === 0
+        ? 'w-full max-w-2xl h-auto border border-[#c8ccd1] object-contain'
+        : layout === 1
+          ? 'w-full max-w-xl h-auto border border-[#c8ccd1] object-contain'
+          : layout === 2
+            ? 'w-full max-w-lg h-auto border border-[#c8ccd1] object-contain'
+            : 'w-full max-w-xl h-auto border border-[#c8ccd1] object-contain';
+      blocks.push(<figure key={`photo-${index}`} className={figureClass}><img src={photoMatch[1]} alt="記録写真" className={imageClass} /></figure>);
+      photoCount += 1;
       return;
     }
     if (trimmed.startsWith('|') && trimmed.endsWith('|')) { flushParagraph(); flushList(); tableLines.push(trimmed); return; }
