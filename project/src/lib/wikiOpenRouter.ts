@@ -24,7 +24,7 @@ export const openRouterTestProvider: WikiProvider = {
           ? [
               '紐づく写真:',
               ...location.photos.map((photo, photoIndex) =>
-                `  写真${photoIndex + 1}: ${photo.is_main ? '代表写真' : '追加写真'} / 保存先: ${photo.storage_path}`
+                `  写真${photoIndex + 1}: ${photo.is_main ? '代表写真' : '追加写真'} / 撮影記録日時: ${photo.created_at} / 保存先: ${photo.storage_path}`
               ),
             ]
           : ['紐づく写真: なし']),
