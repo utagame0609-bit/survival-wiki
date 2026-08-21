@@ -1,6 +1,6 @@
 import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './wiki';
 import { getWikiSystemPrompt } from './wiki';
-import { getPhotoUrl, } from './db';
+import { getPhotoUrl } from './db';
 import { supabase } from './supabase';
 
 export const openRouterTestProvider: WikiProvider = {
