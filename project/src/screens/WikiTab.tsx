@@ -118,11 +118,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
     {actionButtons}
     <article className="w-full bg-white px-4 py-6 sm:px-8 sm:py-8">
       <div className="mx-auto w-full max-w-6xl">
-        <header className="border-b border-[#a2a9b1] pb-3">
-          <h1 className="text-[28px] sm:text-[32px] font-normal leading-tight text-[#202122]">{world.name}</h1>
-          <p className="mt-1 text-xs text-[#54595d]">この世界についての記録</p>
-        </header>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
+        <div className="mt-2 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
           <div className="min-w-0"><MarkdownRenderer content={article ?? ''} /></div>
           <aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit"><div className="h-36 bg-[#eaecf0] border border-[#c8ccd1]" /><div className="mt-3 space-y-2 text-sm"><div className="border-b border-[#c8ccd1] pb-1 font-semibold">基本情報</div><div>名称　{world.name}</div><div>記録地点　{locationCount}</div></div></aside>
         </div>
