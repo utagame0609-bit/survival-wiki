@@ -123,12 +123,11 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const articleClass = isWikipedia ? 'bg-white border-stone-200 text-stone-800' : isScp ? 'bg-[#eeeeee] border-stone-500 text-stone-900' : isAncient ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]' : 'bg-white border-stone-200 text-stone-800';
   const allPhotos = locations
     .flatMap((location) => location.photos)
-    .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index);
-  const mainPhoto = allPhotos.find((photo) => photo.is_main) ?? allPhotos[0] ?? null;
-  const additionalPhotos = allPhotos
-    .filter((photo) => photo.id !== mainPhoto?.id && photo.storage_path !== mainPhoto?.storage_path && !photo.is_main)
+    .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index)
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .slice(0, 4);
+    .slice(0, 5);
+  const mainPhoto = allPhotos[0] ?? null;
+  const additionalPhotos = allPhotos.slice(1, 5);
   const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
 
