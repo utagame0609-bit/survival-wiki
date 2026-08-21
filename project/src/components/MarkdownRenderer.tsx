@@ -79,6 +79,12 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   lines.forEach((line, index) => {
     const trimmed = line.trim();
     if (!trimmed) { flushAll(); return; }
+    const photoMatch = trimmed.match(/^<!--WIKI_PHOTO:(.+)-->$/);
+    if (photoMatch) {
+      flushAll();
+      blocks.push(<figure key={`photo-${index}`} className="my-7 flex justify-center"><img src={photoMatch[1]} alt="記録写真" className="w-full max-w-2xl h-auto border border-[#c8ccd1] object-contain" /></figure>);
+      return;
+    }
     if (trimmed.startsWith('|') && trimmed.endsWith('|')) { flushParagraph(); flushList(); tableLines.push(trimmed); return; }
     if (tableLines.length > 0) flushTable();
     if (/^#{1,3}\s+/.test(trimmed)) {
