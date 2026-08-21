@@ -1,11 +1,21 @@
 import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './wiki';
 import { getWikiSystemPrompt } from './wiki';
-import { getPhotoUrl } from './db';
+import { fetchWikiArticle, getPhotoUrl } from './db';
 import { supabase } from './supabase';
 
 export const openRouterTestProvider: WikiProvider = {
   async generate(input: WikiGenerationInput): Promise<WikiGenerationResult> {
     const { world, locations, style } = input;
+
+    const existingArticle = await fetchWikiArticle(world.id, style);
+    if (existingArticle) {
+      const confirmed = window.confirm(
+        '現在の記事を新しいAI生成結果で置き換えます。\n\n現在の記事は、生成に成功した場合に新しい記事へ置き換わります。\n再生成しますか？'
+      );
+      if (!confirmed) {
+        throw new Error('再生成をキャンセルしました。現在の記事はそのままです。');
+      }
+    }
 
     const message = [
       `ワールド名: ${world.name}`,
