@@ -177,7 +177,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
       flushAll();
       const layout = photoCount % 4;
       const figureClass = layout === 0
-        ? 'my-6 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-80'
+        ? 'my-6 sm:float-left sm:mr-5 sm:mb-3 w-full sm:w-80'
         : layout === 1
           ? 'my-6 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-64'
           : layout === 2
