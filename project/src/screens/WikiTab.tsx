@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle } from '@/lib/db';
+import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { WIKI_STYLES } from '@/lib/wiki';
@@ -93,16 +93,17 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
         {styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}
       </div>}
       {error && <ErrorBanner message={error} />}
-      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} onAiTest={handleAiTest} locationCount={locations.length} isGeneratedWikipedia={isGeneratedWikipedia} />}
+      {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} onAiTest={handleAiTest} locationCount={locations.length} locations={locations} isGeneratedWikipedia={isGeneratedWikipedia} />}
     </div>
   );
 }
 
-function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, onAiTest, locationCount, isGeneratedWikipedia }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; onAiTest: () => void; locationCount: number; isGeneratedWikipedia: boolean }) {
+function WikiContent({ world, style, hasArticle, article, generating, resetting, cooldownActive, onGenerate, onReset, onAiTest, locationCount, locations, isGeneratedWikipedia }: { world: WorldWithMembers; style: string | null; hasArticle: boolean; article: string | null; generating: boolean; resetting: boolean; cooldownActive: boolean; onGenerate: () => void; onReset: () => void; onAiTest: () => void; locationCount: number; locations: LocationWithPhotos[]; isGeneratedWikipedia: boolean }) {
   const isWikipedia = style === 'wikipedia'; const isScp = style === 'scp'; const isAncient = style === 'ancient';
   const pageClass = isWikipedia ? 'bg-white text-stone-800 border-stone-300' : isScp ? 'bg-stone-100 text-stone-900 border-stone-700' : isAncient ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]' : '';
   const headerClass = isWikipedia ? 'bg-stone-50 border-stone-200 text-stone-700' : isScp ? 'bg-stone-200 border-stone-500 text-stone-900' : isAncient ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]' : '';
   const articleClass = isWikipedia ? 'bg-white border-stone-200 text-stone-800' : isScp ? 'bg-[#eeeeee] border-stone-500 text-stone-900' : isAncient ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]' : 'bg-white border-stone-200 text-stone-800';
+  const mainPhoto = locations.flatMap((location) => location.photos).find((photo) => photo.is_main) ?? null;
 
   const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6">
     <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
@@ -121,6 +122,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
         <div className="mt-2 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-8">
           <div className="min-w-0"><MarkdownRenderer content={article ?? ''} /></div>
           <aside className="border border-[#a2a9b1] bg-[#f8f9fa] p-3 h-fit text-sm">
+            {mainPhoto && <img src={getPhotoUrl(mainPhoto.storage_path)} alt="代表写真" className="w-full aspect-[4/3] object-cover border border-[#c8ccd1] mb-3" />}
             <div className="border-b border-[#c8ccd1] pb-2 font-semibold text-base">基本情報</div>
             <div className="mt-3 divide-y divide-[#c8ccd1]">
               <div className="py-2"><span className="font-semibold">名称</span><div className="mt-1">{world.name}</div></div>
