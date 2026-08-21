@@ -128,8 +128,9 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const mainPhoto = locations.flatMap((location) => location.photos).find((photo) => photo.is_main) ?? null;
   const additionalPhotos = locations
     .flatMap((location) => location.photos)
-    .filter((photo) => !photo.is_main)
+    .filter((photo) => !photo.is_main && photo.id !== mainPhoto?.id && photo.storage_path !== mainPhoto?.storage_path)
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index)
     .slice(0, 4);
   const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
