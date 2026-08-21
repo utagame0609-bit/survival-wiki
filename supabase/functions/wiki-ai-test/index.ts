@@ -5,6 +5,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+type RequestBody = {
+  message?: string;
+  imageUrl?: string;
+};
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -17,7 +22,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  let body: { message?: string };
+  let body: RequestBody;
 
   try {
     body = await req.json();
@@ -39,6 +44,21 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  const content = body.imageUrl
+    ? [
+        {
+          type: "text",
+          text: body.message ?? "この画像を確認してください。",
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: body.imageUrl,
+          },
+        },
+      ]
+    : body.message ?? "接続テストです。短く返答してください。";
+
   const openRouterResponse = await fetch(
     "https://openrouter.ai/api/v1/chat/completions",
     {
@@ -52,7 +72,7 @@ Deno.serve(async (req: Request) => {
         messages: [
           {
             role: "user",
-            content: body.message ?? "接続テストです。短く返答してください。",
+            content,
           },
         ],
       }),
