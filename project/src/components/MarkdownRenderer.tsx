@@ -70,7 +70,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
     }
     const header = splitTableRow(tableLines[0]);
     const bodyLines = tableLines.slice(2);
-    blocks.push(<div key={`table-${blocks.length}`} className="my-5 overflow-x-auto border border-[#a2a9b1]"><table className="w-full border-collapse text-left text-sm"><thead className="bg-[#eaecf0]"><tr>{header.map((cell, index) => <th key={index} className="border border-[#c8ccd1] px-3 py-2 font-semibold">{inlineMarkdown(cell, locationLinks)}</th>)}</tr></thead><tbody>{bodyLines.map((line, rowIndex) => { const cells = splitTableRow(line); return <tr key={rowIndex}>{header.map((_, cellIndex) => <td key={cellIndex} className="border border-[#c8ccd1] px-3 py-2 align-top">{inlineMarkdown(cells[cellIndex] ?? '', locationLinks)}</td>)}</tr>; })}</tbody></table></div>);
+    blocks.push(<div key={`table-${blocks.length}`} className="my-5 overflow-x-auto border border-[#a2a9b1]"><table className="w-full border-collapse text-left text-sm"><thead className="bg-[#eaecf0]"><tr>{header.map((cell, index) => <th key={index} className="border border-[#c8ccd1] px-3 py-2 font-semibold">{inlineMarkdown(cell, locationLinks)}</th>)}</tr></thead><tbody>{bodyLines.map((line, rowIndex) => { const cells = splitTableRow(line); return <tr key={rowIndex}>{header.map((_, cellIndex) => <td key={cellIndex} className="border border-[#c8ccd1] px-3 py-2 align-top">{inlineMarkdown(cells[cellIndex] ?? '', locationLinks)}</td>); })}</tbody></table></div>);
     tableLines = [];
   };
 
@@ -85,17 +85,15 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
       flushAll();
       const layout = photoCount % 4;
       const figureClass = layout === 1
-        ? 'my-7 flex justify-start'
+        ? 'my-7 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-64'
         : layout === 2
-          ? 'my-7 flex justify-end'
-          : 'my-7 flex justify-center';
+          ? 'my-7 sm:float-left sm:mr-5 sm:mb-3 w-full sm:w-72'
+          : layout === 3
+            ? 'my-7 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-80'
+            : 'my-7 w-full';
       const imageClass = layout === 0
         ? 'w-full max-w-2xl h-auto border border-[#c8ccd1] object-contain'
-        : layout === 1
-          ? 'w-full max-w-xl h-auto border border-[#c8ccd1] object-contain'
-          : layout === 2
-            ? 'w-full max-w-lg h-auto border border-[#c8ccd1] object-contain'
-            : 'w-full max-w-xl h-auto border border-[#c8ccd1] object-contain';
+        : 'w-full h-auto border border-[#c8ccd1] object-contain';
       blocks.push(<figure key={`photo-${index}`} className={figureClass}><img src={photoMatch[1]} alt="記録写真" className={imageClass} /></figure>);
       photoCount += 1;
       return;
