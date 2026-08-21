@@ -124,7 +124,10 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
             <div className="border-b border-[#c8ccd1] pb-2 font-semibold text-base">基本情報</div>
             <div className="mt-3 divide-y divide-[#c8ccd1]">
               <div className="py-2"><span className="font-semibold">名称</span><div className="mt-1">{world.name}</div></div>
+              <div className="py-2"><span className="font-semibold">プレイヤー</span><div className="mt-1">{world.player ?? '不明'}</div></div>
               <div className="py-2"><span className="font-semibold">記録地点</span><div className="mt-1">{locationCount}</div></div>
+              <div className="py-2"><span className="font-semibold">参加メンバー</span><div className="mt-1">{world.members.length}</div></div>
+              <div className="py-2"><span className="font-semibold">記録開始</span><div className="mt-1">{new Date(world.created_at).toLocaleDateString('ja-JP')}</div></div>
             </div>
           </aside>
         </div>
