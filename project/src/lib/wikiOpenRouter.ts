@@ -11,12 +11,24 @@ export const openRouterTestProvider: WikiProvider = {
       `ワールド概要: ${world.memo || 'なし'}`,
       `プレイヤー: ${world.player || 'なし'}`,
       `ロケーション数: ${locations.length}`,
-      ...locations.map((location) => [
+      '',
+      ...locations.map((location, locationIndex) => [
+        `【ロケーション${locationIndex + 1}】`,
         `ロケーション名: ${location.name}`,
         `座標: ${location.x}, ${location.y}, ${location.z}`,
         `詳細メモ: ${location.detail_memo || 'なし'}`,
         `作成日時: ${location.created_at}`,
         `関連メンバー: ${location.members.map((m) => m.name).join('・') || 'なし'}`,
+        `紐づく写真数: ${location.photos.length}`,
+        ...(location.photos.length > 0
+          ? [
+              '紐づく写真:',
+              ...location.photos.map((photo, photoIndex) =>
+                `  写真${photoIndex + 1}: ${photo.is_main ? '代表写真' : '追加写真'} / 保存先: ${photo.storage_path}`
+              ),
+            ]
+          : ['紐づく写真: なし']),
+        '',
       ].join('\n')),
     ].join('\n');
 
