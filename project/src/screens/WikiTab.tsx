@@ -69,15 +69,11 @@ export function WikiTab({ world, reloadKey }: { world: WorldWithMembers; reloadK
   const handleAiTest = async () => {
     setError('');
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke('wiki-ai-test', {
-        body: { message: 'wiki-ai-connectivity-test' },
-      });
+      const { data, error: invokeError } = await supabase.functions.invoke('wiki-ai-test', { body: { message: 'wiki-ai-connectivity-test' } });
       if (invokeError) throw invokeError;
       if (!data?.ok) throw new Error('AIテストFunctionから正常な応答がありません。');
       window.alert(`AI接続テスト成功: ${data.message}`);
-    } catch (e) {
-      setError(`AI接続テスト失敗: ${(e as Error).message}`);
-    }
+    } catch (e) { setError(`AI接続テスト失敗: ${(e as Error).message}`); }
   };
 
   const styleConfig = style ? WIKI_STYLES.find((s) => s.id === style) : null;
@@ -106,9 +102,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const mainPhoto = locations.flatMap((location) => location.photos).find((photo) => photo.is_main) ?? null;
 
   const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6">
-    <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">
-      {generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}
-    </button>
+    <button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button>
     <button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>
     {style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}
   </div>;
@@ -131,6 +125,12 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
               <div className="py-2"><span className="font-semibold">参加メンバー</span><div className="mt-1">{world.members.length}</div></div>
               <div className="py-2"><span className="font-semibold">記録開始</span><div className="mt-1">{new Date(world.created_at).toLocaleDateString('ja-JP')}</div></div>
             </div>
+            {locations.length > 0 && <div className="mt-4 border-t border-[#c8ccd1] pt-3">
+              <div className="font-semibold text-base mb-2">関連ロケーション</div>
+              <div className="space-y-1.5">
+                {locations.map((location) => <div key={location.id} className="py-1.5 border-b border-[#eaecf0] last:border-b-0"><div className="font-medium">{location.name}</div><div className="text-xs text-[#54595d] font-mono">X {location.x} / Y {location.y} / Z {location.z}</div></div>)}
+              </div>
+            </div>}
           </aside>
         </div>
       </div>
