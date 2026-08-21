@@ -1,5 +1,6 @@
 import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './wiki';
 import { getWikiSystemPrompt } from './wiki';
+import { getPhotoUrl, } from './db';
 import { supabase } from './supabase';
 
 export const openRouterTestProvider: WikiProvider = {
@@ -33,11 +34,16 @@ export const openRouterTestProvider: WikiProvider = {
     ].join('\n');
 
     const systemPrompt = getWikiSystemPrompt(style);
+    const mainPhoto = locations[0]?.photos.find((photo) => photo.is_main) ?? null;
+    const imageUrl = mainPhoto ? getPhotoUrl(mainPhoto.storage_path) : undefined;
 
     const { data, error } = await supabase.functions.invoke('wiki-ai-test', {
       body: {
         systemPrompt,
-        message,
+        message: imageUrl
+          ? `${message}\n\n【画像について】\n添付画像はロケーション1「${locations[0]?.name}」の代表写真です。画像そのものを確認し、写真に写っている内容をロケーション1の情報と関連付けてWiki記事を作成してください。`
+          : message,
+        ...(imageUrl ? { imageUrl } : {}),
       },
     });
 
