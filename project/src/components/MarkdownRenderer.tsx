@@ -5,6 +5,12 @@ type Props = {
   className?: string;
 };
 
+type Heading = {
+  level: 2 | 3;
+  text: string;
+  id: string;
+};
+
 function inlineMarkdown(text: string): ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
   return parts.map((part, index) => {
@@ -30,6 +36,7 @@ function splitTableRow(line: string) {
 export function MarkdownRenderer({ content, className = '' }: Props) {
   const lines = content.replace(/\r\n/g, '\n').split('\n');
   const blocks: ReactNode[] = [];
+  const headings: Heading[] = [];
   let paragraph: string[] = [];
   let listItems: string[] = [];
   let tableLines: string[] = [];
@@ -85,6 +92,7 @@ export function MarkdownRenderer({ content, className = '' }: Props) {
     flushTable();
   };
 
+  let headingCount = 0;
   lines.forEach((line, index) => {
     const trimmed = line.trim();
 
@@ -108,9 +116,14 @@ export function MarkdownRenderer({ content, className = '' }: Props) {
       const level = match[1].length;
       const text = match[2].replace(/^#+\s*/, '');
       const common = 'scroll-mt-4 font-normal text-[#202122]';
-      if (level === 1) blocks.push(<h1 key={`h-${index}`} className={`${common} my-5 border-b border-[#a2a9b1] pb-2 text-2xl sm:text-3xl`}>{inlineMarkdown(text)}</h1>);
-      else if (level === 2) blocks.push(<h2 key={`h-${index}`} className={`${common} mt-8 mb-3 border-b border-[#a2a9b1] pb-1 text-xl sm:text-2xl`}>{inlineMarkdown(text)}</h2>);
-      else blocks.push(<h3 key={`h-${index}`} className={`${common} mt-6 mb-2 text-lg sm:text-xl font-semibold`}>{inlineMarkdown(text)}</h3>);
+      const id = `wiki-heading-${headingCount++}`;
+      if (level === 1) {
+        blocks.push(<h1 key={`h-${index}`} className={`${common} my-5 border-b border-[#a2a9b1] pb-2 text-2xl sm:text-3xl`}>{inlineMarkdown(text)}</h1>);
+      } else {
+        headings.push({ level: level as 2 | 3, text, id });
+        if (level === 2) blocks.push(<h2 id={id} key={`h-${index}`} className={`${common} mt-8 mb-3 border-b border-[#a2a9b1] pb-1 text-xl sm:text-2xl`}>{inlineMarkdown(text)}</h2>);
+        else blocks.push(<h3 id={id} key={`h-${index}`} className={`${common} mt-6 mb-2 text-lg sm:text-xl font-semibold`}>{inlineMarkdown(text)}</h3>);
+      }
       return;
     }
 
@@ -132,5 +145,18 @@ export function MarkdownRenderer({ content, className = '' }: Props) {
 
   flushAll();
 
-  return <div className={`wiki-markdown text-[15px] leading-7 ${className}`}>{blocks}</div>;
+  const tableOfContents = headings.length >= 2 ? (
+    <nav aria-label="目次" className="my-6 border border-[#a2a9b1] bg-[#f8f9fa] p-4 text-sm">
+      <div className="mb-2 font-semibold text-[#202122]">目次</div>
+      <ol className="space-y-1">
+        {headings.map((heading, index) => (
+          <li key={heading.id} className={heading.level === 3 ? 'ml-5' : ''}>
+            <a href={`#${heading.id}`} className="text-[#36c] hover:underline">{index + 1}. {heading.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  ) : null;
+
+  return <div className={`wiki-markdown text-[15px] leading-7 ${className}`}>{tableOfContents}{blocks}</div>;
 }
