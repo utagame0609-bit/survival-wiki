@@ -125,12 +125,13 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const pageClass = isWikipedia ? 'bg-white text-stone-800 border-stone-300' : isScp ? 'bg-stone-100 text-stone-900 border-stone-700' : isAncient ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]' : '';
   const headerClass = isWikipedia ? 'bg-stone-50 border-stone-200 text-stone-700' : isScp ? 'bg-stone-200 border-stone-500 text-stone-900' : isAncient ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]' : '';
   const articleClass = isWikipedia ? 'bg-white border-stone-200 text-stone-800' : isScp ? 'bg-[#eeeeee] border-stone-500 text-stone-900' : isAncient ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]' : 'bg-white border-stone-200 text-stone-800';
-  const mainPhoto = locations.flatMap((location) => location.photos).find((photo) => photo.is_main) ?? null;
-  const additionalPhotos = locations
+  const allPhotos = locations
     .flatMap((location) => location.photos)
-    .filter((photo) => !photo.is_main && photo.id !== mainPhoto?.id && photo.storage_path !== mainPhoto?.storage_path)
+    .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index);
+  const mainPhoto = allPhotos.find((photo) => photo.is_main) ?? allPhotos[0] ?? null;
+  const additionalPhotos = allPhotos
+    .filter((photo) => photo.id !== mainPhoto?.id && photo.storage_path !== mainPhoto?.storage_path)
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index)
     .slice(0, 4);
   const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
@@ -145,5 +146,5 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
 }
 
 function WikipediaPreviewSkeleton({ worldName }: { worldName: string }) {
-  return <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8"><div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal leading-tight">{worldName}</h1></div><div className="mt-5 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6"><div className="space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div><div className="border border-stone-300 bg-stone-50 p-2"><div className="h-28 bg-stone-200" /><div className="mt-3 space-y-2"><div className="h-3 w-full bg-stone-200" /><div className="h-3 w-4/5 bg-stone-200" /><div className="h-3 w-5/6 bg-stone-200" /></div></div></div><div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm"><div className="h-4 w-16 bg-stone-300 mb-3" /><div className="space-y-2"><div className="h-3 w-32 bg-stone-200" /><div className="h-3 w-40 bg-stone-200" /><div className="h-3 w-28 bg-stone-200" /><div className="h-3 w-36 bg-stone-200" /></div></div><div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-40 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-5/6 bg-stone-100" /><div className="h-4 w-3/4 bg-stone-100" /></div><div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-32 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-10/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div></section>;
+  return <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8"><div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal">{worldName}</h1></div><div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-8"><div className="min-w-0 space-y-4"><div className="h-5 bg-stone-100 rounded w-3/4" /><div className="h-5 bg-stone-100 rounded w-full" /><div className="h-5 bg-stone-100 rounded w-5/6" /><div className="h-24 bg-stone-50 rounded border border-stone-200" /></div><aside className="border border-stone-300 bg-stone-50 p-3"><div className="h-40 bg-stone-100 rounded" /><div className="mt-3 h-4 bg-stone-100 rounded w-1/2" /><div className="mt-3 h-4 bg-stone-100 rounded w-2/3" /></aside></div></section>;
 }
