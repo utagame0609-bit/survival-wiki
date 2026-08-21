@@ -24,11 +24,6 @@ function inlineMarkdown(text: string): ReactNode[] {
   });
 }
 
-function isTableSeparator(line: string) {
-  const cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|');
-  return cells.length > 0 && cells.every((cell) => /^\s*:?-{3,}:?\s*$/.test(cell));
-}
-
 function splitTableRow(line: string) {
   return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
 }
@@ -151,7 +146,13 @@ export function MarkdownRenderer({ content, className = '' }: Props) {
       <ol className="space-y-1">
         {headings.map((heading, index) => (
           <li key={heading.id} className={heading.level === 3 ? 'ml-5' : ''}>
-            <a href={`#${heading.id}`} className="text-[#36c] hover:underline">{index + 1}. {heading.text}</a>
+            <button
+              type="button"
+              onClick={() => document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="text-left text-[#36c] hover:underline"
+            >
+              {index + 1}. {heading.text}
+            </button>
           </li>
         ))}
       </ol>
