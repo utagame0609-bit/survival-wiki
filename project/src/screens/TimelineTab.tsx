@@ -25,6 +25,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
+  const [expandedDay, setExpandedDay] = useState(1);
   const [activeIconTop, setActiveIconTop] = useState(0);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -52,83 +53,26 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   useEffect(() => {
     if (groups.length === 0) return;
     setActiveDay((current) => groups.some((group) => group.dayNumber === current) ? current : groups[0].dayNumber);
+    setExpandedDay((current) => groups.some((group) => group.dayNumber === current) ? current : groups[0].dayNumber);
   }, [groups]);
 
   useEffect(() => {
-    if (groups.length === 0) return;
-
-    const updateActiveDay = () => {
-      const timeline = timelineRef.current;
-      if (!timeline) return;
-
-      const viewportAnchor = window.innerHeight * 0.32;
-      const isAtTop = window.scrollY <= 4;
-      const isAtBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8;
-
-      if (isAtTop) {
-        setActiveDay(groups[0].dayNumber);
-        return;
-      }
-
-      if (isAtBottom) {
-        setActiveDay(groups[groups.length - 1].dayNumber);
-        return;
-      }
-
-      let closestDay = groups[0].dayNumber;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      for (const group of groups) {
-        const element = dayRefs.current.get(group.dateKey);
-        if (!element) continue;
-        const distance = Math.abs(element.getBoundingClientRect().top - viewportAnchor);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestDay = group.dayNumber;
-        }
-      }
-      setActiveDay(closestDay);
-    };
-
-    const updateIconPosition = () => {
-      const timeline = timelineRef.current;
-      const element = dayRefs.current.get(groups.find((group) => group.dayNumber === activeDay)?.dateKey ?? '');
-      if (!timeline || !element) return;
-      const timelineRect = timeline.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      setActiveIconTop(elementRect.top - timelineRect.top + 18);
-    };
-
-    const handleViewportChange = () => {
-      updateActiveDay();
-      updateIconPosition();
-    };
-
-    updateActiveDay();
-    updateIconPosition();
-    window.addEventListener('scroll', handleViewportChange, { passive: true });
-    window.addEventListener('resize', handleViewportChange);
-    return () => {
-      window.removeEventListener('scroll', handleViewportChange);
-      window.removeEventListener('resize', handleViewportChange);
-    };
-  }, [groups, activeDay]);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      const timeline = timelineRef.current;
-      const element = dayRefs.current.get(groups.find((group) => group.dayNumber === activeDay)?.dateKey ?? '');
-      if (!timeline || !element) return;
-      const timelineRect = timeline.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      setActiveIconTop(elementRect.top - timelineRect.top + 18);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [groups, activeDay]);
+    const timeline = timelineRef.current;
+    const element = dayRefs.current.get(groups.find((group) => group.dayNumber === activeDay)?.dateKey ?? '');
+    if (!timeline || !element) return;
+    const timelineRect = timeline.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    setActiveIconTop(elementRect.top - timelineRect.top + 18);
+  }, [groups, activeDay, expandedDay]);
 
   const selectSortOrder = (value: SortOrder) => {
     setSortOrder(value);
     setSortMenuOpen(false);
+  };
+
+  const handleDaySelect = (dayNumber: number) => {
+    setActiveDay(dayNumber);
+    setExpandedDay(dayNumber);
   };
 
   const activeMilestone = getMilestone(activeDay);
@@ -172,10 +116,16 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
             </div>
           </div>
           <div className="space-y-10 pl-8">
-            {groups.map((g) => {
-              const isPassed = sortOrder === 'newest' ? g.dayNumber > activeDay : g.dayNumber < activeDay;
-              return <DayChapter key={g.dateKey} group={g} isActive={activeDay === g.dayNumber} isPassed={isPassed} onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }} />;
-            })}
+            {groups.map((g) => (
+              <DayChapter
+                key={g.dateKey}
+                group={g}
+                isActive={activeDay === g.dayNumber}
+                isExpanded={expandedDay === g.dayNumber}
+                onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }}
+                onSelect={() => handleDaySelect(g.dayNumber)}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -183,12 +133,12 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   );
 }
 
-function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isActive: boolean; isPassed: boolean; onRef: (element: HTMLElement | null) => void }) {
+function DayChapter({ group, isActive, isExpanded, onRef, onSelect }: { group: DayGroup; isActive: boolean; isExpanded: boolean; onRef: (element: HTMLElement | null) => void; onSelect: () => void }) {
   const milestone = getMilestone(group.dayNumber);
 
   return (
     <section ref={onRef} className="relative scroll-mt-24">
-      <div className={`relative min-h-[88px] mb-4 flex items-end overflow-hidden border-b pb-3 transition-colors ${isActive ? 'border-emerald-400' : 'border-stone-300'}`}>
+      <button type="button" onClick={onSelect} className={`relative w-full min-h-[88px] mb-4 flex items-end overflow-hidden border-b pb-3 text-left transition-colors ${isActive ? 'border-emerald-400' : 'border-stone-300'}`} aria-expanded={isExpanded}>
         {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.16] [mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)]" /></div>}
         <div className="relative z-10 min-w-0 w-full">
           <div className="flex items-baseline gap-3 flex-wrap">
@@ -203,10 +153,15 @@ function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isA
           </div>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-xs text-stone-500">{group.locations.length}件の記録</p>
+            <ChevronDown className={`w-4 h-4 text-stone-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
           </div>
         </div>
-      </div>
-      <div className="relative"><div className="space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>
+      </button>
+      {isExpanded && (
+        <div className="relative pb-2">
+          <div className="space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div>
+        </div>
+      )}
     </section>
   );
 }
