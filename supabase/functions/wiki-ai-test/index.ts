@@ -10,6 +10,18 @@ type RequestBody = {
   imageUrl?: string;
 };
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -33,60 +45,63 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const apiKey = Deno.env.get("OPENROUTER_API_KEY");
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
 
   if (!apiKey) {
     return new Response(JSON.stringify({
-      error: "OPENROUTER_API_KEY is not configured",
+      error: "GEMINI_API_KEY is not configured",
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  const content = body.imageUrl
-    ? [
-        {
-          type: "text",
-          text: body.message ?? "この画像を確認してください。",
-        },
-        {
-          type: "image_url",
-          image_url: {
-            url: body.imageUrl,
-          },
-        },
-      ]
-    : body.message ?? "接続テストです。短く返答してください。";
+  const parts: Array<Record<string, unknown>> = [
+    {
+      text: body.message ?? "接続テストです。短く返答してください。",
+    },
+  ];
 
-  const openRouterResponse = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
+  if (body.imageUrl) {
+    const imageResponse = await fetch(body.imageUrl);
+    const imageData = await imageResponse.arrayBuffer();
+    const contentType = imageResponse.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+
+    parts.push({
+      inline_data: {
+        mime_type: contentType,
+        data: arrayBufferToBase64(imageData),
+      },
+    });
+  }
+
+  const geminiResponse = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
     {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "x-goog-api-key": apiKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openrouter/free",
-        messages: [
+        contents: [
           {
             role: "user",
-            content,
+            parts,
           },
         ],
       }),
     },
   );
 
-  const data = await openRouterResponse.json();
+  const data = await geminiResponse.json();
 
-  if (!openRouterResponse.ok) {
+  if (!geminiResponse.ok) {
     return new Response(JSON.stringify({
-      error: "OpenRouter request failed",
+      error: "Gemini request failed",
       details: data,
     }), {
-      status: openRouterResponse.status,
+      status: geminiResponse.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -94,7 +109,7 @@ Deno.serve(async (req: Request) => {
   return new Response(
     JSON.stringify({
       ok: true,
-      message: data.choices?.[0]?.message?.content ?? "",
+      message: data.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text ?? "").join("") ?? "",
     }),
     {
       status: 200,
