@@ -69,7 +69,7 @@ export function WikiTab({ world, reloadKey, onOpenLocation }: { world: WorldWith
 
   const handleGenerate = async () => {
     const now = Date.now();
-    if (generating || now < cooldownUntil || locations.length === 0 || style === null) return;
+    if (generating || article !== null || now < cooldownUntil || locations.length === 0 || style === null) return;
     setGenerating(true); setError('');
     try {
       const result = await openRouterTestProvider.generate({ world, locations, style });
@@ -121,17 +121,13 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const pageClass = isWikipedia ? 'bg-white text-stone-800 border-stone-300' : isScp ? 'bg-stone-100 text-stone-900 border-stone-700' : isAncient ? 'bg-[#f4ecd8] text-[#3f3022] border-[#b8a17d]' : '';
   const headerClass = isWikipedia ? 'bg-stone-50 border-stone-200 text-stone-700' : isScp ? 'bg-stone-200 border-stone-500 text-stone-900' : isAncient ? 'bg-[#e9ddc2] border-[#b8a17d] text-[#4a3826]' : '';
   const articleClass = isWikipedia ? 'bg-white border-stone-200 text-stone-800' : isScp ? 'bg-[#eeeeee] border-stone-500 text-stone-900' : isAncient ? 'bg-[#f4ecd8] border-[#a98e68] text-[#3f3022]' : 'bg-white border-stone-200 text-stone-800';
-  const allPhotos = locations
-    .flatMap((location) => location.photos)
-    .filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .slice(0, 5);
+  const allPhotos = locations.flatMap((location) => location.photos).filter((photo, index, photos) => photos.findIndex((item) => item.storage_path === photo.storage_path) === index).sort((a, b) => a.created_at.localeCompare(b.created_at)).slice(0, 5);
   const mainPhoto = allPhotos[0] ?? null;
   const additionalPhotos = allPhotos.slice(1, 5);
   const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
 
-  const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
+  const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={hasArticle || generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
 
   if (style === null) return <div>{actionButtons}<EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" /></div>;
 
@@ -141,5 +137,5 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
 }
 
 function WikipediaPreviewSkeleton({ worldName }: { worldName: string }) {
-  return <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8"><div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal">{worldName}</h1></div><div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-8"><div className="min-w-0 space-y-4"><div className="h-5 bg-stone-100 rounded w-3/4" /><div className="h-5 bg-stone-100 rounded w-full" /><div className="h-5 bg-stone-100 rounded w-5/6" /><div className="h-24 bg-stone-50 rounded border border-stone-200" /></div><aside className="border border-stone-300 bg-stone-50 p-3"><div className="h-40 bg-stone-100 rounded" /><div className="mt-3 h-4 bg-stone-100 rounded w-1/2" /><div className="mt-3 h-4 bg-stone-100 rounded w-2/3" /></aside></div></section>;
+  return <section className="mt-6 border border-stone-300 bg-white text-stone-800 px-5 py-6 sm:px-8 sm:py-8"><div className="border-b border-stone-400 pb-2"><h1 className="text-2xl sm:text-3xl font-normal">{worldName}</h1></div><div className="mt-6 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-6"><div className="space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div><div className="border border-stone-300 bg-stone-50 p-2"><div className="h-28 bg-stone-200" /><div className="mt-3 space-y-2"><div className="h-3 w-full bg-stone-200" /><div className="h-3 w-4/5 bg-stone-200" /><div className="h-3 w-5/6 bg-stone-200" /></div></div></div><div className="mt-7 border border-stone-300 bg-stone-50 p-4 max-w-sm"><div className="h-4 w-16 bg-stone-300 mb-3" /><div className="space-y-2"><div className="h-3 w-32 bg-stone-200" /><div className="h-3 w-40 bg-stone-200" /><div className="h-3 w-28 bg-stone-200" /><div className="h-3 w-36 bg-stone-200" /></div></div><div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-40 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-11/12 bg-stone-100" /><div className="h-4 w-5/6 bg-stone-100" /><div className="h-4 w-3/4 bg-stone-100" /></div><div className="mt-8 border-b border-stone-400 pb-1"><div className="h-5 w-32 bg-stone-200" /></div><div className="mt-4 space-y-3"><div className="h-4 w-full bg-stone-100" /><div className="h-4 w-10/12 bg-stone-100" /><div className="h-4 w-4/5 bg-stone-100" /></div></section>;
 }
