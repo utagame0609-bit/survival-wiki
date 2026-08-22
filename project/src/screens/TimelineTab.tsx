@@ -132,6 +132,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   };
 
   const activeMilestone = getMilestone(activeDay);
+  const trailHeight = Math.max(0, activeIconTop - 18);
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
@@ -161,6 +162,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {!loading && groups.length > 0 && (
         <div ref={timelineRef} className="relative">
           <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-emerald-400/70 to-cyan-400/40 shadow-[0_0_8px_rgba(52,211,153,0.25)]" />
+          <div className="pointer-events-none absolute left-[3px] top-[18px] z-10 w-[9px] origin-top rounded-full bg-gradient-to-b from-emerald-300/10 via-emerald-300/70 to-cyan-300/20 shadow-[0_0_10px_rgba(52,211,153,0.25)] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
           <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
             <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'}`}>
               {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
@@ -201,7 +203,6 @@ function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isA
           </div>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-xs text-stone-500">{group.locations.length}件の記録</p>
-            {isPassed && !isActive && <Footprints className="w-3.5 h-3.5 text-emerald-400/60" aria-label="通過済み" />}
           </div>
         </div>
       </div>
