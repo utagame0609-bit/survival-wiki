@@ -9,9 +9,9 @@ type SortOrder = 'newest' | 'oldest';
 type Milestone = { day: number; label: string };
 
 const MILESTONES: Milestone[] = [
-  { day: 3, label: '三日坊主突破！' },
-  { day: 7, label: '7日継続！' },
-  { day: 30, label: '30日継続！' },
+  { day: 3, label: '3日目、生存確認。' },
+  { day: 7, label: 'まだ生きている。7日目。' },
+  { day: 30, label: '奇跡が起きた。30日生存。' },
 ];
 
 function getMilestone(dayNumber: number) {
@@ -27,6 +27,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [activeDay, setActiveDay] = useState(1);
   const [expandedDay, setExpandedDay] = useState(1);
   const [activeIconTop, setActiveIconTop] = useState(0);
+  const [unlockedMilestones, setUnlockedMilestones] = useState<number[]>([]);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef(new Map<string, HTMLElement>());
@@ -35,6 +36,15 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     setLoading(true);
     fetchLocations(world.id).then(setLocations).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [world.id, reloadKey]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`survival-wiki:milestones:${world.id}`);
+      setUnlockedMilestones(stored ? JSON.parse(stored) : []);
+    } catch {
+      setUnlockedMilestones([]);
+    }
+  }, [world.id]);
 
   useEffect(() => {
     if (!sortMenuOpen) return;
@@ -74,6 +84,20 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     setActiveDay(dayNumber);
     setExpandedDay(dayNumber);
 
+    const milestone = getMilestone(dayNumber);
+    if (milestone && !unlockedMilestones.includes(milestone.day)) {
+      setUnlockedMilestones((current) => {
+        if (current.includes(milestone.day)) return current;
+        const next = [...current, milestone.day].sort((a, b) => a - b);
+        try {
+          localStorage.setItem(`survival-wiki:milestones:${world.id}`, JSON.stringify(next));
+        } catch {
+          // Keep the in-memory unlock even if localStorage is unavailable.
+        }
+        return next;
+      });
+    }
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const group = groups.find((item) => item.dayNumber === dayNumber);
@@ -87,7 +111,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     });
   };
 
-  const activeMilestone = getMilestone(activeDay);
+  const activeMilestone = unlockedMilestones.includes(activeDay) ? getMilestone(activeDay) : undefined;
   const trailHeight = Math.max(0, activeIconTop - 18);
   const totalRecords = locations.length;
   const totalDays = groups.length;
@@ -150,6 +174,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
                   group={g}
                   isActive={activeDay === g.dayNumber}
                   isExpanded={expandedDay === g.dayNumber}
+                  unlockedMilestones={unlockedMilestones}
                   onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }}
                   onSelect={() => handleDaySelect(g.dayNumber)}
                 />
@@ -163,13 +188,14 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   );
 }
 
-function DayChapter({ group, isActive, isExpanded, onRef, onSelect }: { group: DayGroup; isActive: boolean; isExpanded: boolean; onRef: (element: HTMLElement | null) => void; onSelect: () => void }) {
+function DayChapter({ group, isActive, isExpanded, unlockedMilestones, onRef, onSelect }: { group: DayGroup; isActive: boolean; isExpanded: boolean; unlockedMilestones: number[]; onRef: (element: HTMLElement | null) => void; onSelect: () => void }) {
   const milestone = getMilestone(group.dayNumber);
+  const isMilestoneUnlocked = Boolean(milestone && unlockedMilestones.includes(milestone.day));
 
   return (
     <section ref={onRef} className="relative scroll-mt-24">
       <button type="button" onClick={onSelect} className={`group relative w-full min-h-[86px] mb-4 overflow-hidden rounded-xl border text-left transition-all duration-300 ${isActive ? 'border-emerald-400/70 bg-gradient-to-r from-emerald-950/70 via-zinc-900/80 to-zinc-900/75 shadow-[0_0_18px_rgba(16,185,129,0.10)]' : 'border-emerald-950/70 bg-gradient-to-r from-emerald-950/35 via-zinc-900/70 to-zinc-900/60 hover:border-emerald-900/80'}`} aria-expanded={isExpanded}>
-        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
+        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent 100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent 100%)]" /></div>}
         <div className="relative z-10 flex min-h-[86px] items-center gap-3 px-4 py-3 sm:px-5">
           <div className={`flex h-9 w-11 shrink-0 items-center justify-center rounded-lg border ${isActive ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-emerald-900/70 bg-zinc-900/60 text-zinc-400'}`}>
             <span className="text-[10px] font-bold tracking-[0.14em]">DAY</span>
@@ -178,7 +204,7 @@ function DayChapter({ group, isActive, isExpanded, onRef, onSelect }: { group: D
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-base font-semibold ${isActive ? 'text-white' : 'text-zinc-200'}`}>{group.dateLabel}（{group.dayLabel}）</span>
-              {milestone && (
+              {isMilestoneUnlocked && milestone && (
                 <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}>
                   <Crown className="w-3 h-3" /> {milestone.label}
                 </span>
