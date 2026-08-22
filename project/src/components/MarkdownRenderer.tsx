@@ -274,10 +274,10 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   const tableOfContents = headings.length >= 2 ? (
     <nav
       aria-label="目次"
-      className="md:pt-1 text-sm"
+      className="md:pt-8 text-sm"
     >
-      <div className="mb-2 font-semibold text-[#202122]">目次</div>
-      <ol className="space-y-1">
+      <div className="mb-0 pb-2 font-semibold text-[#202122]">目次</div>
+      <ol className="border-t border-[#eaecf0] pt-2 space-y-1">
         {headings.map((heading, index) => (
           <li key={heading.id} className={heading.level === 3 ? 'ml-5' : ''}>
             <button
