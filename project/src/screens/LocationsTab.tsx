@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil, X } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil, X, Search } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -17,6 +17,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const loadRequestRef = useRef(0);
 
   const load = async () => {
@@ -96,17 +97,39 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
     setMode({ type: 'edit', location });
   };
 
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+  const filteredLocations = normalizedQuery
+    ? locations.filter((loc) => loc.name.toLocaleLowerCase().includes(normalizedQuery) || loc.detail_memo?.toLocaleLowerCase().includes(normalizedQuery))
+    : locations;
+
   return (
     <div className="min-h-full bg-[#11120f] text-stone-100 px-4 py-4 max-w-3xl mx-auto">
-      <div className="mb-4">
-        <button onClick={() => setMode({ type: 'create' })} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-medium shadow-md shadow-emerald-950/30 hover:bg-emerald-600 active:scale-[0.99] transition-all">
-          <Plus className="w-5 h-5" /> ロケーションを追加
+      <div className="mb-4 space-y-3">
+        <button onClick={() => setMode({ type: 'create' })} className="group w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 font-semibold shadow-lg shadow-emerald-950/20 hover:bg-emerald-500/15 hover:border-emerald-400/70 hover:text-emerald-200 active:scale-[0.99] transition-all">
+          <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /> ロケーションを追加
         </button>
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500 pointer-events-none" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="ロケーション名やメモで検索..."
+            aria-label="ロケーションを検索"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#171813] border border-[#2d3028] text-sm text-stone-200 placeholder:text-stone-600 outline-none transition-colors focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20"
+          />
+        </div>
       </div>
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ロケーションを読み込み中" />}
       {!loading && locations.length === 0 && <EmptyState message="ロケーションがありません。追加ボタンから記録を始めよう。" />}
-      {!loading && locations.length > 0 && <div className="space-y-2.5">{locations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div>}
+      {!loading && locations.length > 0 && <>
+        <div className="flex justify-between items-center px-1 mb-2.5 text-[11px] text-stone-500 font-mono">
+          <span>登録数: {filteredLocations.length} 件</span>
+          {normalizedQuery && <span>「{searchQuery.trim()}」で検索中</span>}
+        </div>
+        {filteredLocations.length > 0 ? <div className="space-y-2.5">{filteredLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
+      </>}
 
       {selectedLocation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
