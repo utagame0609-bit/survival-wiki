@@ -23,13 +23,11 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('oldest');
-  const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
   const [expandedDay, setExpandedDay] = useState(1);
   const [activeIconTop, setActiveIconTop] = useState(0);
   const [unlockedMilestones, setUnlockedMilestones] = useState<number[]>([]);
   const [milestoneRevealDay, setMilestoneRevealDay] = useState<number | null>(null);
-  const sortMenuRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef(new Map<string, HTMLElement>());
 
@@ -46,15 +44,6 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       setUnlockedMilestones([]);
     }
   }, [world.id]);
-
-  useEffect(() => {
-    if (!sortMenuOpen) return;
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!sortMenuRef.current?.contains(event.target as Node)) setSortMenuOpen(false);
-    };
-    document.addEventListener('pointerdown', handlePointerDown);
-    return () => document.removeEventListener('pointerdown', handlePointerDown);
-  }, [sortMenuOpen]);
 
   const groups = useMemo(() => {
     const grouped = groupByDay(locations);
@@ -76,9 +65,8 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     setActiveIconTop(elementRect.top - timelineRect.top + 18);
   }, [groups, activeDay, expandedDay]);
 
-  const selectSortOrder = (value: SortOrder) => {
-    setSortOrder(value);
-    setSortMenuOpen(false);
+  const toggleSortOrder = () => {
+    setSortOrder((current) => current === 'oldest' ? 'newest' : 'oldest');
   };
 
   const handleDaySelect = (dayNumber: number) => {
@@ -123,25 +111,10 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
       <style>{`
-        @keyframes milestone-pop {
-          0% { transform: scale(0.45); opacity: 0; }
-          45% { transform: scale(1.22); opacity: 1; }
-          70% { transform: scale(0.94); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes milestone-burst {
-          0% { transform: scale(0.5); opacity: 0.8; }
-          70% { transform: scale(1.9); opacity: 0; }
-          100% { transform: scale(1.9); opacity: 0; }
-        }
-        @keyframes milestone-text {
-          0% { transform: translateX(-8px) scale(0.94); opacity: 0; }
-          55% { transform: translateX(2px) scale(1.02); opacity: 1; }
-          100% { transform: translateX(0) scale(1); opacity: 1; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .milestone-reveal, .milestone-burst, .milestone-text { animation: none !important; }
-        }
+        @keyframes milestone-pop { 0% { transform: scale(0.45); opacity: 0; } 45% { transform: scale(1.22); opacity: 1; } 70% { transform: scale(0.94); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes milestone-burst { 0% { transform: scale(0.5); opacity: 0.8; } 70% { transform: scale(1.9); opacity: 0; } 100% { transform: scale(1.9); opacity: 0; } }
+        @keyframes milestone-text { 0% { transform: translateX(-8px) scale(0.94); opacity: 0; } 55% { transform: translateX(2px) scale(1.02); opacity: 1; } 100% { transform: translateX(0) scale(1); opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) { .milestone-reveal, .milestone-burst, .milestone-text { animation: none !important; } }
       `}</style>
       <div className="w-full mb-6 rounded-xl border border-emerald-900/60 bg-gradient-to-r from-emerald-950/75 via-zinc-900/95 to-zinc-900/90 p-3.5 px-4 shadow-[0_0_20px_rgba(16,185,129,0.10)] backdrop-blur-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
@@ -152,26 +125,16 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
             <span className="text-emerald-100/75 truncate">この世界で記録された出来事</span>
           </div>
           <div className="flex items-center gap-3 text-[11px] text-zinc-400 font-mono pl-4">
-            <span className="flex items-center gap-1 whitespace-nowrap">
-              <Activity size={12} className="text-emerald-400" />
-              総記録数: <strong className="text-emerald-300">{totalRecords}</strong>
-            </span>
+            <span className="flex items-center gap-1 whitespace-nowrap"><Activity size={12} className="text-emerald-400" />総記録数: <strong className="text-emerald-300">{totalRecords}</strong></span>
             <span className="text-emerald-900">•</span>
             <span className="whitespace-nowrap">記録日数: <strong className="text-zinc-200">{totalDays} Days</strong></span>
           </div>
         </div>
-
         <div className="self-end sm:self-auto shrink-0">
-          <button type="button" onClick={() => setSortMenuOpen((prev) => !prev)} aria-haspopup="menu" aria-expanded={sortMenuOpen} className="flex items-center gap-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/50 px-3 py-1.5 text-xs font-medium text-emerald-100 shadow-sm transition-colors hover:bg-emerald-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
+          <button type="button" onClick={toggleSortOrder} aria-label="タイムラインの並び順を切り替える" className="flex items-center gap-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/50 px-3 py-1.5 text-xs font-medium text-emerald-100 shadow-sm transition-colors hover:bg-emerald-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
             <ArrowUpDown size={13} className="text-emerald-400" />
             <span>{sortOrder === 'oldest' ? '古い順' : '新しい順'}</span>
           </button>
-          {sortMenuOpen && (
-            <div ref={sortMenuRef} className="absolute z-30 mt-1 min-w-[110px] overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 shadow-lg" role="menu">
-              <button type="button" onClick={() => selectSortOrder('newest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'newest' ? 'bg-emerald-500/10 font-semibold text-emerald-300' : 'text-zinc-300 hover:bg-zinc-800'}`} role="menuitem">新しい順</button>
-              <button type="button" onClick={() => selectSortOrder('oldest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'oldest' ? 'bg-emerald-500/10 font-semibold text-emerald-300' : 'text-zinc-300 hover:bg-zinc-800'}`} role="menuitem">古い順</button>
-            </div>
-          )}
         </div>
       </div>
       {error && <ErrorBanner message={error} />}
@@ -186,25 +149,11 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
               <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'} ${isRevealingMilestone ? 'milestone-reveal' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-pop 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>
                 {isRevealingMilestone && <span className="milestone-burst pointer-events-none absolute inset-0 rounded-full border-2 border-amber-200" style={{ animation: 'milestone-burst 900ms ease-out' }} />}
                 {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
-                {activeMilestone && (
-                  <span className={`absolute left-8 whitespace-nowrap rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow ${isRevealingMilestone ? 'milestone-text' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-text 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>
-                    {activeMilestone.label}
-                  </span>
-                )}
+                {activeMilestone && <span className={`absolute left-8 whitespace-nowrap rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow ${isRevealingMilestone ? 'milestone-text' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-text 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>{activeMilestone.label}</span>}
               </div>
             </div>
             <div className="space-y-10 pl-8">
-              {groups.map((g) => (
-                <DayChapter
-                  key={g.dateKey}
-                  group={g}
-                  isActive={activeDay === g.dayNumber}
-                  isExpanded={expandedDay === g.dayNumber}
-                  unlockedMilestones={unlockedMilestones}
-                  onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }}
-                  onSelect={() => handleDaySelect(g.dayNumber)}
-                />
-              ))}
+              {groups.map((g) => <DayChapter key={g.dateKey} group={g} isActive={activeDay === g.dayNumber} isExpanded={expandedDay === g.dayNumber} unlockedMilestones={unlockedMilestones} onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }} onSelect={() => handleDaySelect(g.dayNumber)} />)}
             </div>
           </div>
           <div aria-hidden="true" className="h-[calc(100vh-88px)]" />
@@ -217,36 +166,19 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 function DayChapter({ group, isActive, isExpanded, unlockedMilestones, onRef, onSelect }: { group: DayGroup; isActive: boolean; isExpanded: boolean; unlockedMilestones: number[]; onRef: (element: HTMLElement | null) => void; onSelect: () => void }) {
   const milestone = getMilestone(group.dayNumber);
   const isMilestoneUnlocked = Boolean(milestone && unlockedMilestones.includes(milestone.day));
-
   return (
     <section ref={onRef} className="relative scroll-mt-24">
       <button type="button" onClick={onSelect} className={`group relative w-full min-h-[86px] mb-4 overflow-hidden rounded-xl border text-left transition-all duration-300 ${isActive ? 'border-emerald-400/70 bg-gradient-to-r from-emerald-950/70 via-zinc-900/80 to-zinc-900/75 shadow-[0_0_18px_rgba(16,185,129,0.10)]' : 'border-emerald-950/70 bg-gradient-to-r from-emerald-950/35 via-zinc-900/70 to-zinc-900/60 hover:border-emerald-900/80'}`} aria-expanded={isExpanded}>
-        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent 100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent 100%)]" /></div>}
+        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
         <div className="relative z-10 flex min-h-[86px] items-center gap-3 px-4 py-3 sm:px-5">
-          <div className={`flex h-9 w-11 shrink-0 items-center justify-center rounded-lg border ${isActive ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-emerald-900/70 bg-zinc-900/60 text-zinc-400'}`}>
-            <span className="text-[10px] font-bold tracking-[0.14em]">DAY</span>
-            <span className="ml-1 text-base font-bold leading-none">{group.dayNumber}</span>
-          </div>
+          <div className={`flex h-9 w-11 shrink-0 items-center justify-center rounded-lg border ${isActive ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-emerald-900/70 bg-zinc-900/60 text-zinc-400'}`}><span className="text-[10px] font-bold tracking-[0.14em]">DAY</span><span className="ml-1 text-base font-bold leading-none">{group.dayNumber}</span></div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-base font-semibold ${isActive ? 'text-white' : 'text-zinc-200'}`}>{group.dateLabel}（{group.dayLabel}）</span>
-              {isMilestoneUnlocked && milestone && (
-                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}>
-                  <Crown className="w-3 h-3" /> {milestone.label}
-                </span>
-              )}
-            </div>
-            <div className="mt-1">
-              <span className={`text-xs font-medium ${isExpanded ? 'text-emerald-300' : 'text-zinc-400'}`}>{group.locations.length}件の記録</span>
-            </div>
+            <div className="flex items-center gap-2 flex-wrap"><span className={`text-base font-semibold ${isActive ? 'text-white' : 'text-zinc-200'}`}>{group.dateLabel}（{group.dayLabel}）</span>{isMilestoneUnlocked && milestone && <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}><Crown className="w-3 h-3" /> {milestone.label}</span>}</div>
+            <div className="mt-1"><span className={`text-xs font-medium ${isExpanded ? 'text-emerald-300' : 'text-zinc-400'}`}>{group.locations.length}件の記録</span></div>
           </div>
         </div>
       </button>
-      {isExpanded && (
-        <div className="relative pb-2">
-          <div className="space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div>
-        </div>
-      )}
+      {isExpanded && <div className="relative pb-2"><div className="space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>}
     </section>
   );
 }
@@ -256,17 +188,13 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
   const hasMemo = Boolean(loc.detail_memo?.trim());
   const hasPhoto = Boolean(mainPhoto);
-
   if (hasPhoto || hasMemo) {
     return (
       <article className="relative overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(150px,0.8fr)_minmax(240px,1.7fr)]">
           {hasPhoto ? <img src={getPhotoUrl(mainPhoto!.storage_path)} alt={loc.name} className="w-full h-44 md:h-full min-h-44 object-cover" /> : <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300"><MapPin className="w-7 h-7" /></div>}
           <div className="p-4 min-w-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0"><h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div>
-              <span className="shrink-0 text-xs text-stone-500 font-mono">{time}</span>
-            </div>
+            <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div><span className="shrink-0 text-xs text-stone-500 font-mono">{time}</span></div>
             {hasMemo && <p className="mt-3 text-sm leading-6 text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p>}
             {loc.members.length > 0 && <p className="text-xs text-stone-500 mt-3 truncate">仲間：{loc.members.map((m) => m.name).join('・')}</p>}
           </div>
@@ -274,7 +202,6 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
       </article>
     );
   }
-
   return <div className="relative min-h-9 flex items-center gap-3 text-sm"><span className="min-w-0 font-medium text-stone-800 truncate">{loc.name}</span><span className="shrink-0 text-xs text-stone-500 font-mono">X {loc.x}　Y {loc.y}　Z {loc.z}</span><span className="ml-auto shrink-0 text-xs text-stone-500 font-mono">{time}</span></div>;
 }
 
