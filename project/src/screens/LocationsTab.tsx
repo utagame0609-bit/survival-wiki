@@ -119,14 +119,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         </button>
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/70 pointer-events-none" />
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ロケーション名やメモで検索..."
-            aria-label="ロケーションを検索"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 text-sm text-zinc-200 placeholder:text-zinc-500 outline-none transition-all focus:border-emerald-700/70 focus:shadow-[0_0_14px_rgba(16,185,129,0.06)] focus:ring-1 focus:ring-emerald-500/20"
-          />
+          <input type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="ロケーション名やメモで検索..." aria-label="ロケーションを検索" className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 text-sm text-zinc-200 placeholder:text-zinc-500 outline-none transition-all focus:border-emerald-700/70 focus:shadow-[0_0_14px_rgba(16,185,129,0.06)] focus:ring-1 focus:ring-emerald-500/20" />
         </div>
       </div>
       {error && <ErrorBanner message={error} />}
@@ -137,14 +130,8 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
           <span>登録数: {filteredLocations.length} 件</span>
           <div className="flex items-center gap-2">
             {normalizedQuery && <span className="truncate">「{searchQuery.trim()}」で検索中</span>}
-            <button
-              type="button"
-              onClick={() => setSortOrder((current) => current === 'asc' ? 'desc' : 'asc')}
-              className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors"
-              aria-label="ロケーションの並び順を変更"
-            >
-              <ArrowUpDown className="w-3 h-3 text-emerald-400" />
-              {sortOrder === 'asc' ? '古い順' : '新しい順'}
+            <button type="button" onClick={() => setSortOrder((current) => current === 'asc' ? 'desc' : 'asc')} className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors" aria-label="ロケーションの並び順を変更">
+              <ArrowUpDown className="w-3 h-3 text-emerald-400" />{sortOrder === 'asc' ? '古い順' : '新しい順'}
             </button>
           </div>
         </div>
@@ -155,10 +142,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeLocationDetail} />
           <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]">
-              <h2 className="text-sm sm:text-base font-semibold text-stone-100">ロケーション</h2>
-              <button onClick={closeLocationDetail} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100"><X className="w-5 h-5" /></button>
-            </div>
+            <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]"><h2 className="text-sm sm:text-base font-semibold text-stone-100">ロケーション</h2><button onClick={closeLocationDetail} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100"><X className="w-5 h-5" /></button></div>
             <div className="overflow-y-auto overscroll-contain">
               {(() => {
                 const mainPhoto = selectedLocation.photos.find((p) => p.is_main);
@@ -198,15 +182,13 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
         {mainPhoto ? <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 shrink-0"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" /></div> : <div className="w-20 h-20 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0"><MapPin className="w-7 h-7 text-zinc-700" /></div>}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
           <div className="flex items-center gap-1.5 min-w-0"><MapPin className="w-4 h-4 text-emerald-400 shrink-0" /><h3 className="font-bold text-sm text-zinc-100 truncate group-hover:text-emerald-300 transition-colors">{loc.name}</h3></div>
-          <div className="self-start inline-flex items-center gap-2 px-2 py-1 bg-zinc-950/80 border border-zinc-800 rounded-md font-mono text-[11px]">
-            <span className="text-zinc-500">X</span><span className="text-emerald-400 font-bold">{loc.x}</span>
-            <span className="text-zinc-500">Y</span><span className="text-emerald-400 font-bold">{loc.y}</span>
-            <span className="text-zinc-500">Z</span><span className="text-emerald-400 font-bold">{loc.z}</span>
+          <div className="self-start inline-flex items-center gap-2 px-2 py-1 bg-zinc-950/80 border border-emerald-900/60 rounded-md font-mono text-[11px] tracking-wide shadow-[inset_0_0_10px_rgba(16,185,129,0.04)]">
+            <span className="text-zinc-500 font-semibold">X</span><span className="text-emerald-300 font-bold tabular-nums">{loc.x}</span>
+            <span className="text-zinc-500 font-semibold">Y</span><span className="text-emerald-300 font-bold tabular-nums">{loc.y}</span>
+            <span className="text-zinc-500 font-semibold">Z</span><span className="text-emerald-300 font-bold tabular-nums">{loc.z}</span>
           </div>
         </div>
-        <div className="flex items-center self-stretch pl-1 text-zinc-600 group-hover:text-emerald-300 transition-colors" aria-hidden="true">
-          <ChevronRight className="w-5 h-5" />
-        </div>
+        <div className="flex items-center self-stretch pl-1 text-zinc-600 group-hover:text-emerald-300 transition-colors" aria-hidden="true"><ChevronRight className="w-5 h-5" /></div>
       </div>
     </button>
   </div>;
