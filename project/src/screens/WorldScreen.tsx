@@ -79,11 +79,11 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
           {wikiLocation && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
               <button aria-label="閉じる" className="absolute inset-0" onClick={() => setWikiLocation(null)} />
-              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-sans">
+              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-serif">
                 <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 border-b border-gray-300 bg-gray-100 text-gray-600">
-                  <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-2">
-                    <img src={UTAPEDIA_AVATAR} alt="Utapedia" className="w-5 h-5 object-cover border border-gray-300" />
-                    <span>Utapedia</span>
+                  <span className="text-xs tracking-wider flex items-center gap-2">
+                    <img src={UTAPEDIA_AVATAR} alt="ウタペディア" className="w-6 h-6 object-cover border border-gray-300" />
+                    <span className="text-sm font-serif">ウタペディア</span>
                     <span className="text-gray-400">//</span>
                     <span>ロケーション詳細</span>
                   </span>
