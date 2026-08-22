@@ -76,6 +76,16 @@ section.relative.scroll-mt-24 > div.relative.pb-2 {
   transform-origin: top center;
 }
 
+/* Wiki style selection: transition into the selected article/content view. */
+@keyframes wiki-content-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child {
+  animation: wiki-content-enter 200ms cubic-bezier(.22,.8,.35,1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   button:not(:disabled) {
     transition: none;
@@ -87,7 +97,8 @@ section.relative.scroll-mt-24 > div.relative.pb-2 {
     filter: none;
   }
 
-  section.relative.scroll-mt-24 > div.relative.pb-2 {
+  section.relative.scroll-mt-24 > div.relative.pb-2,
+  .w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child {
     animation: none;
   }
 }
