@@ -155,7 +155,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
                       <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
                     </div></div>
                   </div>
-                  <div className="flex gap-3 pt-1"><button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button><button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div>
+                  <div className="flex gap-3 pt-1"><button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button><button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-950/40 text-red-300 border border-red-900/40 text-red-300 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div>
                 </div>;
               })()}
             </div>
@@ -163,10 +163,12 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         </div>
       )}
 
-      {mode.type !== 'list' && <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
-        <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeModal} />
-        <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
-          <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]"><h2 className="text-sm sm:text-base font-semibold text-stone-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2><button onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100 disabled:opacity-40"><X className="w-5 h-5" /></button></div>
+      {mode.type !== 'list' && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) closeModal(); }}>
+        <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/90">
+            <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" /><h2 className="text-lg font-semibold text-zinc-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2></div>
+            <button type="button" onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-9 h-9 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/70 flex items-center justify-center transition-colors"><X className="w-5 h-5" /></button>
+          </div>
           <div className="overflow-y-auto overscroll-contain"><LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} /></div>
         </div>
       </div>}
