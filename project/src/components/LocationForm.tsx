@@ -133,7 +133,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         </div>
       )}
 
-      <div className="flex gap-2 pt-1">
+      <div className="flex gap-2 px-0 py-4 border-t border-zinc-800/90 bg-zinc-950/30">
         <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 font-medium hover:bg-zinc-800 hover:border-zinc-600 active:scale-[0.98] transition-all">キャンセル</button>
         <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? '保存中...' : '保存'}</button>
       </div>
