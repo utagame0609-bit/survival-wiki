@@ -127,13 +127,13 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       {!loading && locations.length === 0 && <EmptyState message="ロケーションがありません。追加ボタンから記録を始めよう。" />}
       {!loading && locations.length > 0 && <>
         <div className="flex justify-between items-center px-1 mb-2.5 text-[11px] text-stone-500 font-mono gap-3">
-          <span>登録数: {filteredLocations.length} 件</span>
-          <div className="flex items-center gap-2">
-            {normalizedQuery && <span className="truncate">「{searchQuery.trim()}」で検索中</span>}
-            <button type="button" onClick={() => setSortOrder((current) => current === 'asc' ? 'desc' : 'asc')} className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors" aria-label="ロケーションの並び順を変更">
-              <ArrowUpDown className="w-3 h-3 text-emerald-400" />{sortOrder === 'asc' ? '古い順' : '新しい順'}
-            </button>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-zinc-400 font-medium whitespace-nowrap">総記録数: {filteredLocations.length} 件</span>
+            {normalizedQuery && <span className="truncate text-zinc-600">「{searchQuery.trim()}」で検索中</span>}
           </div>
+          <button type="button" onClick={() => setSortOrder((current) => current === 'asc' ? 'desc' : 'asc')} className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-900/60 bg-emerald-950/20 text-zinc-400 hover:text-emerald-300 hover:border-emerald-700/50 hover:bg-emerald-950/30 transition-colors" aria-label="ロケーションの並び順を変更">
+            <ArrowUpDown className="w-3 h-3 text-emerald-400" />{sortOrder === 'asc' ? '古い順' : '新しい順'}
+          </button>
         </div>
         {sortedLocations.length > 0 ? <div className="space-y-2.5">{sortedLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
       </>}
