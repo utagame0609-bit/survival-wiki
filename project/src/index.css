@@ -49,3 +49,18 @@ article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.sha
   .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button { min-height: 5.75rem; padding: 0.7rem 0.6rem; font-size: 0.75rem; }
   .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button::after { font-size: 0.65rem; }
 }
+
+/* Shared press feedback: a subtle, short physical response for app buttons. */
+button:not(:disabled) {
+  transition: transform 120ms ease-out;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled) {
+    transition: none;
+  }
+}
