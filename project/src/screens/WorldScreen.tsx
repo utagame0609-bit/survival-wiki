@@ -127,7 +127,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
                     <div className="font-semibold mb-1 flex items-center gap-1">
                       <FileText className="w-[13px] h-[13px]" /> 記録資料
                     </div>
-                    <p className="text-gray-500">このロケーションは、Wikiに記録された関連資料です。</p>
+                    <p className="text-gray-500">このロケーションは、ウタペディアに記録された関連資料です。</p>
                   </div>
                 </div>
               </div>
