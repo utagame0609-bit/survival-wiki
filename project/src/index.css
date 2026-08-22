@@ -55,7 +55,36 @@ article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.sha
 }
 
 /* Location detail modal: keep the non-Wiki location view on the modern rounded modal treatment. */
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl { border-radius: 1rem; overflow: hidden; }
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl {
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(6, 78, 59, 0.18), rgba(24, 24, 27, 0.96), rgba(24, 24, 27, 0.92));
+  border-color: rgba(6, 78, 59, 0.6);
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.08), 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* Match the location detail header to the current add/edit modal treatment. */
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child {
+  border-bottom-color: rgba(39, 39, 42, 0.9);
+  background: transparent;
+}
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+  flex-shrink: 0;
+}
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child button {
+  border-radius: 0.5rem;
+}
 
 /* Location detail actions: use the same modern rounded treatment as the location add/edit UI. */
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button {
