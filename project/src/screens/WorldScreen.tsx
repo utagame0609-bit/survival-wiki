@@ -8,6 +8,7 @@ import { TimelineTab } from '@/screens/TimelineTab';
 import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
+import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
 
 type Tab = 'locations' | 'timeline' | 'wiki';
 
@@ -78,16 +79,18 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
           {wikiLocation && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
               <button aria-label="閉じる" className="absolute inset-0" onClick={() => setWikiLocation(null)} />
-              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden rounded-lg bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-sans">
+              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-sans">
                 <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 border-b border-gray-300 bg-gray-100 text-gray-600">
-                  <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5" />
-                    発掘データレコード // ロケーション詳細
+                  <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-2">
+                    <img src={UTAPEDIA_AVATAR} alt="Utapedia" className="w-5 h-5 object-cover border border-gray-300" />
+                    <span>Utapedia</span>
+                    <span className="text-gray-400">//</span>
+                    <span>ロケーション詳細</span>
                   </span>
                   <button
                     onClick={() => setWikiLocation(null)}
                     aria-label="閉じる"
-                    className="p-1 rounded text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
+                    className="p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
                   >
                     <X className="w-[18px] h-[18px]" />
                   </button>
@@ -98,12 +101,12 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
                     {wikiLocation.name}
                   </h2>
 
-                  <div className="p-1.5 rounded border border-gray-300 bg-gray-50">
+                  <div className="p-1.5 border border-gray-300 bg-gray-50">
                     {(() => {
                       const mainPhoto = wikiLocation.photos.find((photo) => photo.is_main);
                       return mainPhoto
-                        ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={wikiLocation.name} className="w-full h-48 object-cover rounded" />
-                        : <div className="w-full h-48 rounded bg-gray-100 flex items-center justify-center"><MapPin className="w-12 h-12 text-gray-300" /></div>;
+                        ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={wikiLocation.name} className="w-full h-48 object-cover" />
+                        : <div className="w-full h-48 bg-gray-100 flex items-center justify-center"><MapPin className="w-12 h-12 text-gray-300" /></div>;
                     })()}
                   </div>
 
@@ -120,7 +123,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
                     </tbody>
                   </table>
 
-                  <div className="p-3 rounded-md text-xs border-l-4 bg-amber-50/50 border-amber-400 text-gray-700">
+                  <div className="p-3 text-xs border-l-4 bg-amber-50/50 border-amber-400 text-gray-700">
                     <div className="font-semibold mb-1 flex items-center gap-1">
                       <FileText className="w-[13px] h-[13px]" /> 記録資料
                     </div>
