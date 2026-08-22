@@ -274,7 +274,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   const tableOfContents = headings.length >= 2 ? (
     <nav
       aria-label="目次"
-      className="my-6 border border-[#a2a9b1] bg-[#f8f9fa] p-4 text-sm"
+      className="border border-[#a2a9b1] bg-[#f8f9fa] p-4 text-sm md:sticky md:top-4 md:self-start"
     >
       <div className="mb-2 font-semibold text-[#202122]">目次</div>
       <ol className="space-y-1">
@@ -299,8 +299,14 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
 
   return (
     <div className={`wiki-markdown text-[15px] leading-7 ${className}`}>
-      {tableOfContents}
-      {blocks}
+      {tableOfContents ? (
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[190px_minmax(0,1fr)] md:items-start">
+          {tableOfContents}
+          <div className="min-w-0">{blocks}</div>
+        </div>
+      ) : (
+        blocks
+      )}
     </div>
   );
 }
