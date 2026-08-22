@@ -28,6 +28,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [expandedDay, setExpandedDay] = useState(1);
   const [activeIconTop, setActiveIconTop] = useState(0);
   const [unlockedMilestones, setUnlockedMilestones] = useState<number[]>([]);
+  const [milestoneRevealDay, setMilestoneRevealDay] = useState<number | null>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef(new Map<string, HTMLElement>());
@@ -86,6 +87,8 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
     const milestone = getMilestone(dayNumber);
     if (milestone && !unlockedMilestones.includes(milestone.day)) {
+      setMilestoneRevealDay(milestone.day);
+      window.setTimeout(() => setMilestoneRevealDay(null), 1200);
       setUnlockedMilestones((current) => {
         if (current.includes(milestone.day)) return current;
         const next = [...current, milestone.day].sort((a, b) => a - b);
@@ -112,12 +115,34 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   };
 
   const activeMilestone = unlockedMilestones.includes(activeDay) ? getMilestone(activeDay) : undefined;
+  const isRevealingMilestone = milestoneRevealDay === activeDay;
   const trailHeight = Math.max(0, activeIconTop - 18);
   const totalRecords = locations.length;
   const totalDays = groups.length;
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
+      <style>{`
+        @keyframes milestone-pop {
+          0% { transform: scale(0.45); opacity: 0; }
+          45% { transform: scale(1.22); opacity: 1; }
+          70% { transform: scale(0.94); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes milestone-burst {
+          0% { transform: scale(0.5); opacity: 0.8; }
+          70% { transform: scale(1.9); opacity: 0; }
+          100% { transform: scale(1.9); opacity: 0; }
+        }
+        @keyframes milestone-text {
+          0% { transform: translateX(-8px) scale(0.94); opacity: 0; }
+          55% { transform: translateX(2px) scale(1.02); opacity: 1; }
+          100% { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .milestone-reveal, .milestone-burst, .milestone-text { animation: none !important; }
+        }
+      `}</style>
       <div className="w-full mb-6 rounded-xl border border-emerald-900/60 bg-gradient-to-r from-emerald-950/75 via-zinc-900/95 to-zinc-900/90 p-3.5 px-4 shadow-[0_0_20px_rgba(16,185,129,0.10)] backdrop-blur-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 min-w-0">
@@ -158,10 +183,11 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
             <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-emerald-400/70 to-cyan-400/40 shadow-[0_0_8px_rgba(52,211,153,0.25)]" />
             <div className="pointer-events-none absolute left-[3px] top-[18px] z-10 w-[9px] origin-top rounded-full bg-gradient-to-b from-emerald-300/10 via-emerald-300/70 to-cyan-300/20 shadow-[0_0_10px_rgba(52,211,153,0.25)] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
             <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
-              <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'}`}>
+              <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'} ${isRevealingMilestone ? 'milestone-reveal' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-pop 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>
+                {isRevealingMilestone && <span className="milestone-burst pointer-events-none absolute inset-0 rounded-full border-2 border-amber-200" style={{ animation: 'milestone-burst 900ms ease-out' }} />}
                 {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
                 {activeMilestone && (
-                  <span className="absolute left-8 whitespace-nowrap rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow">
+                  <span className={`absolute left-8 whitespace-nowrap rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow ${isRevealingMilestone ? 'milestone-text' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-text 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>
                     {activeMilestone.label}
                   </span>
                 )}
