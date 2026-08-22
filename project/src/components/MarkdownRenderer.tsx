@@ -274,7 +274,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   const tableOfContents = headings.length >= 2 ? (
     <nav
       aria-label="目次"
-      className="border border-[#a2a9b1] bg-[#f8f9fa] p-4 text-sm md:sticky md:top-4 md:self-start"
+      className="md:pt-1 text-sm"
     >
       <div className="mb-2 font-semibold text-[#202122]">目次</div>
       <ol className="space-y-1">
@@ -298,14 +298,14 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   ) : null;
 
   return (
-    <div className={`wiki-markdown text-[15px] leading-7 ${className}`}>
+    <div className={`wiki-markdown h-full min-h-0 text-[15px] leading-7 ${className}`}>
       {tableOfContents ? (
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-[190px_minmax(0,1fr)] md:items-start">
-          {tableOfContents}
-          <div className="min-w-0">{blocks}</div>
+        <div className="grid h-full min-h-0 grid-cols-1 gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-10">
+          <div className="min-h-0 md:overflow-hidden">{tableOfContents}</div>
+          <div className="min-h-0 overflow-y-auto pr-2 md:pr-4">{blocks}</div>
         </div>
       ) : (
-        blocks
+        <div className="h-full min-h-0 overflow-y-auto pr-2 md:pr-4">{blocks}</div>
       )}
     </div>
   );
