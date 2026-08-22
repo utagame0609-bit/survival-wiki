@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil, X, Search, ArrowUpDown } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil, X, Search, ArrowUpDown, ChevronRight } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -203,6 +203,9 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
             <span className="text-zinc-500">Y</span><span className="text-emerald-400 font-bold">{loc.y}</span>
             <span className="text-zinc-500">Z</span><span className="text-emerald-400 font-bold">{loc.z}</span>
           </div>
+        </div>
+        <div className="flex items-center self-stretch pl-1 text-zinc-600 group-hover:text-emerald-300 transition-colors" aria-hidden="true">
+          <ChevronRight className="w-5 h-5" />
         </div>
       </div>
     </button>
