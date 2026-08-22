@@ -52,12 +52,12 @@ article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.sha
 
 /* Shared press feedback: a subtle, short physical response for app buttons. */
 button:not(:disabled) {
-  transition: transform 120ms ease-out, filter 120ms ease;
+  transition: transform 160ms cubic-bezier(.22,.8,.35,1), filter 160ms ease;
 }
 
 button:not(:disabled):hover {
-  transform: translateY(-1px);
-  filter: brightness(1.03);
+  transform: translateY(-3px);
+  filter: brightness(1.06);
 }
 
 button:not(:disabled):active {
