@@ -94,26 +94,26 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="w-full mb-6 rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 px-4 shadow-lg backdrop-blur-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="w-full mb-6 rounded-xl border border-emerald-900/60 bg-gradient-to-r from-emerald-950/75 via-zinc-900/95 to-zinc-900/90 p-3.5 px-4 shadow-[0_0_20px_rgba(16,185,129,0.10)] backdrop-blur-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 shrink-0 rounded-full bg-emerald-400" />
+            <span className="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.65)]" />
             <h2 className="text-xs font-extrabold tracking-widest text-zinc-100 uppercase font-mono whitespace-nowrap">WORLD LOG</h2>
-            <span className="text-zinc-600 font-mono text-xs">/</span>
-            <span className="text-xs text-zinc-400 truncate">この世界で記録された出来事</span>
+            <span className="text-emerald-800 font-mono text-xs">/</span>
+            <span className="text-emerald-100/75 truncate">この世界で記録された出来事</span>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-zinc-500 font-mono pl-4">
+          <div className="flex items-center gap-3 text-[11px] text-zinc-400 font-mono pl-4">
             <span className="flex items-center gap-1 whitespace-nowrap">
-              <Activity size={12} className="text-emerald-500" />
-              総記録数: <strong className="text-emerald-400">{totalRecords}</strong>
+              <Activity size={12} className="text-emerald-400" />
+              総記録数: <strong className="text-emerald-300">{totalRecords}</strong>
             </span>
-            <span className="text-zinc-700">•</span>
-            <span className="whitespace-nowrap">記録日数: <strong className="text-zinc-300">{totalDays} Days</strong></span>
+            <span className="text-emerald-900">•</span>
+            <span className="whitespace-nowrap">記録日数: <strong className="text-zinc-200">{totalDays} Days</strong></span>
           </div>
         </div>
 
         <div className="self-end sm:self-auto shrink-0">
-          <button type="button" onClick={() => setSortMenuOpen((prev) => !prev)} aria-haspopup="menu" aria-expanded={sortMenuOpen} className="flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 shadow-sm transition-colors hover:bg-zinc-700/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
+          <button type="button" onClick={() => setSortMenuOpen((prev) => !prev)} aria-haspopup="menu" aria-expanded={sortMenuOpen} className="flex items-center gap-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/50 px-3 py-1.5 text-xs font-medium text-emerald-100 shadow-sm transition-colors hover:bg-emerald-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
             <ArrowUpDown size={13} className="text-emerald-400" />
             <span>{sortOrder === 'oldest' ? '古い順' : '新しい順'}</span>
           </button>
