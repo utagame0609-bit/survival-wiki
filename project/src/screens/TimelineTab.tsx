@@ -153,22 +153,30 @@ function DayChapter({ group, isActive, isExpanded, onRef, onSelect }: { group: D
 
   return (
     <section ref={onRef} className="relative scroll-mt-24">
-      <button type="button" onClick={onSelect} className={`relative w-full min-h-[88px] mb-4 flex items-end overflow-hidden border-b pb-3 text-left transition-colors ${isActive ? 'border-emerald-400' : 'border-stone-300'}`} aria-expanded={isExpanded}>
-        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.16] [mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)]" /></div>}
-        <div className="relative z-10 min-w-0 w-full">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <span className={`text-xs font-bold tracking-[0.18em] uppercase transition-colors ${isActive ? 'text-emerald-500' : 'text-emerald-700'}`}>DAY {group.dayNumber}</span>
-            <span className="text-lg font-semibold text-stone-900">{group.label}</span>
-            <span className="text-xs text-stone-500">{group.dateLabel}（{group.dayLabel}）</span>
-            {milestone && (
-              <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}>
-                <Crown className="w-3 h-3" /> {milestone.label}
-              </span>
-            )}
+      <button type="button" onClick={onSelect} className={`group relative w-full min-h-[92px] mb-4 overflow-hidden rounded-xl border text-left transition-all duration-300 ${isActive ? 'border-emerald-400/70 bg-zinc-900/70 shadow-[0_0_18px_rgba(16,185,129,0.10)]' : 'border-zinc-700/70 bg-zinc-900/35 hover:border-zinc-600'}`} aria-expanded={isExpanded}>
+        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.12] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
+        <div className="relative z-10 flex min-h-[92px] items-center gap-3 px-4 py-3 sm:px-5">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${isActive ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-zinc-700 bg-zinc-800/70 text-zinc-400'}`}>
+            <span className="text-[10px] font-bold tracking-[0.14em]">DAY</span>
+            <span className="ml-1 text-base font-bold leading-none">{group.dayNumber}</span>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-xs text-stone-500">{group.locations.length}件の記録</p>
-            <ChevronDown className={`w-4 h-4 text-stone-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-base font-semibold ${isActive ? 'text-white' : 'text-zinc-200'}`}>{group.label}</span>
+              <span className="text-xs text-zinc-400">{group.dateLabel}（{group.dayLabel}）</span>
+              {milestone && (
+                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}>
+                  <Crown className="w-3 h-3" /> {milestone.label}
+                </span>
+              )}
+            </div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-xs text-zinc-400">{group.locations.length}件の記録</span>
+              <span className={`text-[10px] font-medium ${isExpanded ? 'text-emerald-300' : 'text-zinc-500'}`}>{isExpanded ? '展開中' : 'クリックで表示'}</span>
+            </div>
+          </div>
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${isExpanded ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-zinc-700 bg-zinc-900/60 text-zinc-400'}`}>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
           </div>
         </div>
       </button>
