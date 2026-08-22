@@ -118,14 +118,14 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
           <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /> ロケーションを追加
         </button>
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/70 pointer-events-none" />
           <input
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ロケーション名やメモで検索..."
             aria-label="ロケーションを検索"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#171813] border border-[#2d3028] text-sm text-stone-200 placeholder:text-stone-600 outline-none transition-colors focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 text-sm text-zinc-200 placeholder:text-zinc-500 outline-none transition-all focus:border-emerald-700/70 focus:shadow-[0_0_14px_rgba(16,185,129,0.06)] focus:ring-1 focus:ring-emerald-500/20"
           />
         </div>
       </div>
