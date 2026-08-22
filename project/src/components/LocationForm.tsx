@@ -79,10 +79,10 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-emerald-950/70 bg-zinc-900/80 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-700/70 transition-all';
+  const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-zinc-700/90 bg-zinc-900/88 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/15 focus:border-emerald-500/70 transition-all';
 
   return (
-    <div className="px-4 py-4 max-w-3xl mx-auto space-y-4 pb-4 bg-gradient-to-b from-emerald-950/10 via-zinc-950/10 to-transparent text-zinc-100">
+    <div className="px-4 py-4 max-w-3xl mx-auto space-y-4 pb-4 bg-transparent text-zinc-100">
       {error && <div className="p-3 rounded-xl bg-red-950/35 border border-red-900/60 text-red-300 text-sm">{error}</div>}
 
       <div>
@@ -99,12 +99,12 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       <div>
         <label className="block text-sm font-medium text-zinc-300 mb-1.5">メイン写真</label>
         {mainPreview ? (
-          <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-[0_0_14px_rgba(16,185,129,0.05)]">
+          <div className="relative overflow-hidden rounded-xl border border-zinc-700/90 bg-zinc-950 shadow-[0_0_14px_rgba(0,0,0,0.18)]">
             <img src={mainPreview} alt="メイン写真" className="w-full h-44 object-cover" />
-            <button type="button" onClick={() => { setMainFile(null); setMainPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:text-red-300 hover:border-red-900/60 transition-colors" aria-label="写真を削除"><X className="w-4 h-4" /></button>
+            <button type="button" onClick={() => { setMainFile(null); setMainPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-950/85 border border-zinc-700 text-zinc-300 hover:text-red-300 hover:border-red-900/60 transition-colors" aria-label="写真を削除"><X className="w-4 h-4" /></button>
           </div>
         ) : (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="group w-full h-28 rounded-xl border border-emerald-950/70 bg-gradient-to-r from-emerald-950/15 via-zinc-900/80 to-zinc-900/75 flex flex-col items-center justify-center text-zinc-500 hover:border-emerald-700/60 hover:text-emerald-300 hover:shadow-[0_0_14px_rgba(16,185,129,0.06)] transition-all"><Camera className="w-8 h-8 mb-1 group-hover:scale-105 transition-transform" /><span className="text-sm">撮影・選択</span></button>
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="group w-full h-28 rounded-xl border border-zinc-700/90 bg-zinc-900/70 flex flex-col items-center justify-center text-zinc-500 hover:border-emerald-500/60 hover:text-emerald-300 hover:bg-zinc-900 transition-all"><Camera className="w-8 h-8 mb-1 group-hover:scale-105 transition-transform" /><span className="text-sm">撮影・選択</span></button>
         )}
         <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleMainSelect(e.target.files?.[0] ?? null)} />
       </div>
@@ -112,7 +112,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       <button type="button" onClick={() => setDetailOpen(!detailOpen)} className="flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-emerald-300 transition-colors"><ChevronDown className={`w-4 h-4 transition-transform ${detailOpen ? 'rotate-180' : ''}`} />詳細{detailOpen ? '▲' : '▼'}</button>
 
       {detailOpen && (
-        <div className="space-y-4 p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/15 via-zinc-900/80 to-zinc-900/75 border border-zinc-800 shadow-[0_0_14px_rgba(16,185,129,0.04)]">
+        <div className="space-y-4 p-3.5 rounded-xl bg-zinc-900/65 border border-zinc-800/90 shadow-lg shadow-black/15">
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-1.5">詳細メモ</label>
             <textarea value={detailMemo} onChange={(e) => setDetailMemo(e.target.value)} placeholder="この場所についてのメモ" rows={3} className={`${inputClass} py-2.5 resize-none`} />
@@ -123,7 +123,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
               <div className="flex flex-wrap gap-2">
                 {members.map((m) => {
                   const checked = selectedMembers.has(m.id);
-                  return <button type="button" key={m.id} onClick={() => toggleMember(m.id)} className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${checked ? 'bg-emerald-500/15 text-emerald-300 border-emerald-600/60 shadow-[0_0_10px_rgba(16,185,129,0.06)]' : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200'}`}>{m.name}</button>;
+                  return <button type="button" key={m.id} onClick={() => toggleMember(m.id)} className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${checked ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/50 shadow-[0_0_8px_rgba(16,185,129,0.05)]' : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200'}`}>{m.name}</button>;
                 })}
               </div>
             </div>
@@ -136,8 +136,8 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       )}
 
       <div className="flex gap-3 pt-1">
-        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800 text-zinc-300 font-medium hover:bg-zinc-800 hover:border-zinc-700 active:scale-[0.98] transition-all">キャンセル</button>
-        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? '保存中...' : '保存'}</button>
+        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 font-medium hover:bg-zinc-800 hover:border-zinc-600 active:scale-[0.98] transition-all">キャンセル</button>
+        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? '保存中...' : '保存'}</button>
       </div>
     </div>
   );
