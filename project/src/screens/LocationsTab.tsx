@@ -178,11 +178,11 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
   const mainPhoto = loc.photos.find((p) => p.is_main);
   return <div className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:from-emerald-950/30 hover:via-zinc-900/90 hover:to-zinc-900/85 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)]">
     <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform">
-      <div className="flex gap-3 p-3 pr-4">
+      <div className="flex gap-3.5 p-3.5 pr-4">
         {mainPhoto ? <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 shrink-0"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" /></div> : <div className="w-20 h-20 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0"><MapPin className="w-7 h-7 text-zinc-700" /></div>}
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
-          <div className="flex items-center gap-1.5 min-w-0"><MapPin className="w-4 h-4 text-emerald-400 shrink-0" /><h3 className="font-bold text-sm text-zinc-100 truncate group-hover:text-emerald-300 transition-colors">{loc.name}</h3></div>
-          <div className="self-start inline-flex items-center gap-2 px-2 py-1 bg-zinc-950/80 border border-emerald-900/60 rounded-md font-mono text-[11px] tracking-wide shadow-[inset_0_0_10px_rgba(16,185,129,0.04)]">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-2.5">
+          <div className="flex items-center gap-1.5 min-w-0"><MapPin className="w-4 h-4 text-emerald-400 shrink-0" /><h3 className="font-bold text-sm leading-5 text-zinc-100 truncate group-hover:text-emerald-300 transition-colors">{loc.name}</h3></div>
+          <div className="self-start inline-flex items-center gap-2 px-2.5 py-1.5 bg-zinc-950/80 border border-emerald-900/60 rounded-md font-mono text-[11px] tracking-wide shadow-[inset_0_0_10px_rgba(16,185,129,0.04)]">
             <span className="text-zinc-500 font-semibold">X</span><span className="text-emerald-300 font-bold tabular-nums">{loc.x}</span>
             <span className="text-zinc-500 font-semibold">Y</span><span className="text-emerald-300 font-bold tabular-nums">{loc.y}</span>
             <span className="text-zinc-500 font-semibold">Z</span><span className="text-emerald-300 font-bold tabular-nums">{loc.z}</span>
