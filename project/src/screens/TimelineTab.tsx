@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, MapPin } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
@@ -107,13 +107,43 @@ function DayChapter({ group }: { group: DayGroup }) {
 function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
   const time = new Date(loc.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
   const mainPhoto = loc.photos.find((p) => p.is_main);
+  const hasMemo = Boolean(loc.detail_memo?.trim());
+  const hasPhoto = Boolean(mainPhoto);
+
+  if (hasPhoto || hasMemo) {
+    return (
+      <article className="relative overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+        <span className="absolute -left-[1.55rem] top-5 w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white z-10" />
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(150px,0.8fr)_minmax(240px,1.7fr)]">
+          {hasPhoto ? (
+            <img src={getPhotoUrl(mainPhoto!.storage_path)} alt={loc.name} className="w-full h-44 md:h-full min-h-44 object-cover" />
+          ) : (
+            <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300">
+              <MapPin className="w-7 h-7" />
+            </div>
+          )}
+          <div className="p-4 min-w-0">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4>
+                <p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
+              </div>
+              <span className="shrink-0 text-xs text-stone-500 font-mono">{time}</span>
+            </div>
+            {hasMemo && <p className="mt-3 text-sm leading-6 text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p>}
+            {loc.members.length > 0 && <p className="text-xs text-stone-500 mt-3 truncate">仲間：{loc.members.map((m) => m.name).join('・')}</p>}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
-    <div className="relative grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_minmax(180px,2fr)_auto_auto] md:items-center gap-2 md:gap-4 py-1">
-      <span className="absolute -left-[1.55rem] top-[1.35rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white z-10" />
-      <div className="min-w-0"><h4 className="font-medium text-stone-900 truncate">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div>
-      <div className="min-w-0">{loc.detail_memo ? <p className="text-sm text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p> : <p className="text-sm text-stone-500">メモなし</p>}{loc.members.length > 0 && <p className="text-xs text-stone-500 mt-1 truncate">仲間：{loc.members.map((m) => m.name).join('・')}</p>}</div>
-      <div className="flex items-center">{mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt="" className="w-12 h-12 rounded-lg object-cover" /> : <div className="w-12 h-12 rounded-lg bg-stone-100" />}</div>
-      <span className="text-xs text-stone-500 font-mono md:text-right">{time}</span>
+    <div className="relative min-h-9 flex items-center gap-3 text-sm">
+      <span className="absolute -left-[1.55rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white z-10" />
+      <span className="min-w-0 font-medium text-stone-800 truncate">{loc.name}</span>
+      <span className="shrink-0 text-xs text-stone-500 font-mono">X {loc.x}　Y {loc.y}　Z {loc.z}</span>
+      <span className="ml-auto shrink-0 text-xs text-stone-500 font-mono">{time}</span>
     </div>
   );
 }
