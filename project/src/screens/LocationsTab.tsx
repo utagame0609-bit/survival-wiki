@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil, X, Search } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil, X, Search, ArrowUpDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -10,6 +10,8 @@ type Mode =
   | { type: 'create' }
   | { type: 'edit'; location: LocationWithPhotos };
 
+type SortOrder = 'asc' | 'desc';
+
 export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpenLocationHandled }: { world: WorldWithMembers; reloadKey: number; onReload: () => void; openLocationId?: string | null; onOpenLocationHandled?: () => void }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   const [saving, setSaving] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const loadRequestRef = useRef(0);
 
   const load = async () => {
@@ -102,6 +105,12 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
     ? locations.filter((loc) => loc.name.toLocaleLowerCase().includes(normalizedQuery) || loc.detail_memo?.toLocaleLowerCase().includes(normalizedQuery))
     : locations;
 
+  const sortedLocations = [...filteredLocations].sort((a, b) => {
+    const aTime = new Date(a.created_at).getTime();
+    const bTime = new Date(b.created_at).getTime();
+    return sortOrder === 'asc' ? aTime - bTime : bTime - aTime;
+  });
+
   return (
     <div className="min-h-full bg-[#11120f] text-stone-100 px-4 py-4 max-w-3xl mx-auto">
       <div className="mb-4 space-y-3">
@@ -124,11 +133,22 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       {loading && <Spinner label="ロケーションを読み込み中" />}
       {!loading && locations.length === 0 && <EmptyState message="ロケーションがありません。追加ボタンから記録を始めよう。" />}
       {!loading && locations.length > 0 && <>
-        <div className="flex justify-between items-center px-1 mb-2.5 text-[11px] text-stone-500 font-mono">
+        <div className="flex justify-between items-center px-1 mb-2.5 text-[11px] text-stone-500 font-mono gap-3">
           <span>登録数: {filteredLocations.length} 件</span>
-          {normalizedQuery && <span>「{searchQuery.trim()}」で検索中</span>}
+          <div className="flex items-center gap-2">
+            {normalizedQuery && <span className="truncate">「{searchQuery.trim()}」で検索中</span>}
+            <button
+              type="button"
+              onClick={() => setSortOrder((current) => current === 'asc' ? 'desc' : 'asc')}
+              className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors"
+              aria-label="ロケーションの並び順を変更"
+            >
+              <ArrowUpDown className="w-3 h-3 text-emerald-400" />
+              {sortOrder === 'asc' ? '古い順' : '新しい順'}
+            </button>
+          </div>
         </div>
-        {filteredLocations.length > 0 ? <div className="space-y-2.5">{filteredLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
+        {sortedLocations.length > 0 ? <div className="space-y-2.5">{sortedLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
       </>}
 
       {selectedLocation && (
