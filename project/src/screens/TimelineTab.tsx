@@ -22,7 +22,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('oldest');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
   const [expandedDay, setExpandedDay] = useState(1);
