@@ -160,7 +160,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {!loading && groups.length === 0 && <EmptyState message="タイムラインがありません。ロケーションを記録すると自動生成されます。" />}
       {!loading && groups.length > 0 && (
         <div ref={timelineRef} className="relative">
-          <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-emerald-200" />
+          <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-emerald-400/70 to-cyan-400/40 shadow-[0_0_8px_rgba(52,211,153,0.25)]" />
           <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
             <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'}`}>
               {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
