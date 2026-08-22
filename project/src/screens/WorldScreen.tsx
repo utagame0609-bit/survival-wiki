@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Clock3, MapPin, Settings, X } from 'lucide-react';
+import { BookOpen, Clock3, FileText, MapPin, Settings, X } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWorld, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -76,32 +76,55 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
           </div>
 
           {wikiLocation && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
-              <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setWikiLocation(null)} />
-              <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-2xl bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col">
-                <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]">
-                  <h2 className="text-sm sm:text-base font-semibold">ロケーション</h2>
-                  <button onClick={() => setWikiLocation(null)} aria-label="閉じる" className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100"><X className="w-5 h-5" /></button>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+              <button aria-label="閉じる" className="absolute inset-0" onClick={() => setWikiLocation(null)} />
+              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden rounded-lg bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-sans">
+                <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 border-b border-gray-300 bg-gray-100 text-gray-600">
+                  <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5" />
+                    発掘データレコード // ロケーション詳細
+                  </span>
+                  <button
+                    onClick={() => setWikiLocation(null)}
+                    aria-label="閉じる"
+                    className="p-1 rounded text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
+                  >
+                    <X className="w-[18px] h-[18px]" />
+                  </button>
                 </div>
-                <div className="overflow-y-auto overscroll-contain">
-                  <div className="p-4 sm:p-5 space-y-4">
+
+                <div className="overflow-y-auto overscroll-contain p-5 space-y-4">
+                  <h2 className="text-xl font-bold border-b border-gray-300 pb-2 text-gray-900 break-words">
+                    {wikiLocation.name}
+                  </h2>
+
+                  <div className="p-1.5 rounded border border-gray-300 bg-gray-50">
                     {(() => {
                       const mainPhoto = wikiLocation.photos.find((photo) => photo.is_main);
                       return mainPhoto
-                        ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={wikiLocation.name} className="w-full h-56 sm:h-72 rounded-xl object-cover border border-[#34372f]" />
-                        : <div className="w-full h-56 sm:h-72 rounded-xl bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>;
+                        ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={wikiLocation.name} className="w-full h-48 object-cover rounded" />
+                        : <div className="w-full h-48 rounded bg-gray-100 flex items-center justify-center"><MapPin className="w-12 h-12 text-gray-300" /></div>;
                     })()}
-                    <div>
-                      <h3 className="text-2xl sm:text-3xl font-bold break-words">{wikiLocation.name}</h3>
-                      <div className="mt-4 rounded-xl bg-[#20221d] border border-[#34372f] p-4 sm:p-5">
-                        <div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div>
-                        <div className="grid grid-cols-3 gap-3 text-center font-mono">
-                          <div><div className="text-sm font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl font-semibold">{wikiLocation.x}</div></div>
-                          <div><div className="text-sm font-semibold italic text-stone-300">Y</div><div className="mt-1 text-xl font-semibold">{wikiLocation.y}</div></div>
-                          <div><div className="text-sm font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl font-semibold">{wikiLocation.z}</div></div>
-                        </div>
-                      </div>
+                  </div>
+
+                  <table className="w-full text-sm border-collapse border border-gray-300">
+                    <tbody>
+                      <tr className="border-b border-gray-300">
+                        <th className="w-1/3 bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">座標 (X, Y, Z)</th>
+                        <td className="p-2 font-mono text-xs">{wikiLocation.x}, {wikiLocation.y}, {wikiLocation.z}</td>
+                      </tr>
+                      <tr>
+                        <th className="bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">記録日時</th>
+                        <td className="p-2 text-xs">{new Date(wikiLocation.created_at).toLocaleString('ja-JP')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="p-3 rounded-md text-xs border-l-4 bg-amber-50/50 border-amber-400 text-gray-700">
+                    <div className="font-semibold mb-1 flex items-center gap-1">
+                      <FileText className="w-[13px] h-[13px]" /> 記録資料
                     </div>
+                    <p className="text-gray-500">このロケーションは、Wikiに記録された関連資料です。</p>
                   </div>
                 </div>
               </div>
