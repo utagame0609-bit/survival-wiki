@@ -73,6 +73,18 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const handleDaySelect = (dayNumber: number) => {
     setActiveDay(dayNumber);
     setExpandedDay(dayNumber);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const group = groups.find((item) => item.dayNumber === dayNumber);
+        const element = group ? dayRefs.current.get(group.dateKey) : undefined;
+        if (!element) return;
+
+        const topOffset = 88;
+        const targetTop = Math.max(0, element.getBoundingClientRect().top + window.scrollY - topOffset);
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      });
+    });
   };
 
   const activeMilestone = getMilestone(activeDay);
