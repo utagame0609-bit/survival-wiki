@@ -116,30 +116,33 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {loading && <Spinner label="タイムラインを読み込み中" />}
       {!loading && groups.length === 0 && <EmptyState message="タイムラインがありません。ロケーションを記録すると自動生成されます。" />}
       {!loading && groups.length > 0 && (
-        <div ref={timelineRef} className="relative">
-          <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-emerald-400/70 to-cyan-400/40 shadow-[0_0_8px_rgba(52,211,153,0.25)]" />
-          <div className="pointer-events-none absolute left-[3px] top-[18px] z-10 w-[9px] origin-top rounded-full bg-gradient-to-b from-emerald-300/10 via-emerald-300/70 to-cyan-300/20 shadow-[0_0_10px_rgba(52,211,153,0.25)] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
-          <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
-            <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'}`}>
-              {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
-              <span className={`absolute left-8 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-bold shadow ${activeMilestone ? 'bg-amber-300 text-zinc-950' : 'bg-emerald-400 text-zinc-950'}`}>
-                {activeMilestone ? activeMilestone.label : `Day ${activeDay}`}
-              </span>
+        <>
+          <div ref={timelineRef} className="relative">
+            <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-emerald-400/70 to-cyan-400/40 shadow-[0_0_8px_rgba(52,211,153,0.25)]" />
+            <div className="pointer-events-none absolute left-[3px] top-[18px] z-10 w-[9px] origin-top rounded-full bg-gradient-to-b from-emerald-300/10 via-emerald-300/70 to-cyan-300/20 shadow-[0_0_10px_rgba(52,211,153,0.25)] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
+            <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
+              <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'}`}>
+                {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
+                <span className={`absolute left-8 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-bold shadow ${activeMilestone ? 'bg-amber-300 text-zinc-950' : 'bg-emerald-400 text-zinc-950'}`}>
+                  {activeMilestone ? activeMilestone.label : `Day ${activeDay}`}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-10 pl-8">
+              {groups.map((g) => (
+                <DayChapter
+                  key={g.dateKey}
+                  group={g}
+                  isActive={activeDay === g.dayNumber}
+                  isExpanded={expandedDay === g.dayNumber}
+                  onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }}
+                  onSelect={() => handleDaySelect(g.dayNumber)}
+                />
+              ))}
             </div>
           </div>
-          <div className="space-y-10 pl-8">
-            {groups.map((g) => (
-              <DayChapter
-                key={g.dateKey}
-                group={g}
-                isActive={activeDay === g.dayNumber}
-                isExpanded={expandedDay === g.dayNumber}
-                onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }}
-                onSelect={() => handleDaySelect(g.dayNumber)}
-              />
-            ))}
-          </div>
-        </div>
+          <div aria-hidden="true" className="h-[calc(100vh-88px)]" />
+        </>
       )}
     </div>
   );
