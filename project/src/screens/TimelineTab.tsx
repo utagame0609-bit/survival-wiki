@@ -52,18 +52,15 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
       const timelineRect = timeline.getBoundingClientRect();
       const viewportAnchor = window.innerHeight * 0.32;
-      const topBoundary = viewportAnchor;
-      const bottomBoundary = window.innerHeight * 0.68;
+      const isAtTop = window.scrollY <= 4;
+      const isAtBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8;
 
-      // At the very top, keep the active marker on the first visible day.
-      if (timelineRect.top >= topBoundary) {
+      if (isAtTop) {
         setActiveDay(groups[0].dayNumber);
         return;
       }
 
-      // At the very bottom, force the marker onto the final day so it can
-      // always reach the end of a long timeline.
-      if (timelineRect.bottom <= bottomBoundary) {
+      if (isAtBottom) {
         setActiveDay(groups[groups.length - 1].dayNumber);
         return;
       }
