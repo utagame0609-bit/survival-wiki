@@ -172,8 +172,19 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
 
 function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: () => void }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
-  return <div className="group relative rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden"><button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform hover:bg-[#20231c]"><div className="flex gap-3 p-3 pr-16">
-    {mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-[72px] h-[72px] rounded-lg object-cover flex-shrink-0" /> : <div className="w-[72px] h-[72px] rounded-lg bg-[#24271f] flex items-center justify-center flex-shrink-0"><MapPin className="w-7 h-7 text-stone-600" /></div>}
-    <div className="flex-1 min-w-0 flex flex-col justify-center"><div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" /><h3 className="font-semibold text-stone-100 truncate">{loc.name}</h3></div><p className="text-sm text-stone-400 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div>
-  </div></button></div>;
+  return <div className="group relative rounded-xl bg-zinc-900/90 border border-zinc-800/90 shadow-md shadow-black/20 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-900 hover:border-emerald-500/25 hover:shadow-lg hover:shadow-emerald-950/15">
+    <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform">
+      <div className="flex gap-3 p-3 pr-4">
+        {mainPhoto ? <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 shrink-0"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" /></div> : <div className="w-20 h-20 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0"><MapPin className="w-7 h-7 text-zinc-700" /></div>}
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+          <div className="flex items-center gap-1.5 min-w-0"><MapPin className="w-4 h-4 text-emerald-400 shrink-0" /><h3 className="font-bold text-sm text-zinc-100 truncate group-hover:text-emerald-300 transition-colors">{loc.name}</h3></div>
+          <div className="self-start inline-flex items-center gap-2 px-2 py-1 bg-zinc-950/80 border border-zinc-800 rounded-md font-mono text-[11px]">
+            <span className="text-zinc-500">X</span><span className="text-emerald-400 font-bold">{loc.x}</span>
+            <span className="text-zinc-500">Y</span><span className="text-emerald-400 font-bold">{loc.y}</span>
+            <span className="text-zinc-500">Z</span><span className="text-emerald-400 font-bold">{loc.z}</span>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>;
 }
