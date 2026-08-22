@@ -69,7 +69,7 @@ export function WikiTab({ world, reloadKey, onOpenLocation }: { world: WorldWith
 
   const handleGenerate = async () => {
     const now = Date.now();
-    if (generating || now < cooldownUntil || locations.length === 0 || style === null) return;
+    if (generating || article !== null || now < cooldownUntil || locations.length === 0 || style === null) return;
     setGenerating(true); setError('');
     try {
       const result = await openRouterTestProvider.generate({ world, locations, style });
@@ -131,7 +131,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
 
-  const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
+  const actionButtons = <div className="flex gap-2 mb-4 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={hasArticle || generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : hasArticle ? <><RefreshCw className="w-5 h-5" />更新</> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
 
   if (style === null) return <div>{actionButtons}<EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" /></div>;
 
