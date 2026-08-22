@@ -36,6 +36,7 @@
 
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   overflow: visible;
   padding-bottom: 0;
@@ -43,8 +44,8 @@
 
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button {
   width: 100%;
-  min-height: 4.5rem;
-  padding: 0.85rem 1rem;
+  min-height: 6.25rem;
+  padding: 0.85rem 0.9rem;
   border: 1px solid rgba(63, 63, 70, 0.9) !important;
   border-radius: 0.75rem;
   background: rgba(24, 24, 27, 0.88) !important;
@@ -90,4 +91,21 @@
 
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600::after {
   color: rgba(167, 243, 208, 0.65);
+}
+
+/* Before a style is selected, generation/reset controls have no article to act on. */
+.w-full.px-4.py-4.max-w-3xl.mx-auto > div:not(.mb-4) > .flex.gap-2.mb-4.px-4.pt-4 {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button {
+    min-height: 5.75rem;
+    padding: 0.7rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button::after {
+    font-size: 0.65rem;
+  }
 }
