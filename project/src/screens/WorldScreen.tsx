@@ -79,7 +79,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
           {wikiLocation && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
               <button aria-label="閉じる" className="absolute inset-0" onClick={() => setWikiLocation(null)} />
-              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-serif">
+              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-serif motion-safe:animate-[wiki-modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
                 <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 border-b border-gray-300 bg-gray-100 text-gray-600">
                   <span className="text-xs tracking-wider flex items-center gap-2">
                     <img src={UTAPEDIA_AVATAR} alt="ウタペディア" className="w-6 h-6 object-cover border border-gray-300" />
@@ -139,6 +139,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
           </button>
         </>
       )}
+      <style>{`@keyframes wiki-modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[wiki-modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1\\)\\] { animation: none !important; } }`}</style>
     </div>
   );
 }
