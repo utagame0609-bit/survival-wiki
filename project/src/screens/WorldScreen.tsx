@@ -49,6 +49,11 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
   };
 
   const handleWorldBack = () => {
+    if (tab === 'wiki') {
+      setTab('timeline');
+      setTabHistory([]);
+      return;
+    }
     if (tabHistory.length > 0) {
       setTabHistory((history) => {
         const previousTab = history[history.length - 1];
@@ -110,56 +115,21 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
                     <span className="text-gray-400">//</span>
                     <span>ロケーション詳細</span>
                   </span>
-                  <button
-                    onClick={() => setWikiLocation(null)}
-                    aria-label="閉じる"
-                    className="p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
-                  >
-                    <X className="w-[18px] h-[18px]" />
-                  </button>
+                  <button onClick={() => setWikiLocation(null)} aria-label="閉じる" className="p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"><X className="w-[18px] h-[18px]" /></button>
                 </div>
-
                 <div className="overflow-y-auto overscroll-contain p-5 space-y-4">
-                  <h2 className="text-xl font-bold border-b border-gray-300 pb-2 text-gray-900 break-words">
-                    {wikiLocation.name}
-                  </h2>
-
+                  <h2 className="text-xl font-bold border-b border-gray-300 pb-2 text-gray-900 break-words">{wikiLocation.name}</h2>
                   <div className="p-1.5 border border-gray-300 bg-gray-50">
-                    {(() => {
-                      const mainPhoto = wikiLocation.photos.find((photo) => photo.is_main);
-                      return mainPhoto
-                        ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={wikiLocation.name} className="w-full h-48 object-cover" />
-                        : <div className="w-full h-48 bg-gray-100 flex items-center justify-center"><MapPin className="w-12 h-12 text-gray-300" /></div>;
-                    })()}
+                    {(() => { const mainPhoto = wikiLocation.photos.find((photo) => photo.is_main); return mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt={wikiLocation.name} className="w-full h-48 object-cover" /> : <div className="w-full h-48 bg-gray-100 flex items-center justify-center"><MapPin className="w-12 h-12 text-gray-300" /></div>; })()}
                   </div>
-
-                  <table className="w-full text-sm border-collapse border border-gray-300">
-                    <tbody>
-                      <tr className="border-b border-gray-300">
-                        <th className="w-1/3 bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">座標 (X, Y, Z)</th>
-                        <td className="p-2 font-mono text-xs">{wikiLocation.x}, {wikiLocation.y}, {wikiLocation.z}</td>
-                      </tr>
-                      <tr>
-                        <th className="bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">記録日時</th>
-                        <td className="p-2 text-xs">{new Date(wikiLocation.created_at).toLocaleString('ja-JP')}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <div className="p-3 text-xs border-l-4 bg-amber-50/50 border-amber-400 text-gray-700">
-                    <div className="font-semibold mb-1 flex items-center gap-1">
-                      <FileText className="w-[13px] h-[13px]" /> 記録資料
-                    </div>
-                    <p className="text-gray-500">このロケーションは、ウタペディアに記録された関連資料です。</p>
-                  </div>
+                  <table className="w-full text-sm border-collapse border border-gray-300"><tbody><tr className="border-b border-gray-300"><th className="w-1/3 bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">座標 (X, Y, Z)</th><td className="p-2 font-mono text-xs">{wikiLocation.x}, {wikiLocation.y}, {wikiLocation.z}</td></tr><tr><th className="bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">記録日時</th><td className="p-2 text-xs">{new Date(wikiLocation.created_at).toLocaleString('ja-JP')}</td></tr></tbody></table>
+                  <div className="p-3 text-xs border-l-4 bg-amber-50/50 border-amber-400 text-gray-700"><div className="font-semibold mb-1 flex items-center gap-1"><FileText className="w-[13px] h-[13px]" /> 記録資料</div><p className="text-gray-500">このロケーションは、ウタペディアに記録された関連資料です。</p></div>
                 </div>
               </div>
             </div>
           )}
 
-          <button onClick={() => navigate({ name: 'worldCreate', gameId: world.game_id, gameName: '', worldId: world.id })} className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all">
-            <Settings className="w-5 h-5" />
-          </button>
+          <button onClick={() => navigate({ name: 'worldCreate', gameId: world.game_id, gameName: '', worldId: world.id })} className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all"><Settings className="w-5 h-5" /></button>
         </>
       )}
       <style>{`@keyframes wiki-modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[wiki-modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1\\)\\] { animation: none !important; } }`}</style>
