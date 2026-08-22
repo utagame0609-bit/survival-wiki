@@ -66,7 +66,12 @@ export function WikiTab({ world, reloadKey, onOpenLocation }: { world: WorldWith
     return () => { if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current); };
   }, [world.id, style, reloadKey]);
 
-  const handleStyleSelect = (nextStyle: WikiStyleId) => { if (!generating && !resetting) setStyle(nextStyle); };
+  const handleStyleSelect = (nextStyle: WikiStyleId) => {
+    if (generating || resetting || nextStyle === style) return;
+    setLoading(true);
+    setArticle(null);
+    setStyle(nextStyle);
+  };
 
   const handleGenerate = async () => {
     const now = Date.now();
