@@ -11,7 +11,6 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [expanded, setExpanded] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const sortMenuRef = useRef<HTMLDivElement>(null);
@@ -35,7 +34,6 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     return sortOrder === 'newest' ? grouped : [...grouped].reverse();
   }, [locations, sortOrder]);
 
-  const toggle = (key: string) => setExpanded((prev) => (prev === key ? null : key));
   const selectSortOrder = (value: SortOrder) => {
     setSortOrder(value);
     setSortMenuOpen(false);
@@ -43,7 +41,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-4 rounded-xl bg-emerald-600 px-16 flex items-center justify-between shadow-sm">
+      <div className="h-[45px] mb-6 rounded-xl bg-emerald-600 px-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-sm font-semibold tracking-[0.18em] text-white whitespace-nowrap">WORLD LOG</span>
           <span className="h-4 w-px bg-emerald-300" />
@@ -72,21 +70,37 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="タイムラインを読み込み中" />}
       {!loading && groups.length === 0 && <EmptyState message="タイムラインがありません。ロケーションを記録すると自動生成されます。" />}
-      {!loading && groups.length > 0 && <div className="space-y-3">{groups.map((g) => <DayCard key={g.dateKey} group={g} isExpanded={expanded === g.dateKey} onToggle={() => toggle(g.dateKey)} />)}</div>}
+      {!loading && groups.length > 0 && <div className="space-y-10">{groups.map((g) => <DayChapter key={g.dateKey} group={g} />)}</div>}
     </div>
   );
 }
 
-function DayCard({ group, isExpanded, onToggle }: { group: DayGroup; isExpanded: boolean; onToggle: () => void }) {
+function DayChapter({ group }: { group: DayGroup }) {
   return (
-    <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm bg-white relative">
-      {group.bgPhoto && <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute top-0 left-0 w-full h-auto max-w-none opacity-[0.35] [mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_65%,transparent_100%)]" /></div>}
-      <button onClick={onToggle} className="relative z-10 w-full min-h-[104px] text-left p-4 pl-6 flex items-center justify-between bg-transparent">
-        <div><p className="text-lg font-semibold text-stone-900 whitespace-pre-line">{group.label}</p><p className="text-xs text-stone-600 mt-0.5">{group.locations.length}件の記録</p></div>
-        <ChevronDown className={`w-5 h-5 text-stone-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-      </button>
-      {isExpanded && <div className="relative z-10 px-4 pb-4 bg-transparent"><div className="border-l-2 border-emerald-300 ml-3 pl-4 space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>}
-    </div>
+    <section className="relative">
+      <div className="relative min-h-[88px] mb-4 flex items-end overflow-hidden border-b border-stone-300 pb-3">
+        {group.bgPhoto && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.16] [mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)]" />
+          </div>
+        )}
+        <div className="relative z-10 min-w-0">
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-xs font-bold tracking-[0.18em] text-emerald-700 uppercase">DAY {group.dayNumber}</span>
+            <span className="text-lg font-semibold text-stone-900">{group.label}</span>
+            <span className="text-xs text-stone-500">{group.dateLabel}（{group.dayLabel}）</span>
+          </div>
+          <p className="text-xs text-stone-500 mt-1">{group.locations.length}件の記録</p>
+        </div>
+      </div>
+
+      <div className="relative pl-8">
+        <div className="absolute left-[7px] top-1 bottom-1 w-px bg-emerald-200" />
+        <div className="space-y-4">
+          {group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -95,7 +109,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_minmax(180px,2fr)_auto_auto] md:items-center gap-2 md:gap-4 py-1">
-      <span className="absolute -left-[1.5rem] top-[1.4rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white" />
+      <span className="absolute -left-[1.55rem] top-[1.35rem] w-3.5 h-3.5 rounded-full border-2 border-emerald-600 bg-white z-10" />
       <div className="min-w-0"><h4 className="font-medium text-stone-900 truncate">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-0.5">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div>
       <div className="min-w-0">{loc.detail_memo ? <p className="text-sm text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p> : <p className="text-sm text-stone-500">メモなし</p>}{loc.members.length > 0 && <p className="text-xs text-stone-500 mt-1 truncate">仲間：{loc.members.map((m) => m.name).join('・')}</p>}</div>
       <div className="flex items-center">{mainPhoto ? <img src={getPhotoUrl(mainPhoto.storage_path)} alt="" className="w-12 h-12 rounded-lg object-cover" /> : <div className="w-12 h-12 rounded-lg bg-stone-100" />}</div>
