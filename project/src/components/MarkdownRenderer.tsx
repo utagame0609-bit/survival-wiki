@@ -279,7 +279,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
       <div className="mb-0 pb-2 font-semibold text-[#202122]">目次</div>
       <ol className="border-t border-[#eaecf0] pt-2 space-y-1">
         {headings.map((heading, index) => (
-          <li key={heading.id} className={heading.level === 3 ? 'ml-5' : ''}>
+          <li key={heading.id} className={`min-w-0 ${heading.level === 3 ? 'ml-5' : ''}`}>
             <button
               type="button"
               onClick={() =>
@@ -287,7 +287,8 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
                   .getElementById(heading.id)
                   ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }
-              className="text-left text-[#36c] hover:underline"
+              title={heading.text}
+              className="block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-left text-[#36c] hover:underline"
             >
               {index + 1}. {heading.text}
             </button>
