@@ -65,6 +65,17 @@ button:not(:disabled):active {
   filter: brightness(0.98);
 }
 
+/* Timeline card expansion: reveal the newly opened records with a short, subtle motion. */
+@keyframes timeline-card-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+section.relative.scroll-mt-24 > div.relative.pb-2 {
+  animation: timeline-card-reveal 180ms cubic-bezier(.22,.8,.35,1);
+  transform-origin: top center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   button:not(:disabled) {
     transition: none;
@@ -74,5 +85,9 @@ button:not(:disabled):active {
   button:not(:disabled):active {
     transform: none;
     filter: none;
+  }
+
+  section.relative.scroll-mt-24 > div.relative.pb-2 {
+    animation: none;
   }
 }
