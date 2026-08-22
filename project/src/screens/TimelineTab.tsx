@@ -1,11 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Footprints, MapPin } from 'lucide-react';
+import { ChevronDown, Crown, Footprints, MapPin } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 
 type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhoto?: string };
 type SortOrder = 'newest' | 'oldest';
+type Milestone = { day: number; label: string };
+
+const MILESTONES: Milestone[] = [
+  { day: 3, label: '三日坊主突破！' },
+  { day: 7, label: '7日継続！' },
+  { day: 30, label: '30日継続！' },
+];
+
+function getMilestone(dayNumber: number) {
+  return MILESTONES.find((milestone) => milestone.day === dayNumber);
+}
 
 export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
@@ -50,7 +61,6 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       const timeline = timelineRef.current;
       if (!timeline) return;
 
-      const timelineRect = timeline.getBoundingClientRect();
       const viewportAnchor = window.innerHeight * 0.32;
       const isAtTop = window.scrollY <= 4;
       const isAtBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8;
@@ -121,6 +131,8 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     setSortMenuOpen(false);
   };
 
+  const activeMilestone = getMilestone(activeDay);
+
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
       <div className="h-[45px] mb-6 rounded-xl bg-emerald-600 px-16 flex items-center justify-between shadow-sm">
@@ -150,9 +162,11 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
         <div ref={timelineRef} className="relative">
           <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-emerald-200" />
           <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
-            <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-400 text-zinc-950 shadow-lg shadow-emerald-500/30 ring-4 ring-zinc-950/90">
-              <Footprints className="w-4 h-4" />
-              <span className="absolute left-8 whitespace-nowrap rounded bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow">Day {activeDay}</span>
+            <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'}`}>
+              {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
+              <span className={`absolute left-8 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-bold shadow ${activeMilestone ? 'bg-amber-300 text-zinc-950' : 'bg-emerald-400 text-zinc-950'}`}>
+                {activeMilestone ? activeMilestone.label : `Day ${activeDay}`}
+              </span>
             </div>
           </div>
           <div className="space-y-10 pl-8">
@@ -168,15 +182,22 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 }
 
 function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isActive: boolean; isPassed: boolean; onRef: (element: HTMLElement | null) => void }) {
+  const milestone = getMilestone(group.dayNumber);
+
   return (
     <section ref={onRef} className="relative scroll-mt-24">
       <div className={`relative min-h-[88px] mb-4 flex items-end overflow-hidden border-b pb-3 transition-colors ${isActive ? 'border-emerald-400' : 'border-stone-300'}`}>
         {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.16] [mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)]" /></div>}
-        <div className="relative z-10 min-w-0">
+        <div className="relative z-10 min-w-0 w-full">
           <div className="flex items-baseline gap-3 flex-wrap">
             <span className={`text-xs font-bold tracking-[0.18em] uppercase transition-colors ${isActive ? 'text-emerald-500' : 'text-emerald-700'}`}>DAY {group.dayNumber}</span>
             <span className="text-lg font-semibold text-stone-900">{group.label}</span>
             <span className="text-xs text-stone-500">{group.dateLabel}（{group.dayLabel}）</span>
+            {milestone && (
+              <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}>
+                <Crown className="w-3 h-3" /> {milestone.label}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-xs text-stone-500">{group.locations.length}件の記録</p>
