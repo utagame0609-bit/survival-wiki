@@ -50,7 +50,7 @@ export function WorldCreateModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)]">
+      <div className="world-create-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/90">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
@@ -178,6 +178,17 @@ export function WorldCreateModal({
           border-color: rgba(16, 185, 129, 0.75);
           background: rgba(24, 24, 27, 0.96);
           box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.12), 0 0 14px rgba(16, 185, 129, 0.05);
+        }
+        .world-create-modal-panel {
+          animation: world-create-modal-in 180ms cubic-bezier(.22,.8,.35,1) both;
+          transform-origin: center;
+        }
+        @keyframes world-create-modal-in {
+          from { opacity: 0; transform: translateY(8px) scale(0.985); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .world-create-modal-panel { animation: none; }
         }
       `}</style>
     </div>
