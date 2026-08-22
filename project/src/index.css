@@ -1,3 +1,93 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Wiki style selection: align the pre-generation screen with the World Setup visual language. */
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(6, 78, 59, 0.6);
+  background: linear-gradient(90deg, rgba(6, 78, 59, 0.55), rgba(24, 24, 27, 0.9), rgba(24, 24, 27, 0.85));
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.08);
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > p:first-child {
+  display: none;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4::before {
+  content: 'WIKI STYLE';
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #f4f4f5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4::after {
+  content: '生成するWikiの記述スタイルを選択';
+  display: block;
+  margin-bottom: 0.75rem;
+  color: rgba(209, 250, 229, 0.6);
+  font-size: 0.75rem;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div {
+  display: grid;
+  gap: 0.5rem;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(63, 63, 70, 0.9) !important;
+  border-radius: 0.75rem;
+  background: rgba(24, 24, 27, 0.88) !important;
+  color: #d4d4d8 !important;
+  text-align: left;
+  white-space: normal;
+  box-shadow: none;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button::after {
+  display: block;
+  margin-top: 0.3rem;
+  color: #71717a;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:nth-child(1)::after {
+  content: '百科事典風の客観的な記述';
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:nth-child(2)::after {
+  content: '機密文書風の冷徹な報告書';
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:nth-child(3)::after {
+  content: '滅びゆく世界の古文書風の記録';
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600 {
+  border-color: rgba(52, 211, 153, 0.55) !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #6ee7b7 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.08);
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:hover:not(:disabled) {
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  background: rgba(6, 78, 59, 0.28) !important;
+  color: #a7f3d0 !important;
+}
+
+.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600::after {
+  color: rgba(167, 243, 208, 0.65);
+}
