@@ -49,7 +49,25 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
     const updateActiveDay = () => {
       const timeline = timelineRef.current;
       if (!timeline) return;
+
+      const timelineRect = timeline.getBoundingClientRect();
       const viewportAnchor = window.innerHeight * 0.32;
+      const topBoundary = viewportAnchor;
+      const bottomBoundary = window.innerHeight * 0.68;
+
+      // At the very top, keep the active marker on the first visible day.
+      if (timelineRect.top >= topBoundary) {
+        setActiveDay(groups[0].dayNumber);
+        return;
+      }
+
+      // At the very bottom, force the marker onto the final day so it can
+      // always reach the end of a long timeline.
+      if (timelineRect.bottom <= bottomBoundary) {
+        setActiveDay(groups[groups.length - 1].dayNumber);
+        return;
+      }
+
       let closestDay = groups[0].dayNumber;
       let closestDistance = Number.POSITIVE_INFINITY;
 
@@ -116,13 +134,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
         </div>
         <div ref={sortMenuRef} className="relative shrink-0 ml-3">
           <span className="sr-only">並び順</span>
-          <button
-            type="button"
-            onClick={() => setSortMenuOpen((prev) => !prev)}
-            aria-haspopup="menu"
-            aria-expanded={sortMenuOpen}
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-          >
+          <button type="button" onClick={() => setSortMenuOpen((prev) => !prev)} aria-haspopup="menu" aria-expanded={sortMenuOpen} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
             {sortOrder === 'newest' ? '新しい順' : '古い順'}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -140,33 +152,16 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {!loading && groups.length > 0 && (
         <div ref={timelineRef} className="relative">
           <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-emerald-200" />
-          <div
-            className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out"
-            style={{ top: `${activeIconTop}px` }}
-            aria-hidden="true"
-          >
+          <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
             <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-400 text-zinc-950 shadow-lg shadow-emerald-500/30 ring-4 ring-zinc-950/90">
               <Footprints className="w-4 h-4" />
-              <span className="absolute left-8 whitespace-nowrap rounded bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow">
-                Day {activeDay}
-              </span>
+              <span className="absolute left-8 whitespace-nowrap rounded bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow">Day {activeDay}</span>
             </div>
           </div>
           <div className="space-y-10 pl-8">
             {groups.map((g) => {
               const isPassed = sortOrder === 'newest' ? g.dayNumber > activeDay : g.dayNumber < activeDay;
-              return (
-                <DayChapter
-                  key={g.dateKey}
-                  group={g}
-                  isActive={activeDay === g.dayNumber}
-                  isPassed={isPassed}
-                  onRef={(element) => {
-                    if (element) dayRefs.current.set(g.dateKey, element);
-                    else dayRefs.current.delete(g.dateKey);
-                  }}
-                />
-              );
+              return <DayChapter key={g.dateKey} group={g} isActive={activeDay === g.dayNumber} isPassed={isPassed} onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }} />;
             })}
           </div>
         </div>
@@ -179,11 +174,7 @@ function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isA
   return (
     <section ref={onRef} className="relative scroll-mt-24">
       <div className={`relative min-h-[88px] mb-4 flex items-end overflow-hidden border-b pb-3 transition-colors ${isActive ? 'border-emerald-400' : 'border-stone-300'}`}>
-        {group.bgPhoto && (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.16] [mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)]" />
-          </div>
-        )}
+        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.16] [mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_55%,transparent_100%)]" /></div>}
         <div className="relative z-10 min-w-0">
           <div className="flex items-baseline gap-3 flex-wrap">
             <span className={`text-xs font-bold tracking-[0.18em] uppercase transition-colors ${isActive ? 'text-emerald-500' : 'text-emerald-700'}`}>DAY {group.dayNumber}</span>
@@ -196,12 +187,7 @@ function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isA
           </div>
         </div>
       </div>
-
-      <div className="relative">
-        <div className="space-y-4">
-          {group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}
-        </div>
-      </div>
+      <div className="relative"><div className="space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>
     </section>
   );
 }
@@ -216,19 +202,10 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
     return (
       <article className="relative overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(150px,0.8fr)_minmax(240px,1.7fr)]">
-          {hasPhoto ? (
-            <img src={getPhotoUrl(mainPhoto!.storage_path)} alt={loc.name} className="w-full h-44 md:h-full min-h-44 object-cover" />
-          ) : (
-            <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300">
-              <MapPin className="w-7 h-7" />
-            </div>
-          )}
+          {hasPhoto ? <img src={getPhotoUrl(mainPhoto!.storage_path)} alt={loc.name} className="w-full h-44 md:h-full min-h-44 object-cover" /> : <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300"><MapPin className="w-7 h-7" /></div>}
           <div className="p-4 min-w-0">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4>
-                <p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p>
-              </div>
+              <div className="min-w-0"><h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div>
               <span className="shrink-0 text-xs text-stone-500 font-mono">{time}</span>
             </div>
             {hasMemo && <p className="mt-3 text-sm leading-6 text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p>}
@@ -239,13 +216,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
     );
   }
 
-  return (
-    <div className="relative min-h-9 flex items-center gap-3 text-sm">
-      <span className="min-w-0 font-medium text-stone-800 truncate">{loc.name}</span>
-      <span className="shrink-0 text-xs text-stone-500 font-mono">X {loc.x}　Y {loc.y}　Z {loc.z}</span>
-      <span className="ml-auto shrink-0 text-xs text-stone-500 font-mono">{time}</span>
-    </div>
-  );
+  return <div className="relative min-h-9 flex items-center gap-3 text-sm"><span className="min-w-0 font-medium text-stone-800 truncate">{loc.name}</span><span className="shrink-0 text-xs text-stone-500 font-mono">X {loc.x}　Y {loc.y}　Z {loc.z}</span><span className="ml-auto shrink-0 text-xs text-stone-500 font-mono">{time}</span></div>;
 }
 
 function groupByDay(locations: LocationWithPhotos[]): DayGroup[] {
