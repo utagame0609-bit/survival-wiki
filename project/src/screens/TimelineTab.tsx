@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Crown, Footprints, MapPin } from 'lucide-react';
+import { Activity, ArrowUpDown, ChevronDown, Crown, Footprints, MapPin } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
@@ -89,25 +89,38 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
 
   const activeMilestone = getMilestone(activeDay);
   const trailHeight = Math.max(0, activeIconTop - 18);
+  const totalRecords = locations.length;
+  const totalDays = groups.length;
 
   return (
     <div className="px-4 py-4 max-w-3xl mx-auto">
-      <div className="h-[45px] mb-6 rounded-xl bg-emerald-600 px-16 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="text-sm font-semibold tracking-[0.18em] text-white whitespace-nowrap">WORLD LOG</span>
-          <span className="h-4 w-px bg-emerald-300" />
-          <span className="text-xs text-white truncate">この世界で記録された出来事</span>
+      <div className="w-full mb-6 rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 px-4 shadow-lg backdrop-blur-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 shrink-0 rounded-full bg-emerald-400" />
+            <h2 className="text-xs font-extrabold tracking-widest text-zinc-100 uppercase font-mono whitespace-nowrap">WORLD LOG</h2>
+            <span className="text-zinc-600 font-mono text-xs">/</span>
+            <span className="text-xs text-zinc-400 truncate">この世界で記録された出来事</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-zinc-500 font-mono pl-4">
+            <span className="flex items-center gap-1 whitespace-nowrap">
+              <Activity size={12} className="text-emerald-500" />
+              総記録数: <strong className="text-emerald-400">{totalRecords}</strong>
+            </span>
+            <span className="text-zinc-700">•</span>
+            <span className="whitespace-nowrap">記録日数: <strong className="text-zinc-300">{totalDays} Days</strong></span>
+          </div>
         </div>
-        <div ref={sortMenuRef} className="relative shrink-0 ml-3">
-          <span className="sr-only">並び順</span>
-          <button type="button" onClick={() => setSortMenuOpen((prev) => !prev)} aria-haspopup="menu" aria-expanded={sortMenuOpen} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-            {sortOrder === 'newest' ? '新しい順' : '古い順'}
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`} />
+
+        <div className="self-end sm:self-auto shrink-0">
+          <button type="button" onClick={() => setSortMenuOpen((prev) => !prev)} aria-haspopup="menu" aria-expanded={sortMenuOpen} className="flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 shadow-sm transition-colors hover:bg-zinc-700/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
+            <ArrowUpDown size={13} className="text-emerald-400" />
+            <span>{sortOrder === 'oldest' ? '古い順' : '新しい順'}</span>
           </button>
           {sortMenuOpen && (
-            <div className="absolute right-0 top-full mt-1 z-30 min-w-[92px] overflow-hidden rounded-lg border border-emerald-700/20 bg-white shadow-lg ring-1 ring-black/5" role="menu">
-              <button type="button" onClick={() => selectSortOrder('newest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'newest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`} role="menuitem">新しい順</button>
-              <button type="button" onClick={() => selectSortOrder('oldest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'oldest' ? 'bg-emerald-50 font-semibold text-emerald-700' : 'text-stone-700 hover:bg-stone-50'}`} role="menuitem">古い順</button>
+            <div ref={sortMenuRef} className="absolute z-30 mt-1 min-w-[110px] overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 shadow-lg" role="menu">
+              <button type="button" onClick={() => selectSortOrder('newest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'newest' ? 'bg-emerald-500/10 font-semibold text-emerald-300' : 'text-zinc-300 hover:bg-zinc-800'}`} role="menuitem">新しい順</button>
+              <button type="button" onClick={() => selectSortOrder('oldest')} className={`block w-full px-3 py-2 text-left text-xs transition-colors ${sortOrder === 'oldest' ? 'bg-emerald-500/10 font-semibold text-emerald-300' : 'text-zinc-300 hover:bg-zinc-800'}`} role="menuitem">古い順</button>
             </div>
           )}
         </div>
