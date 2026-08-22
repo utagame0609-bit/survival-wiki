@@ -188,7 +188,7 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
             <span className="text-zinc-500 font-semibold">Z</span><span className="text-emerald-300 font-bold tabular-nums">{loc.z}</span>
           </div>
         </div>
-        <div className="flex items-center self-stretch pl-1 text-zinc-600 group-hover:text-emerald-300 transition-colors" aria-hidden="true"><ChevronRight className="w-5 h-5" /></div>
+        <div className="flex items-center self-stretch pl-1 text-zinc-600 group-hover:text-emerald-300 group-hover:translate-x-0.5 transition-all" aria-hidden="true"><ChevronRight className="w-5 h-5" /></div>
       </div>
     </button>
   </div>;
