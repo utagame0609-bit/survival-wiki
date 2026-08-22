@@ -18,6 +18,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('locations');
   const [tabHistory, setTabHistory] = useState<Tab[]>([]);
+  const [wikiArticleBack, setWikiArticleBack] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [openLocationId, setOpenLocationId] = useState<string | null>(null);
   const [wikiLocation, setWikiLocation] = useState<LocationWithPhotos | null>(null);
@@ -44,11 +45,20 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
 
   const handleTabChange = (nextTab: Tab) => {
     if (nextTab === tab) return;
+    setWikiArticleBack(false);
     setTabHistory((history) => [...history, tab]);
     setTab(nextTab);
   };
 
+  const handleWikiArticleStateChange = (isArticle: boolean) => {
+    setWikiArticleBack(isArticle);
+  };
+
   const handleWorldBack = () => {
+    if (tab === 'wiki' && wikiArticleBack) {
+      setWikiArticleBack(false);
+      return;
+    }
     if (tab === 'wiki') {
       setTab('timeline');
       setTabHistory([]);
@@ -101,7 +111,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
           <div className="flex-1">
             {tab === 'locations' && <LocationsTab world={world} reloadKey={reloadKey} onReload={reload} openLocationId={openLocationId} onOpenLocationHandled={() => setOpenLocationId(null)} />}
             {tab === 'timeline' && <TimelineTab world={world} reloadKey={reloadKey} />}
-            {tab === 'wiki' && <WikiTab world={world} reloadKey={reloadKey} onOpenLocation={handleOpenLocation} />}
+            {tab === 'wiki' && <WikiTab world={world} reloadKey={reloadKey} onOpenLocation={handleOpenLocation} onArticleStateChange={handleWikiArticleStateChange} />}
           </div>
 
           {wikiLocation && (
