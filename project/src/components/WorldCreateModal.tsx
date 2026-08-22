@@ -45,19 +45,22 @@ export function WorldCreateModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-[#1b1c18] border border-[#36392f] shadow-2xl shadow-black/50">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#30332b]">
-          <h2 className="text-lg font-semibold text-stone-100">ワールドを追加</h2>
+      <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/90">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+            <h2 className="text-lg font-semibold text-zinc-100">ワールドを追加</h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="閉じる"
-            className="w-9 h-9 rounded-lg text-stone-400 hover:text-stone-100 hover:bg-[#292b24] flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/70 flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -89,11 +92,11 @@ export function WorldCreateModal({
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-medium text-stone-300">関連メンバー</label>
+              <label className="text-sm font-medium text-zinc-300">関連メンバー</label>
               <button
                 type="button"
                 onClick={() => setMembers([...members, ''])}
-                className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300"
+                className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 追加
@@ -117,7 +120,7 @@ export function WorldCreateModal({
                     <button
                       type="button"
                       onClick={() => setMembers(members.filter((_, i) => i !== index))}
-                      className="w-10 h-10 rounded-lg text-stone-500 hover:text-red-300 hover:bg-red-950/30 flex items-center justify-center"
+                      className="w-10 h-10 rounded-lg text-zinc-500 hover:text-red-300 hover:bg-red-950/30 flex items-center justify-center transition-colors"
                       aria-label="メンバーを削除"
                     >
                       <X className="w-5 h-5" />
@@ -139,12 +142,12 @@ export function WorldCreateModal({
           </Field>
         </div>
 
-        <div className="flex gap-2 px-5 py-4 border-t border-[#30332b] bg-[#171813]">
+        <div className="flex gap-2 px-5 py-4 border-t border-zinc-800/90 bg-zinc-950/30">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="flex-1 py-2.5 rounded-xl bg-[#292b24] text-stone-300 font-medium hover:bg-[#34372e] disabled:opacity-50 transition-colors"
+            className="flex-1 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 font-medium hover:bg-zinc-800 hover:border-zinc-600 disabled:opacity-50 transition-all"
           >
             キャンセル
           </button>
@@ -152,7 +155,7 @@ export function WorldCreateModal({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 py-2.5 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-600 disabled:opacity-50 transition-colors"
+            className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 disabled:opacity-50 transition-all"
           >
             {saving ? '保存中...' : '追加する'}
           </button>
@@ -164,13 +167,18 @@ export function WorldCreateModal({
           width: 100%;
           padding: 0.65rem 0.75rem;
           border-radius: 0.75rem;
-          border: 1px solid #3b3e34;
-          background: #151613;
-          color: #f5f5f4;
+          border: 1px solid rgba(63, 63, 70, 0.9);
+          background: rgba(24, 24, 27, 0.88);
+          color: #f4f4f5;
           outline: none;
+          transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
         }
-        .modal-input::placeholder { color: #787c72; }
-        .modal-input:focus { border-color: #059669; box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.18); }
+        .modal-input::placeholder { color: #71717a; }
+        .modal-input:focus {
+          border-color: rgba(16, 185, 129, 0.75);
+          background: rgba(24, 24, 27, 0.96);
+          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.12), 0 0 14px rgba(16, 185, 129, 0.05);
+        }
       `}</style>
     </div>
   );
@@ -187,7 +195,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-stone-300 mb-1.5">
+      <label className="block text-sm font-medium text-zinc-300 mb-1.5">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
