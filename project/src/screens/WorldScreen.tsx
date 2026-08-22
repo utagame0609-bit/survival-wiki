@@ -17,6 +17,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('locations');
+  const [tabHistory, setTabHistory] = useState<Tab[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
   const [openLocationId, setOpenLocationId] = useState<string | null>(null);
   const [wikiLocation, setWikiLocation] = useState<LocationWithPhotos | null>(null);
@@ -41,6 +42,28 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
     }
   };
 
+  const handleTabChange = (nextTab: Tab) => {
+    if (nextTab === tab) return;
+    setTabHistory((history) => [...history, tab]);
+    setTab(nextTab);
+  };
+
+  const handleWorldBack = () => {
+    if (tabHistory.length > 0) {
+      setTabHistory((history) => {
+        const previousTab = history[history.length - 1];
+        setTab(previousTab);
+        return history.slice(0, -1);
+      });
+      return;
+    }
+    if (tab !== 'locations') {
+      setTab('locations');
+      return;
+    }
+    goBack();
+  };
+
   const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
     { id: 'locations', label: 'ロケーション', icon: MapPin },
     { id: 'timeline', label: 'タイムライン', icon: Clock3 },
@@ -49,7 +72,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
 
   return (
     <div className="min-h-screen overflow-y-scroll [scrollbar-gutter:stable] bg-[#11120f] text-stone-100 flex flex-col">
-      <Header title={worldName} onBack={goBack} />
+      <Header title={worldName} onBack={handleWorldBack} />
       {error && <ErrorBanner message={error} />}
       {loading && <Spinner label="ワールドを読み込み中" />}
       {!loading && world && (
@@ -60,7 +83,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
                 const Icon = t.icon;
                 const label = t.id === 'locations' ? 'ロケーション' : t.id === 'timeline' ? 'タイムライン' : 'Wiki';
                 return (
-                  <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${tab === t.id ? 'text-emerald-400' : 'text-stone-500 hover:text-stone-300'}`}>
+                  <button key={t.id} onClick={() => handleTabChange(t.id)} className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${tab === t.id ? 'text-emerald-400' : 'text-stone-500 hover:text-stone-300'}`}>
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     <span>{label}</span>
                     {tab === t.id && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500" />}
