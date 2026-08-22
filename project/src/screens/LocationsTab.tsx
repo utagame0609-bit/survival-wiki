@@ -114,7 +114,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   return (
     <div className="min-h-full bg-[#11120f] text-stone-100 px-4 py-4 max-w-3xl mx-auto">
       <div className="mb-4 space-y-3">
-        <button onClick={() => setMode({ type: 'create' })} className="group w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 font-semibold shadow-lg shadow-emerald-950/20 hover:bg-emerald-500/15 hover:border-emerald-400/70 hover:text-emerald-200 active:scale-[0.99] transition-all">
+        <button onClick={() => setMode({ type: 'create' })} className="group w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-900/90 border border-emerald-500/35 text-emerald-300 font-semibold shadow-[0_0_20px_rgba(16,185,129,0.08)] hover:bg-emerald-950/35 hover:border-emerald-400/70 hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(16,185,129,0.12)] active:scale-[0.99] transition-all">
           <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" /> ロケーションを追加
         </button>
         <div className="relative">
