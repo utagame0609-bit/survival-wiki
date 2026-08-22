@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Users, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Globe, Users, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld, fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -67,9 +67,9 @@ export function WorldListScreen({
       <div className="px-4 py-4 max-w-3xl mx-auto">
         <button
           onClick={() => setShowCreateModal(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-700 text-white font-medium shadow-md shadow-emerald-950/30 hover:bg-emerald-600 active:scale-[0.99] transition-all"
+          className="group w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-emerald-950/55 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 text-emerald-300 font-semibold shadow-[0_0_20px_rgba(16,185,129,0.10)] hover:from-emerald-900/45 hover:via-zinc-900/95 hover:to-zinc-900/90 hover:border-emerald-500/60 hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(16,185,129,0.14)] active:scale-[0.99] transition-all"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
           新規ワールドを作成
         </button>
 
@@ -134,54 +134,57 @@ function WorldCard({
   return (
     <div
       onClick={onOpen}
-      className="group w-full rounded-xl bg-[#1b1c18] border border-[#2d3028] shadow-lg shadow-black/20 overflow-hidden cursor-pointer hover:border-emerald-700/70 hover:bg-[#1e201b] transition-all"
+      className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] cursor-pointer hover:-translate-y-0.5 hover:from-emerald-950/35 hover:via-zinc-900/90 hover:to-zinc-900/85 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)] transition-all duration-200"
     >
-      <div className="p-3.5">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-lg bg-[#1f3a20] flex items-center justify-center flex-shrink-0">
+      <div className="p-3.5 pr-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-lg bg-zinc-950/80 border border-emerald-900/60 flex items-center justify-center flex-shrink-0 shadow-[inset_0_0_10px_rgba(16,185,129,0.04)]">
             <Globe className="w-5 h-5 text-emerald-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-stone-100 truncate">{world.name}</h3>
+            <div className="flex items-center gap-2 min-w-0">
+              <h3 className="font-bold text-sm text-zinc-100 truncate group-hover:text-emerald-300 transition-colors">{world.name}</h3>
             </div>
-            {world.player && <p className="text-sm text-stone-400 truncate">プレイヤー: {world.player}</p>}
-            <div className="flex items-center gap-1 mt-1 text-xs text-stone-500">
-              <Users className="w-3.5 h-3.5" />
+            {world.player && <p className="text-sm text-zinc-400 truncate mt-0.5">プレイヤー: {world.player}</p>}
+            <div className="flex items-center gap-1 mt-1.5 text-xs text-zinc-500">
+              <Users className="w-3.5 h-3.5 text-emerald-500/80" />
               <span>{world.members.length}名</span>
               {world.memo && <span className="truncate">· {world.memo}</span>}
             </div>
             {formattedLastLocationDate && (
-              <p className="text-[11px] text-stone-600 mt-1.5 text-right">
+              <p className="text-[11px] text-zinc-600 mt-1.5 font-mono">
                 最終ロケーション：{formattedLastLocationDate}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:pointer-events-none sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto sm:group-focus-within:opacity-100 sm:group-focus-within:pointer-events-auto transition-opacity">
-            <button
-              type="button"
-              aria-label={`${world.name}を編集`}
-              title="編集"
-              onClick={(event) => {
-                event.stopPropagation();
-                onEdit();
-              }}
-              className="w-8 h-8 rounded-lg bg-[#292b24] text-stone-300 hover:bg-[#34372e] hover:text-white flex items-center justify-center transition-colors"
-            >
-              <Pencil className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              aria-label={`${world.name}を削除`}
-              title="削除"
-              onClick={(event) => {
-                event.stopPropagation();
-                onDelete();
-              }}
-              className="w-8 h-8 rounded-lg bg-red-950/40 text-red-300 hover:bg-red-950/60 hover:text-red-200 flex items-center justify-center transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+          <div className="flex items-center gap-1 shrink-0 pl-1">
+            <div className="flex items-center gap-1 sm:opacity-0 sm:pointer-events-none sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto sm:group-focus-within:opacity-100 sm:group-focus-within:pointer-events-auto transition-opacity">
+              <button
+                type="button"
+                aria-label={`${world.name}を編集`}
+                title="編集"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onEdit();
+                }}
+                className="w-8 h-8 rounded-lg bg-zinc-950/70 border border-zinc-800 text-zinc-400 hover:border-emerald-900/70 hover:bg-emerald-950/30 hover:text-emerald-300 flex items-center justify-center transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                aria-label={`${world.name}を削除`}
+                title="削除"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete();
+                }}
+                className="w-8 h-8 rounded-lg bg-red-950/30 border border-red-950/50 text-red-300 hover:bg-red-950/50 hover:border-red-900/60 hover:text-red-200 flex items-center justify-center transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+            <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-emerald-300 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
           </div>
         </div>
       </div>
