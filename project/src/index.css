@@ -106,6 +106,12 @@ article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.sha
   padding-right: 0.25rem;
 }
 
+/* Location detail modal: keep the non-Wiki location view on the modern rounded modal treatment. */
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
 @media (max-width: 640px) {
   .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button {
     min-height: 5.75rem;
