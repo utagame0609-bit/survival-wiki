@@ -153,17 +153,21 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
             </div>
           </div>
           <div className="space-y-10 pl-8">
-            {groups.map((g) => (
-              <DayChapter
-                key={g.dateKey}
-                group={g}
-                isActive={activeDay === g.dayNumber}
-                onRef={(element) => {
-                  if (element) dayRefs.current.set(g.dateKey, element);
-                  else dayRefs.current.delete(g.dateKey);
-                }}
-              />
-            ))}
+            {groups.map((g) => {
+              const isPassed = sortOrder === 'newest' ? g.dayNumber > activeDay : g.dayNumber < activeDay;
+              return (
+                <DayChapter
+                  key={g.dateKey}
+                  group={g}
+                  isActive={activeDay === g.dayNumber}
+                  isPassed={isPassed}
+                  onRef={(element) => {
+                    if (element) dayRefs.current.set(g.dateKey, element);
+                    else dayRefs.current.delete(g.dateKey);
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       )}
@@ -171,7 +175,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   );
 }
 
-function DayChapter({ group, isActive, onRef }: { group: DayGroup; isActive: boolean; onRef: (element: HTMLElement | null) => void }) {
+function DayChapter({ group, isActive, isPassed, onRef }: { group: DayGroup; isActive: boolean; isPassed: boolean; onRef: (element: HTMLElement | null) => void }) {
   return (
     <section ref={onRef} className="relative scroll-mt-24">
       <div className={`relative min-h-[88px] mb-4 flex items-end overflow-hidden border-b pb-3 transition-colors ${isActive ? 'border-emerald-400' : 'border-stone-300'}`}>
@@ -186,7 +190,10 @@ function DayChapter({ group, isActive, onRef }: { group: DayGroup; isActive: boo
             <span className="text-lg font-semibold text-stone-900">{group.label}</span>
             <span className="text-xs text-stone-500">{group.dateLabel}（{group.dayLabel}）</span>
           </div>
-          <p className="text-xs text-stone-500 mt-1">{group.locations.length}件の記録</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-xs text-stone-500">{group.locations.length}件の記録</p>
+            {isPassed && !isActive && <Footprints className="w-3.5 h-3.5 text-emerald-400/60" aria-label="通過済み" />}
+          </div>
         </div>
       </div>
 
