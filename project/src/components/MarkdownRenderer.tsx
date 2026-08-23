@@ -37,7 +37,8 @@ function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): React
     if (!part) return null;
     if (part.startsWith('**') && part.endsWith('**')) {
       const boldText = part.slice(2, -2);
-      const location = locationLinks.find((item) => item.name === boldText);
+      const locationText = boldText.replace(/^「(.*)」$/, '$1');
+      const location = locationLinks.find((item) => item.name === locationText);
       if (location) {
         return (
           <button
