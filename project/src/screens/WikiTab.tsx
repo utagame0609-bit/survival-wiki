@@ -8,7 +8,7 @@ import { WIKI_STYLES } from '@/lib/wiki';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
-import { playConfirmSound } from '@/lib/sound';
+import { playAddSound, playConfirmSound } from '@/lib/sound';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
@@ -77,6 +77,7 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
   const handleGenerate = async () => {
     const now = Date.now();
     if (generating || article !== null || now < cooldownUntil || locations.length === 0 || style === null) return;
+    playAddSound();
     setGenerating(true); setError('');
     try {
       const result = await openRouterTestProvider.generate({ world, locations, style });
