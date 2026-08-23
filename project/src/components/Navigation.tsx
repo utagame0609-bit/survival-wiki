@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { playTapSound } from '../lib/sound';
 
 type Screen =
   | { name: 'top' }
@@ -32,7 +33,10 @@ export function Header({
       <div className="flex items-center gap-2 px-4 h-14 max-w-3xl mx-auto">
         {onBack && (
           <button
-            onClick={onBack}
+            onClick={() => {
+              playTapSound();
+              onBack();
+            }}
             className="flex items-center gap-1 text-stone-400 hover:text-stone-100 -ml-2 px-2 py-1 rounded-lg hover:bg-[#20231c] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
