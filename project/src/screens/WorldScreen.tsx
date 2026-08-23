@@ -70,8 +70,9 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
       return;
     }
     if (tab === 'wiki') {
-      setTab('timeline');
-      setTabHistory([]);
+      const previousTab = tabHistory[tabHistory.length - 1] ?? 'timeline';
+      setTab(previousTab);
+      setTabHistory((history) => history.slice(0, -1));
       return;
     }
     if (tabHistory.length > 0) {
