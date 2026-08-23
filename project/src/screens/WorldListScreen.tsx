@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Users, Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Globe, Users, Pencil, Trash2, ChevronRight, AlertTriangle, X } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld, fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { playConfirmSound, playDeleteSound } from '@/lib/sound';
+import { playConfirmSound, playDeleteSound, playCancelSound } from '@/lib/sound';
 
 export function WorldListScreen({
   gameId,
@@ -24,6 +24,7 @@ export function WorldListScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<WorldWithMembers | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -47,15 +48,19 @@ export function WorldListScreen({
     load();
   }, [gameId]);
 
-  const handleDelete = async (world: WorldWithMembers) => {
-    const confirmed = window.confirm(
-      `「${world.name}」を削除しますか？\nこの操作は元に戻せません。`
-    );
-    if (!confirmed) return;
+  const handleDelete = (world: WorldWithMembers) => {
+    setDeleteTarget(world);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    const worldId = deleteTarget.id;
+    setDeleteTarget(null);
 
     try {
       setError('');
-      await deleteWorld(world.id);
+      await deleteWorld(worldId);
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'ワールドの削除に失敗しました');
@@ -111,6 +116,63 @@ export function WorldListScreen({
           onClose={() => setShowCreateModal(false)}
           onCreated={load}
         />
+      )}
+
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              playCancelSound();
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-world-title"
+            className="w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-900 to-[#151712] border border-emerald-900/70 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]"
+          >
+            <div className="px-5 pt-6 pb-5 text-center">
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/50 border border-red-900/60 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.12)]">
+                <AlertTriangle className="w-7 h-7 text-red-300" />
+              </div>
+              <h2 id="delete-world-title" className="text-lg font-bold text-zinc-100">
+                ワールドを削除しますか？
+              </h2>
+              <p className="mt-2 text-sm text-emerald-300 font-semibold break-words">
+                「{deleteTarget.name}」
+              </p>
+              <p className="mt-3 text-xs leading-5 text-zinc-500">
+                この操作は元に戻せません。<br />
+                ワールドに保存されている記録も削除されます。
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 px-5 pb-5">
+              <button
+                type="button"
+                onClick={() => {
+                  playCancelSound();
+                  setDeleteTarget(null);
+                }}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.98] transition-all"
+              >
+                <X className="w-4 h-4" />
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-950/70 border border-red-900/70 text-red-200 hover:bg-red-900/60 hover:border-red-800 hover:text-red-100 active:scale-[0.98] transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                削除する
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
