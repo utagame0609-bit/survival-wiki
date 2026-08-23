@@ -3,7 +3,7 @@ import { ChevronDown, Camera, X } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
-import { playSaveSound } from '@/lib/sound';
+import { playAddSound, playSaveSound } from '@/lib/sound';
 
 type SaveInput = {
   name: string;
@@ -74,7 +74,11 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       } else if (editing && !mainPreview && existingMainPhoto) {
         await deletePhoto(existingMainPhoto.id, existingMainPhoto.storage_path);
       }
-      playSaveSound();
+      if (editing) {
+        playSaveSound();
+      } else {
+        playAddSound();
+      }
       onComplete();
     } catch (e) {
       setError((e as Error).message);
@@ -153,7 +157,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         }
         .modal-input::placeholder { color: #71717a; }
         .modal-input:focus {
-          border-color: rgba(16, 185, 0.75);
+          border-color: rgba(16, 185, 0, 0.75);
           background: rgba(24, 24, 27, 0.96);
           box-shadow: 0 0 0 2px rgba(16, 185, 0, 0.12), 0 0 14px rgba(16, 185, 0, 0.05);
         }
