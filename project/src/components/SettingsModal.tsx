@@ -84,9 +84,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 aria-checked={soundEnabled}
                 aria-label="SEのオンオフ"
                 onClick={handleSoundToggle}
-                className={`relative h-7 w-12 rounded-full border transition-colors ${soundEnabled ? 'border-emerald-500/70 bg-emerald-600' : 'border-zinc-700 bg-zinc-800'}`}
+                className={`relative flex h-7 w-12 shrink-0 items-center rounded-full border p-0.5 transition-colors ${soundEnabled ? 'border-emerald-500/70 bg-emerald-600' : 'border-zinc-700 bg-zinc-800'}`}
               >
-                <span className={`absolute top-1 h-5 w-5 rounded-full bg-zinc-100 shadow-sm transition-transform ${soundEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`block h-5 w-5 rounded-full bg-zinc-100 shadow-sm transition-transform ${soundEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
 
