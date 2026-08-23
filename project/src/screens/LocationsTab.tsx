@@ -4,7 +4,7 @@ import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
-import { playConfirmSound, playToggleSound } from '@/lib/sound';
+import { playConfirmSound, playToggleSound, playModalOpenSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -136,7 +136,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
             <ArrowUpDown className="w-3 h-3 text-emerald-400" />{sortOrder === 'asc' ? '古い順' : '新しい順'}
           </button>
         </div>
-        {sortedLocations.length > 0 ? <div className="space-y-2.5">{sortedLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => setSelectedLocation(loc)} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
+        {sortedLocations.length > 0 ? <div className="space-y-2.5">{sortedLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => { playModalOpenSound(); setSelectedLocation(loc); }} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
       </>}
 
       {selectedLocation && (
@@ -156,7 +156,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
                       <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">Z</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.z}</div></div>
                     </div></div>
                   </div>
-                  <div className="flex gap-3 pt-1"><button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button><button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div>
+                  <div className="flex gap-3 pt-1"><button onClick={handleDetailEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button><button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 hover:border-red-800 hover:text-red-200 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div>
                 </div>;
               })()}
             </div>
