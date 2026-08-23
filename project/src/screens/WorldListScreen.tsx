@@ -6,7 +6,7 @@ import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { playConfirmSound, playDeleteSound, playCancelSound } from '@/lib/sound';
+import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound } from '@/lib/sound';
 
 export function WorldListScreen({
   gameId,
@@ -49,6 +49,7 @@ export function WorldListScreen({
   }, [gameId]);
 
   const handleDelete = (world: WorldWithMembers) => {
+    playErrorSound();
     setDeleteTarget(world);
   };
 
