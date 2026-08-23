@@ -20,7 +20,6 @@ export function SettingsButton() {
   };
 
   const closeSettings = () => {
-    playModalCloseSound();
     setSettingsOpen(false);
   };
 
@@ -54,7 +53,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <button aria-label="設定を閉じる" className="absolute inset-0" onClick={onClose} />
+      <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
       <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-b from-zinc-900 to-[#151712] text-zinc-100 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]">
         <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
           <div>
