@@ -251,7 +251,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
 
 function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: () => void }) {
   const mainPhoto = loc.photos.find((p) => p.is_main);
-  return <div className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:from-emerald-950/30 hover:via-zinc-900/90 hover:to-zinc-900/90 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)]">
+  return <div className="selectable-pulse group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:from-emerald-950/30 hover:via-zinc-900/90 hover:to-zinc-900/90 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)]">
     <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform">
       <div className="flex gap-3.5 p-3.5 pr-4">
         {mainPhoto ? <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 shrink-0"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" /></div> : <div className="w-20 h-20 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0"><MapPin className="w-7 h-7 text-zinc-700" /></div>}
