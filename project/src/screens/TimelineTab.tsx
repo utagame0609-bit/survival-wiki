@@ -72,8 +72,10 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   };
 
   const handleDaySelect = (dayNumber: number) => {
-    playFootstepSound();
     playCardOpenSound();
+    window.setTimeout(() => {
+      playFootstepSound();
+    }, 70);
     setActiveDay(dayNumber);
     setExpandedDay(dayNumber);
 
