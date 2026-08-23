@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, RefreshCw, BookOpen, RotateCcw } from 'lucide-react';
+import { Sparkles, RefreshCw, BookOpen, RotateCcw, AlertTriangle, X } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
@@ -8,7 +8,7 @@ import { WIKI_STYLES } from '@/lib/wiki';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
-import { playAddSound, playConfirmSound, playSaveSound } from '@/lib/sound';
+import { playAddSound, playConfirmSound, playSaveSound, playCancelSound, playDeleteSound, playErrorSound } from '@/lib/sound';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
@@ -48,6 +48,7 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [resetTarget, setResetTarget] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [error, setError] = useState('');
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,12 +93,19 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
     }
   };
 
-  const handleReset = async () => {
+  const handleReset = () => {
     if (!style || !article || resetting) return;
-    const confirmed = window.confirm('この記事を削除して、Wikiを初期状態に戻しますか？\n記事と現在のスタイル選択が解除されます。');
-    if (!confirmed) return;
+    playErrorSound();
+    setResetTarget(true);
+  };
+
+  const confirmReset = async () => {
+    if (!resetTarget || !style || !article || resetting) return;
+    const resetStyle = style;
+    setResetTarget(false);
+    playDeleteSound();
     setResetting(true); setError('');
-    try { await resetWikiArticle(world.id, style); setArticle(null); setStyle(null); }
+    try { await resetWikiArticle(world.id, resetStyle); setArticle(null); setStyle(null); }
     catch (e) { setError((e as Error).message); }
     finally { setResetting(false); }
   };
@@ -125,6 +133,62 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
     {!isGeneratedWikipedia && <div className="mb-4"><p className="text-sm font-medium text-stone-700 mb-2">スタイル</p><div className="flex gap-2 overflow-x-auto pb-1">{WIKI_STYLES.map((s) => <button key={s.id} onClick={() => { playConfirmSound(); handleStyleSelect(s.id); }} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>)}</div>{styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}</div>}
     {error && <ErrorBanner message={error} />}
     {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} onAiTest={handleAiTest} locationCount={locations.length} locations={locations} isGeneratedWikipedia={isGeneratedWikipedia} onOpenLocation={onOpenLocation} />}
+    {resetTarget && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+        role="presentation"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) {
+            playCancelSound();
+            setResetTarget(false);
+          }
+        }}
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reset-wiki-title"
+          className="w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-900 to-[#151712] border border-emerald-900/70 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]"
+        >
+          <div className="px-5 pt-6 pb-5 text-center">
+            <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/50 border border-red-900/60 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.12)]">
+              <AlertTriangle className="w-7 h-7 text-red-300" />
+            </div>
+            <h2 id="reset-wiki-title" className="text-lg font-bold text-zinc-100">
+              Wiki記事をリセットしますか？
+            </h2>
+            <p className="mt-2 text-sm text-emerald-300 font-semibold break-words">
+              「{world.name}」
+            </p>
+            <p className="mt-3 text-xs leading-5 text-zinc-500">
+              この操作は元に戻せません。<br />
+              Wiki記事と現在のスタイル選択が解除されます。
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 px-5 pb-5">
+            <button
+              type="button"
+              onClick={() => {
+                playCancelSound();
+                setResetTarget(false);
+              }}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.98] transition-all"
+            >
+              <X className="w-4 h-4" />
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={confirmReset}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-950/70 border border-red-900/70 text-red-200 hover:bg-red-900/60 hover:border-red-800 hover:text-red-100 active:scale-[0.98] transition-all"
+            >
+              <Trash2 className="w-4 h-4" />
+              リセットする
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>;
 }
 
