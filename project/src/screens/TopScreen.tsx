@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Box, Dna, Lock, Settings } from 'lucide-react';
+import { Box, Dna, Lock } from 'lucide-react';
 import type { Game } from '@/lib/types';
 import { fetchGames } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { SettingsModal } from '@/components/SettingsModal';
-import { playConfirmSound, playModalOpenSound } from '@/lib/sound';
+import { playConfirmSound } from '@/lib/sound';
 
 export function TopScreen({ navigate }: { navigate: NavigateFn }) {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     fetchGames()
@@ -19,11 +17,6 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
-
-  const openSettings = () => {
-    playModalOpenSound();
-    setSettingsOpen(true);
-  };
 
   return (
     <div
@@ -58,16 +51,6 @@ export function TopScreen({ navigate }: { navigate: NavigateFn }) {
           </div>
         )}
       </div>
-
-      <button
-        onClick={openSettings}
-        aria-label="設定"
-        className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
-
-      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }
