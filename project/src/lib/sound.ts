@@ -54,7 +54,7 @@ let soundVolume = DEFAULT_SOUND_VOLUME;
 function readStoredSettings(): void {
   if (typeof window === 'undefined') return;
   const storedVolume = Number(window.localStorage.getItem(SOUND_VOLUME_KEY));
-  if (Number.isFinite(storedVolume)) soundVolume = Math.min(100, Math.max(50, storedVolume));
+  if (Number.isFinite(storedVolume)) soundVolume = Math.min(100, Math.max(0, storedVolume));
   const storedEnabled = window.localStorage.getItem(SOUND_ENABLED_KEY);
   if (storedEnabled !== null) enabled = storedEnabled === 'true';
 }
@@ -62,8 +62,8 @@ function readStoredSettings(): void {
 readStoredSettings();
 
 function getMasterGainValue(): number {
-  // 50 = current volume. 100 = a controlled boost while preserving every SE's relative balance.
-  return 1 + ((soundVolume - DEFAULT_SOUND_VOLUME) / (100 - DEFAULT_SOUND_VOLUME)) * 0.8;
+  // 50 = current volume, 100 = 200% of current volume.
+  return soundVolume / DEFAULT_SOUND_VOLUME;
 }
 
 function getAudioContext(): AudioContext | null {
@@ -160,7 +160,7 @@ export function getSoundVolume(): number {
 }
 
 export function setSoundVolume(value: number): number {
-  soundVolume = Math.min(100, Math.max(50, Math.round(value)));
+  soundVolume = Math.min(100, Math.max(0, Math.round(value)));
   if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_VOLUME_KEY, String(soundVolume));
   if (masterGain && audioContext) {
     masterGain.gain.setTargetAtTime(getMasterGainValue(), audioContext.currentTime, 0.01);
