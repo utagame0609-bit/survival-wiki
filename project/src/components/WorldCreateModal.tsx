@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { createWorld } from '@/lib/db';
-import { playCloseSound, playConfirmSound } from '@/lib/sound';
+import { playCloseSound, playAddSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 
 export function WorldCreateModal({
@@ -35,7 +35,7 @@ export function WorldCreateModal({
         memo: memo.trim(),
         members: members.map((member) => member.trim()).filter(Boolean),
       });
-      playConfirmSound();
+      playAddSound();
       onCreated();
       onClose();
     } catch (e) {
@@ -186,9 +186,9 @@ export function WorldCreateModal({
         }
         .modal-input::placeholder { color: #71717a; }
         .modal-input:focus {
-          border-color: rgba(16, 185, 129, 0.75);
+          border-color: rgba(16, 185, 0.75);
           background: rgba(24, 24, 27, 0.96);
-          box-shadow: 0 0 0 2px rgba(16, 185, 0.12), 0 0 14px rgba(16, 185, 129, 0.05);
+          box-shadow: 0 0 0 2px rgba(16, 185, 0, 0.12), 0 0 14px rgba(16, 185, 129, 0.05);
         }
         .world-create-modal-panel {
           animation: world-create-modal-in 180ms cubic-bezier(.22,.8,.35,1) both;
