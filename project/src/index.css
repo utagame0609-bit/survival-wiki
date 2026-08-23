@@ -75,6 +75,15 @@ button:not(:disabled):active {
   }
 }
 
+@keyframes selectable-pulse-active {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.8), 0 0 20px rgba(34, 211, 238, 0.32);
+  }
+}
+
 .selectable-pulse {
   will-change: box-shadow;
 }
@@ -83,11 +92,19 @@ button:not(:disabled):active {
   .selectable-pulse:hover {
     animation: selectable-pulse 1.8s ease-in-out infinite;
   }
+
+  .selectable-pulse.selectable-pulse-active:hover {
+    animation-name: selectable-pulse-active;
+  }
 }
 
 @media (hover: none) and (pointer: coarse) {
   .selectable-pulse:active {
     animation: selectable-pulse 1.8s ease-in-out infinite;
+  }
+
+  .selectable-pulse.selectable-pulse-active:active {
+    animation-name: selectable-pulse-active;
   }
 }
 
