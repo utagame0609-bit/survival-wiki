@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { playTapSound } from '../lib/sound';
+import { playCancelSound } from '../lib/sound';
 
 type Screen =
   | { name: 'top' }
@@ -14,6 +14,7 @@ export function useBackButton(onBack: () => void) {
   useEffect(() => {
     const handler = (e: PopStateEvent) => {
       e.preventDefault();
+      playCancelSound();
       onBack();
     };
     window.addEventListener('popstate', handler);
@@ -34,7 +35,7 @@ export function Header({
         {onBack && (
           <button
             onClick={() => {
-              playTapSound();
+              playCancelSound();
               onBack();
             }}
             className="flex items-center gap-1 text-stone-400 hover:text-stone-100 -ml-2 px-2 py-1 rounded-lg hover:bg-[#20231c] transition-colors"
