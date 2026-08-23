@@ -21,6 +21,46 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function renderBoldText(text: string, locationLinks: LocationLink[], keyPrefix: string): ReactNode[] {
+  const matches = locationLinks
+    .map((location) => {
+      const plainIndex = text.indexOf(location.name);
+      const quotedName = `「${location.name}」`;
+      const quotedIndex = text.indexOf(quotedName);
+      if (quotedIndex >= 0) return { location, index: quotedIndex, length: quotedName.length };
+      if (plainIndex >= 0) return { location, index: plainIndex, length: location.name.length };
+      return null;
+    })
+    .filter((match): match is { location: LocationLink; index: number; length: number } => match !== null)
+    .sort((a, b) => a.index - b.index || b.length - a.length);
+
+  if (matches.length === 0) return [<strong key={keyPrefix}>{text}</strong>];
+
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+  matches.forEach((match, index) => {
+    if (match.index < cursor) return;
+    if (match.index > cursor) {
+      nodes.push(<span key={`${keyPrefix}-text-${index}`}>{text.slice(cursor, match.index)}</span>);
+    }
+    nodes.push(
+      <button
+        key={`${keyPrefix}-location-${index}`}
+        type="button"
+        onClick={match.location.onClick}
+        className="font-semibold text-[#36c] hover:underline"
+      >
+        {text.slice(match.index, match.index + match.length)}
+      </button>,
+    );
+    cursor = match.index + match.length;
+  });
+  if (cursor < text.length) {
+    nodes.push(<span key={`${keyPrefix}-text-end`}>{text.slice(cursor)}</span>);
+  }
+  return nodes;
+}
+
 function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): ReactNode[] {
   const locationNames = locationLinks
     .map((location) => location.name)
@@ -37,21 +77,7 @@ function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): React
     if (!part) return null;
     if (part.startsWith('**') && part.endsWith('**')) {
       const boldText = part.slice(2, -2);
-      const locationText = boldText.replace(/^「(.*)」$/, '$1');
-      const location = locationLinks.find((item) => item.name === locationText);
-      if (location) {
-        return (
-          <button
-            key={index}
-            type="button"
-            onClick={location.onClick}
-            className="font-semibold text-[#36c] hover:underline"
-          >
-            {boldText}
-          </button>
-        );
-      }
-      return <strong key={index}>{boldText}</strong>;
+      return <span key={index} className="font-semibold">{renderBoldText(boldText, locationLinks, `bold-${index}`)}</span>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
       return (
