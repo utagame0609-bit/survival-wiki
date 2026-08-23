@@ -4,6 +4,7 @@ import type { Game } from '@/lib/types';
 import { fetchGames } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
+import { playConfirmSound } from '@/lib/sound';
 
 export function TopScreen({ navigate }: { navigate: NavigateFn }) {
   const [games, setGames] = useState<Game[]>([]);
@@ -69,7 +70,10 @@ function GameCard({ game, navigate }: { game: Game; navigate: NavigateFn }) {
 
   return (
     <button
-      onClick={() => navigate({ name: 'worldList', gameId: game.id, gameName: game.name })}
+      onClick={() => {
+        playConfirmSound();
+        navigate({ name: 'worldList', gameId: game.id, gameName: game.name });
+      }}
       className="min-h-36 rounded-2xl bg-[#1b1c18] border border-emerald-800/80 flex items-center px-5 text-left text-stone-100 shadow-lg shadow-black/20 hover:border-emerald-600 hover:bg-[#20231c] active:scale-[0.99] transition-all"
     >
       <div className="w-14 h-14 shrink-0 rounded-xl bg-[#1f3a20] flex items-center justify-center mr-4">
