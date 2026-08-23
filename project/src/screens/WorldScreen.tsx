@@ -55,7 +55,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
     if (nextTab === tab) return;
     playTabSwitchSound();
     setWikiArticleBack(false);
-    setTabHistory((history) => [...history, tab]);
+    setTabHistory([]);
     setTab(nextTab);
   };
 
@@ -70,20 +70,10 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
       return;
     }
     if (tab === 'wiki') {
-      const previousTab = tabHistory[tabHistory.length - 1] ?? 'timeline';
-      setTab(previousTab);
-      setTabHistory((history) => history.slice(0, -1));
+      setTab('timeline');
       return;
     }
-    if (tabHistory.length > 0) {
-      setTabHistory((history) => {
-        const previousTab = history[history.length - 1];
-        setTab(previousTab);
-        return history.slice(0, -1);
-      });
-      return;
-    }
-    if (tab !== 'locations') {
+    if (tab === 'timeline') {
       setTab('locations');
       return;
     }
