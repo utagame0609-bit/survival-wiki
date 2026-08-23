@@ -58,6 +58,7 @@ export function WorldListScreen({
 
     const worldId = deleteTarget.id;
     setDeleteTarget(null);
+    playDeleteSound();
 
     try {
       setError('');
