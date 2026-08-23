@@ -8,7 +8,7 @@ import { WIKI_STYLES } from '@/lib/wiki';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
-import { playAddSound, playConfirmSound } from '@/lib/sound';
+import { playAddSound, playConfirmSound, playSaveSound } from '@/lib/sound';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
@@ -81,7 +81,7 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
     setGenerating(true); setError('');
     try {
       const result = await openRouterTestProvider.generate({ world, locations, style });
-      await saveWikiArticle(world.id, style, result.content); setArticle(result.content);
+      await saveWikiArticle(world.id, style, result.content); setArticle(result.content); playSaveSound();
     } catch (e) { setError((e as Error).message); }
     finally {
       const nextCooldownUntil = Date.now() + WIKI_GENERATE_COOLDOWN_MS;
