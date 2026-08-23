@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Pencil, X, Search, ArrowUpDown, ChevronRight } from 'lucide-react';
+import { Plus, MapPin, Trash2, Pencil, X, Search, ArrowUpDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
-import { playConfirmSound, playToggleSound, playModalOpenSound } from '@/lib/sound';
+import { playConfirmSound, playToggleSound, playModalOpenSound, playDeleteSound, playCancelSound, playErrorSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -20,6 +20,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<LocationWithPhotos | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const loadRequestRef = useRef(0);
@@ -76,11 +77,21 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
     }
   };
 
-  const handleDelete = async (loc: LocationWithPhotos) => {
-    if (!confirm(`「${loc.name}」を削除しますか？`)) return;
+  const handleDelete = (loc: LocationWithPhotos) => {
+    playErrorSound();
+    setDeleteTarget(loc);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    const locationId = deleteTarget.id;
+    setDeleteTarget(null);
+    playDeleteSound();
+
     try {
-      await deleteLocation(loc.id);
-      setSelectedLocation((prev) => (prev?.id === loc.id ? null : prev));
+      await deleteLocation(locationId);
+      setSelectedLocation((prev) => (prev?.id === locationId ? null : prev));
       onReload();
     } catch (e) {
       setError((e as Error).message);
@@ -159,6 +170,63 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
                   <div className="flex gap-3 pt-1"><button onClick={() => { playConfirmSound(); handleDetailEdit(); }} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#292b24] border border-[#3a3d34] text-stone-200 font-medium hover:bg-[#34382e] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" />編集</button><button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-950/40 text-red-300 border border-red-900/40 font-medium hover:bg-red-950/60 hover:border-red-800 hover:text-red-200 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除</button></div>
                 </div>;
               })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              playCancelSound();
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-location-title"
+            className="w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-900 to-[#151712] border border-emerald-900/70 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]"
+          >
+            <div className="px-5 pt-6 pb-5 text-center">
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/50 border border-red-900/60 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.12)]">
+                <AlertTriangle className="w-7 h-7 text-red-300" />
+              </div>
+              <h2 id="delete-location-title" className="text-lg font-bold text-zinc-100">
+                ロケーションを削除しますか？
+              </h2>
+              <p className="mt-2 text-sm text-emerald-300 font-semibold break-words">
+                「{deleteTarget.name}」
+              </p>
+              <p className="mt-3 text-xs leading-5 text-zinc-500">
+                この操作は元に戻せません。<br />
+                このロケーションに保存されている写真も削除されます。
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 px-5 pb-5">
+              <button
+                type="button"
+                onClick={() => {
+                  playCancelSound();
+                  setDeleteTarget(null);
+                }}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.98] transition-all"
+              >
+                <X className="w-4 h-4" />
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-950/70 border border-red-900/70 text-red-200 hover:bg-red-900/60 hover:border-red-800 hover:text-red-100 active:scale-[0.98] transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                削除する
+              </button>
             </div>
           </div>
         </div>
