@@ -4,7 +4,7 @@ import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
-import { playConfirmSound } from '@/lib/sound';
+import { playConfirmSound, playToggleSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -132,7 +132,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
             <span className="text-zinc-400 font-medium whitespace-nowrap">総記録数: {filteredLocations.length} 件</span>
             {normalizedQuery && <span className="truncate text-zinc-600">「{searchQuery.trim()}」で検索中</span>}
           </div>
-          <button type="button" onClick={() => setSortOrder((current) => current === 'asc' ? 'desc' : 'asc')} className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-900/60 bg-emerald-950/20 text-zinc-400 hover:text-emerald-300 hover:border-emerald-700/50 hover:bg-emerald-950/30 transition-colors" aria-label="ロケーションの並び順を変更">
+          <button type="button" onClick={() => { playToggleSound(); setSortOrder((current) => current === 'asc' ? 'desc' : 'asc'); }} className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-900/60 bg-emerald-950/20 text-zinc-400 hover:text-emerald-300 hover:border-emerald-700/50 hover:bg-emerald-950/30 transition-colors" aria-label="ロケーションの並び順を変更">
             <ArrowUpDown className="w-3 h-3 text-emerald-400" />{sortOrder === 'asc' ? '古い順' : '新しい順'}
           </button>
         </div>
