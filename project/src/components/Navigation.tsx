@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Home } from 'lucide-react';
 import { playCancelSound } from '../lib/sound';
 
 type Screen =
@@ -29,6 +29,11 @@ export function Header({
   title: string;
   onBack?: () => void;
 }) {
+  const handleHome = () => {
+    playCancelSound();
+    window.dispatchEvent(new CustomEvent('survival-wiki:home'));
+  };
+
   return (
     <header className="sticky top-0 z-30 bg-[#11120f]/90 backdrop-blur-md border-b border-[#2d3028]">
       <div className="flex items-center gap-2 px-4 h-14 max-w-3xl mx-auto">
@@ -38,7 +43,7 @@ export function Header({
               playCancelSound();
               onBack();
             }}
-            className="flex items-center gap-1 text-stone-400 hover:text-stone-100 -ml-2 px-2 py-1 rounded-lg hover:bg-[#20231c] transition-colors"
+            className="flex items-center gap-1 text-stone-400 hover:text-stone-100 -ml-2 px-2 py-1 rounded-lg hover:bg-[#20231c] transition-colors shrink-0"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="text-sm">戻る</span>
@@ -47,7 +52,16 @@ export function Header({
         <h1 className="text-base font-semibold text-stone-100 truncate flex-1 text-center">
           {title}
         </h1>
-        {onBack && <div className="w-16" />}
+        {onBack && (
+          <button
+            onClick={handleHome}
+            aria-label="ホームへ"
+            className="flex items-center gap-1 text-stone-400 hover:text-stone-100 px-2 py-1 rounded-lg hover:bg-[#20231c] transition-colors shrink-0"
+          >
+            <Home className="w-4 h-4" />
+            <span className="text-sm">ホームへ</span>
+          </button>
+        )}
       </div>
     </header>
   );
@@ -73,6 +87,15 @@ export function useScreenHistory() {
       return h.slice(0, -1);
     });
   };
+
+  useEffect(() => {
+    const handler = () => {
+      setScreenState({ name: 'top' });
+      setHistory([]);
+    };
+    window.addEventListener('survival-wiki:home', handler);
+    return () => window.removeEventListener('survival-wiki:home', handler);
+  }, []);
 
   useBackButton(goBack);
 
