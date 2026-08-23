@@ -239,7 +239,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/90">
             <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" /><h2 className="text-lg font-semibold text-zinc-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2></div>
-            <button type="button" onClick={closeModal} disabled={saving} aria-label="閉じる" className="w-9 h-9 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/70 flex items-center justify-center transition-colors"><X className="w-5 h-5" /></button>
+            <button type="button" onClick={() => { playCancelSound(); closeModal(); }} disabled={saving} aria-label="閉じる" className="w-9 h-9 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/70 flex items-center justify-center transition-colors"><X className="w-5 h-5" /></button>
           </div>
           <div className="overflow-y-auto overscroll-contain"><LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} /></div>
         </div>
