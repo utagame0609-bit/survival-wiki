@@ -1,14 +1,37 @@
-import { Volume2, VolumeX, X } from 'lucide-react';
+import { Settings, Volume2, VolumeX, X } from 'lucide-react';
 import { useState } from 'react';
 import {
   getSoundVolume,
   isSoundEnabled,
   playCancelSound,
   playModalCloseSound,
+  playModalOpenSound,
   playToggleSound,
   setSoundVolume,
   toggleSound,
 } from '@/lib/sound';
+
+export function SettingsButton() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const openSettings = () => {
+    playModalOpenSound();
+    setSettingsOpen(true);
+  };
+
+  return (
+    <>
+      <button
+        onClick={openSettings}
+        aria-label="設定"
+        className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 hover:bg-[#34372e] active:scale-95 transition-all"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+    </>
+  );
+}
 
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
@@ -34,7 +57,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             <h2 className="mt-1 text-lg font-bold">設定</h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              playModalCloseSound();
+              onClose();
+            }}
             aria-label="設定を閉じる"
             className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-100 active:scale-95 transition-all"
           >
