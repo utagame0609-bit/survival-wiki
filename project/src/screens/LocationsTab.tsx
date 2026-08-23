@@ -235,7 +235,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         </div>
       )}
 
-      {mode.type !== 'list' && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) closeModal(); }}>
+      {mode.type !== 'list' && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); closeModal(); } }}>
         <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/90">
             <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" /><h2 className="text-lg font-semibold text-zinc-100">{mode.type === 'edit' ? 'ロケーション編集' : 'ロケーション追加'}</h2></div>
@@ -244,7 +244,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
           <div className="overflow-y-auto overscroll-contain"><LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} /></div>
         </div>
       </div>}
-      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,\\.8\\,.35\\,1)\\] { animation: none !important; } }`}</style>
+      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1)\\] { animation: none !important; } }`}</style>
     </div>
   );
 }
