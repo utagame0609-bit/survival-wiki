@@ -94,7 +94,10 @@ export function WorldListScreen({
                   localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, w.id);
                   navigate({ name: 'world', worldId: w.id, worldName: w.name });
                 }}
-                onEdit={() => navigate({ name: 'worldCreate', gameId, gameName, worldId: w.id })}
+                onEdit={() => {
+                  playConfirmSound();
+                  navigate({ name: 'worldCreate', gameId, gameName, worldId: w.id });
+                }}
                 onDelete={() => handleDelete(w)}
               />
             ))}
