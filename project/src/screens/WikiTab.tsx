@@ -40,7 +40,7 @@ function addWikiPhotoMarkers(content: string, photos: { storage_path: string }[]
   return blocks.join('\n\n');
 }
 
-export function WikiTab({ world, reloadKey, onOpenLocation }: { world: WorldWithMembers; reloadKey: number; onOpenLocation?: (locationId: string) => void }) {
+export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange }: { world: WorldWithMembers; reloadKey: number; onOpenLocation?: (locationId: string) => void; onArticleStateChange?: (isArticle: boolean) => void }) {
   const [style, setStyle] = useState<WikiStyleId | null>(null);
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [article, setArticle] = useState<string | null>(null);
@@ -115,6 +115,10 @@ export function WikiTab({ world, reloadKey, onOpenLocation }: { world: WorldWith
   const cooldownActive = cooldownUntil > Date.now();
   const isGeneratedWikipedia = hasArticle && style === 'wikipedia';
 
+  useEffect(() => {
+    onArticleStateChange?.(hasArticle);
+  }, [hasArticle, onArticleStateChange]);
+
   return <div className={isGeneratedWikipedia ? 'w-full' : 'w-full px-4 py-4 max-w-3xl mx-auto'}>
     {!isGeneratedWikipedia && <div className="mb-4"><p className="text-sm font-medium text-stone-700 mb-2">スタイル</p><div className="flex gap-2 overflow-x-auto pb-1">{WIKI_STYLES.map((s) => <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>)}</div>{styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}</div>}
     {error && <ErrorBanner message={error} />}
@@ -137,7 +141,7 @@ function WikiContent({ world, style, hasArticle, article, generating, resetting,
   const articleWithPhotoMarkers = addWikiPhotoMarkers(article ?? '', additionalPhotos);
   const locationLinks = locations.map((location) => ({ name: location.name, onClick: () => onOpenLocation?.(location.id) }));
 
-  const actionButtons = <div className="flex gap-2 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={hasArticle || generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-[0.98] transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
+  const actionButtons = <div className="flex gap-2 px-4 pt-4 sm:px-6"><button onClick={onGenerate} disabled={hasArticle || generating || resetting || cooldownActive || locationCount === 0 || style === null} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600 text-white font-medium shadow-sm hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-50">{generating ? <><Spinner /><span>生成中...</span></> : <><Sparkles className="w-5 h-5" />記事を生成</>}</button><button onClick={onReset} disabled={!hasArticle || !style || generating || resetting} className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-stone-300 bg-white text-stone-600 font-medium shadow-sm hover:bg-stone-50 active:scale-95 transition-all disabled:opacity-40"><RotateCcw className="w-4 h-4" />リセット</button>{style === null && <button onClick={onAiTest} className="shrink-0 px-3 py-3 rounded-2xl border border-sky-200 bg-sky-50 text-sky-700 text-sm font-medium">AI接続テスト</button>}</div>;
 
   if (style === null) return <div><EmptyState message="スタイルを選択すると、Wiki記事を作成できます。" /></div>;
 
