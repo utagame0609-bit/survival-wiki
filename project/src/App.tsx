@@ -1,4 +1,5 @@
 import { useScreenHistory } from '@/components/Navigation';
+import { SettingsButton } from '@/components/SettingsModal';
 import { TopScreen } from '@/screens/TopScreen';
 import { WorldListScreen } from '@/screens/WorldListScreen';
 import { WorldCreateScreen } from '@/screens/WorldCreateScreen';
@@ -7,11 +8,14 @@ import { WorldScreen } from '@/screens/WorldScreen';
 function App() {
   const { screen, setScreen, goBack } = useScreenHistory();
 
+  let screenContent;
+
   switch (screen.name) {
     case 'top':
-      return <TopScreen navigate={setScreen} />;
+      screenContent = <TopScreen navigate={setScreen} />;
+      break;
     case 'worldList':
-      return (
+      screenContent = (
         <WorldListScreen
           gameId={screen.gameId}
           gameName={screen.gameName}
@@ -19,8 +23,9 @@ function App() {
           goBack={goBack}
         />
       );
+      break;
     case 'worldCreate':
-      return (
+      screenContent = (
         <WorldCreateScreen
           gameId={screen.gameId}
           gameName={screen.gameName}
@@ -29,8 +34,9 @@ function App() {
           goBack={goBack}
         />
       );
+      break;
     case 'world':
-      return (
+      screenContent = (
         <WorldScreen
           worldId={screen.worldId}
           worldName={screen.worldName}
@@ -38,7 +44,15 @@ function App() {
           goBack={goBack}
         />
       );
+      break;
   }
+
+  return (
+    <>
+      {screenContent}
+      <SettingsButton />
+    </>
+  );
 }
 
 export default App;
