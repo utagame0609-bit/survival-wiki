@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, RefreshCw, BookOpen, RotateCcw, AlertTriangle, X } from 'lucide-react';
+import { Sparkles, RefreshCw, BookOpen, RotateCcw, AlertTriangle, X, Trash2 } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
