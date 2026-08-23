@@ -6,7 +6,7 @@ import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { playConfirmSound } from '@/lib/sound';
+import { playConfirmSound, playDeleteSound } from '@/lib/sound';
 
 export function WorldListScreen({
   gameId,
@@ -185,6 +185,7 @@ function WorldCard({
                 title="削除"
                 onClick={(event) => {
                   event.stopPropagation();
+                  playDeleteSound();
                   onDelete();
                 }}
                 className="w-8 h-8 rounded-lg bg-red-950/30 border border-red-950/50 text-red-300 hover:bg-red-950/50 hover:border-red-900/60 hover:text-red-200 flex items-center justify-center transition-colors"
