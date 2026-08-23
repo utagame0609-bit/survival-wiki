@@ -2,150 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Wiki style selection: align the pre-generation screen with the World Setup visual language. */
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 { padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(6, 78, 59, 0.6); background: linear-gradient(90deg, rgba(6, 78, 59, 0.55), rgba(24, 24, 27, 0.9), rgba(24, 24, 27, 0.85)); box-shadow: 0 0 18px rgba(16, 185, 129, 0.08); }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > p:first-child { display: none; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4::before { content: 'WIKI STYLE'; display: block; margin-bottom: 0.25rem; color: #f4f4f5; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.16em; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4::after { content: '生成するWikiの記述スタイルを選択'; display: block; margin-bottom: 0.75rem; color: rgba(209, 250, 229, 0.6); font-size: 0.75rem; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; overflow: visible; padding-bottom: 0; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button { width: 100%; min-height: 6.25rem; padding: 0.85rem 0.9rem; border: 1px solid rgba(63, 63, 70, 0.9) !important; border-radius: 0.75rem; background: rgba(24, 24, 27, 0.88) !important; color: #d4d4d8 !important; text-align: left; white-space: normal; box-shadow: none; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button::after { display: block; margin-top: 0.3rem; color: #71717a; font-size: 0.75rem; font-weight: 400; line-height: 1.35; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:nth-child(1)::after { content: '百科事典風の客観的な記述'; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:nth-child(2)::after { content: '機密文書風の冷徹な報告書'; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:nth-child(3)::after { content: '滅びゆく世界の古文書風の記録'; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600 { border-color: rgba(52, 211, 153, 0.55) !important; background: rgba(16, 185, 129, 0.12) !important; color: #6ee7b7 !important; box-shadow: 0 0 16px rgba(16, 185, 129, 0.08); }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:hover:not(:disabled) { border-color: rgba(16, 185, 129, 0.5) !important; background: rgba(6, 78, 59, 0.28) !important; color: #a7f3d0 !important; }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600::after { color: rgba(167, 243, 208, 0.65); }
-.w-full.px-4.py-4.max-w-3xl.mx-auto > div:not(.mb-4) > .flex.gap-2.mb-4.px-4.pt-4 { display: none; }
-
-/* Timeline detail memo: keep the card compact and scroll only the memo when it exceeds the visible area. */
-article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.shadow-sm p.whitespace-pre-wrap.break-words { max-height: 6.5rem; overflow-y: auto; overscroll-behavior: contain; padding-right: 0.25rem; }
-
-/* Location detail modal: modern rounded treatment. */
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl { border-radius: 1rem; overflow: hidden; background: linear-gradient(90deg, rgba(6, 78, 59, 0.18), rgba(24, 24, 27, 0.96), rgba(24, 24, 27, 0.92)); border-color: rgba(6, 78, 59, 0.6); box-shadow: 0 0 28px rgba(16, 185, 129, 0.08), 0 20px 50px rgba(0, 0, 0, 0.45); }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child { border-bottom-color: rgba(39, 39, 42, 0.9); background: transparent; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2 { display: flex; align-items: center; gap: 0.5rem; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: #34d399; box-shadow: 0 0 8px rgba(52, 211, 153, 0.6); flex-shrink: 0; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child button { border-radius: 0.5rem; }
-
-/* Location detail coordinates: replace the flat block with the same restrained rounded treatment. */
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] { border-radius: 0.75rem; border-color: rgba(63, 63, 70, 0.9); background: linear-gradient(90deg, rgba(6, 78, 59, 0.08), rgba(32, 34, 29, 0.96), rgba(24, 24, 27, 0.92)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02); }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] > div:first-child { color: rgba(168, 162, 158, 0.9); }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] .grid > div > div:first-child { color: rgba(163, 230, 53, 0.82); font-style: normal; font-size: 0.7rem; letter-spacing: 0.12em; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] .grid > div > div:last-child { margin-top: 0.25rem; color: #f4f4f5; font-weight: 650; }
-
-/* Location detail actions: use the same modern rounded treatment as the location add/edit UI. */
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button { border-radius: 0.75rem; min-height: 2.75rem; transition: all 0.2s; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:first-child { background: rgba(6, 78, 59, 0.55); border-color: rgba(16, 185, 129, 0.75); color: #6ee7b7; box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.04); }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:first-child:hover { background: rgba(6, 78, 59, 0.72); border-color: rgba(52, 211, 153, 0.9); color: #a7f3d0; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:last-child { background: linear-gradient(90deg, rgba(69, 10, 10, 0.55), rgba(39, 24, 24, 0.95)); border-color: rgba(127, 29, 29, 0.55); color: #fca5a5; }
-.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:last-child:hover { background: linear-gradient(90deg, rgba(80, 12, 12, 0.65), rgba(45, 26, 26, 0.95)); }
-
-/* Location edit/create modal: make the outer modal the single scroll container so wheel and touch gestures scroll it. */
-.fixed.inset-0.z-50 > div.w-full.max-w-lg.max-h-\[calc\(100vh-2rem\)\] { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-.fixed.inset-0.z-50 > div.w-full.max-w-lg.max-h-\[calc\(100vh-2rem\)\] > div.overflow-y-auto { overflow: visible; }
-
-@media (max-width: 640px) {
-  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button { min-height: 5.75rem; padding: 0.7rem 0.6rem; font-size: 0.75rem; }
-  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button::after { font-size: 0.65rem; }
-}
-
-/* Shared press feedback: a subtle, short physical response for app buttons. */
-button:not(:disabled) {
-  transition: transform 160ms cubic-bezier(.22,.8,.35,1), filter 160ms ease;
-}
-
-button:not(:disabled):hover {
-  transform: translateY(-3px);
-  filter: brightness(1.06);
-}
-
-button:not(:disabled):active {
-  transform: scale(0.985);
-  filter: brightness(0.98);
-}
-
 /* Shared focus pulse for selectable objects. */
 @keyframes selectable-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0);
-  }
-  50% {
-    box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.65), 0 0 18px rgba(16, 185, 129, 0.24);
-  }
+  0% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.32), 0 0 8px rgba(16, 185, 129, 0.12); }
+  12% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.55), 0 0 14px rgba(16, 185, 129, 0.18); }
+  50% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.65), 0 0 18px rgba(16, 185, 129, 0.24); }
+  100% { box-shadow: 0 0 0 rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 @keyframes selectable-pulse-active {
-  0%, 100% {
-    box-shadow: 0 0 0 rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0);
-  }
-  50% {
-    box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.8), 0 0 20px rgba(34, 211, 238, 0.32);
-  }
+  0% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.38), 0 0 10px rgba(34, 211, 238, 0.14); }
+  12% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.68), 0 0 16px rgba(34, 211, 238, 0.22); }
+  50% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.8), 0 0 20px rgba(34, 211, 238, 0.32); }
+  100% { box-shadow: 0 0 0 rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0); }
 }
 
-.selectable-pulse {
-  will-change: box-shadow;
-}
+.selectable-pulse { will-change: box-shadow; }
 
 @media (hover: hover) and (pointer: fine) {
-  .selectable-pulse:hover {
-    animation: selectable-pulse 1.8s ease-in-out infinite;
-  }
-
-  .selectable-pulse.selectable-pulse-active:hover {
-    animation-name: selectable-pulse-active;
-  }
+  .selectable-pulse:hover { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .selectable-pulse.selectable-pulse-active:hover { animation-name: selectable-pulse-active; }
 }
 
 @media (hover: none) and (pointer: coarse) {
-  .selectable-pulse:active {
-    animation: selectable-pulse 1.8s ease-in-out infinite;
-  }
-
-  .selectable-pulse.selectable-pulse-active:active {
-    animation-name: selectable-pulse-active;
-  }
-}
-
-/* Timeline card expansion: reveal the newly opened records with a short, subtle motion. */
-@keyframes timeline-card-reveal {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-section.relative.scroll-mt-24 > div.relative.pb-2 {
-  animation: timeline-card-reveal 180ms cubic-bezier(.22,.8,.35,1);
-  transform-origin: top center;
-}
-
-/* Wiki style selection: transition into the selected article/content view. */
-@keyframes wiki-content-enter {
-  from { opacity: 0; transform: translateY(8px) scale(.992); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child {
-  animation: wiki-content-enter 200ms cubic-bezier(.22,.8,.35,1);
+  .selectable-pulse:active { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .selectable-pulse.selectable-pulse-active:active { animation-name: selectable-pulse-active; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button:not(:disabled) {
-    transition: none;
-  }
-
-  button:not(:disabled):hover,
-  button:not(:disabled):active {
-    transform: none;
-    filter: none;
-  }
-
-  .selectable-pulse {
-    animation: none !important;
-  }
-
-  section.relative.scroll-mt-24 > div.relative.pb-2,
-  .w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child {
-    animation: none;
-  }
+  .selectable-pulse { animation: none !important; }
 }
