@@ -42,8 +42,29 @@ const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   error: { frequency: 180, endFrequency: 110, duration: 0.15, volume: 0.15, type: 'sawtooth' },
 };
 
+const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
+const SOUND_ENABLED_KEY = 'survival-wiki-se-enabled';
+const DEFAULT_SOUND_VOLUME = 50;
+
 let audioContext: AudioContext | null = null;
+let masterGain: GainNode | null = null;
 let enabled = true;
+let soundVolume = DEFAULT_SOUND_VOLUME;
+
+function readStoredSettings(): void {
+  if (typeof window === 'undefined') return;
+  const storedVolume = Number(window.localStorage.getItem(SOUND_VOLUME_KEY));
+  if (Number.isFinite(storedVolume)) soundVolume = Math.min(100, Math.max(50, storedVolume));
+  const storedEnabled = window.localStorage.getItem(SOUND_ENABLED_KEY);
+  if (storedEnabled !== null) enabled = storedEnabled === 'true';
+}
+
+readStoredSettings();
+
+function getMasterGainValue(): number {
+  // 50 = current volume. 100 = a controlled boost while preserving every SE's relative balance.
+  return 1 + ((soundVolume - DEFAULT_SOUND_VOLUME) / (100 - DEFAULT_SOUND_VOLUME)) * 0.8;
+}
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -51,13 +72,16 @@ function getAudioContext(): AudioContext | null {
     const AudioContextClass = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return null;
     audioContext = new AudioContextClass();
+    masterGain = audioContext.createGain();
+    masterGain.gain.setValueAtTime(getMasterGainValue(), audioContext.currentTime);
+    masterGain.connect(audioContext.destination);
   }
   return audioContext;
 }
 
 function playTone(profile: SoundProfile): void {
   const context = getAudioContext();
-  if (!context) return;
+  if (!context || !masterGain) return;
   if (context.state === 'suspended') void context.resume();
 
   const now = context.currentTime;
@@ -72,7 +96,7 @@ function playTone(profile: SoundProfile): void {
   gain.gain.exponentialRampToValueAtTime(profile.volume, now + 0.008);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
   oscillator.connect(gain);
-  gain.connect(context.destination);
+  gain.connect(masterGain);
   oscillator.start(now);
   oscillator.stop(now + profile.duration + 0.01);
 
@@ -94,7 +118,7 @@ function playTone(profile: SoundProfile): void {
     noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
     noiseSource.connect(filter);
     filter.connect(noiseGain);
-    noiseGain.connect(context.destination);
+    noiseGain.connect(masterGain);
     noiseSource.start(now);
     noiseSource.stop(now + profile.duration + 0.01);
   }
@@ -110,7 +134,7 @@ function playTone(profile: SoundProfile): void {
     secondGain.gain.exponentialRampToValueAtTime(profile.volume, secondStart + 0.008);
     secondGain.gain.exponentialRampToValueAtTime(0.0001, secondStart + secondDuration);
     secondOscillator.connect(secondGain);
-    secondGain.connect(context.destination);
+    secondGain.connect(masterGain);
     secondOscillator.start(secondStart);
     secondOscillator.stop(secondStart + secondDuration + 0.01);
   }
@@ -123,7 +147,25 @@ export function playSound(sound: SoundType): void {
 
 export function toggleSound(state?: boolean): boolean {
   enabled = state === undefined ? !enabled : state;
+  if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_ENABLED_KEY, String(enabled));
   return enabled;
+}
+
+export function isSoundEnabled(): boolean {
+  return enabled;
+}
+
+export function getSoundVolume(): number {
+  return soundVolume;
+}
+
+export function setSoundVolume(value: number): number {
+  soundVolume = Math.min(100, Math.max(50, Math.round(value)));
+  if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_VOLUME_KEY, String(soundVolume));
+  if (masterGain && audioContext) {
+    masterGain.gain.setTargetAtTime(getMasterGainValue(), audioContext.currentTime, 0.01);
+  }
+  return soundVolume;
 }
 
 export const playConfirmSound = () => playSound('confirm');
