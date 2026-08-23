@@ -8,6 +8,7 @@ import { WIKI_STYLES } from '@/lib/wiki';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
+import { playConfirmSound } from '@/lib/sound';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
@@ -120,7 +121,7 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
   }, [hasArticle, onArticleStateChange]);
 
   return <div className={isGeneratedWikipedia ? 'w-full' : 'w-full px-4 py-4 max-w-3xl mx-auto'}>
-    {!isGeneratedWikipedia && <div className="mb-4"><p className="text-sm font-medium text-stone-700 mb-2">スタイル</p><div className="flex gap-2 overflow-x-auto pb-1">{WIKI_STYLES.map((s) => <button key={s.id} onClick={() => handleStyleSelect(s.id)} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>)}</div>{styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}</div>}
+    {!isGeneratedWikipedia && <div className="mb-4"><p className="text-sm font-medium text-stone-700 mb-2">スタイル</p><div className="flex gap-2 overflow-x-auto pb-1">{WIKI_STYLES.map((s) => <button key={s.id} onClick={() => { playConfirmSound(); handleStyleSelect(s.id); }} disabled={generating || resetting} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${style === s.id ? 'bg-emerald-600 text-white' : 'bg-white text-stone-600 border border-stone-200'}`}>{s.name}</button>)}</div>{styleConfig && <p className="text-xs text-stone-400 mt-1">{styleConfig.description}</p>}</div>}
     {error && <ErrorBanner message={error} />}
     {loading ? <Spinner label="Wikiを読み込み中" /> : <WikiContent world={world} style={style} hasArticle={hasArticle} article={article} generating={generating} resetting={resetting} cooldownActive={cooldownActive} onGenerate={handleGenerate} onReset={handleReset} onAiTest={handleAiTest} locationCount={locations.length} locations={locations} isGeneratedWikipedia={isGeneratedWikipedia} onOpenLocation={onOpenLocation} />}
   </div>;
