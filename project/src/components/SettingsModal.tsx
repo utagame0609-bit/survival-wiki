@@ -19,6 +19,11 @@ export function SettingsButton() {
     setSettingsOpen(true);
   };
 
+  const closeSettings = () => {
+    playModalCloseSound();
+    setSettingsOpen(false);
+  };
+
   return (
     <>
       <button
@@ -28,7 +33,7 @@ export function SettingsButton() {
       >
         <Settings className="w-6 h-6" />
       </button>
-      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && <SettingsModal onClose={closeSettings} />}
     </>
   );
 }
