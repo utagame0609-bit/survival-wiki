@@ -9,6 +9,7 @@ import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
+import { playModalCloseSound, playModalOpenSound, playTabSwitchSound } from '@/lib/sound';
 
 type Tab = 'locations' | 'timeline' | 'wiki';
 
@@ -38,14 +39,21 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
       const locations = await fetchLocations(worldId);
       const location = locations.find((item) => item.id === locationId);
       if (!location) throw new Error('ロケーションが見つかりません。');
+      playModalOpenSound();
       setWikiLocation(location);
     } catch (e) {
       setError((e as Error).message);
     }
   };
 
+  const handleCloseWikiLocation = () => {
+    playModalCloseSound();
+    setWikiLocation(null);
+  };
+
   const handleTabChange = (nextTab: Tab) => {
     if (nextTab === tab) return;
+    playTabSwitchSound();
     setWikiArticleBack(false);
     setTabHistory((history) => [...history, tab]);
     setTab(nextTab);
@@ -118,7 +126,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
 
           {wikiLocation && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-              <button aria-label="閉じる" className="absolute inset-0" onClick={() => setWikiLocation(null)} />
+              <button aria-label="閉じる" className="absolute inset-0" onClick={handleCloseWikiLocation} />
               <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-serif motion-safe:animate-[wiki-modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
                 <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 border-b border-gray-300 bg-gray-100 text-gray-600">
                   <span className="text-xs tracking-wider flex items-center gap-2">
@@ -127,7 +135,7 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
                     <span className="text-gray-400">//</span>
                     <span>ロケーション詳細</span>
                   </span>
-                  <button onClick={() => setWikiLocation(null)} aria-label="閉じる" className="p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"><X className="w-[18px] h-[18px]" /></button>
+                  <button onClick={handleCloseWikiLocation} aria-label="閉じる" className="p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"><X className="w-[18px] h-[18px]" /></button>
                 </div>
                 <div className="overflow-y-auto overscroll-contain p-5 space-y-4">
                   <h2 className="text-xl font-bold border-b border-gray-300 pb-2 text-gray-900 break-words">{wikiLocation.name}</h2>
