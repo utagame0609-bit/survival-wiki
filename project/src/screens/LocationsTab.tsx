@@ -162,7 +162,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
               {(() => {
                 const mainPhoto = selectedLocation.photos.find((p) => p.is_main);
                 return <div className="p-4 sm:p-5 space-y-4">
-                  {mainPhoto ? <div className="group w-full h-56 sm:h-72 overflow-hidden bg-[#24271f]"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-110" /></div> : <div className="w-full h-56 sm:h-72 bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
+                  {mainPhoto ? <div className="group w-full h-56 sm:h-72 overflow-hidden bg-[#24271f]"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-full object-cover" /></div> : <div className="w-full h-56 sm:h-72 bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
                   <div><h3 className="text-2xl sm:text-3xl font-bold text-stone-100 break-words">{selectedLocation.name}</h3>
                     <div className="mt-4 bg-[#20221d] border border-[#34372f] p-4 sm:p-5"><div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div><div className="grid grid-cols-3 gap-3 text-center font-mono">
                       <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
