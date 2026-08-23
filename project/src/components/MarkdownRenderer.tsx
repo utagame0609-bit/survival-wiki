@@ -36,7 +36,21 @@ function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): React
   return parts.map((part, index) => {
     if (!part) return null;
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
+      const boldText = part.slice(2, -2);
+      const location = locationLinks.find((item) => item.name === boldText);
+      if (location) {
+        return (
+          <button
+            key={index}
+            type="button"
+            onClick={location.onClick}
+            className="font-semibold text-[#36c] hover:underline"
+          >
+            {boldText}
+          </button>
+        );
+      }
+      return <strong key={index}>{boldText}</strong>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
       return (
