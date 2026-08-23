@@ -8,6 +8,7 @@ import { TimelineTab } from '@/screens/TimelineTab';
 import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
+import { SettingsButton } from '@/components/SettingsModal';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
 import { playModalCloseSound, playModalOpenSound, playTabSwitchSound } from '@/lib/sound';
 
@@ -114,6 +115,8 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
             {tab === 'timeline' && <TimelineTab world={world} reloadKey={reloadKey} />}
             {tab === 'wiki' && <WikiTab key={wikiArticleViewKey} world={world} reloadKey={reloadKey} onOpenLocation={handleOpenLocation} onArticleStateChange={handleWikiArticleStateChange} />}
           </div>
+
+          {!wikiArticleBack && <SettingsButton />}
 
           {wikiLocation && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
