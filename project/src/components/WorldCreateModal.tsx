@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { createWorld } from '@/lib/db';
+import { playCloseSound, playConfirmSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 
 export function WorldCreateModal({
@@ -34,6 +35,7 @@ export function WorldCreateModal({
         memo: memo.trim(),
         members: members.map((member) => member.trim()).filter(Boolean),
       });
+      playConfirmSound();
       onCreated();
       onClose();
     } catch (e) {
@@ -47,7 +49,10 @@ export function WorldCreateModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) {
+          playCloseSound();
+          onClose();
+        }
       }}
     >
       <div className="world-create-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 shadow-[0_0_28px_rgba(16,185,129,0.08),0_20px_50px_rgba(0,0,0,0.45)]">
@@ -58,7 +63,10 @@ export function WorldCreateModal({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              playCloseSound();
+              onClose();
+            }}
             aria-label="閉じる"
             className="w-9 h-9 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/70 flex items-center justify-center transition-colors"
           >
@@ -145,7 +153,10 @@ export function WorldCreateModal({
         <div className="flex gap-2 px-5 py-4 border-t border-zinc-800/90 bg-zinc-950/30">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              playCloseSound();
+              onClose();
+            }}
             disabled={saving}
             className="flex-1 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 font-medium hover:bg-zinc-800 hover:border-zinc-600 disabled:opacity-50 transition-all"
           >
@@ -177,7 +188,7 @@ export function WorldCreateModal({
         .modal-input:focus {
           border-color: rgba(16, 185, 129, 0.75);
           background: rgba(24, 24, 27, 0.96);
-          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.12), 0 0 14px rgba(16, 185, 129, 0.05);
+          box-shadow: 0 0 0 2px rgba(16, 185, 0.12), 0 0 14px rgba(16, 185, 129, 0.05);
         }
         .world-create-modal-panel {
           animation: world-create-modal-in 180ms cubic-bezier(.22,.8,.35,1) both;
