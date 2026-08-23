@@ -65,6 +65,32 @@ button:not(:disabled):active {
   filter: brightness(0.98);
 }
 
+/* Shared focus pulse for selectable objects. */
+@keyframes selectable-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.65), 0 0 18px rgba(16, 185, 129, 0.24);
+  }
+}
+
+.selectable-pulse {
+  will-change: box-shadow;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .selectable-pulse:hover {
+    animation: selectable-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .selectable-pulse:active {
+    animation: selectable-pulse 1.8s ease-in-out infinite;
+  }
+}
+
 /* Timeline card expansion: reveal the newly opened records with a short, subtle motion. */
 @keyframes timeline-card-reveal {
   from { opacity: 0; transform: translateY(-6px); }
@@ -95,6 +121,10 @@ section.relative.scroll-mt-24 > div.relative.pb-2 {
   button:not(:disabled):active {
     transform: none;
     filter: none;
+  }
+
+  .selectable-pulse {
+    animation: none !important;
   }
 
   section.relative.scroll-mt-24 > div.relative.pb-2,
