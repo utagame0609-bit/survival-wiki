@@ -4,7 +4,7 @@ import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
-import { playConfirmSound, playToggleSound, playModalOpenSound, playDeleteSound, playCancelSound, playErrorSound } from '@/lib/sound';
+import { playConfirmSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playErrorSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -103,7 +103,10 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
     setMode({ type: 'list' });
   };
 
-  const closeLocationDetail = () => setSelectedLocation(null);
+  const closeLocationDetail = () => {
+    playModalCloseSound();
+    setSelectedLocation(null);
+  };
 
   const handleDetailEdit = () => {
     if (!selectedLocation) return;
@@ -241,7 +244,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
           <div className="overflow-y-auto overscroll-contain"><LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} /></div>
         </div>
       </div>}
-      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,\\.8\\,\\.35\\,1\\)\\] { animation: none !important; } }`}</style>
+      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,\\.8\\,.35\\,1)\\] { animation: none !important; } }`}</style>
     </div>
   );
 }
