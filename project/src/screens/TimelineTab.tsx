@@ -3,6 +3,7 @@ import { Activity, ArrowUpDown, Crown, Footprints, MapPin } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
+import { playCardOpenSound, playFootstepSound, playToggleSound } from '@/lib/sound';
 
 type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhoto?: string };
 type SortOrder = 'newest' | 'oldest';
@@ -66,10 +67,13 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   }, [groups, activeDay, expandedDay]);
 
   const toggleSortOrder = () => {
+    playToggleSound();
     setSortOrder((current) => current === 'oldest' ? 'newest' : 'oldest');
   };
 
   const handleDaySelect = (dayNumber: number) => {
+    playFootstepSound();
+    playCardOpenSound();
     setActiveDay(dayNumber);
     setExpandedDay(dayNumber);
 
