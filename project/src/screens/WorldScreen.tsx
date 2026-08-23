@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Clock3, FileText, MapPin, Settings, X } from 'lucide-react';
+import { BookOpen, Clock3, FileText, MapPin, X } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWorld, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -139,8 +139,6 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
               </div>
             </div>
           )}
-
-          <button onClick={() => navigate({ name: 'worldCreate', gameId: world.game_id, gameName: '', worldId: world.id })} className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 flex items-center justify-center hover:bg-[#34372e] active:scale-95 transition-all"><Settings className="w-5 h-5" /></button>
         </>
       )}
       <style>{`@keyframes wiki-modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[wiki-modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1\\)\\] { animation: none !important; } }`}</style>
