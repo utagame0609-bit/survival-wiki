@@ -193,17 +193,17 @@ export const playChestOpenSound = () => {
 
   const clickOsc = context.createOscillator();
   const clickGain = context.createGain();
-  clickOsc.type = 'triangle';
-  clickOsc.frequency.setValueAtTime(1200, now);
-  clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
-  clickGain.gain.setValueAtTime(0.3, now);
-  clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+  clickOsc.type = 'square';
+  clickOsc.frequency.setValueAtTime(800, now);
+  clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.03);
+  clickGain.gain.setValueAtTime(0.2, now);
+  clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
   clickOsc.connect(clickGain);
   clickGain.connect(masterGain);
   clickOsc.start(now);
-  clickOsc.stop(now + 0.05);
+  clickOsc.stop(now + 0.03);
 
-  const bufferSize = context.sampleRate * 0.3;
+  const bufferSize = context.sampleRate * 0.4;
   const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i += 1) data[i] = Math.random() * 2 - 1;
@@ -212,16 +212,16 @@ export const playChestOpenSound = () => {
   noise.buffer = buffer;
   const filter = context.createBiquadFilter();
   filter.type = 'bandpass';
-  filter.frequency.setValueAtTime(400, now + 0.03);
-  filter.frequency.linearRampToValueAtTime(800, now + 0.3);
-  filter.Q.value = 5;
+  filter.frequency.setValueAtTime(300, now + 0.02);
+  filter.frequency.linearRampToValueAtTime(500, now + 0.35);
+  filter.Q.value = 8;
   const noiseGain = context.createGain();
   noiseGain.gain.setValueAtTime(0.0, now);
-  noiseGain.gain.setValueAtTime(0.15, now + 0.03);
-  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+  noiseGain.gain.setValueAtTime(0.25, now + 0.02);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
   noise.connect(filter);
   filter.connect(noiseGain);
   noiseGain.connect(masterGain);
-  noise.start(now + 0.03);
-  noise.stop(now + 0.3);
+  noise.start(now + 0.02);
+  noise.stop(now + 0.35);
 };
