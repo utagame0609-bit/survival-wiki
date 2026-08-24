@@ -62,7 +62,6 @@ function readStoredSettings(): void {
 readStoredSettings();
 
 function getMasterGainValue(): number {
-  // 50 = current volume, 100 = 200% of current volume.
   return soundVolume / DEFAULT_SOUND_VOLUME;
 }
 
@@ -184,3 +183,45 @@ export const playSaveSound = () => playSound('save');
 export const playDeleteSound = () => playSound('delete');
 export const playToggleSound = () => playSound('toggle');
 export const playErrorSound = () => playSound('error');
+
+export const playChestOpenSound = () => {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return;
+  if (context.state === 'suspended') void context.resume();
+
+  const now = context.currentTime;
+
+  const clickOsc = context.createOscillator();
+  const clickGain = context.createGain();
+  clickOsc.type = 'triangle';
+  clickOsc.frequency.setValueAtTime(1200, now);
+  clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+  clickGain.gain.setValueAtTime(0.3, now);
+  clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+  clickOsc.connect(clickGain);
+  clickGain.connect(masterGain);
+  clickOsc.start(now);
+  clickOsc.stop(now + 0.05);
+
+  const bufferSize = context.sampleRate * 0.3;
+  const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i += 1) data[i] = Math.random() * 2 - 1;
+
+  const noise = context.createBufferSource();
+  noise.buffer = buffer;
+  const filter = context.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(400, now + 0.03);
+  filter.frequency.linearRampToValueAtTime(800, now + 0.3);
+  filter.Q.value = 5;
+  const noiseGain = context.createGain();
+  noiseGain.gain.setValueAtTime(0.0, now);
+  noiseGain.gain.setValueAtTime(0.15, now + 0.03);
+  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+  noise.connect(filter);
+  filter.connect(noiseGain);
+  noiseGain.connect(masterGain);
+  noise.start(now + 0.03);
+  noise.stop(now + 0.3);
+};
