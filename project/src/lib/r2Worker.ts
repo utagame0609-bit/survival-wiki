@@ -20,6 +20,14 @@ export type R2UploadResult = {
   error?: string;
 };
 
+export type R2DeleteResult = {
+  ok: boolean;
+  deleted: boolean;
+  userId?: string;
+  storagePath?: string;
+  error?: string;
+};
+
 async function getAccessToken(): Promise<string> {
   const accessToken = await getSupabaseAccessToken();
 
@@ -101,4 +109,26 @@ export async function getR2Photo(storagePath: string): Promise<Blob> {
   }
 
   return response.blob();
+}
+
+export async function deleteR2Photo(storagePath: string): Promise<R2DeleteResult> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(
+    `${R2_WORKER_URL}?path=${encodeURIComponent(storagePath)}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const result = (await response.json()) as R2DeleteResult;
+
+  if (!response.ok) {
+    throw new Error(result.error ?? `Worker delete failed: ${response.status}`);
+  }
+
+  return result;
 }
