@@ -16,6 +16,17 @@
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600 { border-color: rgba(52, 211, 153, 0.55) !important; background: rgba(16, 185, 129, 0.12) !important; color: #6ee7b7 !important; box-shadow: 0 0 16px rgba(16, 185, 129, 0.08); }
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:hover:not(:disabled) { border-color: rgba(16, 185, 129, 0.5) !important; background: rgba(6, 78, 59, 0.28) !important; color: #a7f3d0 !important; }
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600::after { color: rgba(167, 243, 208, 0.65); }
+
+/* Wiki style selection: reuse the shared selectable pulse. */
+@media (hover: hover) and (pointer: fine) {
+  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:hover:not(:disabled) { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600:hover:not(:disabled) { animation-name: selectable-pulse-active; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:active { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600:active { animation-name: selectable-pulse-active; }
+}
+
 .w-full.px-4.py-4.max-w-3xl.mx-auto > div:not(.mb-4) > .flex.gap-2.mb-4.px-4.pt-4 { display: none; }
 
 /* Timeline detail memo: keep the card compact and scroll only the memo when it exceeds the visible area. */
@@ -54,16 +65,8 @@ article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.sha
 button:not(:disabled) {
   transition: transform 160ms cubic-bezier(.22,.8,.35,1), filter 160ms ease;
 }
-
-button:not(:disabled):hover {
-  transform: translateY(-3px);
-  filter: brightness(1.06);
-}
-
-button:not(:disabled):active {
-  transform: scale(0.985);
-  filter: brightness(0.98);
-}
+button:not(:disabled):hover { transform: translateY(-3px); filter: brightness(1.06); }
+button:not(:disabled):active { transform: scale(0.985); filter: brightness(0.98); }
 
 /* Shared focus pulse for selectable objects. */
 @keyframes selectable-pulse {
@@ -71,75 +74,32 @@ button:not(:disabled):active {
   20% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.65), 0 0 18px rgba(16, 185, 129, 0.24); }
   55%, 100% { box-shadow: 0 0 0 rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0); }
 }
-
 @keyframes selectable-pulse-active {
   0% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.38), 0 0 10px rgba(34, 211, 238, 0.14); }
   20% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.8), 0 0 20px rgba(34, 211, 238, 0.32); }
   55%, 100% { box-shadow: 0 0 0 rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0); }
 }
-
-.selectable-pulse {
-  will-change: box-shadow;
-}
-
+.selectable-pulse { will-change: box-shadow; }
 @media (hover: hover) and (pointer: fine) {
-  .selectable-pulse:hover {
-    animation: selectable-pulse 1.8s ease-in-out infinite;
-  }
-
-  .selectable-pulse.selectable-pulse-active:hover {
-    animation-name: selectable-pulse-active;
-  }
+  .selectable-pulse:hover { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .selectable-pulse.selectable-pulse-active:hover { animation-name: selectable-pulse-active; }
 }
-
 @media (hover: none) and (pointer: coarse) {
-  .selectable-pulse:active {
-    animation: selectable-pulse 1.8s ease-in-out infinite;
-  }
-
-  .selectable-pulse.selectable-pulse-active:active {
-    animation-name: selectable-pulse-active;
-  }
+  .selectable-pulse:active { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .selectable-pulse.selectable-pulse-active:active { animation-name: selectable-pulse-active; }
 }
 
 /* Timeline card expansion: reveal the newly opened records with a short, subtle motion. */
-@keyframes timeline-card-reveal {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-section.relative.scroll-mt-24 > div.relative.pb-2 {
-  animation: timeline-card-reveal 180ms cubic-bezier(.22,.8,.35,1);
-  transform-origin: top center;
-}
+@keyframes timeline-card-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+section.relative.scroll-mt-24 > div.relative.pb-2 { animation: timeline-card-reveal 180ms cubic-bezier(.22,.8,.35,1); transform-origin: top center; }
 
 /* Wiki style selection: transition into the selected article/content view. */
-@keyframes wiki-content-enter {
-  from { opacity: 0; transform: translateY(8px) scale(.992); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child {
-  animation: wiki-content-enter 200ms cubic-bezier(.22,.8,.35,1);
-}
+@keyframes wiki-content-enter { from { opacity: 0; transform: translateY(8px) scale(.992); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child { animation: wiki-content-enter 200ms cubic-bezier(.22,.8,.35,1); }
 
 @media (prefers-reduced-motion: reduce) {
-  button:not(:disabled) {
-    transition: none;
-  }
-
-  button:not(:disabled):hover,
-  button:not(:disabled):active {
-    transform: none;
-    filter: none;
-  }
-
-  .selectable-pulse {
-    animation: none !important;
-  }
-
-  section.relative.scroll-mt-24 > div.relative.pb-2,
-  .w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child {
-    animation: none;
-  }
+  button:not(:disabled) { transition: none; }
+  button:not(:disabled):hover, button:not(:disabled):active { transform: none; filter: none; }
+  .selectable-pulse { animation: none !important; }
+  section.relative.scroll-mt-24 > div.relative.pb-2, .w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child { animation: none; }
 }
