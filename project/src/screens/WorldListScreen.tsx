@@ -206,7 +206,7 @@ function WorldCard({
   return (
     <div
       onClick={onOpen}
-      className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] cursor-pointer hover:-translate-y-0.5 hover:from-emerald-950/35 hover:via-zinc-900/90 hover:to-zinc-900/85 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)] transition-all duration-200"
+      className="selectable-pulse group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] cursor-pointer hover:-translate-y-0.5 hover:from-emerald-950/35 hover:via-zinc-900/90 hover:to-zinc-900/85 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)] transition-all duration-200"
     >
       <div className="p-3.5 pr-4">
         <div className="flex items-center gap-3.5">
