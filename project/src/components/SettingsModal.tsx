@@ -1,5 +1,5 @@
 import { Settings, Volume2, VolumeX, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   getSoundVolume,
   isSoundEnabled,
@@ -10,15 +10,6 @@ import {
   setSoundVolume,
   toggleSound,
 } from '@/lib/sound';
-import {
-  checkR2WorkerAuth,
-  deleteR2Photo,
-  getR2Photo,
-  uploadR2Photo,
-  type R2DeleteResult,
-  type R2WorkerResult,
-  type R2UploadResult,
-} from '@/lib/r2Worker';
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -49,21 +40,6 @@ export function SettingsButton() {
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
-  const [r2Result, setR2Result] = useState<R2WorkerResult | null>(null);
-  const [r2Error, setR2Error] = useState('');
-  const [r2Loading, setR2Loading] = useState(false);
-  const [r2UploadResult, setR2UploadResult] = useState<R2UploadResult | null>(null);
-  const [r2UploadError, setR2UploadError] = useState('');
-  const [r2UploadLoading, setR2UploadLoading] = useState(false);
-  const [testLocationId, setTestLocationId] = useState('');
-  const [testStoragePath, setTestStoragePath] = useState('');
-  const [r2PhotoUrl, setR2PhotoUrl] = useState('');
-  const [r2PhotoError, setR2PhotoError] = useState('');
-  const [r2PhotoLoading, setR2PhotoLoading] = useState(false);
-  const [r2DeleteResult, setR2DeleteResult] = useState<R2DeleteResult | null>(null);
-  const [r2DeleteError, setR2DeleteError] = useState('');
-  const [r2DeleteLoading, setR2DeleteLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSoundToggle = () => {
     const next = toggleSound();
@@ -73,96 +49,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
   const handleVolumeChange = (value: number) => {
     setSoundVolumeState(setSoundVolume(value));
-  };
-
-  const handleR2Test = async () => {
-    setR2Loading(true);
-    setR2Error('');
-    setR2Result(null);
-
-    try {
-      const result = await checkR2WorkerAuth();
-      setR2Result(result);
-    } catch (error) {
-      setR2Error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setR2Loading(false);
-    }
-  };
-
-  const handleR2UploadTest = async (file: File) => {
-    setR2UploadLoading(true);
-    setR2UploadError('');
-    setR2UploadResult(null);
-
-    try {
-      const locationId = testLocationId.trim();
-
-      if (!locationId) {
-        throw new Error('テスト用Location IDを入力してください');
-      }
-
-      if (file.type !== 'image/webp') {
-        throw new Error('テスト画像はWebP形式を選択してください');
-      }
-
-      const result = await uploadR2Photo(locationId, file);
-      setR2UploadResult(result);
-    } catch (error) {
-      setR2UploadError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setR2UploadLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleR2PhotoTest = async () => {
-    setR2PhotoLoading(true);
-    setR2PhotoError('');
-    setR2PhotoUrl('');
-
-    try {
-      const storagePath = testStoragePath.trim();
-
-      if (!storagePath) {
-        throw new Error('テスト用Storage Pathを入力してください');
-      }
-
-      const blob = await getR2Photo(storagePath);
-      const objectUrl = URL.createObjectURL(blob);
-      setR2PhotoUrl(objectUrl);
-    } catch (error) {
-      setR2PhotoError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setR2PhotoLoading(false);
-    }
-  };
-
-  const handleR2DeleteTest = async () => {
-    setR2DeleteLoading(true);
-    setR2DeleteError('');
-    setR2DeleteResult(null);
-
-    try {
-      const storagePath = testStoragePath.trim();
-
-      if (!storagePath) {
-        throw new Error('削除するStorage Pathを入力してください');
-      }
-
-      const result = await deleteR2Photo(storagePath);
-      setR2DeleteResult(result);
-
-      if (result.deleted) {
-        setR2PhotoUrl('');
-      }
-    } catch (error) {
-      setR2DeleteError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setR2DeleteLoading(false);
-    }
   };
 
   return (
@@ -230,139 +116,6 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 <span>100 200%</span>
               </div>
               <p className="mt-3 text-xs leading-5 text-zinc-500">50を基準に、0で無音、100で現在の音量の2倍です。</p>
-            </div>
-          </section>
-
-          <section className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
-            <div>
-              <p className="text-sm font-semibold text-zinc-100">R2接続テスト</p>
-              <p className="mt-0.5 text-xs text-zinc-500">ログイン中のJWTでWorker認証を確認</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleR2Test}
-              disabled={r2Loading}
-              className="mt-4 w-full rounded-lg border border-emerald-700/70 bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/50 disabled:opacity-50 active:scale-[0.99] transition-all"
-            >
-              {r2Loading ? '確認中...' : 'R2接続を確認'}
-            </button>
-
-            {r2Result && (
-              <div className="mt-3 rounded-lg border border-emerald-900/60 bg-emerald-950/30 p-3 text-xs leading-5 text-emerald-200">
-                <p>認証: {r2Result.authenticated ? 'OK' : 'NG'}</p>
-                <p>ユーザーID: {r2Result.userId ?? '-'}</p>
-                <p>R2: {r2Result.r2 ? 'OK' : 'NG'}</p>
-                <p>Object数: {r2Result.objectCount ?? '-'}</p>
-              </div>
-            )}
-
-            {r2Error && (
-              <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
-                {r2Error}
-              </div>
-            )}
-
-            <div className="mt-5 border-t border-zinc-800 pt-4">
-              <p className="text-sm font-semibold text-zinc-100">R2写真アップロードテスト</p>
-              <p className="mt-0.5 text-xs text-zinc-500">実データには触れず、指定したLocation IDへWebPを1枚送信します</p>
-
-              <input
-                value={testLocationId}
-                onChange={(event) => setTestLocationId(event.target.value)}
-                placeholder="テスト用Location ID（UUID）"
-                className="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-emerald-600"
-              />
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/webp"
-                className="mt-3 w-full text-sm text-zinc-400 file:mr-3 file:rounded-lg file:border file:border-zinc-700 file:bg-zinc-800 file:px-3 file:py-2 file:text-sm file:text-zinc-200 hover:file:bg-zinc-700"
-                disabled={r2UploadLoading}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) void handleR2UploadTest(file);
-                }}
-              />
-
-              {r2UploadLoading && <p className="mt-3 text-xs text-emerald-300">R2へアップロード中...</p>}
-
-              {r2UploadResult && (
-                <div className="mt-3 rounded-lg border border-emerald-900/60 bg-emerald-950/30 p-3 text-xs leading-5 text-emerald-200">
-                  <p>アップロード: {r2UploadResult.uploaded ? 'OK' : 'NG'}</p>
-                  <p>ユーザーID: {r2UploadResult.userId ?? '-'}</p>
-                  <p>Location ID: {r2UploadResult.locationId ?? '-'}</p>
-                  <p>保存先: {r2UploadResult.storagePath ?? '-'}</p>
-                </div>
-              )}
-
-              {r2UploadError && (
-                <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
-                  {r2UploadError}
-                </div>
-              )}
-            </div>
-
-            <div className="mt-5 border-t border-zinc-800 pt-4">
-              <p className="text-sm font-semibold text-zinc-100">R2写真取得テスト</p>
-              <p className="mt-0.5 text-xs text-zinc-500">保存済みのStorage Pathから画像を取得して表示します</p>
-
-              <input
-                value={testStoragePath}
-                onChange={(event) => setTestStoragePath(event.target.value)}
-                placeholder="Storage Path（例: user-id/location-id/xxx.webp）"
-                className="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-emerald-600"
-              />
-
-              <button
-                type="button"
-                onClick={handleR2PhotoTest}
-                disabled={r2PhotoLoading}
-                className="mt-3 w-full rounded-lg border border-emerald-700/70 bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/50 disabled:opacity-50 active:scale-[0.99] transition-all"
-              >
-                {r2PhotoLoading ? '取得中...' : 'R2写真を取得'}
-              </button>
-
-              {r2PhotoError && (
-                <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
-                  {r2PhotoError}
-                </div>
-              )}
-
-              {r2PhotoUrl && (
-                <div className="mt-3 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 p-2">
-                  <img src={r2PhotoUrl} alt="R2取得テスト" className="max-h-64 w-full rounded-md object-contain" />
-                </div>
-              )}
-            </div>
-
-            <div className="mt-5 border-t border-zinc-800 pt-4">
-              <p className="text-sm font-semibold text-zinc-100">R2写真削除テスト</p>
-              <p className="mt-0.5 text-xs text-zinc-500">指定したStorage PathのR2画像を1枚だけ削除します</p>
-
-              <button
-                type="button"
-                onClick={handleR2DeleteTest}
-                disabled={r2DeleteLoading}
-                className="mt-3 w-full rounded-lg border border-red-800/70 bg-red-950/30 px-4 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-950/50 disabled:opacity-50 active:scale-[0.99] transition-all"
-              >
-                {r2DeleteLoading ? '削除中...' : 'R2写真を削除'}
-              </button>
-
-              {r2DeleteResult && (
-                <div className="mt-3 rounded-lg border border-emerald-900/60 bg-emerald-950/30 p-3 text-xs leading-5 text-emerald-200">
-                  <p>削除: {r2DeleteResult.deleted ? 'OK' : 'NG'}</p>
-                  <p>ユーザーID: {r2DeleteResult.userId ?? '-'}</p>
-                  <p>削除先: {r2DeleteResult.storagePath ?? '-'}</p>
-                </div>
-              )}
-
-              {r2DeleteError && (
-                <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
-                  {r2DeleteError}
-                </div>
-              )}
             </div>
           </section>
         </div>
