@@ -320,14 +320,6 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
 
   flushAll();
 
-  const tocIndentClass = (level: Heading['level']) => {
-    if (level === 3) return 'ml-5';
-    if (level === 4) return 'ml-10';
-    if (level === 5) return 'ml-15';
-    if (level === 6) return 'ml-20';
-    return '';
-  };
-
   const tableOfContents = headings.length >= 2 ? (
     <nav
       aria-label="目次"
@@ -336,7 +328,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
       <div className="mb-0 pb-2 font-semibold text-[#202122]">目次</div>
       <ol className="border-t border-[#eaecf0] pt-2 space-y-1">
         {headings.map((heading) => (
-          <li key={heading.id} className={`min-w-0 ${tocIndentClass(heading.level)}`}>
+          <li key={heading.id} className="min-w-0">
             <button
               type="button"
               onClick={() =>
