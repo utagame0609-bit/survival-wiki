@@ -73,3 +73,32 @@ export async function uploadR2Photo(
 
   return result;
 }
+
+export async function getR2Photo(storagePath: string): Promise<Blob> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(
+    `${R2_WORKER_URL}?path=${encodeURIComponent(storagePath)}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    let errorMessage = `Worker photo request failed: ${response.status}`;
+
+    try {
+      const result = (await response.json()) as { error?: string };
+      errorMessage = result.error ?? errorMessage;
+    } catch {
+      // Keep the HTTP status error when the response is not JSON.
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.blob();
+}
