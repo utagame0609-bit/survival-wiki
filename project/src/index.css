@@ -70,22 +70,22 @@ button:not(:disabled):active { transform: scale(0.985); filter: brightness(0.98)
 
 /* Shared focus pulse for selectable objects. */
 @keyframes selectable-pulse {
-  0% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.32), 0 0 8px rgba(16, 185, 129, 0.12); }
-  20% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.65), 0 0 18px rgba(16, 185, 129, 0.24); }
-  55%, 100% { box-shadow: 0 0 0 rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0); }
+  0% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0); filter: brightness(1); }
+  50% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.58), 0 0 16px rgba(16, 185, 129, 0.18); filter: brightness(1.08); }
+  100% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0); filter: brightness(1); }
 }
 @keyframes selectable-pulse-active {
-  0% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.38), 0 0 10px rgba(34, 211, 238, 0.14); }
-  20% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.8), 0 0 20px rgba(34, 211, 238, 0.32); }
-  55%, 100% { box-shadow: 0 0 0 rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0); }
+  0% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0); filter: brightness(1); }
+  50% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.72), 0 0 18px rgba(34, 211, 238, 0.24); filter: brightness(1.07); }
+  100% { box-shadow: 0 0 0 1px rgba(125, 211, 252, 0), 0 0 0 rgba(34, 211, 238, 0); filter: brightness(1); }
 }
-.selectable-pulse { will-change: box-shadow; }
+.selectable-pulse { will-change: box-shadow, filter; }
 @media (hover: hover) and (pointer: fine) {
-  .selectable-pulse:hover { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .selectable-pulse:hover { animation: selectable-pulse 2.8s ease-in-out infinite; }
   .selectable-pulse.selectable-pulse-active:hover { animation-name: selectable-pulse-active; }
 }
 @media (hover: none) and (pointer: coarse) {
-  .selectable-pulse:active { animation: selectable-pulse 1.8s ease-in-out infinite; }
+  .selectable-pulse:active { animation: selectable-pulse 2.8s ease-in-out infinite; }
   .selectable-pulse.selectable-pulse-active:active { animation-name: selectable-pulse-active; }
 }
 
