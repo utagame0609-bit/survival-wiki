@@ -18,6 +18,17 @@ type BeforeInstallPromptEvent = Event & {
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
 
   const openSettings = () => {
     playModalOpenSound();
@@ -37,25 +48,22 @@ export function SettingsButton() {
       >
         <Settings className="w-6 h-6" />
       </button>
-      {settingsOpen && <SettingsModal onClose={closeSettings} />}
+      {settingsOpen && <SettingsModal onClose={closeSettings} installPrompt={installPrompt} onInstallPromptUsed={() => setInstallPrompt(null)} />}
     </>
   );
 }
 
-export function SettingsModal({ onClose }: { onClose: () => void }) {
+export function SettingsModal({
+  onClose,
+  installPrompt,
+  onInstallPromptUsed,
+}: {
+  onClose: () => void;
+  installPrompt: BeforeInstallPromptEvent | null;
+  onInstallPromptUsed: () => void;
+}) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
 
   const handleSoundToggle = () => {
     const next = toggleSound();
@@ -71,13 +79,13 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     playToggleSound();
 
     if (!installPrompt) {
-      window.alert('ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。');
+      window.alert('この環境ではアプリのインストール確認画面を直接開けません。ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。');
       return;
     }
 
     await installPrompt.prompt();
     await installPrompt.userChoice;
-    setInstallPrompt(null);
+    onInstallPromptUsed();
   };
 
   return (
