@@ -12,9 +12,10 @@ type Props = {
 };
 
 type Heading = {
-  level: 2 | 3;
+  level: 2 | 3 | 4 | 5 | 6;
   text: string;
   id: string;
+  number: string;
 };
 
 function escapeRegExp(value: string) {
@@ -204,6 +205,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   };
 
   let headingCount = 0;
+  const headingCounters = [0, 0, 0, 0, 0, 0];
 
   lines.forEach((line, index) => {
     const trimmed = line.trim();
@@ -245,9 +247,9 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
 
     if (tableLines.length > 0) flushTable();
 
-    if (/^#{1,3}\s+/.test(trimmed)) {
+    if (/^#{1,6}\s+/.test(trimmed)) {
       flushAll();
-      const match = trimmed.match(/^(#{1,3})\s+(.+)$/)!;
+      const match = trimmed.match(/^(#{1,6})\s+(.+)$/)!;
       const level = match[1].length;
       const text = match[2].replace(/^#+\s*/, '');
       const common = 'scroll-mt-4 font-normal text-[#202122]';
@@ -263,28 +265,34 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
           </h1>,
         );
       } else {
-        headings.push({ level: level as 2 | 3, text, id });
-        if (level === 2) {
-          blocks.push(
-            <h2
-              id={id}
-              key={`h-${index}`}
-              className={`${common} mt-8 mb-3 border-b border-[#a2a9b1] pb-1 text-xl sm:text-2xl`}
-            >
-              {inlineMarkdown(text, locationLinks)}
-            </h2>,
-          );
-        } else {
-          blocks.push(
-            <h3
-              id={id}
-              key={`h-${index}`}
-              className={`${common} mt-6 mb-2 text-lg sm:text-xl font-semibold`}
-            >
-              {inlineMarkdown(text, locationLinks)}
-            </h3>,
-          );
+        headingCounters[level - 2] += 1;
+        for (let counterIndex = level - 1; counterIndex < headingCounters.length; counterIndex += 1) {
+          headingCounters[counterIndex] = 0;
         }
+        const number = headingCounters
+          .slice(0, level - 1)
+          .filter((value) => value > 0)
+          .join('.');
+        headings.push({ level: level as Heading['level'], text, id, number });
+
+        const headingClass = level === 2
+          ? `${common} mt-8 mb-3 border-b border-[#a2a9b1] pb-1 text-xl sm:text-2xl`
+          : level === 3
+            ? `${common} mt-6 mb-2 text-lg sm:text-xl font-semibold`
+            : level === 4
+              ? `${common} mt-5 mb-2 text-base sm:text-lg font-semibold`
+              : `${common} mt-4 mb-2 text-base font-semibold`;
+
+        const HeadingTag = `h${level}` as 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+        blocks.push(
+          <HeadingTag
+            id={id}
+            key={`h-${index}`}
+            className={headingClass}
+          >
+            {inlineMarkdown(text, locationLinks)}
+          </HeadingTag>,
+        );
       }
       return;
     }
@@ -312,6 +320,14 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
 
   flushAll();
 
+  const tocIndentClass = (level: Heading['level']) => {
+    if (level === 3) return 'ml-5';
+    if (level === 4) return 'ml-10';
+    if (level === 5) return 'ml-15';
+    if (level === 6) return 'ml-20';
+    return '';
+  };
+
   const tableOfContents = headings.length >= 2 ? (
     <nav
       aria-label="目次"
@@ -319,8 +335,8 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
     >
       <div className="mb-0 pb-2 font-semibold text-[#202122]">目次</div>
       <ol className="border-t border-[#eaecf0] pt-2 space-y-1">
-        {headings.map((heading, index) => (
-          <li key={heading.id} className={`min-w-0 ${heading.level === 3 ? 'ml-5' : ''}`}>
+        {headings.map((heading) => (
+          <li key={heading.id} className={`min-w-0 ${tocIndentClass(heading.level)}`}>
             <button
               type="button"
               onClick={() =>
@@ -331,7 +347,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
               title={heading.text}
               className="block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-left text-[#36c] hover:underline"
             >
-              {index + 1}. {heading.text}
+              {heading.number}. {heading.text}
             </button>
           </li>
         ))}
