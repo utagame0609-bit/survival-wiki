@@ -1,5 +1,5 @@
 import { supabase, PHOTOS_BUCKET } from './supabase';
-import { deleteR2Photo } from './r2Worker';
+import { deleteR2Photo, uploadR2Photo } from './r2Worker';
 import type {
   Game,
   World,
@@ -77,29 +77,22 @@ export async function updateWorld(id: string, input: { name: string; player: str
 export async function deleteWorld(id: string): Promise<void> {
   const { data: locations, error: lErr } = await supabase.from('locations').select('id').eq('world_id', id);
   if (lErr) throw lErr;
-
   const locationIds = (locations ?? []).map((location) => location.id);
-
   if (locationIds.length > 0) {
     const { data: photos, error: pErr } = await supabase.from('location_photos').select('storage_path').in('location_id', locationIds);
     if (pErr) throw pErr;
-
     for (const photo of photos ?? []) {
       const pathParts = photo.storage_path.split('/');
       const isR2StoragePath = pathParts.length === 3 && pathParts.every((part) => part.length > 0);
-
       if (isR2StoragePath) {
         const result = await deleteR2Photo(photo.storage_path);
-        if (!result.deleted) {
-          throw new Error(result.error ?? 'R2写真の削除に失敗しました');
-        }
+        if (!result.deleted) throw new Error(result.error ?? 'R2写真の削除に失敗しました');
       } else {
         const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove([photo.storage_path]);
         if (storageErr) throw storageErr;
       }
     }
   }
-
   const { error } = await supabase.from('worlds').delete().eq('id', id);
   if (error) throw error;
 }
@@ -204,11 +197,18 @@ async function resizeAndConvertToWebP(file: File): Promise<Blob> {
 
 export async function uploadPhoto(locationId: string, file: File, isMain: boolean): Promise<LocationPhoto> {
   const imageBlob = await resizeAndConvertToWebP(file);
-  const path = `${locationId}/${crypto.randomUUID()}.webp`;
-  const { error: upErr } = await supabase.storage.from(PHOTOS_BUCKET).upload(path, imageBlob, { contentType: 'image/webp' });
-  if (upErr) throw upErr;
-  const { data, error } = await supabase.from('location_photos').insert({ location_id: locationId, storage_path: path, is_main: isMain, sort_order: 0 }).select().single();
-  if (error) throw error;
+  const result = await uploadR2Photo(locationId, imageBlob);
+  if (!result.storagePath) throw new Error('R2保存先が取得できませんでした');
+
+  const { data, error } = await supabase.from('location_photos').insert({ location_id: locationId, storage_path: result.storagePath, is_main: isMain, sort_order: 0 }).select().single();
+  if (error) {
+    try {
+      await deleteR2Photo(result.storagePath);
+    } catch {
+      // Keep the database error as the primary failure.
+    }
+    throw error;
+  }
   return data as LocationPhoto;
 }
 
