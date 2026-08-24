@@ -282,9 +282,22 @@ export async function deleteLocation(id: string): Promise<void> {
   if (pErr) throw pErr;
 
   if (photos && photos.length > 0) {
-    const paths = photos.map((p) => p.storage_path);
-    const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove(paths);
-    if (storageErr) throw storageErr;
+    for (const photo of photos) {
+      const pathParts = photo.storage_path.split('/');
+      const isR2StoragePath = pathParts.length === 3 && pathParts.every((part) => part.length > 0);
+
+      if (isR2StoragePath) {
+        const result = await deleteR2Photo(photo.storage_path);
+        if (!result.deleted) {
+          throw new Error(result.error ?? 'R2写真の削除に失敗しました');
+        }
+      } else {
+        const { error: storageErr } = await supabase.storage
+          .from(PHOTOS_BUCKET)
+          .remove([photo.storage_path]);
+        if (storageErr) throw storageErr;
+      }
+    }
   }
 
   const { error } = await supabase.from('locations').delete().eq('id', id);
