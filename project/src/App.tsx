@@ -81,6 +81,7 @@ function App() {
           worldId={screen.worldId}
           worldName={screen.worldName}
           navigate={setScreen}
+          goBack={goBack}
         />
       );
       break;
