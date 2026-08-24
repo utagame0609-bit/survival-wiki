@@ -10,7 +10,15 @@ import {
   setSoundVolume,
   toggleSound,
 } from '@/lib/sound';
-import { checkR2WorkerAuth, getR2Photo, uploadR2Photo, type R2WorkerResult, type R2UploadResult } from '@/lib/r2Worker';
+import {
+  checkR2WorkerAuth,
+  deleteR2Photo,
+  getR2Photo,
+  uploadR2Photo,
+  type R2DeleteResult,
+  type R2WorkerResult,
+  type R2UploadResult,
+} from '@/lib/r2Worker';
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -52,6 +60,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [r2PhotoUrl, setR2PhotoUrl] = useState('');
   const [r2PhotoError, setR2PhotoError] = useState('');
   const [r2PhotoLoading, setR2PhotoLoading] = useState(false);
+  const [r2DeleteResult, setR2DeleteResult] = useState<R2DeleteResult | null>(null);
+  const [r2DeleteError, setR2DeleteError] = useState('');
+  const [r2DeleteLoading, setR2DeleteLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSoundToggle = () => {
@@ -126,6 +137,31 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
       setR2PhotoError(error instanceof Error ? error.message : String(error));
     } finally {
       setR2PhotoLoading(false);
+    }
+  };
+
+  const handleR2DeleteTest = async () => {
+    setR2DeleteLoading(true);
+    setR2DeleteError('');
+    setR2DeleteResult(null);
+
+    try {
+      const storagePath = testStoragePath.trim();
+
+      if (!storagePath) {
+        throw new Error('削除するStorage Pathを入力してください');
+      }
+
+      const result = await deleteR2Photo(storagePath);
+      setR2DeleteResult(result);
+
+      if (result.deleted) {
+        setR2PhotoUrl('');
+      }
+    } catch (error) {
+      setR2DeleteError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setR2DeleteLoading(false);
     }
   };
 
@@ -297,6 +333,34 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               {r2PhotoUrl && (
                 <div className="mt-3 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 p-2">
                   <img src={r2PhotoUrl} alt="R2取得テスト" className="max-h-64 w-full rounded-md object-contain" />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 border-t border-zinc-800 pt-4">
+              <p className="text-sm font-semibold text-zinc-100">R2写真削除テスト</p>
+              <p className="mt-0.5 text-xs text-zinc-500">指定したStorage PathのR2画像を1枚だけ削除します</p>
+
+              <button
+                type="button"
+                onClick={handleR2DeleteTest}
+                disabled={r2DeleteLoading}
+                className="mt-3 w-full rounded-lg border border-red-800/70 bg-red-950/30 px-4 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-950/50 disabled:opacity-50 active:scale-[0.99] transition-all"
+              >
+                {r2DeleteLoading ? '削除中...' : 'R2写真を削除'}
+              </button>
+
+              {r2DeleteResult && (
+                <div className="mt-3 rounded-lg border border-emerald-900/60 bg-emerald-950/30 p-3 text-xs leading-5 text-emerald-200">
+                  <p>削除: {r2DeleteResult.deleted ? 'OK' : 'NG'}</p>
+                  <p>ユーザーID: {r2DeleteResult.userId ?? '-'}</p>
+                  <p>削除先: {r2DeleteResult.storagePath ?? '-'}</p>
+                </div>
+              )}
+
+              {r2DeleteError && (
+                <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
+                  {r2DeleteError}
                 </div>
               )}
             </div>
