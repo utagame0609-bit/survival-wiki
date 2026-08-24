@@ -168,7 +168,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       </>}
 
       {collectionOpen && (
-        <div className="fixed inset-0 z-[55] bg-[#11120f] text-stone-100 overflow-y-auto">
+        <div className="fixed inset-0 z-40 bg-[#11120f] text-stone-100 overflow-y-auto">
           <div className="min-h-full px-4 py-4 max-w-3xl mx-auto">
             <div className="flex items-center justify-between h-12 border-b border-[#2d3028] mb-5">
               <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       )}
 
       {selectedLocation && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           <button aria-label="閉じる" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={closeLocationDetail} />
           <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden bg-[#1b1c18] text-stone-100 border border-[#34372f] shadow-2xl flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
             <div className="flex items-center justify-between px-4 sm:px-5 h-12 flex-shrink-0 border-b border-[#34372f] bg-[#171813]"><h2 className="text-sm sm:text-base font-semibold text-stone-100">ロケーション</h2><button onClick={closeLocationDetail} aria-label="閉じる" className="w-8 h-8 flex items-center justify-center text-stone-400 hover:bg-[#292b24] hover:text-stone-100"><X className="w-5 h-5" /></button></div>
