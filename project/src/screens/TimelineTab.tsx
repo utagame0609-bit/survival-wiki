@@ -5,7 +5,7 @@ import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { playCardOpenSound, playToggleSound } from '@/lib/sound';
 
-type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhoto?: string };
+type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhotoPath?: string };
 type SortOrder = 'newest' | 'oldest';
 type Milestone = { day: number; label: string };
 
@@ -17,6 +17,37 @@ const MILESTONES: Milestone[] = [
 
 function getMilestone(dayNumber: number) {
   return MILESTONES.find((milestone) => milestone.day === dayNumber);
+}
+
+function TimelinePhoto({ storagePath, alt, className }: { storagePath: string; alt: string; className: string }) {
+  const [src, setSrc] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl = '';
+
+    getPhotoUrl(storagePath)
+      .then((url) => {
+        if (active) {
+          objectUrl = url.startsWith('blob:') ? url : '';
+          setSrc(url);
+        } else if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      })
+      .catch(() => {
+        if (active) setSrc('');
+      });
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [storagePath]);
+
+  if (!src) return null;
+
+  return <img src={src} alt={alt} className={className} />;
 }
 
 export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
@@ -172,7 +203,7 @@ function DayChapter({ group, isActive, isExpanded, unlockedMilestones, onRef, on
   return (
     <section ref={onRef} className="relative scroll-mt-24">
       <button type="button" onClick={onSelect} className={`selectable-pulse ${isActive ? 'selectable-pulse-active ' : ''}group relative w-full min-h-[86px] mb-4 overflow-hidden rounded-xl border text-left transition-all duration-300 ${isActive ? 'border-emerald-400/70 bg-gradient-to-r from-emerald-950/70 via-zinc-900/80 to-zinc-900/75 shadow-[0_0_18px_rgba(16,185,129,0.10)]' : 'border-emerald-950/70 bg-gradient-to-r from-emerald-950/35 via-zinc-900/70 to-zinc-900/60 hover:border-emerald-900/80'}`} aria-expanded={isExpanded}>
-        {group.bgPhoto && <div className="absolute inset-0 overflow-hidden pointer-events-none"><img src={group.bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
+        {group.bgPhotoPath && <div className="absolute inset-0 overflow-hidden pointer-events-none"><TimelinePhoto storagePath={group.bgPhotoPath} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
         <div className="relative z-10 flex min-h-[86px] items-center gap-3 px-4 py-3 sm:px-5">
           <div className={`flex h-9 w-11 shrink-0 items-center justify-center rounded-lg border ${isActive ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-emerald-900/70 bg-zinc-900/60 text-zinc-400'}`}><span className="text-[10px] font-bold tracking-[0.14em]">DAY</span><span className="ml-1 text-base font-bold leading-none">{group.dayNumber}</span></div>
           <div className="min-w-0 flex-1">
@@ -195,7 +226,7 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
     return (
       <article className="relative overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(150px,0.8fr)_minmax(240px,1.7fr)]">
-          {hasPhoto ? <img src={getPhotoUrl(mainPhoto!.storage_path)} alt={loc.name} className="w-full h-44 md:h-full min-h-44 object-cover" /> : <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300"><MapPin className="w-7 h-7" /></div>}
+          {hasPhoto ? <div className="w-full h-44 md:h-full min-h-44 overflow-hidden"><TimelinePhoto storagePath={mainPhoto!.storage_path} alt={loc.name} className="w-full h-full object-cover" /></div> : <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300"><MapPin className="w-7 h-7" /></div>}
           <div className="p-4 min-w-0">
             <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div><span className="shrink-0 text-xs text-stone-500 font-mono">{time}</span></div>
             {hasMemo && <p className="mt-3 text-sm leading-6 text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p>}
@@ -229,8 +260,8 @@ function groupByDay(locations: LocationWithPhotos[]): DayGroup[] {
     const dayNum = dateKeyToDayNum.get(key) ?? 1;
     const label = `${dayNum}日目`;
     const firstWithPhoto = [...locs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).find((l) => l.photos.some((p) => p.is_main));
-    const bgPhoto = firstWithPhoto?.photos.find((p) => p.is_main);
-    groups.push({ dateKey: key, label, dayNumber: dayNum, dateLabel, dayLabel, locations: [...locs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()), bgPhoto: bgPhoto ? getPhotoUrl(bgPhoto.storage_path) : undefined });
+    const bgPhotoPath = firstWithPhoto?.photos.find((p) => p.is_main)?.storage_path;
+    groups.push({ dateKey: key, label, dayNumber: dayNum, dateLabel, dayLabel, locations: [...locs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()), bgPhotoPath });
   }
   return groups;
 }
