@@ -47,7 +47,10 @@ export async function fetchWorld(id: string): Promise<WorldWithMembers | null> {
 }
 
 export async function createWorld(gameId: string, input: { name: string; player: string; memo: string; members: string[] }): Promise<World> {
-  const { data, error } = await supabase.from('worlds').insert({ game_id: gameId, name: input.name, player: input.player, memo: input.memo }).select().single();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  if (!user) throw new Error('ログインユーザーを確認できません');
+  const { data, error } = await supabase.from('worlds').insert({ user_id: user.id, game_id: gameId, name: input.name, player: input.player, memo: input.memo }).select().single();
   if (error) throw error;
   const world = data as World;
   if (input.members.length > 0) {
@@ -134,8 +137,10 @@ export async function updateLocation(id: string, input: { name: string; x: numbe
   if (dErr) throw dErr;
   if (input.member_ids.length > 0) {
     const rows = input.member_ids.map((mid) => ({ location_id: id, member_id: mid }));
-    const { error: lmErr } = await supabase.from('location_members').insert(rows);
-    if (lmErr) throw lmErr;
+    if (rows.length > 0) {
+      const { error: mErr } = await supabase.from('location_members').insert(rows);
+      if (mErr) throw mErr;
+    }
   }
 }
 
