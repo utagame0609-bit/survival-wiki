@@ -1,4 +1,5 @@
 import { supabase, PHOTOS_BUCKET } from './supabase';
+import { deleteR2Photo } from './r2Worker';
 import type {
   Game,
   World,
@@ -361,8 +362,19 @@ export async function uploadPhoto(
 }
 
 export async function deletePhoto(photoId: string, storagePath: string): Promise<void> {
-  const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove([storagePath]);
-  if (storageErr) throw storageErr;
+  const pathParts = storagePath.split('/');
+  const isR2StoragePath = pathParts.length === 3 && pathParts.every((part) => part.length > 0);
+
+  if (isR2StoragePath) {
+    const result = await deleteR2Photo(storagePath);
+    if (!result.deleted) {
+      throw new Error(result.error ?? 'R2写真の削除に失敗しました');
+    }
+  } else {
+    const { error: storageErr } = await supabase.storage.from(PHOTOS_BUCKET).remove([storagePath]);
+    if (storageErr) throw storageErr;
+  }
+
   const { error } = await supabase.from('location_photos').delete().eq('id', photoId);
   if (error) throw error;
 }
