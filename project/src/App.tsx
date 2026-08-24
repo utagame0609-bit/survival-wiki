@@ -37,11 +37,7 @@ function App() {
   }, []);
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-[#11120f] text-stone-100 flex items-center justify-center">
-        <p className="text-sm text-stone-400">認証状態を確認中...</p>
-      </div>
-    );
+    return <div className="fixed inset-0 bg-[#11120f]" aria-hidden="true" />;
   }
 
   if (!session) {
