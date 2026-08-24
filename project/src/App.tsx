@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
 function App() {
-  const { screen, setScreen, goBack } = useScreenHistory();
+  const { screen, setScreen, setStartupWorld, goBack } = useScreenHistory();
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [startupLoading, setStartupLoading] = useState(true);
@@ -59,7 +59,10 @@ function App() {
           if (!world) continue;
 
           if (!cancelled) {
-            setScreen({ name: 'world', worldId: world.id, worldName: world.name });
+            setStartupWorld(
+              { name: 'world', worldId: world.id, worldName: world.name },
+              { gameId: game.id, gameName: game.name },
+            );
           }
           return;
         }
@@ -75,7 +78,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, session, setScreen]);
+  }, [authLoading, session, setStartupWorld]);
 
   if (authLoading || (session && startupLoading)) {
     return <div className="fixed inset-0 bg-[#11120f]" aria-hidden="true" />;
