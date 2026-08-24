@@ -10,6 +10,7 @@ import {
   setSoundVolume,
   toggleSound,
 } from '@/lib/sound';
+import { checkR2WorkerAuth, type R2WorkerResult } from '@/lib/r2Worker';
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -40,6 +41,9 @@ export function SettingsButton() {
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
+  const [r2Result, setR2Result] = useState<R2WorkerResult | null>(null);
+  const [r2Error, setR2Error] = useState('');
+  const [r2Loading, setR2Loading] = useState(false);
 
   const handleSoundToggle = () => {
     const next = toggleSound();
@@ -49,6 +53,21 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
   const handleVolumeChange = (value: number) => {
     setSoundVolumeState(setSoundVolume(value));
+  };
+
+  const handleR2Test = async () => {
+    setR2Loading(true);
+    setR2Error('');
+    setR2Result(null);
+
+    try {
+      const result = await checkR2WorkerAuth();
+      setR2Result(result);
+    } catch (error) {
+      setR2Error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setR2Loading(false);
+    }
   };
 
   return (
@@ -117,6 +136,37 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               </div>
               <p className="mt-3 text-xs leading-5 text-zinc-500">50を基準に、0で無音、100で現在の音量の2倍です。</p>
             </div>
+          </section>
+
+          <section className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
+            <div>
+              <p className="text-sm font-semibold text-zinc-100">R2接続テスト</p>
+              <p className="mt-0.5 text-xs text-zinc-500">ログイン中のJWTでWorker認証を確認</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleR2Test}
+              disabled={r2Loading}
+              className="mt-4 w-full rounded-lg border border-emerald-700/70 bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/50 disabled:opacity-50 active:scale-[0.99] transition-all"
+            >
+              {r2Loading ? '確認中...' : 'R2接続を確認'}
+            </button>
+
+            {r2Result && (
+              <div className="mt-3 rounded-lg border border-emerald-900/60 bg-emerald-950/30 p-3 text-xs leading-5 text-emerald-200">
+                <p>認証: {r2Result.authenticated ? 'OK' : 'NG'}</p>
+                <p>ユーザーID: {r2Result.userId ?? '-'}</p>
+                <p>R2: {r2Result.r2 ? 'OK' : 'NG'}</p>
+                <p>Object数: {r2Result.objectCount ?? '-'}</p>
+              </div>
+            )}
+
+            {r2Error && (
+              <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
+                {r2Error}
+              </div>
+            )}
           </section>
         </div>
 
