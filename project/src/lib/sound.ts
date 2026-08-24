@@ -53,8 +53,11 @@ let soundVolume = DEFAULT_SOUND_VOLUME;
 
 function readStoredSettings(): void {
   if (typeof window === 'undefined') return;
-  const storedVolume = Number(window.localStorage.getItem(SOUND_VOLUME_KEY));
-  if (Number.isFinite(storedVolume)) soundVolume = Math.min(100, Math.max(0, storedVolume));
+  const storedVolume = window.localStorage.getItem(SOUND_VOLUME_KEY);
+  if (storedVolume !== null) {
+    const parsedVolume = Number(storedVolume);
+    if (Number.isFinite(parsedVolume)) soundVolume = Math.min(100, Math.max(0, parsedVolume));
+  }
   const storedEnabled = window.localStorage.getItem(SOUND_ENABLED_KEY);
   if (storedEnabled !== null) enabled = storedEnabled === 'true';
 }
