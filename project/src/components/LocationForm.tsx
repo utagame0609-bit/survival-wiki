@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Camera, X } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
@@ -36,14 +36,57 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   const existingMain = editing?.photos.find((p) => p.is_main) ?? null;
   const [existingMainPhoto] = useState(existingMain);
   const [mainFile, setMainFile] = useState<File | null>(null);
-  const [mainPreview, setMainPreview] = useState<string | null>(existingMain ? getPhotoUrl(existingMain.storage_path) : null);
+  const [mainPreview, setMainPreview] = useState<string | null>(null);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    let active = true;
+
+    if (!existingMainPhoto) {
+      setMainPreview(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    getPhotoUrl(existingMainPhoto.storage_path)
+      .then((url) => {
+        if (active) {
+          setMainPreview(url);
+        } else if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      })
+      .catch(() => {
+        if (active) setMainPreview(null);
+      });
+
+    return () => {
+      active = false;
+      setMainPreview((current) => {
+        if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
+        return null;
+      });
+    };
+  }, [existingMainPhoto]);
+
   const handleMainSelect = (file: File | null) => {
     if (!file) return;
+    setMainPreview((current) => {
+      if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
+      return URL.createObjectURL(file);
+    });
     setMainFile(file);
-    setMainPreview(URL.createObjectURL(file));
+  };
+
+  const clearMainPreview = () => {
+    setMainFile(null);
+    setMainPreview((current) => {
+      if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
+      return null;
+    });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const toggleMember = (id: string) => {
@@ -105,7 +148,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         {mainPreview ? (
           <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-[0_0_14px_rgba(0,0,0,0.18)]">
             <img src={mainPreview} alt="メイン写真" className="w-full h-44 object-cover" />
-            <button type="button" onClick={() => { setMainFile(null); setMainPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-950/85 border border-zinc-700 text-zinc-300 hover:text-red-300 hover:border-red-900/60 transition-colors" aria-label="写真を削除"><X className="w-4 h-4" /></button>
+            <button type="button" onClick={clearMainPreview} className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-950/85 border border-zinc-700 text-zinc-300 hover:text-red-300 hover:border-red-900/60 transition-colors" aria-label="写真を削除"><X className="w-4 h-4" /></button>
           </div>
         ) : (
           <button type="button" onClick={() => fileInputRef.current?.click()} className="group w-full h-28 rounded-xl border border-zinc-700/80 bg-zinc-900/88 flex flex-col items-center justify-center text-zinc-500 hover:border-zinc-600 hover:text-zinc-300 hover:bg-zinc-900 transition-all"><Camera className="w-8 h-8 mb-1 group-hover:scale-105 transition-transform" /><span className="text-sm">撮影・選択</span></button>
