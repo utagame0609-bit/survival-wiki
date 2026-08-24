@@ -79,6 +79,15 @@ export function useScreenHistory() {
     window.history.pushState({}, '');
   };
 
+  const setStartupWorld = (world: Screen & { name: 'world' }, game: { gameId: string; gameName: string }) => {
+    setScreenState(world);
+    setHistory([
+      { name: 'top' },
+      { name: 'worldList', gameId: game.gameId, gameName: game.gameName },
+    ]);
+    window.history.replaceState({}, '');
+  };
+
   const goBack = () => {
     setHistory((h) => {
       if (h.length === 0) return h;
@@ -99,5 +108,5 @@ export function useScreenHistory() {
 
   useBackButton(goBack);
 
-  return { screen, setScreen, goBack };
+  return { screen, setScreen, setStartupWorld, goBack };
 }
