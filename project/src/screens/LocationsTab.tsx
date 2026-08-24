@@ -13,6 +13,11 @@ type Mode =
 
 type SortOrder = 'asc' | 'desc';
 
+type CollectionItem = {
+  location: LocationWithPhotos;
+  storagePath: string;
+};
+
 export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpenLocationHandled }: { world: WorldWithMembers; reloadKey: number; onReload: () => void; openLocationId?: string | null; onOpenLocationHandled?: () => void }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +26,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   const [saving, setSaving] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<LocationWithPhotos | null>(null);
+  const [collectionOpen, setCollectionOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const loadRequestRef = useRef(0);
@@ -84,11 +90,9 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
-
     const locationId = deleteTarget.id;
     setDeleteTarget(null);
     playDeleteSound();
-
     try {
       await deleteLocation(locationId);
       setSelectedLocation((prev) => (prev?.id === locationId ? null : prev));
@@ -126,6 +130,11 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
     return sortOrder === 'asc' ? aTime - bTime : bTime - aTime;
   });
 
+  const collectionItems: CollectionItem[] = locations
+    .flatMap((location) => location.photos.map((photo) => ({ location, storagePath: photo.storage_path, createdAt: photo.created_at })))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .map(({ location, storagePath }) => ({ location, storagePath }));
+
   return (
     <div className="min-h-full bg-[#11120f] text-stone-100 px-4 py-4 max-w-3xl mx-auto">
       <div className="mb-4 space-y-3">
@@ -143,7 +152,12 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       {!loading && locations.length > 0 && <>
         <div className="flex justify-between items-center px-1 mb-2.5 text-[11px] text-stone-500 font-mono gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-zinc-400 font-medium whitespace-nowrap">総記録数: {filteredLocations.length} 件</span>
+            <button type="button" onClick={() => setCollectionOpen(true)} aria-label="コレクションを開く" title="コレクション" className="group shrink-0 w-9 h-8 rounded-lg border border-emerald-900/60 bg-emerald-950/20 hover:border-emerald-600/70 hover:bg-emerald-950/30 active:scale-[0.96] transition-all flex items-center justify-center">
+              <span aria-hidden="true" className="relative block w-[18px] h-[15px] rounded-[2px] border border-amber-700/80 bg-gradient-to-b from-amber-700/90 to-amber-900/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.35)]">
+                <span className="absolute left-[-1px] right-[-1px] top-[3px] h-[3px] border-y border-amber-500/60 bg-amber-800/90" />
+                <span className="absolute left-1/2 top-[4px] -translate-x-1/2 w-[3px] h-[4px] rounded-[1px] border border-amber-300/60 bg-amber-500/80" />
+              </span>
+            </button>
             {normalizedQuery && <span className="truncate text-zinc-600">「{searchQuery.trim()}」で検索中</span>}
           </div>
           <button type="button" onClick={() => { playToggleSound(); setSortOrder((current) => current === 'asc' ? 'desc' : 'asc'); }} className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-900/60 bg-emerald-950/20 text-zinc-400 hover:text-emerald-300 hover:border-emerald-700/50 hover:bg-emerald-950/30 transition-colors" aria-label="ロケーションの並び順を変更">
@@ -152,6 +166,30 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         </div>
         {sortedLocations.length > 0 ? <div className="space-y-2.5">{sortedLocations.map((loc) => <LocationCard key={loc.id} loc={loc} onToggle={() => { playModalOpenSound(); setSelectedLocation(loc); }} />)}</div> : <EmptyState message="該当するロケーションがありません。" />}
       </>}
+
+      {collectionOpen && (
+        <div className="fixed inset-0 z-[55] bg-[#11120f] text-stone-100 overflow-y-auto">
+          <div className="min-h-full px-4 py-4 max-w-3xl mx-auto">
+            <div className="flex items-center justify-between h-12 border-b border-[#2d3028] mb-5">
+              <div className="flex items-center gap-2">
+                <span className="relative block w-5 h-4 rounded-[2px] border border-amber-700/80 bg-gradient-to-b from-amber-700/90 to-amber-900/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.35)]" aria-hidden="true">
+                  <span className="absolute left-[-1px] right-[-1px] top-[4px] h-[3px] border-y border-amber-500/60 bg-amber-800/90" />
+                  <span className="absolute left-1/2 top-[5px] -translate-x-1/2 w-[3px] h-[4px] rounded-[1px] border border-amber-300/60 bg-amber-500/80" />
+                </span>
+                <h2 className="text-sm font-semibold tracking-[0.14em] text-zinc-200">COLLECTION</h2>
+              </div>
+              <button type="button" onClick={() => setCollectionOpen(false)} aria-label="コレクションを閉じる" className="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:bg-[#292b24] hover:text-stone-100 active:scale-[0.96] transition-all"><X className="w-5 h-5" /></button>
+            </div>
+            {collectionItems.length === 0 ? (
+              <EmptyState message="まだ記録写真がありません。" />
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
+                {collectionItems.map((item) => <CollectionSlot key={`${item.location.id}-${item.storagePath}`} item={item} onOpen={() => { setCollectionOpen(false); playModalOpenSound(); setSelectedLocation(item.location); }} />)}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {selectedLocation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
@@ -179,57 +217,17 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       )}
 
       {deleteTarget && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              playCancelSound();
-              setDeleteTarget(null);
-            }
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-location-title"
-            className="w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-900 to-[#151712] border border-emerald-900/70 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]"
-          >
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setDeleteTarget(null); } }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-location-title" className="w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-900 to-[#151712] border border-emerald-900/70 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]">
             <div className="px-5 pt-6 pb-5 text-center">
-              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/50 border border-red-900/60 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.12)]">
-                <AlertTriangle className="w-7 h-7 text-red-300" />
-              </div>
-              <h2 id="delete-location-title" className="text-lg font-bold text-zinc-100">
-                ロケーションを削除しますか？
-              </h2>
-              <p className="mt-2 text-sm text-emerald-300 font-semibold break-words">
-                「{deleteTarget.name}」
-              </p>
-              <p className="mt-3 text-xs leading-5 text-zinc-500">
-                この操作は元に戻せません。<br />
-                このロケーションに保存されている写真も削除されます。
-              </p>
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/50 border border-red-900/60 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.12)]"><AlertTriangle className="w-7 h-7 text-red-300" /></div>
+              <h2 id="delete-location-title" className="text-lg font-bold text-zinc-100">ロケーションを削除しますか？</h2>
+              <p className="mt-2 text-sm text-emerald-300 font-semibold break-words">「{deleteTarget.name}」</p>
+              <p className="mt-3 text-xs leading-5 text-zinc-500">この操作は元に戻せません。<br />このロケーションに保存されている写真も削除されます。</p>
             </div>
             <div className="grid grid-cols-2 gap-3 px-5 pb-5">
-              <button
-                type="button"
-                onClick={() => {
-                  playCancelSound();
-                  setDeleteTarget(null);
-                }}
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.98] transition-all"
-              >
-                <X className="w-4 h-4" />
-                キャンセル
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-950/70 border border-red-900/70 text-red-200 hover:bg-red-900/60 hover:border-red-800 hover:text-red-100 active:scale-[0.98] transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-                削除する
-              </button>
+              <button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.98] transition-all"><X className="w-4 h-4" />キャンセル</button>
+              <button type="button" onClick={confirmDelete} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-950/70 border border-red-900/70 text-red-200 hover:bg-red-900/60 hover:border-red-800 hover:text-red-100 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除する</button>
             </div>
           </div>
         </div>
@@ -263,4 +261,15 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
       </div>
     </button>
   </div>;
+}
+
+function CollectionSlot({ item, onOpen }: { item: CollectionItem; onOpen: () => void }) {
+  return <button type="button" onClick={onOpen} className="group aspect-square rounded-md border border-zinc-700/90 bg-[#1b1c18] p-1.5 sm:p-2 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02),inset_0_0_14px_rgba(0,0,0,0.45)] hover:border-emerald-700/70 hover:bg-[#20221d] active:scale-[0.98] transition-all">
+    <div className="relative w-full h-full overflow-hidden rounded-sm bg-zinc-950 border border-zinc-800/90">
+      <img src={getPhotoUrl(item.storagePath)} alt={item.location.name} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]" />
+      <div className="absolute inset-x-0 bottom-0 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent pt-4">
+        <div className="text-[10px] sm:text-[11px] text-zinc-200 truncate">{item.location.name}</div>
+      </div>
+    </div>
+  </button>;
 }
