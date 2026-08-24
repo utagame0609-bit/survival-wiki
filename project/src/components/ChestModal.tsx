@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { getPhotoUrl } from '@/lib/db';
@@ -42,9 +43,34 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
 }
 
 function CollectionSlot({ item, onOpen }: { item: CollectionItem; onOpen: () => void }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+
+    getPhotoUrl(item.storagePath)
+      .then((url) => {
+        if (!active) {
+          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url.startsWith('blob:') ? url : null;
+        setSrc(url);
+      })
+      .catch(() => {
+        if (active) setSrc(null);
+      });
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [item.storagePath]);
+
   return <button type="button" onClick={onOpen} className="group aspect-square rounded-md border border-zinc-700/90 bg-[#1b1c18] p-1.5 sm:p-2 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02),inset_0_0_14px_rgba(0,0,0,0.45)] hover:border-emerald-700/70 hover:bg-[#20221d] active:scale-[0.98] transition-all">
     <div className="relative w-full h-full overflow-hidden rounded-sm bg-zinc-950 border border-zinc-800/90">
-      <img src={getPhotoUrl(item.storagePath)} alt={item.location.name} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]" />
+      {src ? <img src={src} alt={item.location.name} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]" /> : <div className="w-full h-full bg-zinc-900" aria-hidden="true" />}
       <div className="absolute inset-x-0 bottom-0 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent pt-4">
         <div className="text-[10px] sm:text-[11px] text-zinc-200 truncate">{item.location.name}</div>
       </div>
