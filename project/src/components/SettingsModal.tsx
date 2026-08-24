@@ -10,7 +10,7 @@ import {
   setSoundVolume,
   toggleSound,
 } from '@/lib/sound';
-import { checkR2WorkerAuth, uploadR2Photo, type R2WorkerResult, type R2UploadResult } from '@/lib/r2Worker';
+import { checkR2WorkerAuth, getR2Photo, uploadR2Photo, type R2WorkerResult, type R2UploadResult } from '@/lib/r2Worker';
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -48,6 +48,10 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [r2UploadError, setR2UploadError] = useState('');
   const [r2UploadLoading, setR2UploadLoading] = useState(false);
   const [testLocationId, setTestLocationId] = useState('');
+  const [testStoragePath, setTestStoragePath] = useState('');
+  const [r2PhotoUrl, setR2PhotoUrl] = useState('');
+  const [r2PhotoError, setR2PhotoError] = useState('');
+  const [r2PhotoLoading, setR2PhotoLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSoundToggle = () => {
@@ -100,6 +104,28 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleR2PhotoTest = async () => {
+    setR2PhotoLoading(true);
+    setR2PhotoError('');
+    setR2PhotoUrl('');
+
+    try {
+      const storagePath = testStoragePath.trim();
+
+      if (!storagePath) {
+        throw new Error('テスト用Storage Pathを入力してください');
+      }
+
+      const blob = await getR2Photo(storagePath);
+      const objectUrl = URL.createObjectURL(blob);
+      setR2PhotoUrl(objectUrl);
+    } catch (error) {
+      setR2PhotoError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setR2PhotoLoading(false);
     }
   };
 
@@ -238,6 +264,39 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
               {r2UploadError && (
                 <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
                   {r2UploadError}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 border-t border-zinc-800 pt-4">
+              <p className="text-sm font-semibold text-zinc-100">R2写真取得テスト</p>
+              <p className="mt-0.5 text-xs text-zinc-500">保存済みのStorage Pathから画像を取得して表示します</p>
+
+              <input
+                value={testStoragePath}
+                onChange={(event) => setTestStoragePath(event.target.value)}
+                placeholder="Storage Path（例: user-id/location-id/xxx.webp）"
+                className="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-emerald-600"
+              />
+
+              <button
+                type="button"
+                onClick={handleR2PhotoTest}
+                disabled={r2PhotoLoading}
+                className="mt-3 w-full rounded-lg border border-emerald-700/70 bg-emerald-900/30 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/50 disabled:opacity-50 active:scale-[0.99] transition-all"
+              >
+                {r2PhotoLoading ? '取得中...' : 'R2写真を取得'}
+              </button>
+
+              {r2PhotoError && (
+                <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/30 p-3 text-xs leading-5 text-red-200">
+                  {r2PhotoError}
+                </div>
+              )}
+
+              {r2PhotoUrl && (
+                <div className="mt-3 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 p-2">
+                  <img src={r2PhotoUrl} alt="R2取得テスト" className="max-h-64 w-full rounded-md object-contain" />
                 </div>
               )}
             </div>
