@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, Home } from 'lucide-react';
 import { playCancelSound } from '../lib/sound';
 
@@ -79,14 +79,17 @@ export function useScreenHistory() {
     window.history.pushState({}, '');
   };
 
-  const setStartupWorld = (world: Screen & { name: 'world' }, game: { gameId: string; gameName: string }) => {
+  const setStartupWorld = useCallback((
+    world: Screen & { name: 'world' },
+    game: { gameId: string; gameName: string },
+  ) => {
     setScreenState(world);
     setHistory([
       { name: 'top' },
       { name: 'worldList', gameId: game.gameId, gameName: game.gameName },
     ]);
     window.history.replaceState({}, '');
-  };
+  }, []);
 
   const goBack = () => {
     setHistory((h) => {
