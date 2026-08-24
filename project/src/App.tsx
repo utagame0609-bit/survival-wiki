@@ -6,6 +6,7 @@ import { TopScreen } from '@/screens/TopScreen';
 import { WorldListScreen } from '@/screens/WorldListScreen';
 import { WorldCreateScreen } from '@/screens/WorldCreateScreen';
 import { WorldScreen } from '@/screens/WorldScreen';
+import { fetchGames, fetchWorlds } from '@/lib/db';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -13,6 +14,7 @@ function App() {
   const { screen, setScreen, goBack } = useScreenHistory();
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [startupLoading, setStartupLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -36,7 +38,46 @@ function App() {
     };
   }, []);
 
-  if (authLoading) {
+  useEffect(() => {
+    if (authLoading || !session) {
+      if (!authLoading) setStartupLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const restoreLastWorld = async () => {
+      try {
+        const games = await fetchGames();
+
+        for (const game of games) {
+          const lastOpenedWorldId = localStorage.getItem(`survival-wiki:last-opened-world:${game.id}`);
+          if (!lastOpenedWorldId) continue;
+
+          const worlds = await fetchWorlds(game.id);
+          const world = worlds.find((item) => item.id === lastOpenedWorldId);
+          if (!world) continue;
+
+          if (!cancelled) {
+            setScreen({ name: 'world', worldId: world.id, worldName: world.name });
+          }
+          return;
+        }
+      } catch {
+        // 起動時の自動復元に失敗した場合は、従来どおりトップ画面から開始する。
+      } finally {
+        if (!cancelled) setStartupLoading(false);
+      }
+    };
+
+    restoreLastWorld();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, session, setScreen]);
+
+  if (authLoading || (session && startupLoading)) {
     return <div className="fixed inset-0 bg-[#11120f]" aria-hidden="true" />;
   }
 
