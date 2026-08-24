@@ -1,5 +1,5 @@
-import { Settings, Volume2, VolumeX, X } from 'lucide-react';
-import { useState } from 'react';
+import { Download, Settings, Volume2, VolumeX, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
   getSoundVolume,
   isSoundEnabled,
@@ -10,6 +10,11 @@ import {
   setSoundVolume,
   toggleSound,
 } from '@/lib/sound';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -40,6 +45,17 @@ export function SettingsButton() {
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
 
   const handleSoundToggle = () => {
     const next = toggleSound();
@@ -49,6 +65,19 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
   const handleVolumeChange = (value: number) => {
     setSoundVolumeState(setSoundVolume(value));
+  };
+
+  const handleInstall = async () => {
+    playToggleSound();
+
+    if (!installPrompt) {
+      window.alert('ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。');
+      return;
+    }
+
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
   };
 
   return (
@@ -116,6 +145,18 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 <span>100 200%</span>
               </div>
               <p className="mt-3 text-xs leading-5 text-zinc-500">50を基準に、0で無音、100で現在の音量の2倍です。</p>
+            </div>
+
+            <div className="mt-6 border-t border-zinc-800 pt-5">
+              <button
+                type="button"
+                onClick={handleInstall}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-700/70 bg-emerald-950/40 px-4 py-3 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/50 active:scale-[0.98] transition-all"
+              >
+                <Download className="h-5 w-5" />
+                ホーム画面に追加
+              </button>
+              <p className="mt-2 text-center text-xs leading-5 text-zinc-500">スマホやPCのホーム画面からすぐに起動できます。</p>
             </div>
           </section>
         </div>
