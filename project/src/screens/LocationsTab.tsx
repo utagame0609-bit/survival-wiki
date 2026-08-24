@@ -179,7 +179,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
               {(() => {
                 const mainPhoto = selectedLocation.photos.find((p) => p.is_main);
                 return <div className="p-4 sm:p-5 space-y-4">
-                  {mainPhoto ? <div className="group w-full h-56 sm:h-72 overflow-hidden bg-[#24271f]"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={selectedLocation.name} className="w-full h-full object-cover" /></div> : <div className="w-full h-56 sm:h-72 bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
+                  {mainPhoto ? <div className="group w-full h-56 sm:h-72 overflow-hidden bg-[#24271f]"><PhotoImage storagePath={mainPhoto.storage_path} alt={selectedLocation.name} className="w-full h-full object-cover" /></div> : <div className="w-full h-56 sm:h-72 bg-[#24271f] flex items-center justify-center"><MapPin className="w-12 h-12 text-stone-600" /></div>}
                   <div><h3 className="text-2xl sm:text-3xl font-bold text-stone-100 break-words">{selectedLocation.name}</h3>
                     <div className="mt-4 bg-[#20221d] border border-[#34372f] p-4 sm:p-5"><div className="flex items-center gap-2 text-sm text-stone-400 mb-3"><MapPin className="w-4 h-4 text-emerald-400" />座標</div><div className="grid grid-cols-3 gap-3 text-center font-mono">
                       <div><div className="text-sm sm:text-base font-semibold italic text-stone-300">X</div><div className="mt-1 text-xl sm:text-2xl font-semibold text-stone-100">{selectedLocation.x}</div></div>
@@ -231,7 +231,7 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
   return <div className="selectable-pulse group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/20 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:from-emerald-950/30 hover:via-zinc-900/90 hover:to-zinc-900/90 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)]">
     <button onClick={onToggle} className="w-full text-left active:scale-[0.99] transition-transform">
       <div className="flex gap-3.5 p-3.5 pr-4">
-        {mainPhoto ? <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 shrink-0"><img src={getPhotoUrl(mainPhoto.storage_path)} alt={loc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" /></div> : <div className="w-20 h-20 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0"><MapPin className="w-7 h-7 text-zinc-700" /></div>}
+        {mainPhoto ? <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-zinc-950 border border-zinc-800 shrink-0"><PhotoImage storagePath={mainPhoto.storage_path} alt={loc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" /></div> : <div className="w-20 h-20 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0"><MapPin className="w-7 h-7 text-zinc-700" /></div>}
         <div className="flex-1 min-w-0 flex flex-col justify-center gap-2.5">
           <div className="flex items-center gap-1.5 min-w-0"><MapPin className="w-4 h-4 text-emerald-400 shrink-0" /><div className="font-semibold text-zinc-100 truncate">{loc.name}</div><ChevronRight className="w-4 h-4 text-zinc-600 shrink-0 ml-auto" /></div>
           <div className="text-xs text-zinc-500 font-mono truncate">{loc.x}, {loc.y}, {loc.z}</div>
@@ -240,4 +240,35 @@ function LocationCard({ loc, onToggle }: { loc: LocationWithPhotos; onToggle: ()
       </div>
     </button>
   </div>;
+}
+
+function PhotoImage({ storagePath, alt, className }: { storagePath: string; alt: string; className?: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+
+    setSrc(null);
+    getPhotoUrl(storagePath)
+      .then((url) => {
+        if (!active) {
+          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url.startsWith('blob:') ? url : null;
+        setSrc(url);
+      })
+      .catch(() => {
+        if (active) setSrc(null);
+      });
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [storagePath]);
+
+  if (!src) return <div className={className} aria-hidden="true" />;
+  return <img src={src} alt={alt} className={className} />;
 }
