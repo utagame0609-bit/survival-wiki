@@ -2,7 +2,7 @@ import { X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { getPhotoUrl } from '@/lib/db';
 import { EmptyState } from '@/components/Feedback';
-import { playModalOpenSound, playChestOpenSound } from '@/lib/sound';
+import { playModalOpenSound } from '@/lib/sound';
 
 type CollectionItem = {
   location: LocationWithPhotos;
@@ -33,9 +33,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
           <EmptyState message="まだ記録写真がありません。" />
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
-            {collectionItems.map((item) => (
-              <CollectionSlot key={`${item.location.id}-${item.storagePath}`} item={item} onOpen={() => { playModalOpenSound(); onOpenLocation(item.location); }} />
-            ))}
+            {collectionItems.map((item) => <CollectionSlot key={`${item.location.id}-${item.storagePath}`} item={item} onOpen={() => { playModalOpenSound(); onOpenLocation(item.location); }} />)}
           </div>
         )}
       </div>
