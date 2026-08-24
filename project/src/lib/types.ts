@@ -9,6 +9,7 @@ export type Game = {
 
 export type World = {
   id: string;
+  user_id: string | null;
   game_id: string;
   name: string;
   player: string | null;
