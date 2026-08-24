@@ -1,5 +1,5 @@
 import { supabase, PHOTOS_BUCKET } from './supabase';
-import { deleteR2Photo, uploadR2Photo } from './r2Worker';
+import { deleteR2Photo, uploadR2Photo, getR2Photo } from './r2Worker';
 import type {
   Game,
   World,
@@ -199,7 +199,6 @@ export async function uploadPhoto(locationId: string, file: File, isMain: boolea
   const imageBlob = await resizeAndConvertToWebP(file);
   const result = await uploadR2Photo(locationId, imageBlob);
   if (!result.storagePath) throw new Error('R2保存先が取得できませんでした');
-
   const { data, error } = await supabase.from('location_photos').insert({ location_id: locationId, storage_path: result.storagePath, is_main: isMain, sort_order: 0 }).select().single();
   if (error) {
     try {
@@ -226,9 +225,19 @@ export async function deletePhoto(photoId: string, storagePath: string): Promise
   if (error) throw error;
 }
 
-export function getPhotoUrl(storagePath: string): string {
-  const { data } = supabase.storage.from(PHOTOS_BUCKET).getPublicUrl(storagePath);
-  return data.publicUrl;
+function isR2StoragePath(storagePath: string): boolean {
+  const pathParts = storagePath.split('/');
+  return pathParts.length === 3 && pathParts.every((part) => part.length > 0) && pathParts[2].toLowerCase().endsWith('.webp');
+}
+
+export async function getPhotoUrl(storagePath: string): Promise<string> {
+  if (!isR2StoragePath(storagePath)) {
+    const { data } = supabase.storage.from(PHOTOS_BUCKET).getPublicUrl(storagePath);
+    return data.publicUrl;
+  }
+
+  const blob = await getR2Photo(storagePath);
+  return URL.createObjectURL(blob);
 }
 
 // ---- Wiki ----
