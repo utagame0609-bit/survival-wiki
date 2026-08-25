@@ -1,8 +1,8 @@
 import { ArrowLeft, Play, Volume2, Waves } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { playNewRecordSound, playCursorMoveSound } from '@/lib/sound';
 import { playSoundCandidatePreview } from '@/lib/soundCandidatePreviewEngine';
-import { getStoredReverbAmount, setStoredReverbAmount } from '@/lib/soundReverb';
+import { getStoredReverbAmount, setStoredReverbAmount, subscribeReverbAmount } from '@/lib/soundReverb';
 import { SOUND_CANDIDATES, SoundCandidate } from '@/lib/soundCandidates';
 
 const categoryOrder = ['system', 'screen', 'action', 'wiki'] as const;
@@ -10,9 +10,10 @@ const categoryOrder = ['system', 'screen', 'action', 'wiki'] as const;
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [reverbAmount, setReverbAmount] = useState(Math.round(getStoredReverbAmount() * 100));
 
+  useEffect(() => subscribeReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
+
   const handleReverbChange = (value: number) => {
-    const normalized = setStoredReverbAmount(value / 100);
-    setReverbAmount(Math.round(normalized * 100));
+    setStoredReverbAmount(value / 100);
   };
 
   return <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#050811] text-slate-100 font-mono"><header className="sticky top-0 z-10 border-b border-slate-800 bg-[#070c18]/95 px-4 py-3 backdrop-blur-md"><div className="mx-auto flex max-w-7xl items-center gap-3"><button type="button" onClick={onBack} className="flex items-center gap-1.5 rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-300 hover:border-amber-500 hover:text-amber-400"><ArrowLeft className="h-4 w-4" /> 戻る</button><div className="min-w-0 flex-1"><p className="text-[10px] font-bold tracking-[0.2em] text-emerald-400">DEVELOPMENT AUDIO // 開発音源</p><h1 className="text-base font-bold text-amber-400">16bit × Switch Sound Studio</h1></div><div className="hidden items-center gap-2 rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-[10px] text-slate-400 sm:flex"><Volume2 className="h-3.5 w-3.5 text-cyan-400" /> アプリ内試聴環境</div></div></header><main className="mx-auto max-w-7xl p-4 sm:p-6"><section className="rounded-sm border border-slate-800 bg-[#0a1120] p-5 shadow-[0_0_30px_rgba(0,0,0,0.35)]"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-800 pb-4"><div><p className="text-[10px] font-bold tracking-widest text-emerald-400">SOUND DEVELOPMENT CONSOLE</p><h2 className="mt-1 text-lg font-black text-slate-100">音源候補</h2><p className="mt-1 text-xs leading-5 text-slate-500">正式採用前のSEをアプリ内で確認するための開発画面</p></div><div className="flex items-center gap-3 rounded-sm border border-cyan-500/40 bg-cyan-950/20 px-3 py-2"><Waves className="h-4 w-4 text-cyan-400" /><div><div className="flex items-center gap-2"><span className="text-[10px] font-bold text-slate-400">REVERB</span><span className="text-xs font-bold text-cyan-300">{reverbAmount}%</span></div><input aria-label="開発音源の残響量" type="range" min="0" max="100" step="1" value={reverbAmount} onChange={(event)=>handleReverbChange(Number(event.target.value))} className="mt-1 w-32 accent-cyan-500 cursor-pointer" /></div></div><span className="rounded-sm border border-amber-500/50 bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-400">DEV ONLY</span></div><div className="mt-5 space-y-7">{categoryOrder.map((category)=>{const candidates=SOUND_CANDIDATES.filter((sound)=>sound.category===category);if(!candidates.length)return null;return <section key={category}><div className="mb-3 flex items-center gap-2 border-b border-slate-800/80 pb-2"><div className="h-2 w-2 rounded-full bg-amber-400"/><h3 className="text-sm font-bold text-slate-100">{candidates[0].categoryJa}</h3><span className="text-[10px] text-slate-500">({candidates.length}種)</span></div><div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">{candidates.map((sound)=><SoundCandidateCard key={sound.id} sound={sound}/>)}</div></section>})}</div></section></main></div>;
