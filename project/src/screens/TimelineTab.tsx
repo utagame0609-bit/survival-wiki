@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Activity, ArrowUpDown, Crown, Footprints, MapPin } from 'lucide-react';
+import { Activity, ArrowUpDown, Crown, Footprints, MapPin, Clock } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
@@ -143,51 +143,67 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   const totalDays = groups.length;
 
   return (
-    <div className="px-4 py-4 max-w-3xl mx-auto">
+    <div className="px-4 sm:px-6 py-6 max-w-4xl mx-auto">
       <style>{`
         @keyframes milestone-pop { 0% { transform: scale(0.45); opacity: 0; } 45% { transform: scale(1.22); opacity: 1; } 70% { transform: scale(0.94); } 100% { transform: scale(1); opacity: 1; } }
         @keyframes milestone-burst { 0% { transform: scale(0.5); opacity: 0.8; } 70% { transform: scale(1.9); opacity: 0; } 100% { transform: scale(1.9); opacity: 0; } }
         @keyframes milestone-text { 0% { transform: translateX(-8px) scale(0.94); opacity: 0; } 55% { transform: translateX(2px) scale(1.02); opacity: 1; } 100% { transform: translateX(0) scale(1); opacity: 1; } }
         @media (prefers-reduced-motion: reduce) { .milestone-reveal, .milestone-burst, .milestone-text { animation: none !important; } }
       `}</style>
-      <div className="w-full mb-6 rounded-xl border border-emerald-900/60 bg-gradient-to-r from-emerald-950/75 via-zinc-900/95 to-zinc-900/90 p-3.5 px-4 shadow-[0_0_20px_rgba(16,185,129,0.10)] backdrop-blur-md flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+      <div className="w-full mb-6 rounded-sm border-2 border-[#1a2333] bg-[#0d1627] p-4 px-5 shadow-lg flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.65)]" />
-            <h2 className="text-xs font-extrabold tracking-widest text-zinc-100 uppercase font-mono whitespace-nowrap">WORLD LOG</h2>
-            <span className="text-emerald-800 font-mono text-xs">/</span>
-            <span className="text-emerald-100/75 truncate">この世界で記録された出来事</span>
+            <span className="w-2 h-2 shrink-0 rounded-full bg-[#ffb000] shadow-[0_0_8px_#ffb000]" />
+            <h2 className="text-xs font-bold tracking-widest text-[#ffb000] uppercase font-mono whitespace-nowrap">ADVENTURE TIMELINE // 冒険の記憶</h2>
+            <span className="text-zinc-600 font-mono text-xs">//</span>
+            <span className="text-zinc-300 text-xs truncate">進行ルート</span>
           </div>
           <div className="flex items-center gap-3 text-[11px] text-zinc-400 font-mono pl-4">
-            <span className="flex items-center gap-1 whitespace-nowrap"><Activity size={12} className="text-emerald-400" />総記録数: <strong className="text-emerald-300">{totalRecords}</strong></span>
-            <span className="text-emerald-900">•</span>
-            <span className="whitespace-nowrap">記録日数: <strong className="text-zinc-200">{totalDays} Days</strong></span>
+            <span className="flex items-center gap-1 whitespace-nowrap"><Activity size={12} className="text-[#32cd32]" />総記録数: <strong className="text-[#32cd32]">{totalRecords}</strong></span>
+            <span className="text-zinc-700">•</span>
+            <span className="whitespace-nowrap">経過日数: <strong className="text-[#ffb000]">{totalDays} Days</strong></span>
           </div>
         </div>
         <div className="self-end sm:self-auto shrink-0">
-          <button type="button" onClick={toggleSortOrder} aria-label="タイムラインの並び順を切り替える" className="flex items-center gap-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/50 px-3 py-1.5 text-xs font-medium text-emerald-100 shadow-sm transition-colors hover:bg-emerald-900/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
-            <ArrowUpDown size={13} className="text-emerald-400" />
+          <button type="button" onClick={toggleSortOrder} aria-label="タイムラインの並び順を切り替える" className="flex items-center gap-1.5 rounded-sm border-2 border-[#334155] bg-[#1a2333] px-3.5 py-2 text-xs font-bold text-zinc-200 shadow-sm transition-colors hover:border-[#ffb000] hover:text-[#ffb000]">
+            <ArrowUpDown size={13} className="text-[#ffb000]" />
             <span>{sortOrder === 'oldest' ? '古い順' : '新しい順'}</span>
           </button>
         </div>
       </div>
+
       {error && <ErrorBanner message={error} />}
-      {loading && <Spinner label="タイムラインを読み込み中" />}
-      {!loading && groups.length === 0 && <EmptyState message="タイムラインがありません。ロケーションを記録すると自動生成されます。" />}
+      {loading && <Spinner label="タイムライン冒険ログを読み込み中" />}
+      {!loading && groups.length === 0 && <EmptyState message="タイムラインがありません。ロケーションを記録すると冒険ルートが自動生成されます。" />}
+
       {!loading && groups.length > 0 && (
         <>
           <div ref={timelineRef} className="relative">
-            <div className="pointer-events-none absolute left-[7px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-emerald-400/70 to-cyan-400/40 shadow-[0_0_8px_rgba(52,211,153,0.25)]" />
-            <div className="pointer-events-none absolute left-[3px] top-[18px] z-10 w-[9px] origin-top rounded-full bg-gradient-to-b from-emerald-300/10 via-emerald-300/70 to-cyan-300/20 shadow-[0_0_10px_rgba(52,211,153,0.25)] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
+            <div className="pointer-events-none absolute left-[8px] top-0 bottom-0 w-1 bg-repeat-y bg-[linear-gradient(to_bottom,#ffb000_50%,transparent_50%)] bg-[length:4px_12px] opacity-40" />
+            <div className="pointer-events-none absolute left-[7px] top-[18px] z-10 w-[3px] origin-top rounded-full bg-gradient-to-b from-[#ffb000] via-[#ffb000] to-[#32cd32] shadow-[0_0_12px_#ffb000] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
             <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
-              <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-zinc-950 shadow-lg ring-4 ring-zinc-950/90 ${activeMilestone ? 'bg-amber-300 shadow-amber-400/50' : 'bg-emerald-400 shadow-emerald-500/30'} ${isRevealingMilestone ? 'milestone-reveal' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-pop 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>
-                {isRevealingMilestone && <span className="milestone-burst pointer-events-none absolute inset-0 rounded-full border-2 border-amber-200" style={{ animation: 'milestone-burst 900ms ease-out' }} />}
-                {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
-                {activeMilestone && <span className={`absolute left-8 whitespace-nowrap rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold text-zinc-950 shadow ${isRevealingMilestone ? 'milestone-text' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-text 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>{activeMilestone.label}</span>}
+              <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-[#0a1120] shadow-lg ring-2 ring-[#0a1120] ${activeMilestone ? 'bg-[#ffb000] shadow-[0_0_15px_#ffb000]' : 'bg-[#32cd32] shadow-[0_0_12px_#32cd32]'} ${isRevealingMilestone ? 'milestone-reveal' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-pop 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>
+                {isRevealingMilestone && <span className="milestone-burst pointer-events-none absolute inset-0 rounded-full border-2 border-[#ffb000]" style={{ animation: 'milestone-burst 900ms ease-out' }} />}
+                {activeMilestone ? <Crown className="w-4 h-4 text-[#0a1120]" /> : <Footprints className="w-4 h-4 text-[#0a1120]" />}
+                {activeMilestone && <span className={`absolute left-8 whitespace-nowrap rounded-sm bg-[#ffb000] px-2 py-0.5 text-[10px] font-bold text-[#0a1120] shadow-md border border-white/40 ${isRevealingMilestone ? 'milestone-text' : ''}`} style={isRevealingMilestone ? { animation: 'milestone-text 700ms cubic-bezier(.22,.8,.35,1)' } : undefined}>{activeMilestone.label}</span>}
               </div>
             </div>
-            <div className="space-y-10 pl-8">
-              {groups.map((g) => <DayChapter key={g.dateKey} group={g} isActive={activeDay === g.dayNumber} isExpanded={expandedDay === g.dayNumber} unlockedMilestones={unlockedMilestones} onRef={(element) => { if (element) dayRefs.current.set(g.dateKey, element); else dayRefs.current.delete(g.dateKey); }} onSelect={() => handleDaySelect(g.dayNumber)} />)}
+            <div className="space-y-8 pl-8 sm:pl-9">
+              {groups.map((g) => (
+                <DayChapter
+                  key={g.dateKey}
+                  group={g}
+                  isActive={activeDay === g.dayNumber}
+                  isExpanded={expandedDay === g.dayNumber}
+                  unlockedMilestones={unlockedMilestones}
+                  onRef={(element) => {
+                    if (element) dayRefs.current.set(g.dateKey, element);
+                    else dayRefs.current.delete(g.dateKey);
+                  }}
+                  onSelect={() => handleDaySelect(g.dayNumber)}
+                />
+              ))}
             </div>
           </div>
           <div aria-hidden="true" className="h-[calc(100vh-88px)]" />
@@ -202,17 +218,23 @@ function DayChapter({ group, isActive, isExpanded, unlockedMilestones, onRef, on
   const isMilestoneUnlocked = Boolean(milestone && unlockedMilestones.includes(milestone.day));
   return (
     <section ref={onRef} className="relative scroll-mt-24">
-      <button type="button" onClick={onSelect} className={`selectable-pulse ${isActive ? 'selectable-pulse-active ' : ''}group relative w-full min-h-[86px] mb-4 overflow-hidden rounded-xl border text-left transition-all duration-300 ${isActive ? 'border-emerald-400/70 bg-gradient-to-r from-emerald-950/70 via-zinc-900/80 to-zinc-900/75 shadow-[0_0_18px_rgba(16,185,129,0.10)]' : 'border-emerald-950/70 bg-gradient-to-r from-emerald-950/35 via-zinc-900/70 to-zinc-900/60 hover:border-emerald-900/80'}`} aria-expanded={isExpanded}>
-        {group.bgPhotoPath && <div className="absolute inset-0 overflow-hidden pointer-events-none"><TimelinePhoto storagePath={group.bgPhotoPath} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.10] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
-        <div className="relative z-10 flex min-h-[86px] items-center gap-3 px-4 py-3 sm:px-5">
-          <div className={`flex h-9 w-11 shrink-0 items-center justify-center rounded-lg border ${isActive ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300' : 'border-emerald-900/70 bg-zinc-900/60 text-zinc-400'}`}><span className="text-[10px] font-bold tracking-[0.14em]">DAY</span><span className="ml-1 text-base font-bold leading-none">{group.dayNumber}</span></div>
+      <button type="button" onClick={onSelect} className={`group relative w-full min-h-[80px] mb-3 overflow-hidden rounded-sm border-2 text-left transition-all duration-200 ${isActive ? 'border-[#ffb000] bg-[#0d1627] shadow-[0_0_20px_rgba(255,176,0,0.2)]' : 'border-[#1a2333] bg-[#0d1627] hover:border-[#334155] hover:bg-[#111c30]'}`} aria-expanded={isExpanded}>
+        {group.bgPhotoPath && <div className="absolute inset-0 overflow-hidden pointer-events-none"><TimelinePhoto storagePath={group.bgPhotoPath} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.12] [mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_60%,transparent_100%)]" /></div>}
+        <div className="relative z-10 flex min-h-[80px] items-center gap-3.5 px-4 py-3 sm:px-5">
+          <div className={`flex h-10 w-14 shrink-0 items-center justify-center rounded-sm border-2 font-mono ${isActive ? 'border-[#ffb000] bg-[#ffb000] text-[#0a1120] font-black shadow-md' : 'border-[#334155] bg-[#1a2333] text-zinc-400 font-bold'}`}>
+            <span className="text-[10px] tracking-[0.1em]">DAY</span>
+            <span className="ml-1 text-base leading-none">{group.dayNumber}</span>
+          </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap"><span className={`text-base font-semibold ${isActive ? 'text-white' : 'text-zinc-200'}`}>{group.dateLabel}（{group.dayLabel}）</span>{isMilestoneUnlocked && milestone && <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-amber-400/70 bg-amber-100 text-amber-800' : 'border-amber-300/50 bg-amber-50 text-amber-700'}`}><Crown className="w-3 h-3" /> {milestone.label}</span>}</div>
-            <div className="mt-1"><span className={`text-xs font-medium ${isExpanded ? 'text-emerald-300' : 'text-zinc-400'}`}>{group.locations.length}件の記録</span></div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-sm sm:text-base font-bold ${isActive ? 'text-[#ffb000]' : 'text-zinc-200'}`}>{group.dateLabel}（{group.dayLabel}）</span>
+              {isMilestoneUnlocked && milestone && <span className={`inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[10px] font-bold ${isActive ? 'border-[#ffb000] bg-[#ffb000] text-[#0a1120] shadow-sm' : 'border-[#ffb000]/50 bg-[#ffb000]/20 text-[#ffb000]'}`}><Crown className="w-3 h-3" /> {milestone.label}</span>}
+            </div>
+            <div className="mt-1 flex items-center gap-2 text-xs"><span className={`font-mono ${isExpanded ? 'text-[#32cd32]' : 'text-zinc-400'}`}>{group.locations.length}件の冒険ログ</span></div>
           </div>
         </div>
       </button>
-      {isExpanded && <div className="relative pb-2"><div className="space-y-4">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>}
+      {isExpanded && <div className="relative pb-2"><div className="space-y-3.5">{group.locations.map((loc) => <TimelineEntry key={loc.id} loc={loc} />)}</div></div>}
     </section>
   );
 }
@@ -224,19 +246,22 @@ function TimelineEntry({ loc }: { loc: LocationWithPhotos }) {
   const hasPhoto = Boolean(mainPhoto);
   if (hasPhoto || hasMemo) {
     return (
-      <article className="relative overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+      <article className="relative overflow-hidden rounded-sm border-2 border-[#1a2333] bg-[#0d1627] shadow-md hover:border-[#334155] transition-colors">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(150px,0.8fr)_minmax(240px,1.7fr)]">
-          {hasPhoto ? <div className="w-full h-44 md:h-full min-h-44 overflow-hidden"><TimelinePhoto storagePath={mainPhoto!.storage_path} alt={loc.name} className="w-full h-full object-cover" /></div> : <div className="h-24 md:h-full min-h-24 bg-stone-50 flex items-center justify-center text-stone-300"><MapPin className="w-7 h-7" /></div>}
+          {hasPhoto ? <div className="w-full h-44 md:h-full min-h-44 overflow-hidden bg-[#050a14] border-b md:border-b-0 md:border-r border-[#1a2333]"><TimelinePhoto storagePath={mainPhoto!.storage_path} alt={loc.name} className="w-full h-full object-cover" /></div> : <div className="h-24 md:h-full min-h-24 bg-[#050a14] flex items-center justify-center text-zinc-600 border-b md:border-b-0 md:border-r border-[#1a2333]"><MapPin className="w-7 h-7" /></div>}
           <div className="p-4 min-w-0">
-            <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h4 className="text-base font-semibold text-stone-900 break-words">{loc.name}</h4><p className="text-xs text-stone-500 font-mono mt-1">X {loc.x}　Y {loc.y}　Z {loc.z}</p></div><span className="shrink-0 text-xs text-stone-500 font-mono">{time}</span></div>
-            {hasMemo && <p className="mt-3 text-sm leading-6 text-stone-700 whitespace-pre-wrap break-words">{loc.detail_memo}</p>}
-            {loc.members.length > 0 && <p className="text-xs text-stone-500 mt-3 truncate">仲間：{loc.members.map((m) => m.name).join('・')}</p>}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0"><h4 className="text-sm sm:text-base font-bold text-[#ffb000] break-words flex items-center gap-1.5"><span className="text-[#ffb000]">◆</span><span>{loc.name}</span></h4><p className="text-xs text-[#32cd32] font-mono mt-1">POS: X:{loc.x} Y:{loc.y} Z:{loc.z}</p></div>
+              <span className="shrink-0 text-xs text-zinc-500 font-mono flex items-center gap-1"><Clock className="w-3 h-3 text-zinc-500" />{time}</span>
+            </div>
+            {hasMemo && <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-zinc-300 whitespace-pre-wrap break-words p-3 rounded-sm bg-[#050a14] border border-[#1a2333] font-mono">{loc.detail_memo}</p>}
+            {loc.members.length > 0 && <p className="text-[11px] text-sky-400 mt-2.5 truncate font-mono">同行仲間: {loc.members.map((m) => m.name).join(' ・ ')}</p>}
           </div>
         </div>
       </article>
     );
   }
-  return <div className="relative min-h-9 flex items-center gap-3 text-sm"><span className="min-w-0 font-medium text-stone-800 truncate">{loc.name}</span><span className="shrink-0 text-xs text-stone-500 font-mono">X {loc.x}　Y {loc.y}　Z {loc.z}</span><span className="ml-auto shrink-0 text-xs text-stone-500 font-mono">{time}</span></div>;
+  return <div className="relative min-h-9 flex items-center gap-3 text-xs sm:text-sm px-3.5 py-2.5 rounded-sm bg-[#0d1627] border border-[#1a2333]"><span className="text-[#ffb000] font-mono">▸</span><span className="min-w-0 font-bold text-zinc-200 truncate">{loc.name}</span><span className="shrink-0 text-xs text-[#32cd32] font-mono">X:{loc.x} Y:{loc.y} Z:{loc.z}</span><span className="ml-auto shrink-0 text-xs text-zinc-500 font-mono">{time}</span></div>;
 }
 
 function groupByDay(locations: LocationWithPhotos[]): DayGroup[] {
