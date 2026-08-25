@@ -88,63 +88,170 @@ export function WorldScreen({ worldId, worldName, navigate, goBack }: { worldId:
   ];
 
   return (
-    <div className="min-h-screen overflow-y-scroll [scrollbar-gutter:stable] bg-[#11120f] text-stone-100 flex flex-col">
+    <div className="min-h-screen overflow-y-scroll [scrollbar-gutter:stable] bg-[#0a1120] text-[#e2e8f0] flex flex-col relative">
       <Header title={worldName} onBack={handleWorldBack} />
+
       {error && <ErrorBanner message={error} />}
-      {loading && <Spinner label="ワールドを読み込み中" />}
+      {loading && <Spinner label="ワールド冒険の書を読み込み中" />}
+
       {!loading && world && (
         <>
-          <div className="sticky top-14 z-20 bg-[#151611]/95 backdrop-blur-md border-b border-[#2d3028]">
-            <div className="flex max-w-3xl mx-auto h-12">
-              {tabs.map((t) => {
-                const Icon = t.icon;
-                const label = t.id === 'locations' ? 'ロケーション' : t.id === 'timeline' ? 'タイムライン' : 'Wiki';
-                return (
-                  <button key={t.id} onClick={() => handleTabChange(t.id)} className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors relative ${tab === t.id ? 'text-emerald-400' : 'text-stone-500 hover:text-stone-300'}`}>
-                    <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span>{label}</span>
-                    {tab === t.id && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500" />}
-                  </button>
-                );
-              })}
+          <nav className="sticky top-14 z-20 bg-[#0d1627] border-b-2 border-[#1a2333] shadow-lg">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2.5">
+              <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+                {tabs.map((t, index) => {
+                  const Icon = t.icon;
+                  const label = t.id === 'locations' ? 'ロケーション' : t.id === 'timeline' ? 'タイムライン' : '旅の書 (WIKI)';
+                  const pageNum = `0${index + 1}`;
+                  const isActive = tab === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => handleTabChange(t.id)}
+                      className={`h-11 sm:h-12 px-3.5 sm:px-5 flex items-center gap-2.5 rounded-sm text-xs sm:text-sm font-bold select-none transition-all ${
+                        isActive
+                          ? 'bg-[#1a2333] border-2 border-[#ffb000] text-[#ffb000] shadow-[0_0_15px_rgba(255,176,0,0.25)]'
+                          : 'bg-[#050a14] border-2 border-[#1a2333] text-zinc-400 hover:text-zinc-200 hover:border-[#334155]'
+                      }`}
+                    >
+                      <span className={`text-[11px] font-mono ${isActive ? 'text-[#32cd32]' : 'opacity-0'}`}>▶</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-sm border ${
+                        isActive ? 'bg-[#ffb000]/20 border-[#ffb000] text-[#ffb000]' : 'bg-[#1a2333] border-[#334155] text-zinc-500'
+                      }`}>
+                        PAGE {pageNum}
+                      </span>
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#ffb000]' : 'text-zinc-400'}`} />
+                      <span className="tracking-wide whitespace-nowrap">{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </nav>
 
-          <div className="flex-1">
-            {tab === 'locations' && <LocationsTab world={world} reloadKey={reloadKey} onReload={reload} openLocationId={openLocationId} onOpenLocationHandled={() => setOpenLocationId(null)} />}
+          <main className="flex-1 pb-12">
+            {tab === 'locations' && (
+              <LocationsTab
+                world={world}
+                reloadKey={reloadKey}
+                onReload={reload}
+                openLocationId={openLocationId}
+                onOpenLocationHandled={() => setOpenLocationId(null)}
+              />
+            )}
             {tab === 'timeline' && <TimelineTab world={world} reloadKey={reloadKey} />}
-            {tab === 'wiki' && <WikiTab key={wikiArticleViewKey} world={world} reloadKey={reloadKey} onOpenLocation={handleOpenLocation} onArticleStateChange={handleWikiArticleStateChange} />}
-          </div>
+            {tab === 'wiki' && (
+              <WikiTab
+                key={wikiArticleViewKey}
+                world={world}
+                reloadKey={reloadKey}
+                onOpenLocation={handleOpenLocation}
+                onArticleStateChange={handleWikiArticleStateChange}
+              />
+            )}
+          </main>
+
+          <footer className="h-12 bg-[#050a14] border-t-2 border-[#1a2333] flex items-center justify-between px-4 sm:px-8 text-[10px] text-zinc-500 font-mono font-bold tracking-widest mt-auto">
+            <div className="truncate">SYSTEM STATUS: ONLINE // SUPABASE_CONNECTED: TRUE // R2_STORAGE: READY</div>
+            <div className="hidden sm:block shrink-0">© ADVENTURE_LOG_SYS 1998-2024</div>
+          </footer>
 
           {!wikiArticleBack && <SettingsButton />}
 
           {wikiLocation && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
               <button aria-label="閉じる" className="absolute inset-0" onClick={handleCloseWikiLocation} />
-              <div className="relative z-10 w-full max-w-lg max-h-[80vh] overflow-hidden bg-white text-gray-800 border border-gray-300 shadow-2xl flex flex-col font-serif motion-safe:animate-[wiki-modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-                <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0 border-b border-gray-300 bg-gray-100 text-gray-600">
-                  <span className="text-xs tracking-wider flex items-center gap-2">
-                    <img src={UTAPEDIA_AVATAR} alt="ウタペディア" className="w-6 h-6 object-cover border border-gray-300" />
-                    <span className="text-sm font-serif">ウタペディア</span>
-                    <span className="text-gray-400">//</span>
-                    <span>ロケーション詳細</span>
-                  </span>
-                  <button onClick={handleCloseWikiLocation} aria-label="閉じる" className="p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"><X className="w-[18px] h-[18px]" /></button>
-                </div>
-                <div className="overflow-y-auto overscroll-contain p-5 space-y-4">
-                  <h2 className="text-xl font-bold border-b border-gray-300 pb-2 text-gray-900 break-words">{wikiLocation.name}</h2>
-                  <div className="p-1.5 border border-gray-300 bg-gray-50">
-                    {(() => { const mainPhoto = wikiLocation.photos.find((photo) => photo.is_main); return mainPhoto ? <PhotoImage storagePath={mainPhoto.storage_path} alt={wikiLocation.name} className="w-full h-48 object-cover" /> : <div className="w-full h-48 bg-gray-100 flex items-center justify-center"><MapPin className="w-12 h-12 text-gray-300" /></div>; })()}
+              <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-hidden rounded-sm bg-[#0a1120] text-[#e2e8f0] border-4 border-double border-[#ffb000] shadow-[0_0_25px_rgba(255,176,0,0.2),inset_0_0_10px_rgba(255,176,0,0.1)] flex flex-col motion-safe:animate-[wiki-modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+                <div className="flex items-center justify-between px-5 py-3 flex-shrink-0 border-b-2 border-[#1a2333] bg-[#0d1627] text-[#ffb000]">
+                  <div className="text-xs tracking-wider flex items-center gap-2.5">
+                    <img
+                      src={UTAPEDIA_AVATAR}
+                      alt="ウタペディア"
+                      className="w-6 h-6 object-cover rounded-sm border border-[#ffb000]"
+                    />
+                    <span className="font-bold text-[#ffb000]">ウタペディア</span>
+                    <span className="text-zinc-600 font-mono">//</span>
+                    <span className="text-zinc-300">ロケーション詳細</span>
                   </div>
-                  <table className="w-full text-sm border-collapse border border-gray-300"><tbody><tr className="border-b border-gray-300"><th className="w-1/3 bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">座標 (X, Y, Z)</th><td className="p-2 font-mono text-xs">{wikiLocation.x}, {wikiLocation.y}, {wikiLocation.z}</td></tr><tr><th className="bg-gray-100 p-2 text-left text-xs font-semibold text-gray-700 border-r border-gray-300">記録日時</th><td className="p-2 text-xs">{new Date(wikiLocation.created_at).toLocaleString('ja-JP')}</td></tr></tbody></table>
-                  <div className="p-3 text-xs border-l-4 bg-amber-50/50 border-amber-400 text-gray-700"><div className="font-semibold mb-1 flex items-center gap-1"><FileText className="w-[13px] h-[13px]" /> 記録資料</div><p className="text-gray-500">このロケーションは、ウタペディアに記録された関連資料です。</p></div>
+                  <button
+                    onClick={handleCloseWikiLocation}
+                    aria-label="閉じる"
+                    className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]"
+                  >
+                    <X className="w-[18px] h-[18px]" />
+                  </button>
+                </div>
+
+                <div className="overflow-y-auto overscroll-contain p-5 space-y-4">
+                  <div className="flex items-center gap-2 border-l-4 border-[#ffb000] pl-3">
+                    <h2 className="text-lg sm:text-xl font-bold text-[#ffb000] break-words">
+                      {wikiLocation.name}
+                    </h2>
+                  </div>
+
+                  <div className="p-1 rounded-sm border-2 border-[#334155] bg-[#0d1627]">
+                    {(() => {
+                      const mainPhoto = wikiLocation.photos.find((photo) => photo.is_main);
+                      return mainPhoto ? (
+                        <PhotoImage
+                          storagePath={mainPhoto.storage_path}
+                          alt={wikiLocation.name}
+                          className="w-full h-48 sm:h-56 object-cover rounded-sm"
+                        />
+                      ) : (
+                        <div className="w-full h-48 sm:h-56 bg-[#1a2333] rounded-sm flex items-center justify-center">
+                          <MapPin className="w-12 h-12 text-zinc-600" />
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <table className="w-full text-xs border-collapse rounded-sm overflow-hidden border-2 border-[#1a2333] bg-[#0d1627]">
+                    <tbody>
+                      <tr className="border-b border-[#1a2333]">
+                        <th className="w-1/3 bg-[#1a2333] p-2.5 text-left font-bold text-[#ffb000] border-r border-[#1a2333]">
+                          座標 (X, Y, Z)
+                        </th>
+                        <td className="p-2.5 font-mono text-[#32cd32] font-bold">
+                          X: {wikiLocation.x} / Y: {wikiLocation.y} / Z: {wikiLocation.z}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th className="bg-[#1a2333] p-2.5 text-left font-bold text-[#ffb000] border-r border-[#1a2333]">
+                          記録日時
+                        </th>
+                        <td className="p-2.5 text-zinc-300 font-mono">
+                          {new Date(wikiLocation.created_at).toLocaleString('ja-JP')}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="p-3 text-xs rounded-sm border-l-4 bg-[#0d1627] border-[#32cd32] text-zinc-300">
+                    <div className="font-bold mb-1 flex items-center gap-1.5 text-[#32cd32]">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>記録資料</span>
+                    </div>
+                    <p className="text-zinc-400 text-[11px] leading-relaxed font-mono">
+                      このロケーションは、ウタペディア冒険の書に永久記録された関連資料です。
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[#0d1627] border-t-2 border-[#1a2333] flex justify-end">
+                  <button
+                    onClick={handleCloseWikiLocation}
+                    className="px-4 py-2 bg-[#1a2333] text-[#ffb000] text-xs font-bold font-mono border border-[#334155] hover:border-[#ffb000] transition-colors"
+                  >
+                    閉じる (ESC)
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </>
       )}
-      <style>{`@keyframes wiki-modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[wiki-modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,35\\,1\\)\\] { animation: none !important; } }`}</style>
+      <style>{`@keyframes wiki-modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[wiki-modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1\\)\\] { animation: none !important; } }`}</style>
     </div>
   );
 }
