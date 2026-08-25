@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import { X, Plus } from 'lucide-react';
-import { createWorld, updateWorld, fetchWorld } from '@/lib/db';
+import { Camera, X, Plus, UserRound } from 'lucide-react';
+import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
 import { playSaveSound } from '@/lib/sound';
+
+type MemberPhotoState = {
+  name: string;
+  file: File | null;
+  previewUrl: string;
+  existingPath: string | null;
+};
 
 export function WorldCreateScreen({
   gameId,
@@ -22,8 +29,11 @@ export function WorldCreateScreen({
   const isEdit = Boolean(worldId);
   const [name, setName] = useState('');
   const [player, setPlayer] = useState('');
+  const [playerPhotoFile, setPlayerPhotoFile] = useState<File | null>(null);
+  const [playerPhotoPreview, setPlayerPhotoPreview] = useState('');
+  const [playerExistingPath, setPlayerExistingPath] = useState<string | null>(null);
   const [memo, setMemo] = useState('');
-  const [members, setMembers] = useState<string[]>(['']);
+  const [members, setMembers] = useState<MemberPhotoState[]>([{ name: '', file: null, previewUrl: '', existingPath: null }]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
@@ -31,16 +41,46 @@ export function WorldCreateScreen({
   useEffect(() => {
     if (!worldId) return;
     fetchWorld(worldId)
-      .then((w) => {
+      .then(async (w) => {
         if (!w) return;
         setName(w.name);
         setPlayer(w.player ?? '');
         setMemo(w.memo ?? '');
-        setMembers(w.members.length > 0 ? w.members.map((m) => m.name) : ['']);
+        setPlayerExistingPath(w.player_photo_path ?? null);
+        if (w.player_photo_path) {
+          try { setPlayerPhotoPreview(await getPhotoUrl(w.player_photo_path)); } catch { setPlayerPhotoPreview(''); }
+        }
+        const loadedMembers = await Promise.all(w.members.map(async (m) => ({
+          name: m.name,
+          file: null,
+          previewUrl: m.photo_path ? await getPhotoUrl(m.photo_path).catch(() => '') : '',
+          existingPath: m.photo_path ?? null,
+        })));
+        setMembers(loadedMembers.length > 0 ? loadedMembers : [{ name: '', file: null, previewUrl: '', existingPath: null }]);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [worldId]);
+
+  const setPlayerPhoto = (file: File | null) => {
+    if (!file) return;
+    setPlayerPhotoFile(file);
+    const url = URL.createObjectURL(file);
+    setPlayerPhotoPreview(url);
+  };
+
+  const setMemberPhoto = (index: number, file: File | null) => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setMembers((current) => current.map((member, i) => i === index ? { ...member, file, previewUrl: url } : member));
+  };
+
+  const updateMemberName = (index: number, value: string) => {
+    setMembers((current) => current.map((member, i) => i === index ? { ...member, name: value } : member));
+  };
+
+  const addMember = () => setMembers((current) => [...current, { name: '', file: null, previewUrl: '', existingPath: null }]);
+  const removeMember = (index: number) => setMembers((current) => current.filter((_, i) => i !== index));
 
   const handleSave = async () => {
     setError('');
@@ -50,15 +90,48 @@ export function WorldCreateScreen({
     }
     setSaving(true);
     try {
-      const memberNames = members.map((m) => m.trim()).filter(Boolean);
+      const memberNames = members.map((m) => m.name.trim()).filter(Boolean);
+      const oldPlayerPath = playerExistingPath;
+      const oldMemberPaths = members.filter((m) => m.name.trim() && m.existingPath).map((m) => ({ name: m.name.trim(), path: m.existingPath as string }));
+      let savedWorldId = worldId;
+
       if (isEdit && worldId) {
         await updateWorld(worldId, { name, player, memo, members: memberNames });
-        playSaveSound();
-        goBack();
+        savedWorldId = worldId;
       } else {
-        await createWorld(gameId, { name, player, memo, members: memberNames });
-        goBack();
+        const created = await createWorld(gameId, { name, player, memo, members: memberNames });
+        savedWorldId = created.id;
       }
+
+      const refreshed = savedWorldId ? await fetchWorld(savedWorldId) : null;
+      if (!refreshed) throw new Error('保存したワールドを確認できませんでした');
+
+      if (playerPhotoFile) {
+        await saveWorldPlayerPhoto(savedWorldId as string, playerPhotoFile);
+      } else if (oldPlayerPath) {
+        const blob = await fetchPhotoBlob(oldPlayerPath);
+        await saveWorldPlayerPhoto(savedWorldId as string, new File([blob], 'player.webp', { type: 'image/webp' }));
+        if (oldPlayerPath !== refreshed.player_photo_path) await deleteWorldMemberPhoto(oldPlayerPath).catch(() => undefined);
+      }
+
+      const savedMembers = refreshed.members;
+      const oldPathsToDelete: string[] = [];
+      for (let index = 0; index < memberNames.length; index += 1) {
+        const memberState = members.filter((m) => m.name.trim())[index];
+        const savedMember = savedMembers[index];
+        if (!memberState || !savedMember) continue;
+        if (memberState.file) {
+          await saveWorldMemberPhoto(savedMember.id, memberState.file);
+        } else if (memberState.existingPath) {
+          const blob = await fetchPhotoBlob(memberState.existingPath);
+          await saveWorldMemberPhoto(savedMember.id, new File([blob], 'member.webp', { type: 'image/webp' }));
+          oldPathsToDelete.push(memberState.existingPath);
+        }
+      }
+      for (const path of oldPathsToDelete) await deleteWorldMemberPhoto(path).catch(() => undefined);
+
+      if (isEdit) playSaveSound();
+      goBack();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -99,22 +172,23 @@ export function WorldCreateScreen({
           </Field>
 
           <Field label="プレイヤー">
-            <input type="text" value={player} onChange={(e) => setPlayer(e.target.value)} placeholder="あなたの名前" className={inputClass} />
+            <PhotoNameInput name={player} onNameChange={setPlayer} previewUrl={playerPhotoPreview} onPhotoChange={setPlayerPhoto} inputClass={inputClass} />
           </Field>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-sm font-medium text-zinc-300">関連メンバー</label>
-              <button onClick={() => setMembers([...members, ''])} className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
+              <button type="button" onClick={addMember} className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
                 <Plus className="w-4 h-4" /> 追加
               </button>
             </div>
             <div className="space-y-2">
-              {members.map((m, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input type="text" value={m} onChange={(e) => { const next = [...members]; next[i] = e.target.value; setMembers(next); }} placeholder={`メンバー${i + 1}`} className={inputClass} />
+              {members.map((member, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <PhotoPicker previewUrl={member.previewUrl} onChange={(file) => setMemberPhoto(index, file)} />
+                  <input type="text" value={member.name} onChange={(e) => updateMemberName(index, e.target.value)} placeholder={`メンバー${index + 1}`} className={inputClass} />
                   {members.length > 1 && (
-                    <button onClick={() => setMembers(members.filter((_, idx) => idx !== i))} className="p-2 rounded-lg text-zinc-500 hover:text-red-300 hover:bg-red-950/30 transition-colors">
+                    <button type="button" onClick={() => removeMember(index)} className="p-2 rounded-lg text-zinc-500 hover:text-red-300 hover:bg-red-950/30 transition-colors" aria-label="メンバーを削除">
                       <X className="w-5 h-5" />
                     </button>
                   )}
@@ -128,12 +202,40 @@ export function WorldCreateScreen({
           </Field>
         </div>
 
-        <button onClick={handleSave} disabled={saving} className="w-full py-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 active:scale-[0.99] transition-all disabled:opacity-50">
+        <button type="button" onClick={handleSave} disabled={saving} className="w-full py-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 active:scale-[0.99] transition-all disabled:opacity-50">
           {saving ? '保存中...' : isEdit ? '更新する' : '作成する'}
         </button>
       </div>
     </div>
   );
+}
+
+function PhotoNameInput({ name, onNameChange, previewUrl, onPhotoChange, inputClass }: { name: string; onNameChange: (value: string) => void; previewUrl: string; onPhotoChange: (file: File | null) => void; inputClass: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <PhotoPicker previewUrl={previewUrl} onChange={onPhotoChange} />
+      <input type="text" value={name} onChange={(e) => onNameChange(e.target.value)} placeholder="あなたの名前" className={inputClass} />
+    </div>
+  );
+}
+
+function PhotoPicker({ previewUrl, onChange }: { previewUrl: string; onChange: (file: File | null) => void }) {
+  return (
+    <label className="relative flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-emerald-800/70 bg-zinc-950/80 text-emerald-500 hover:border-emerald-400/70 transition-colors">
+      {previewUrl ? <img src={previewUrl} alt="" className="h-full w-full object-cover" /> : <UserRound className="h-5 w-5" />}
+      <span className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-tl bg-black/75 text-emerald-300"><Camera className="h-2.5 w-2.5" /></span>
+      <input type="file" accept="image/*" className="sr-only" onChange={(event) => onChange(event.target.files?.[0] ?? null)} />
+    </label>
+  );
+}
+
+async function fetchPhotoBlob(storagePath: string): Promise<Blob> {
+  const url = await getPhotoUrl(storagePath);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('既存写真を読み込めませんでした');
+  const blob = await response.blob();
+  if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+  return blob;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
