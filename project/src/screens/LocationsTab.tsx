@@ -273,8 +273,7 @@ function LocationCard({ loc, slotNumber, onToggle }: { key?: string | number; lo
               <div className="font-bold text-[#e2e8f0] text-sm sm:text-base group-hover:text-[#ffb000] truncate">{loc.name}</div>
               <div className="flex items-center gap-1 text-xs font-bold text-[#ffb000] group-hover:translate-x-1 transition-transform shrink-0 ml-auto font-mono"><span className="hidden sm:inline text-[11px]">詳細</span><ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-[#ffb000]" /></div>
             </div>
-            <div className="text-[11px] text-[#32cd32] font-mono flex items-center gap-2"><span className="text-zinc-500 font-bold">POS:</span><span className="font-bold">X:{loc.x} Y:{loc.y} Z:{loc.z}</span></div>
-            {loc.detail_memo && <div className="text-xs text-zinc-400 truncate max-w-full font-mono">{loc.detail_memo}</div>}
+            <div className="text-xs sm:text-sm text-[#32cd32] font-mono flex items-center gap-2"><span className="text-zinc-500 font-bold text-[10px] sm:text-[11px]">POS:</span><span className="font-bold tracking-wide sm:text-base">X:{loc.x} Y:{loc.y} Z:{loc.z}</span></div>
           </div>
         </div>
       </button>
