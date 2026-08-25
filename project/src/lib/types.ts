@@ -22,6 +22,7 @@ export type WorldMember = {
   id: string;
   world_id: string;
   name: string;
+  photo_path: string | null;
   created_at: string;
 };
 
