@@ -1,6 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Game UI typography: use DotGothic16 only for compact system/game labels. */
+.game-ui-font,
+.world-select-screen .font-mono,
+.world-select-screen .save-slot-load,
+.world-select-screen .text-\[10px\],
+.world-select-screen .text-\[9px\] {
+  font-family: 'DotGothic16', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
 
 /* Wiki style selection: align the pre-generation screen with the World Setup visual language. */
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 { padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(6, 78, 59, 0.6); background: linear-gradient(90deg, rgba(6, 78, 59, 0.55), rgba(24, 24, 27, 0.9), rgba(24, 24, 27, 0.85)); box-shadow: 0 0 18px rgba(16, 185, 129, 0.08); }
