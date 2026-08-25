@@ -10,6 +10,8 @@ export type SoundReverb = {
   getAmount: () => number;
 };
 
+let activeReverb: SoundReverb | null = null;
+
 export function getStoredReverbAmount(): number {
   if (typeof window === 'undefined') return DEFAULT_REVERB;
   const stored = window.localStorage.getItem(REVERB_AMOUNT_KEY);
@@ -18,9 +20,15 @@ export function getStoredReverbAmount(): number {
   return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : DEFAULT_REVERB;
 }
 
-export function setStoredReverbAmount(value: number): number {
+function storeReverbAmount(value: number): number {
   const normalized = Math.min(1, Math.max(0, value));
   if (typeof window !== 'undefined') window.localStorage.setItem(REVERB_AMOUNT_KEY, String(normalized));
+  return normalized;
+}
+
+export function setStoredReverbAmount(value: number): number {
+  const normalized = storeReverbAmount(value);
+  if (activeReverb) activeReverb.setAmount(normalized);
   return normalized;
 }
 
@@ -70,17 +78,20 @@ export function createSwitchStyleReverb(context: AudioContext): SoundReverb {
 
   applyAmount();
 
-  return {
+  const reverb: SoundReverb = {
     input,
     output,
     wet,
     dry,
     setAmount(value: number) {
-      amount = setStoredReverbAmount(value);
+      amount = Math.min(1, Math.max(0, value));
       applyAmount();
     },
     getAmount() {
       return amount;
     },
   };
+
+  activeReverb = reverb;
+  return reverb;
 }
