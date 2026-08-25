@@ -2,6 +2,7 @@ import { Download, Settings, Volume2, VolumeX, X, Sliders, Music2, Waves } from 
 import { useEffect, useState } from 'react';
 import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
+import { saveUserSoundSettings } from '@/lib/userSoundSettings';
 import {
   getSoundVolume,
   isSoundEnabled,
@@ -35,7 +36,11 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: {
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
   useEffect(() => subscribeToReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
   const handleSoundToggle = () => { const next = toggleSound(); setSoundEnabled(next); if (next) playToggleSound(); };
-  const handleVolumeChange = (value: number) => { setSoundVolumeState(setSoundVolume(value)); };
+  const handleVolumeChange = (value: number) => {
+    const normalized = setSoundVolume(value);
+    setSoundVolumeState(normalized);
+    void saveUserSoundSettings({ seVolume: normalized, seReverb: Math.round(getStoredReverbAmount() * 100) }).catch((error) => console.error('Failed to save SE volume:', error));
+  };
   const handleReverbChange = (value: number) => { setStoredReverbAmount(value / 100); };
   const handleInstall = async () => {
     playToggleSound();
