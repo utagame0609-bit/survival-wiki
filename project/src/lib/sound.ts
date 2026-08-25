@@ -186,6 +186,49 @@ function playWarningSound(): void {
   oscB.stop(now + 0.3);
 }
 
+function playTabSwitchSoundInternal(): void {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return;
+  if (context.state === 'suspended') void context.resume();
+
+  const now = context.currentTime;
+
+  const osc = context.createOscillator();
+  const blipGain = context.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(950, now);
+  osc.frequency.exponentialRampToValueAtTime(1600, now + 0.035);
+  blipGain.gain.setValueAtTime(0.0001, now);
+  blipGain.gain.linearRampToValueAtTime(0.18, now + 0.004);
+  blipGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+  osc.connect(blipGain);
+
+  const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.05), context.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < noiseBuffer.length; i += 1) output[i] = Math.random() * 2 - 1;
+
+  const noiseSource = context.createBufferSource();
+  noiseSource.buffer = noiseBuffer;
+  const noiseFilter = context.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.setValueAtTime(3200, now);
+  noiseFilter.Q.setValueAtTime(2.0, now);
+
+  const noiseGain = context.createGain();
+  noiseGain.gain.setValueAtTime(0.14, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+  noiseSource.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  blipGain.connect(masterGain);
+  noiseGain.connect(masterGain);
+
+  osc.start(now);
+  osc.stop(now + 0.06);
+  noiseSource.start(now);
+  noiseSource.stop(now + 0.05);
+}
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
   playTone(SOUND_PROFILES[sound]);
@@ -218,7 +261,7 @@ export const playConfirmSound = () => playSound('confirm');
 export const playCancelSound = () => playSound('cancel');
 export const playHoverSound = () => playSound('hover');
 export const playTapSound = () => playSound('hover');
-export const playTabSwitchSound = () => playSound('tabSwitch');
+export const playTabSwitchSound = () => playTabSwitchSoundInternal();
 export const playFootstepSound = () => playSound('footstep');
 export const playCardOpenSound = () => playSound('cardOpen');
 export const playCardCloseSound = () => playSound('cardClose');
