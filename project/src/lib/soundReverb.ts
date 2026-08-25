@@ -1,4 +1,5 @@
 const DEFAULT_REVERB = 0.18;
+const REVERB_AMOUNT_KEY = 'survival-wiki-se-reverb';
 
 export type SoundReverb = {
   input: GainNode;
@@ -8,6 +9,20 @@ export type SoundReverb = {
   setAmount: (value: number) => void;
   getAmount: () => number;
 };
+
+export function getStoredReverbAmount(): number {
+  if (typeof window === 'undefined') return DEFAULT_REVERB;
+  const stored = window.localStorage.getItem(REVERB_AMOUNT_KEY);
+  if (stored === null) return DEFAULT_REVERB;
+  const value = Number(stored);
+  return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : DEFAULT_REVERB;
+}
+
+export function setStoredReverbAmount(value: number): number {
+  const normalized = Math.min(1, Math.max(0, value));
+  if (typeof window !== 'undefined') window.localStorage.setItem(REVERB_AMOUNT_KEY, String(normalized));
+  return normalized;
+}
 
 function createImpulseResponse(context: AudioContext): AudioBuffer {
   const duration = 0.32;
@@ -35,7 +50,7 @@ export function createSwitchStyleReverb(context: AudioContext): SoundReverb {
   const convolver = context.createConvolver();
   const filter = context.createBiquadFilter();
 
-  let amount = DEFAULT_REVERB;
+  let amount = getStoredReverbAmount();
 
   convolver.buffer = createImpulseResponse(context);
   filter.type = 'lowpass';
@@ -43,7 +58,6 @@ export function createSwitchStyleReverb(context: AudioContext): SoundReverb {
 
   input.connect(dry);
   dry.connect(output);
-
   input.connect(convolver);
   convolver.connect(filter);
   filter.connect(wet);
@@ -62,7 +76,7 @@ export function createSwitchStyleReverb(context: AudioContext): SoundReverb {
     wet,
     dry,
     setAmount(value: number) {
-      amount = Math.min(1, Math.max(0, value));
+      amount = setStoredReverbAmount(value);
       applyAmount();
     },
     getAmount() {
