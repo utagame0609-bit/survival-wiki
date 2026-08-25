@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Pencil, Trash2, ChevronRight, AlertTriangle, X, MapPin } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronRight, AlertTriangle, X } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld, fetchWorlds, fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -92,10 +92,10 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
   return (
     <div className="world-select-screen min-h-screen bg-[#090b0a] text-stone-100">
       <Header title={gameName} onBack={goBack} />
-      <div className="relative px-4 py-5 max-w-3xl mx-auto">
+      <div className="relative mx-auto max-w-3xl px-4 py-5">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-950/20 to-transparent" />
         <div className="relative mb-5 text-center">
-          <p className="text-[10px] font-mono tracking-[0.32em] text-emerald-500/70 uppercase">SAVE DATA</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-emerald-500/70">SAVE DATA</p>
           <h1 className="mt-1 text-lg font-semibold tracking-[0.18em] text-zinc-100">ワールドを選択</h1>
         </div>
         {loading && <Spinner label="ワールドを読み込み中" />}
@@ -109,10 +109,15 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
         {!loading && !error && worlds.length > 0 && (
           <div className="relative space-y-3">
             {worlds.map((world, index) => (
-              <WorldCard key={world.id} slotNumber={index + 1} world={world} meta={worldMeta[world.id]}
+              <WorldCard
+                key={world.id}
+                slotNumber={index + 1}
+                world={world}
+                meta={worldMeta[world.id]}
                 onOpen={() => { playConfirmSound(); localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id); navigate({ name: 'world', worldId: world.id, worldName: world.name }); }}
                 onEdit={() => { playConfirmSound(); navigate({ name: 'worldCreate', gameId, gameName, worldId: world.id }); }}
-                onDelete={() => handleDelete(world)} />
+                onDelete={() => handleDelete(world)}
+              />
             ))}
           </div>
         )}
@@ -129,22 +134,21 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
       </div>
       {showCreateModal && <WorldCreateModal gameId={gameId} onClose={() => setShowCreateModal(false)} onCreated={load} />}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setDeleteTarget(null); } }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-900 to-[#151712] border border-emerald-900/70 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]">
-            <div className="px-5 pt-6 pb-5 text-center"><div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/50 border border-red-900/60 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.12)]"><AlertTriangle className="w-7 h-7 text-red-300" /></div><h2 id="delete-world-title" className="text-lg font-bold text-zinc-100">ワールドを削除しますか？</h2><p className="mt-2 text-sm text-emerald-300 font-semibold break-words">「{deleteTarget.name}」</p><p className="mt-3 text-xs leading-5 text-zinc-500">この操作は元に戻せません。<br />ワールドに保存されている記録も削除されます。</p></div>
-            <div className="grid grid-cols-2 gap-3 px-5 pb-5"><button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-950/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-900 hover:border-zinc-600 hover:text-zinc-100 active:scale-[0.98] transition-all"><X className="w-4 h-4" />キャンセル</button><button type="button" onClick={confirmDelete} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-950/70 border border-red-900/70 text-red-200 hover:bg-red-900/60 hover:border-red-800 hover:text-red-100 active:scale-[0.98] transition-all"><Trash2 className="w-4 h-4" />削除する</button></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setDeleteTarget(null); } }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="w-full max-w-md overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-b from-zinc-900 to-[#151712] shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]">
+            <div className="px-5 pb-5 pt-6 text-center"><div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-red-900/60 bg-red-950/50 shadow-[0_0_20px_rgba(239,68,68,0.12)]"><AlertTriangle className="h-7 w-7 text-red-300" /></div><h2 id="delete-world-title" className="text-lg font-bold text-zinc-100">ワールドを削除しますか？</h2><p className="mt-2 break-words text-sm font-semibold text-emerald-300">「{deleteTarget.name}」</p><p className="mt-3 text-xs leading-5 text-zinc-500">この操作は元に戻せません。<br />ワールドに保存されている記録も削除されます。</p></div>
+            <div className="grid grid-cols-2 gap-3 px-5 pb-5"><button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} className="flex items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-950/80 py-3 text-zinc-300 transition-all hover:border-zinc-600 hover:bg-zinc-900 hover:text-zinc-100 active:scale-[0.98]"><X className="h-4 w-4" />キャンセル</button><button type="button" onClick={confirmDelete} className="flex items-center justify-center gap-2 rounded-xl border border-red-900/70 bg-red-950/70 py-3 text-red-200 transition-all hover:border-red-800 hover:bg-red-900/60 hover:text-red-100 active:scale-[0.98]"><Trash2 className="h-4 w-4" />削除する</button></div>
           </div>
         </div>
       )}
       <style>{`
         .world-select-screen { position: relative; isolation: isolate; overflow: hidden; }
         .world-select-screen::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0.32; background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.028) 0, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 4px), radial-gradient(circle at 50% 0%, rgba(16,185,129,0.09), transparent 42%); }
-        .save-slot-card { border-width: 2px; border-color: rgba(167,243,208,0.48); box-shadow: inset 0 0 0 2px rgba(16,185,129,0.08), inset 0 0 28px rgba(16,185,129,0.045), 0 0 20px rgba(16,185,129,0.08); border-radius: 4px; font-family: 'DotGothic16', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .save-slot-card { border: 2px solid rgba(167,243,208,0.48); box-shadow: inset 0 0 0 2px rgba(16,185,129,0.08), inset 0 0 28px rgba(16,185,129,0.045), 0 0 20px rgba(16,185,129,0.08); border-radius: 4px; font-family: 'DotGothic16', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
         .save-slot-card::after { content: ""; position: absolute; inset: 4px; pointer-events: none; border: 1px solid rgba(167,243,208,0.14); border-radius: 2px; }
-        .save-slot-load { min-width: 138px; min-height: 48px; border-width: 2px; border-radius: 3px; background: linear-gradient(180deg, rgba(16,185,129,0.22), rgba(6,78,59,0.42)); box-shadow: inset 0 0 0 2px rgba(16,185,129,0.08), 0 0 14px rgba(16,185,129,0.08); text-shadow: 0 0 8px rgba(167,243,208,0.35); }
+        .save-slot-load { min-height: 44px; border: 2px solid rgba(167,243,208,0.45); border-radius: 3px; background: linear-gradient(180deg, rgba(16,185,129,0.22), rgba(6,78,59,0.42)); box-shadow: inset 0 0 0 2px rgba(16,185,129,0.08), 0 0 14px rgba(16,185,129,0.08); text-shadow: 0 0 8px rgba(167,243,208,0.35); }
         .save-slot-load:hover { box-shadow: inset 0 0 0 2px rgba(167,243,208,0.10), 0 0 22px rgba(16,185,129,0.22); }
         .save-slot-load:active { transform: translateY(1px) scale(0.985); }
-        @media (max-width: 640px) { .save-slot-load { min-width: 118px; min-height: 44px; } }
       `}</style>
     </div>
   );
@@ -152,31 +156,92 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
 
 function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }: { slotNumber: number; world: WorldWithMembers; meta?: WorldMeta; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
   const [photoUrl, setPhotoUrl] = useState('');
-  useEffect(() => {
-    let active = true; let objectUrl = '';
-    if (!meta?.lastPhotoPath) { setPhotoUrl(''); return; }
-    getPhotoUrl(meta.lastPhotoPath).then((url) => { if (!active) { if (url.startsWith('blob:')) URL.revokeObjectURL(url); return; } objectUrl = url.startsWith('blob:') ? url : ''; setPhotoUrl(url); }).catch(() => { if (active) setPhotoUrl(''); });
-    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [meta?.lastPhotoPath]);
+  const [playerPhotoUrl, setPlayerPhotoUrl] = useState('');
+  const [memberPhotoUrls, setMemberPhotoUrls] = useState<Record<string, string>>({});
 
-  const membersLabel = world.members.map((member) => member.name).join('・');
+  useEffect(() => {
+    let active = true;
+    let objectUrls: string[] = [];
+
+    const loadPhotos = async () => {
+      const paths = [
+        meta?.lastPhotoPath,
+        world.player_photo_path,
+        ...world.members.map((member) => member.photo_path),
+      ];
+      const validPaths = paths.filter((path): path is string => Boolean(path));
+      if (validPaths.length === 0) {
+        if (active) { setPhotoUrl(''); setPlayerPhotoUrl(''); setMemberPhotoUrls({}); }
+        return;
+      }
+
+      const urls = await Promise.all(validPaths.map(async (path) => {
+        try { return [path, await getPhotoUrl(path)] as const; } catch { return [path, ''] as const; }
+      }));
+      if (!active) {
+        urls.forEach(([, url]) => { if (url.startsWith('blob:')) URL.revokeObjectURL(url); });
+        return;
+      }
+
+      objectUrls = urls.map(([, url]) => url).filter((url) => url.startsWith('blob:'));
+      const urlMap = new Map(urls);
+      setPhotoUrl(meta?.lastPhotoPath ? urlMap.get(meta.lastPhotoPath) ?? '' : '');
+      setPlayerPhotoUrl(world.player_photo_path ? urlMap.get(world.player_photo_path) ?? '' : '');
+      setMemberPhotoUrls(Object.fromEntries(world.members.map((member) => [member.id, member.photo_path ? urlMap.get(member.photo_path) ?? '' : ''])));
+    };
+
+    loadPhotos();
+    return () => { active = false; objectUrls.forEach((url) => URL.revokeObjectURL(url)); };
+  }, [meta?.lastPhotoPath, world.player_photo_path, world.members]);
+
   const formattedLastRecordDate = meta?.lastLocationDate ? new Date(meta.lastLocationDate).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : null;
+  const slotLabel = String(slotNumber).padStart(2, '0');
 
   return (
-    <article className="save-slot-card selectable-pulse group relative overflow-hidden bg-gradient-to-r from-emerald-950/55 via-zinc-950/95 to-zinc-900/95 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200/70 hover:shadow-[0_0_26px_rgba(16,185,129,0.16)]">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-zinc-950/92 via-zinc-950/88 to-zinc-950/72" />
+    <article className="save-slot-card selectable-pulse group relative overflow-hidden bg-[#0d100f] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200/70 hover:shadow-[0_0_26px_rgba(16,185,129,0.16)]">
+      {photoUrl && <img src={photoUrl} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.14]" />}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#090b0a]/[0.96] via-[#090b0a]/[0.90] to-[#090b0a]/[0.72]" />
       <div className="relative p-4 sm:p-5">
-        <div className="flex items-start gap-3">
-          {photoUrl ? <div className="h-11 w-14 shrink-0 overflow-hidden rounded-[2px] border-2 border-emerald-200/45 bg-zinc-950/80 shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]"><img src={photoUrl} alt="" className="h-full w-full object-cover" /></div> : <div className="flex h-11 w-14 shrink-0 items-center justify-center rounded-[2px] border-2 border-emerald-200/45 bg-zinc-950/80 font-mono text-xs font-bold tracking-[0.12em] text-emerald-300 shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]">DATA {String(slotNumber).padStart(2, '0')}</div>}
-          <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left" aria-label={`${world.name}をロード`}><div className="flex items-center gap-2 min-w-0"><h3 className="truncate text-base font-bold text-zinc-100 group-hover:text-emerald-100 transition-colors">{world.name}</h3><span className="shrink-0 rounded-[2px] border border-emerald-200/30 bg-emerald-950/50 px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-emerald-300">SAVE</span></div>{world.player && <p className="mt-1 truncate text-xs text-zinc-400">PLAYER / {world.player}</p>}</button>
-          <div className="flex shrink-0 items-center gap-1"><button type="button" aria-label={`${world.name}を編集`} title="編集" onClick={(event) => { event.stopPropagation(); onEdit(); }} className="w-8 h-8 rounded-[2px] bg-zinc-950/70 border border-zinc-700 text-zinc-400 hover:border-emerald-300/60 hover:bg-emerald-950/30 hover:text-emerald-200 flex items-center justify-center transition-colors"><Pencil className="w-4 h-4" /></button><button type="button" aria-label={`${world.name}を削除`} title="削除" onClick={(event) => { event.stopPropagation(); playDeleteSound(); onDelete(); }} className="w-8 h-8 rounded-[2px] bg-red-950/30 border border-red-950/50 text-red-300 hover:bg-red-950/50 hover:border-red-900/60 hover:text-red-200 flex items-center justify-center transition-colors"><Trash2 className="w-4 h-4" /></button></div>
+        <div className="flex items-center gap-3">
+          <div className="shrink-0 font-mono text-[10px] font-bold tracking-[0.18em] text-emerald-300/80">SAVE SLOT {slotLabel}</div>
+          <div className="min-w-0 flex-1 truncate text-sm font-bold tracking-wide text-zinc-100">{world.name}</div>
+          <div className="flex shrink-0 items-center gap-1">
+            <button type="button" aria-label={`${world.name}を編集`} title="編集" onClick={(event) => { event.stopPropagation(); playConfirmSound(); onEdit(); }} className="flex h-8 w-8 items-center justify-center rounded-[2px] border border-zinc-700 bg-zinc-950/70 text-zinc-400 transition-colors hover:border-emerald-300/60 hover:bg-emerald-950/30 hover:text-emerald-200 active:scale-95"><Pencil className="h-4 w-4" /></button>
+            <button type="button" aria-label={`${world.name}を削除`} title="削除" onClick={(event) => { event.stopPropagation(); onDelete(); }} className="flex h-8 w-8 items-center justify-center rounded-[2px] border border-red-950/50 bg-red-950/30 text-red-300 transition-colors hover:border-red-900/60 hover:bg-red-950/50 hover:text-red-200 active:scale-95"><Trash2 className="h-4 w-4" /></button>
+          </div>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-emerald-950/70 py-3 sm:grid-cols-4"><Stat label="DAY" value={String(meta?.dayCount ?? 0)} /><Stat label="RECORDS" value={String(meta?.recordCount ?? 0)} /><div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">MEMBERS</div>{world.members.length > 0 ? <div title={membersLabel} className="mt-1 line-clamp-2 break-words text-xs leading-4 text-zinc-300">{membersLabel}</div> : <div className="mt-1 text-xs text-zinc-600">---</div>}</div><div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">LAST RECORD</div><div className="mt-1 truncate text-xs text-zinc-300">{formattedLastRecordDate ?? '---'}</div></div></div>
-        <div className="mt-3 min-w-0"><div className="flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] text-zinc-600"><MapPin className="h-3 w-3 text-emerald-600" />LAST LOCATION</div><div className="mt-1 truncate text-sm font-semibold text-zinc-100">{meta?.lastLocationName ?? '---'}</div></div>
-        <div className="mt-4 flex justify-end border-t border-emerald-950/60 pt-3"><button type="button" onClick={onOpen} className="save-slot-load selectable-pulse group/load flex items-center justify-center gap-2 font-mono text-sm font-bold tracking-[0.16em] text-emerald-100 transition-all hover:text-white active:scale-[0.98]">LOAD <ChevronRight className="h-5 w-5 transition-transform group-hover/load:translate-x-0.5" /></button></div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+          <MemberBadge name={world.player ?? '---'} photoUrl={playerPhotoUrl} player />
+          {world.members.slice(0, 2).map((member) => <MemberBadge key={member.id} name={member.name} photoUrl={memberPhotoUrls[member.id] ?? ''} />)}
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-4 border-y border-emerald-950/70 py-3">
+          <div><div className="font-mono text-[9px] tracking-[0.18em] text-zinc-600">DAY</div><div className="mt-1 text-base font-bold text-zinc-100">{meta?.dayCount ?? 0}</div></div>
+          <div><div className="font-mono text-[9px] tracking-[0.18em] text-zinc-600">RECORDS</div><div className="mt-1 text-base font-bold text-zinc-100">{meta?.recordCount ?? 0}</div></div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-[1fr_auto] items-end gap-3">
+          <div className="min-w-0">
+            <div className="font-mono text-[9px] tracking-[0.18em] text-zinc-600">LAST LOCATION</div>
+            <div className="mt-1 truncate text-sm font-bold text-zinc-100">{meta?.lastLocationName ?? '---'}</div>
+          </div>
+          <button type="button" onClick={onOpen} className="save-slot-load selectable-pulse flex shrink-0 items-center justify-center gap-2 px-5 font-mono text-sm font-bold tracking-[0.16em] text-emerald-100 transition-all hover:text-white active:scale-[0.98]">LOAD <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" /></button>
+        </div>
+        {formattedLastRecordDate && <div className="mt-2 text-right font-mono text-[9px] tracking-[0.08em] text-zinc-700">LAST RECORD / {formattedLastRecordDate}</div>}
       </div>
     </article>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) { return <div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">{label}</div><div className="mt-1 truncate text-sm font-bold text-zinc-200">{value}</div></div>; }
+function MemberBadge({ name, photoUrl, player = false }: { name: string; photoUrl: string; player?: boolean }) {
+  return (
+    <div className="min-w-0 text-center">
+      <div className="mx-auto flex aspect-square w-full max-w-[72px] items-center justify-center overflow-hidden rounded-[3px] border-2 border-emerald-200/35 bg-zinc-950/80 shadow-[inset_0_0_14px_rgba(16,185,129,0.08)]">
+        {photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : <span className="truncate px-1 font-mono text-[11px] font-bold text-emerald-200/80">{name}</span>}
+      </div>
+      <div className="mt-1 truncate text-[11px] font-semibold text-zinc-300">{name}</div>
+      {player && <div className="font-mono text-[8px] tracking-[0.12em] text-emerald-700">PLAYER</div>}
+    </div>
+  );
+}
