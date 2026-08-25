@@ -146,7 +146,6 @@ function playWarningSound(): void {
   const context = getAudioContext();
   if (!context || !masterGain || !enabled) return;
   if (context.state === 'suspended') void context.resume();
-
   const now = context.currentTime;
 
   const subOsc = context.createOscillator();
@@ -186,11 +185,10 @@ function playWarningSound(): void {
   oscB.stop(now + 0.3);
 }
 
-function playTabSwitchSoundInternal(): void {
+function playTabSwitchSoundDirect(): void {
   const context = getAudioContext();
   if (!context || !masterGain || !enabled) return;
   if (context.state === 'suspended') void context.resume();
-
   const now = context.currentTime;
 
   const osc = context.createOscillator();
@@ -198,29 +196,26 @@ function playTabSwitchSoundInternal(): void {
   osc.type = 'square';
   osc.frequency.setValueAtTime(950, now);
   osc.frequency.exponentialRampToValueAtTime(1600, now + 0.035);
-  blipGain.gain.setValueAtTime(0.0001, now);
+  blipGain.gain.setValueAtTime(0.001, now);
   blipGain.gain.linearRampToValueAtTime(0.18, now + 0.004);
-  blipGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+  blipGain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
   osc.connect(blipGain);
+  blipGain.connect(masterGain);
 
   const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.05), context.sampleRate);
   const output = noiseBuffer.getChannelData(0);
   for (let i = 0; i < noiseBuffer.length; i += 1) output[i] = Math.random() * 2 - 1;
-
   const noiseSource = context.createBufferSource();
   noiseSource.buffer = noiseBuffer;
   const noiseFilter = context.createBiquadFilter();
   noiseFilter.type = 'bandpass';
   noiseFilter.frequency.setValueAtTime(3200, now);
-  noiseFilter.Q.setValueAtTime(2.0, now);
-
+  noiseFilter.Q.setValueAtTime(2, now);
   const noiseGain = context.createGain();
   noiseGain.gain.setValueAtTime(0.14, now);
   noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
-
   noiseSource.connect(noiseFilter);
   noiseFilter.connect(noiseGain);
-  blipGain.connect(masterGain);
   noiseGain.connect(masterGain);
 
   osc.start(now);
@@ -229,8 +224,45 @@ function playTabSwitchSoundInternal(): void {
   noiseSource.stop(now + 0.05);
 }
 
+function playModalSound(): void {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return;
+  if (context.state === 'suspended') void context.resume();
+  const now = context.currentTime;
+
+  const osc = context.createOscillator();
+  const gain = context.createGain();
+  const filter = context.createBiquadFilter();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(480, now);
+  osc.frequency.exponentialRampToValueAtTime(110, now + 0.08);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1200, now);
+  filter.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(0.35, now + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  osc.start(now);
+  osc.stop(now + 0.13);
+}
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
+  if (sound === 'error') {
+    playWarningSound();
+    return;
+  }
+  if (sound === 'tabSwitch') {
+    playTabSwitchSoundDirect();
+    return;
+  }
+  if (sound === 'modalOpen' || sound === 'modalClose') {
+    playModalSound();
+    return;
+  }
   playTone(SOUND_PROFILES[sound]);
 }
 
@@ -261,7 +293,7 @@ export const playConfirmSound = () => playSound('confirm');
 export const playCancelSound = () => playSound('cancel');
 export const playHoverSound = () => playSound('hover');
 export const playTapSound = () => playSound('hover');
-export const playTabSwitchSound = () => playTabSwitchSoundInternal();
+export const playTabSwitchSound = () => playSound('tabSwitch');
 export const playFootstepSound = () => playSound('footstep');
 export const playCardOpenSound = () => playSound('cardOpen');
 export const playCardCloseSound = () => playSound('cardClose');
@@ -272,13 +304,12 @@ export const playAddSound = () => playSound('add');
 export const playSaveSound = () => playSound('save');
 export const playDeleteSound = () => playSound('delete');
 export const playToggleSound = () => playSound('toggle');
-export const playErrorSound = () => playWarningSound();
+export const playErrorSound = () => playSound('error');
 
 export const playChestOpenSound = () => {
   const context = getAudioContext();
   if (!context || !masterGain || !enabled) return;
   if (context.state === 'suspended') void context.resume();
-
   const now = context.currentTime;
 
   const clickOsc = context.createOscillator();
@@ -297,7 +328,6 @@ export const playChestOpenSound = () => {
   const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i += 1) data[i] = Math.random() * 2 - 1;
-
   const noise = context.createBufferSource();
   noise.buffer = buffer;
   const filter = context.createBiquadFilter();
@@ -306,7 +336,7 @@ export const playChestOpenSound = () => {
   filter.frequency.linearRampToValueAtTime(500, now + 0.35);
   filter.Q.value = 8;
   const noiseGain = context.createGain();
-  noiseGain.gain.setValueAtTime(0.0, now);
+  noiseGain.gain.setValueAtTime(0, now);
   noiseGain.gain.setValueAtTime(0.25, now + 0.02);
   noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
   noise.connect(filter);
