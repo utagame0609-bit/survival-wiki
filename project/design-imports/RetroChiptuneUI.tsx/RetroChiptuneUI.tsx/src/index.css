@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #050010;
+    color: #00f0ff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+.immersive-bg {
+  background-color: #050010;
+  background-image: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
+    linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+  background-size: 100% 4px, 3px 100%;
+}
+
+.scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.3) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 255, 0.03),
+    rgba(0, 240, 255, 0.02),
+    rgba(0, 240, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+}
+
+.neon-glow-magenta {
+  filter: drop-shadow(0 0 8px #ff00ff);
+}
+
+.neon-glow-cyan {
+  filter: drop-shadow(0 0 8px #00f0ff);
+}
+
+.neon-box-magenta {
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.35), inset 0 0 10px rgba(255, 0, 255, 0.15);
+}
+
+.neon-box-cyan {
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.25), inset 0 0 10px rgba(0, 240, 255, 0.1);
+}
+
+/* Custom Cyberpunk Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a001a;
+  border-left: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff00ff;
+  border-radius: 0px;
+  box-shadow: 0 0 6px #ff00ff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+  box-shadow: 0 0 8px #00f0ff;
+}
