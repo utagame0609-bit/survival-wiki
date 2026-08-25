@@ -117,7 +117,7 @@ section.relative.scroll-mt-24 > div.relative.pb-2 { animation: timeline-card-rev
 }
 @media (max-width: 640px) {
   .world-select-screen .save-slot-card .mt-3.grid.items-center {
-    grid-template-columns: minmax(0, 1fr) 116px !important;
+    grid-template-columns: minmax(0, 1fr) 116px;
     gap: 0.75rem;
   }
   .world-select-screen .save-slot-card .mt-3.grid.items-center > div:last-child {
@@ -131,4 +131,23 @@ section.relative.scroll-mt-24 > div.relative.pb-2 { animation: timeline-card-rev
   button:not(:disabled):hover, button:not(:disabled):active { transform: none; filter: none; }
   .selectable-pulse { animation: none !important; }
   section.relative.scroll-mt-24 > div.relative.pb-2, .w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child { animation: none; }
+}
+
+/* Location detail modal: keep its outer shell aligned with the amber World Setup modal. */
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl {
+  border-radius: 0.125rem;
+  background: #0a1120;
+  border: 1px solid #ffb000;
+  box-shadow: 0 0 30px rgba(255,176,0,0.25);
+}
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child {
+  border-bottom: 1px solid #1a2333;
+  background: #0d1627;
+}
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child > div:first-child > span {
+  background: #ffb000;
+  box-shadow: 0 0 8px #ffb000;
+}
+.fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2::before {
+  display: none;
 }
