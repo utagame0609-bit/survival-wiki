@@ -152,12 +152,31 @@ section.relative.scroll-mt-24 > div.relative.pb-2 { animation: timeline-card-rev
   display: none;
 }
 
-/* Timeline memo: keep long text inside the record card and scroll only the memo area. */
-section.relative.scroll-mt-24 article p.whitespace-pre-wrap.break-words {
+/* Timeline memo: fixed record height; long text scrolls only inside the memo. */
+section.relative.scroll-mt-24 article.relative.overflow-hidden.rounded-sm.border-2 {
+  height: 214px;
+}
+section.relative.scroll-mt-24 article.relative.overflow-hidden.rounded-sm.border-2 > div.grid {
+  height: 100%;
+}
+section.relative.scroll-mt-24 article.relative.overflow-hidden.rounded-sm.border-2 > div.grid > div:last-child {
+  min-height: 0;
+  overflow: hidden;
+}
+section.relative.scroll-mt-24 article.relative.overflow-hidden.rounded-sm.border-2 p.whitespace-pre-wrap.break-words {
   max-height: 9rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   scrollbar-width: thin;
+}
+
+@media (max-width: 767px) {
+  section.relative.scroll-mt-24 article.relative.overflow-hidden.rounded-sm.border-2 {
+    height: 360px;
+  }
+  section.relative.scroll-mt-24 article.relative.overflow-hidden.rounded-sm.border-2 p.whitespace-pre-wrap.break-words {
+    max-height: 8rem;
+  }
 }
