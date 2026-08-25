@@ -142,6 +142,50 @@ function playTone(profile: SoundProfile): void {
   }
 }
 
+function playWarningSound(): void {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return;
+  if (context.state === 'suspended') void context.resume();
+
+  const now = context.currentTime;
+
+  const subOsc = context.createOscillator();
+  const subGain = context.createGain();
+  subOsc.type = 'triangle';
+  subOsc.frequency.setValueAtTime(140, now);
+  subOsc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+  subGain.gain.setValueAtTime(0.35, now);
+  subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+  subOsc.connect(subGain);
+  subGain.connect(masterGain);
+  subOsc.start(now);
+  subOsc.stop(now + 0.17);
+
+  const oscA = context.createOscillator();
+  const oscB = context.createOscillator();
+  const buzzFilter = context.createBiquadFilter();
+  const buzzGain = context.createGain();
+  oscA.type = 'sawtooth';
+  oscB.type = 'square';
+  oscA.frequency.setValueAtTime(116.54, now);
+  oscB.frequency.setValueAtTime(123.47, now);
+  buzzFilter.type = 'lowpass';
+  buzzFilter.frequency.setValueAtTime(1200, now);
+  buzzFilter.Q.setValueAtTime(4, now);
+  buzzGain.gain.setValueAtTime(0.001, now);
+  buzzGain.gain.linearRampToValueAtTime(0.28, now + 0.008);
+  buzzGain.gain.setValueAtTime(0.22, now + 0.12);
+  buzzGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+  oscA.connect(buzzFilter);
+  oscB.connect(buzzFilter);
+  buzzFilter.connect(buzzGain);
+  buzzGain.connect(masterGain);
+  oscA.start(now);
+  oscB.start(now);
+  oscA.stop(now + 0.3);
+  oscB.stop(now + 0.3);
+}
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
   playTone(SOUND_PROFILES[sound]);
@@ -185,7 +229,7 @@ export const playAddSound = () => playSound('add');
 export const playSaveSound = () => playSound('save');
 export const playDeleteSound = () => playSound('delete');
 export const playToggleSound = () => playSound('toggle');
-export const playErrorSound = () => playSound('error');
+export const playErrorSound = () => playWarningSound();
 
 export const playChestOpenSound = () => {
   const context = getAudioContext();
