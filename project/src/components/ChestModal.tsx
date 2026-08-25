@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { getPhotoUrl } from '@/lib/db';
 import { EmptyState } from '@/components/Feedback';
-import { playModalOpenSound } from '@/lib/sound';
+import { playConfirmSound, playModalCloseSound } from '@/lib/sound';
 
 type CollectionItem = {
   location: LocationWithPhotos;
@@ -17,6 +17,11 @@ type ChestModalProps = {
 };
 
 export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestModalProps) {
+  const handleClose = () => {
+    playModalCloseSound();
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-40 bg-black/85 backdrop-blur-md text-slate-100 overflow-y-auto font-mono flex items-center justify-center p-3 sm:p-6">
       <div className="relative z-10 w-full max-w-4xl max-h-[calc(100vh-32px)] overflow-hidden rounded-sm bg-[#0a1120] border-2 border-amber-500/80 shadow-[0_0_35px_rgba(245,158,11,0.25)] flex flex-col">
@@ -32,7 +37,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
               <h2 className="text-sm sm:text-base font-bold text-amber-400 uppercase tracking-wider">宝箱コレクション (CHEST LOG)</h2>
             </div>
           </div>
-          <button type="button" onClick={onClose} aria-label="コレクションを閉じる" className="w-8 h-8 flex items-center justify-center rounded-sm text-slate-400 hover:bg-[#1a2333] hover:text-amber-400 transition-colors border border-transparent hover:border-slate-700 cursor-pointer">
+          <button type="button" onClick={handleClose} aria-label="コレクションを閉じる" className="w-8 h-8 flex items-center justify-center rounded-sm text-slate-400 hover:bg-[#1a2333] hover:text-amber-400 transition-colors border border-transparent hover:border-slate-700 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -44,7 +49,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
               {collectionItems.map((item, idx) => (
-                <CollectionSlot key={`${item.location.id}-${item.storagePath}`} slotNumber={idx + 1} item={item} onOpen={() => { playModalOpenSound(); onOpenLocation(item.location); }} />
+                <CollectionSlot key={`${item.location.id}-${item.storagePath}`} slotNumber={idx + 1} item={item} onOpen={() => { playConfirmSound(); onOpenLocation(item.location); }} />
               ))}
             </div>
           )}
@@ -53,7 +58,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
         {/* Modal Footer */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-slate-800 bg-[#0d1627] flex-shrink-0 text-xs text-slate-400">
           <span>TOTAL ARCHIVES: <strong className="text-emerald-400">{collectionItems.length}</strong></span>
-          <button type="button" onClick={onClose} className="px-4 py-1.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-bold text-xs uppercase cursor-pointer">
+          <button type="button" onClick={handleClose} className="px-4 py-1.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-bold text-xs uppercase cursor-pointer">
             閉じる (CLOSE)
           </button>
         </div>
