@@ -21,6 +21,8 @@ export async function fetchGames(): Promise<Game[]> {
 
 // ---- Worlds ----
 
+export type WorldMemberInput = string | { name: string; photoFile?: File | null };
+
 export async function fetchWorlds(gameId: string): Promise<WorldWithMembers[]> {
   const { data, error } = await supabase.from('worlds').select('*, world_members(*)').eq('game_id', gameId).order('created_at', { ascending: false });
   if (error) throw error;
@@ -46,38 +48,81 @@ export async function fetchWorld(id: string): Promise<WorldWithMembers | null> {
   return { ...data, members: data.world_members ?? [] };
 }
 
-export async function createWorld(gameId: string, input: { name: string; player: string; memo: string; members: string[] }): Promise<World> {
+export async function createWorld(gameId: string, input: { name: string; player: string; memo: string; members: WorldMemberInput[]; playerPhotoFile?: File | null }): Promise<World> {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError;
   if (!user) throw new Error('ログインユーザーを確認できません');
   const { data, error } = await supabase.from('worlds').insert({ user_id: user.id, game_id: gameId, name: input.name, player: input.player, memo: input.memo }).select().single();
   if (error) throw error;
   const world = data as World;
-  if (input.members.length > 0) {
-    const rows = input.members.filter((m) => m.trim()).map((m) => ({ world_id: world.id, name: m.trim() }));
-    if (rows.length > 0) {
-      const { error: mErr } = await supabase.from('world_members').insert(rows);
-      if (mErr) throw mErr;
+  try {
+    if (input.playerPhotoFile) {
+      const playerPhotoPath = await uploadWorldPlayerPhoto(world.id, input.playerPhotoFile);
+      const { error: playerErr } = await supabase.from('worlds').update({ player_photo_path: playerPhotoPath }).eq('id', world.id);
+      if (playerErr) throw playerErr;
     }
+    const memberInputs = input.members
+      .map((member) => typeof member === 'string' ? { name: member.trim(), photoFile: null } : { name: member.name.trim(), photoFile: member.photoFile ?? null })
+      .filter((member) => member.name);
+    if (memberInputs.length > 0) {
+      const { data: createdMembers, error: mErr } = await supabase.from('world_members').insert(memberInputs.map((member) => ({ world_id: world.id, name: member.name }))).select();
+      if (mErr) throw mErr;
+      for (let index = 0; index < memberInputs.length; index += 1) {
+        const file = memberInputs[index].photoFile;
+        const member = createdMembers?.[index] as WorldMember | undefined;
+        if (file && member) await saveWorldMemberPhoto(member.id, file);
+      }
+    }
+  } catch (error) {
+    await deleteWorld(world.id).catch(() => undefined);
+    throw error;
   }
   return world;
 }
 
-export async function updateWorld(id: string, input: { name: string; player: string; memo: string; members: string[] }): Promise<void> {
+export async function updateWorld(id: string, input: { name: string; player: string; memo: string; members: WorldMemberInput[]; playerPhotoFile?: File | null; removePlayerPhoto?: boolean }): Promise<void> {
+  const { data: current, error: currentError } = await supabase.from('worlds').select('player_photo_path').eq('id', id).maybeSingle();
+  if (currentError) throw currentError;
   const { error } = await supabase.from('worlds').update({ name: input.name, player: input.player, memo: input.memo }).eq('id', id);
   if (error) throw error;
+
+  if (input.playerPhotoFile) {
+    await saveWorldPlayerPhoto(id, input.playerPhotoFile);
+  } else if (input.removePlayerPhoto && current?.player_photo_path) {
+    await deleteWorldMemberPhoto(current.player_photo_path).catch(() => undefined);
+    const { error: clearErr } = await supabase.from('worlds').update({ player_photo_path: null }).eq('id', id);
+    if (clearErr) throw clearErr;
+  }
+
+  const { data: currentMembers, error: currentMembersError } = await supabase.from('world_members').select('id, photo_path').eq('world_id', id);
+  if (currentMembersError) throw currentMembersError;
   const { error: dErr } = await supabase.from('world_members').delete().eq('world_id', id);
   if (dErr) throw dErr;
-  if (input.members.length > 0) {
-    const rows = input.members.filter((m) => m.trim()).map((m) => ({ world_id: id, name: m.trim() }));
-    if (rows.length > 0) {
-      const { error: mErr } = await supabase.from('world_members').insert(rows);
-      if (mErr) throw mErr;
+  for (const member of currentMembers ?? []) {
+    if (member.photo_path) await deleteWorldMemberPhoto(member.photo_path).catch(() => undefined);
+  }
+
+  const memberInputs = input.members
+    .map((member) => typeof member === 'string' ? { name: member.trim(), photoFile: null } : { name: member.name.trim(), photoFile: member.photoFile ?? null })
+    .filter((member) => member.name);
+  if (memberInputs.length > 0) {
+    const { data: createdMembers, error: mErr } = await supabase.from('world_members').insert(memberInputs.map((member) => ({ world_id: id, name: member.name }))).select();
+    if (mErr) throw mErr;
+    for (let index = 0; index < memberInputs.length; index += 1) {
+      const file = memberInputs[index].photoFile;
+      const member = createdMembers?.[index] as WorldMember | undefined;
+      if (file && member) await saveWorldMemberPhoto(member.id, file);
     }
   }
 }
 
 export async function deleteWorld(id: string): Promise<void> {
+  const { data: memberRows, error: memberErr } = await supabase.from('world_members').select('photo_path').eq('world_id', id);
+  if (memberErr) throw memberErr;
+  for (const member of memberRows ?? []) if (member.photo_path) await deleteWorldMemberPhoto(member.photo_path).catch(() => undefined);
+  const { data: world, error: worldErr } = await supabase.from('worlds').select('player_photo_path').eq('id', id).maybeSingle();
+  if (worldErr) throw worldErr;
+  if (world?.player_photo_path) await deleteWorldMemberPhoto(world.player_photo_path).catch(() => undefined);
   const { data: locations, error: lErr } = await supabase.from('locations').select('id').eq('world_id', id);
   if (lErr) throw lErr;
   const locationIds = (locations ?? []).map((location) => location.id);
