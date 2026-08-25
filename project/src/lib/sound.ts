@@ -279,6 +279,45 @@ function playNewRecord(audioCtx: AudioContext): void {
   });
 }
 
+function playCursorMoveSound(): void {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return;
+  if (context.state === 'suspended') void context.resume();
+  const now = context.currentTime;
+
+  const osc = context.createOscillator();
+  const gain = context.createGain();
+  const airFilter = context.createBiquadFilter();
+  const airGain = context.createGain();
+
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(1320, now);
+  osc.frequency.exponentialRampToValueAtTime(1980, now + 0.045);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.16, now + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+  osc.connect(gain);
+  gain.connect(masterGain);
+
+  const airBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.045), context.sampleRate);
+  const airData = airBuffer.getChannelData(0);
+  for (let i = 0; i < airBuffer.length; i += 1) airData[i] = Math.random() * 2 - 1;
+  const airSource = context.createBufferSource();
+  airSource.buffer = airBuffer;
+  airFilter.type = 'highshelf';
+  airFilter.frequency.setValueAtTime(3000, now);
+  airFilter.gain.setValueAtTime(5, now);
+  airGain.gain.setValueAtTime(0.045, now);
+  airGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+  airSource.connect(airFilter);
+  airFilter.connect(airGain);
+  airGain.connect(masterGain);
+  osc.start(now);
+  osc.stop(now + 0.055);
+  airSource.start(now);
+  airSource.stop(now + 0.045);
+}
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
   if (sound === 'error') {
@@ -404,3 +443,5 @@ export const playChestOpenSound = () => {
   noise.start(now + 0.02);
   noise.stop(now + 0.35);
 };
+
+export const playCursorMoveSound = () => playCursorMoveSound();
