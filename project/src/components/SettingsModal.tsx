@@ -93,7 +93,7 @@ export function SettingsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
       <div className="relative z-10 w-full max-w-md overflow-hidden rounded-sm border-2 border-amber-500/70 bg-[#0a1120] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.8),0_0_24px_rgba(245,158,11,0.15)]">
-        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4">
+        <div className="flex items-center border-b border-slate-800 bg-[#0d1627] px-5 py-4">
           <div>
             <p className="text-[11px] font-extrabold tracking-widest text-emerald-400 uppercase font-mono flex items-center gap-1.5">
               <Sliders className="w-3.5 h-3.5 text-emerald-400" />
@@ -101,16 +101,6 @@ export function SettingsModal({
             </p>
             <h2 className="mt-0.5 text-base font-bold text-amber-400">システム環境設定</h2>
           </div>
-          <button
-            onClick={() => {
-              playModalCloseSound();
-              onClose();
-            }}
-            aria-label="設定を閉じる"
-            className="rounded-sm p-1.5 text-slate-400 hover:bg-[#1a2333] hover:text-amber-400 border border-transparent hover:border-slate-700 transition-all cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         <div className="p-5">
