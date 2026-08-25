@@ -1,4 +1,4 @@
-import { Download, Settings, Volume2, VolumeX, X } from 'lucide-react';
+import { Download, Settings, Volume2, VolumeX, X, Sliders } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
   getSoundVolume,
@@ -44,9 +44,9 @@ export function SettingsButton() {
       <button
         onClick={openSettings}
         aria-label="設定"
-        className="fixed bottom-8 right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#292b24] text-stone-200 border border-[#3a3d34] shadow-lg shadow-black/30 hover:bg-[#34372e] active:scale-95 transition-all"
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-sm bg-[#0d1627] text-amber-400 border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:bg-amber-500 hover:text-slate-950 active:scale-95 transition-all cursor-pointer"
       >
-        <Settings className="w-6 h-6" />
+        <Settings className="w-5 h-5" />
       </button>
       {settingsOpen && <SettingsModal onClose={closeSettings} installPrompt={installPrompt} onInstallPromptUsed={() => setInstallPrompt(null)} />}
     </>
@@ -89,13 +89,16 @@ export function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-emerald-900/70 bg-gradient-to-b from-zinc-900 to-[#151712] text-zinc-100 shadow-[0_0_40px_rgba(0,0,0,0.55),0_0_24px_rgba(16,185,129,0.08)]">
-        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-sm border-2 border-amber-500/70 bg-[#0a1120] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.8),0_0_24px_rgba(245,158,11,0.15)]">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4">
           <div>
-            <p className="text-xs font-extrabold tracking-widest text-emerald-400 uppercase font-mono">OPTIONS</p>
-            <h2 className="mt-1 text-lg font-bold">設定</h2>
+            <p className="text-[11px] font-extrabold tracking-widest text-emerald-400 uppercase font-mono flex items-center gap-1.5">
+              <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+              <span>SYSTEM CONFIGURATION // 設定</span>
+            </p>
+            <h2 className="mt-0.5 text-base font-bold text-amber-400">システム環境設定</h2>
           </div>
           <button
             onClick={() => {
@@ -103,20 +106,20 @@ export function SettingsModal({
               onClose();
             }}
             aria-label="設定を閉じる"
-            className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-100 active:scale-95 transition-all"
+            className="rounded-sm p-1.5 text-slate-400 hover:bg-[#1a2333] hover:text-amber-400 border border-transparent hover:border-slate-700 transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-5">
-          <section className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
+          <section className="rounded-sm border border-slate-800 bg-[#090d16] p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                {soundEnabled ? <Volume2 className="w-5 h-5 text-emerald-400" /> : <VolumeX className="w-5 h-5 text-zinc-500" />}
+                {soundEnabled ? <Volume2 className="w-5 h-5 text-emerald-400" /> : <VolumeX className="w-5 h-5 text-slate-600" />}
                 <div>
-                  <p className="text-sm font-semibold text-zinc-100">SE</p>
-                  <p className="mt-0.5 text-xs text-zinc-500">アプリ内の効果音</p>
+                  <p className="text-xs font-bold text-slate-200 uppercase tracking-wider">SOUND EFFECTS // 効果音</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500 font-mono">操作フィードバック音の再生</p>
                 </div>
               </div>
               <button
@@ -125,16 +128,16 @@ export function SettingsModal({
                 aria-checked={soundEnabled}
                 aria-label="SEのオンオフ"
                 onClick={handleSoundToggle}
-                className={`relative flex h-7 w-12 shrink-0 items-center rounded-full border p-0.5 transition-colors ${soundEnabled ? 'border-emerald-500/70 bg-emerald-600' : 'border-zinc-700 bg-zinc-800'}`}
+                className={`relative flex h-6 w-11 shrink-0 items-center rounded-sm border p-0.5 transition-colors cursor-pointer ${soundEnabled ? 'border-emerald-500 bg-emerald-950 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-slate-700 bg-slate-900'}`}
               >
-                <span className={`block h-5 w-5 rounded-full bg-zinc-100 shadow-sm transition-transform ${soundEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                <span className={`block h-4 w-4 rounded-sm transition-transform ${soundEnabled ? 'translate-x-5 bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'translate-x-0 bg-slate-600'}`} />
               </button>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-5 border-t border-slate-800/80 pt-4">
               <div className="flex items-center justify-between">
-                <label htmlFor="se-volume" className="text-sm font-semibold text-zinc-200">SE音量</label>
-                <span className="font-mono text-sm font-bold text-emerald-400">{soundVolume}</span>
+                <label htmlFor="se-volume" className="text-xs font-bold text-slate-300 uppercase tracking-wider">SE VOLUME // 音量</label>
+                <span className="font-mono text-xs font-bold text-emerald-400 px-2 py-0.5 rounded-sm bg-[#050a14] border border-slate-800">{soundVolume}%</span>
               </div>
               <input
                 id="se-volume"
@@ -145,39 +148,39 @@ export function SettingsModal({
                 value={soundVolume}
                 onChange={(event) => handleVolumeChange(Number(event.target.value))}
                 disabled={!soundEnabled}
-                className="mt-3 w-full accent-emerald-500 disabled:opacity-40"
+                className="mt-3 w-full accent-amber-500 disabled:opacity-40 cursor-pointer"
               />
-              <div className="mt-1 flex justify-between text-[11px] text-zinc-500">
-                <span>0 無音</span>
-                <span>50 現在の音量</span>
-                <span>100 200%</span>
+              <div className="mt-1 flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>0 MUTE</span>
+                <span>50 DEFAULT</span>
+                <span>100 MAX</span>
               </div>
-              <p className="mt-3 text-xs leading-5 text-zinc-500">50を基準に、0で無音、100で現在の音量の2倍です。</p>
+              <p className="mt-3 text-[11px] leading-relaxed text-slate-500 font-mono">※Web Audio合成エンジンにより低負荷でタクティカルな操作音を生成します。</p>
             </div>
 
-            <div className="mt-6 border-t border-zinc-800 pt-5">
+            <div className="mt-5 border-t border-slate-800 pt-4">
               <button
                 type="button"
                 onClick={handleInstall}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-700/70 bg-emerald-950/40 px-4 py-3 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/50 active:scale-[0.98] transition-all"
+                className="flex w-full items-center justify-center gap-2 rounded-sm border border-sky-500/70 bg-sky-950/40 px-4 py-2.5 text-xs font-bold text-sky-300 hover:bg-sky-900/50 hover:border-sky-400 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
               >
-                <Download className="h-5 w-5" />
-                ホーム画面に追加
+                <Download className="h-4 w-4 text-sky-400" />
+                ホーム画面に追加 (PWA INSTALL)
               </button>
-              <p className="mt-2 text-center text-xs leading-5 text-zinc-500">スマホやPCのホーム画面からすぐに起動できます。</p>
+              <p className="mt-2 text-center text-[11px] leading-5 text-slate-500 font-mono">オフラインでも高速起動できるスタンドアロンHUDとして利用できます。</p>
             </div>
           </section>
         </div>
 
-        <div className="flex justify-end border-t border-zinc-800 px-5 py-3">
+        <div className="flex justify-end border-t border-slate-800 bg-[#0d1627] px-5 py-3">
           <button
             onClick={() => {
               playCancelSound();
               onClose();
             }}
-            className="rounded-lg px-3 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 active:scale-95 transition-all"
+            className="rounded-sm border border-slate-700 bg-[#0a1120] px-4 py-1.5 text-xs font-bold text-slate-400 hover:border-slate-500 hover:text-slate-100 active:scale-95 transition-all cursor-pointer uppercase tracking-wider"
           >
-            閉じる
+            閉じる (CLOSE)
           </button>
         </div>
       </div>
