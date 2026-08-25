@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, X, Camera } from 'lucide-react';
 import { createWorld, fetchWorld, saveWorldMemberPhoto, saveWorldPlayerPhoto } from '@/lib/db';
-import { playCloseSound, playAddSound } from '@/lib/sound';
+import { playModalOpenSound, playModalCloseSound, playAddSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 
 type MemberDraft = { name: string; photo: File | null };
@@ -22,6 +22,10 @@ export function WorldCreateModal({
   const [members, setMembers] = useState<MemberDraft[]>([{ name: '', photo: null }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    playModalOpenSound();
+  }, []);
 
   const handleSave = async () => {
     setError('');
@@ -67,13 +71,13 @@ export function WorldCreateModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
-          playCloseSound();
+          playModalCloseSound();
           onClose();
         }
       }}
     >
       <div className="world-create-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-sm bg-[#0a1120] border-2 border-amber-500/80 shadow-[0_0_35px_rgba(245,158,11,0.25)] text-slate-100">
-        <div className="flex items-center px-5 py-4 border-b border-slate-800 bg-[#0d1627]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-[#0d1627]">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-sm bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-xs shadow-[0_0_10px_rgba(245,158,11,0.4)]">W</div>
             <div>
@@ -81,7 +85,6 @@ export function WorldCreateModal({
               <h2 className="text-sm sm:text-base font-bold text-amber-400 uppercase tracking-wider">新規ワールド作成</h2>
             </div>
           </div>
-        </div>
 
         <div className="p-5 space-y-4">
           {error && <ErrorBanner message={error} />}
@@ -120,7 +123,7 @@ export function WorldCreateModal({
         </div>
 
         <div className="flex gap-3 px-5 py-4 border-t border-slate-800 bg-[#0d1627]">
-          <button type="button" onClick={() => { playCloseSound(); onClose(); }} disabled={saving} className="flex-1 py-2.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-all text-xs uppercase tracking-wider cursor-pointer">キャンセル</button>
+          <button type="button" onClick={() => { playModalCloseSound(); onClose(); }} disabled={saving} className="flex-1 py-2.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-all text-xs uppercase tracking-wider cursor-pointer">キャンセル</button>
           <button type="button" onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-sm bg-amber-500 text-slate-950 font-black border border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.25)] hover:bg-amber-400 disabled:opacity-50 transition-all text-xs uppercase tracking-wider cursor-pointer">{saving ? 'GENERATING... // 作成中' : '▶ 作成して開始 (START)'}</button>
         </div>
       </div>
