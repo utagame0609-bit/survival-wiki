@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Plus, X, Camera } from 'lucide-react';
 import { createWorld, fetchWorld, saveWorldMemberPhoto, saveWorldPlayerPhoto } from '@/lib/db';
-import { playModalOpenSound, playModalCloseSound, playAddSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playAddSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 
 type MemberDraft = { name: string; photo: File | null };
@@ -22,10 +22,6 @@ export function WorldCreateModal({
   const [members, setMembers] = useState<MemberDraft[]>([{ name: '', photo: null }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    playModalOpenSound();
-  }, []);
 
   const handleSave = async () => {
     setError('');
@@ -124,7 +120,7 @@ export function WorldCreateModal({
         </div>
 
         <div className="flex gap-3 px-5 py-4 border-t border-slate-800 bg-[#0d1627]">
-          <button type="button" onClick={() => { playModalCloseSound(); onClose(); }} disabled={saving} className="flex-1 py-2.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-all text-xs uppercase tracking-wider cursor-pointer">キャンセル</button>
+          <button type="button" onClick={() => { playCloseSound(); onClose(); }} disabled={saving} className="flex-1 py-2.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-all text-xs uppercase tracking-wider cursor-pointer">キャンセル</button>
           <button type="button" onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-sm bg-amber-500 text-slate-950 font-black border border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.25)] hover:bg-amber-400 disabled:opacity-50 transition-all text-xs uppercase tracking-wider cursor-pointer">{saving ? 'GENERATING... // 作成中' : '▶ 作成して開始 (START)'}</button>
         </div>
       </div>
@@ -132,7 +128,7 @@ export function WorldCreateModal({
       <style>{`
         .modal-input { width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.25rem; border: 1px solid #334155; background: #090d16; color: #f1f5f9; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
         .modal-input::placeholder { color: #64748b; }
-        .modal-input:focus { border-color: #38bdf8; background: #0d1627; box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.15); }
+        .modal-input:focus { border-color: #38bdf8; background: #0d1627; box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56, 189, 242, 0.15); }
         .world-create-modal-panel { animation: world-create-modal-in 180ms cubic-bezier(.22,.8,.35,1) both; transform-origin: center; }
         @keyframes world-create-modal-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @media (prefers-reduced-motion: reduce) { .world-create-modal-panel { animation: none; } }
