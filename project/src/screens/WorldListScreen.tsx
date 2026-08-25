@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Plus, Globe, Users, Pencil, Trash2, ChevronRight, AlertTriangle, X } from 'lucide-react';
+import { Plus, Globe, Pencil, Trash2, ChevronRight, AlertTriangle, X, MapPin } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
-import { deleteWorld, fetchWorlds, fetchLatestLocationDates } from '@/lib/db';
+import { deleteWorld, fetchWorlds, fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
-import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
+import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
 import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound } from '@/lib/sound';
 
+type WorldMeta = {
+  recordCount: number;
+  dayCount: number;
+  lastLocationName: string | null;
+  lastLocationDate: string | null;
+  lastPhotoPath: string | null;
+};
+
 export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
   const [worlds, setWorlds] = useState<WorldWithMembers[]>([]);
-  const [lastLocationDates, setLastLocationDates] = useState<Record<string, string | null>>({});
+  const [worldMeta, setWorldMeta] = useState<Record<string, WorldMeta>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -18,6 +26,7 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
 
   const load = () => {
     setLoading(true);
+    setError('');
     fetchWorlds(gameId).then(async (data) => {
       const lastOpenedWorldId = localStorage.getItem(`survival-wiki:last-opened-world:${gameId}`);
       const sortedWorlds = [...data].sort((a, b) => {
@@ -25,9 +34,37 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
         if (b.id === lastOpenedWorldId) return 1;
         return 0;
       });
+
+      const metaEntries = await Promise.all(
+        data.map(async (world) => {
+          const locations = await fetchLocations(world.id);
+          const sortedLocations = [...locations].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          const dayKeys = new Set(
+            locations.map((location) => {
+              const date = new Date(location.created_at);
+              return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            }),
+          );
+          const latestLocation = sortedLocations[0];
+          const latestPhoto = latestLocation
+            ? latestLocation.photos.find((photo) => photo.is_main) ?? latestLocation.photos[0] ?? null
+            : null;
+
+          return [
+            world.id,
+            {
+              recordCount: locations.length,
+              dayCount: dayKeys.size,
+              lastLocationName: latestLocation?.name ?? null,
+              lastLocationDate: latestLocation?.created_at ?? null,
+              lastPhotoPath: latestPhoto?.storage_path ?? null,
+            },
+          ] as const;
+        }),
+      );
+
       setWorlds(sortedWorlds);
-      const dates = await fetchLatestLocationDates(data.map((w) => w.id));
-      setLastLocationDates(dates);
+      setWorldMeta(Object.fromEntries(metaEntries));
     }).catch((e) => setError(e.message)).finally(() => setLoading(false));
   };
 
@@ -53,40 +90,68 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
   };
 
   return (
-    <div className="min-h-screen bg-[#11120f] text-stone-100">
+    <div className="world-select-screen min-h-screen bg-[#090b0a] text-stone-100">
       <Header title={gameName} onBack={goBack} />
-      <div className="px-4 py-4 max-w-3xl mx-auto">
-        <button
-          onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
-          className="selectable-pulse group w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-emerald-950/55 via-zinc-900/95 to-zinc-900/90 border border-emerald-900/60 text-emerald-300 font-semibold shadow-[0_0_20px_rgba(16,185,129,0.10)] hover:from-emerald-900/45 hover:via-zinc-900/95 hover:to-zinc-900/90 hover:border-emerald-500/60 hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(16,185,129,0.14)] active:scale-[0.99] transition-all"
-        >
-          <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          新規ワールドを作成
-        </button>
+
+      <div className="relative px-4 py-5 max-w-3xl mx-auto">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-950/20 to-transparent" />
+
+        <div className="relative mb-5 text-center">
+          <p className="text-[10px] font-mono tracking-[0.32em] text-emerald-500/70 uppercase">SAVE DATA</p>
+          <h1 className="mt-1 text-lg font-semibold tracking-[0.18em] text-zinc-100">ワールドを選択</h1>
+        </div>
 
         {loading && <Spinner label="ワールドを読み込み中" />}
         {error && <ErrorBanner message={error} />}
-        {!loading && !error && worlds.length === 0 && <EmptyState message="まだワールドがありません。新規ワールドを作成してください。" />}
+        {!loading && !error && worlds.length === 0 && (
+          <div className="relative mb-4 rounded-xl border border-emerald-950/70 bg-zinc-950/70 px-5 py-8 text-center">
+            <p className="text-sm text-zinc-400">まだワールドがありません。</p>
+            <p className="mt-1 text-xs text-zinc-600">NEW GAMEから最初のワールドを作成してください。</p>
+          </div>
+        )}
+
         {!loading && !error && worlds.length > 0 && (
-          <div className="mt-4 space-y-3">
-            {worlds.map((w) => (
+          <div className="relative space-y-3">
+            {worlds.map((world, index) => (
               <WorldCard
-                key={w.id}
-                world={w}
-                lastLocationDate={lastLocationDates[w.id]}
+                key={world.id}
+                slotNumber={index + 1}
+                world={world}
+                meta={worldMeta[world.id]}
                 onOpen={() => {
                   playConfirmSound();
-                  localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, w.id);
-                  navigate({ name: 'world', worldId: w.id, worldName: w.name });
+                  localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id);
+                  navigate({ name: 'world', worldId: world.id, worldName: world.name });
                 }}
                 onEdit={() => {
                   playConfirmSound();
-                  navigate({ name: 'worldCreate', gameId, gameName, worldId: w.id });
+                  navigate({ name: 'worldCreate', gameId, gameName, worldId: world.id });
                 }}
-                onDelete={() => handleDelete(w)}
+                onDelete={() => handleDelete(world)}
               />
             ))}
           </div>
+        )}
+
+        {!loading && !error && (
+          <button
+            type="button"
+            onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
+            className="selectable-pulse group relative mt-3 w-full overflow-hidden rounded-xl border border-emerald-800/70 bg-gradient-to-r from-emerald-950/55 via-zinc-950/95 to-zinc-900/95 text-left shadow-[0_0_20px_rgba(16,185,129,0.08)] transition-all hover:border-emerald-500/70 hover:shadow-[0_0_24px_rgba(16,185,129,0.13)] active:scale-[0.995]"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,185,129,0.10),transparent_42%,rgba(16,185,129,0.04))]" />
+            <div className="relative flex min-h-[108px] items-center gap-4 px-4 py-4 sm:px-5">
+              <div className="flex h-12 w-14 shrink-0 items-center justify-center rounded-lg border border-emerald-700/70 bg-emerald-950/40 text-emerald-400 shadow-[inset_0_0_14px_rgba(16,185,129,0.08)]">
+                <Plus className="h-6 w-6 transition-transform group-hover:scale-110" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-mono text-[10px] tracking-[0.2em] text-emerald-500/70">NEW GAME</div>
+                <div className="mt-1 text-base font-bold tracking-wide text-zinc-100 group-hover:text-emerald-200 transition-colors">新しいワールドを作成</div>
+                <div className="mt-1 text-xs text-zinc-500">空いているセーブデータを作成します</div>
+              </div>
+              <ChevronRight className="h-5 w-5 shrink-0 text-emerald-800 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-300" />
+            </div>
+          </button>
         )}
       </div>
 
@@ -114,32 +179,155 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
           </div>
         </div>
       )}
+
+      <style>{`
+        .world-select-screen {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+        }
+        .world-select-screen::before {
+          content: "";
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: -1;
+          opacity: 0.32;
+          background:
+            repeating-linear-gradient(
+              to bottom,
+              rgba(255,255,255,0.028) 0,
+              rgba(255,255,255,0.028) 1px,
+              transparent 1px,
+              transparent 4px
+            ),
+            radial-gradient(circle at 50% 0%, rgba(16,185,129,0.09), transparent 42%);
+        }
+      `}</style>
     </div>
   );
 }
 
-function WorldCard({ world, lastLocationDate, onOpen, onEdit, onDelete }: { world: WorldWithMembers; lastLocationDate?: string | null; onOpen: () => void; onEdit: () => void; onDelete: () => void }) {
-  const formattedLastLocationDate = lastLocationDate ? new Date(lastLocationDate).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : null;
+function WorldCard({
+  slotNumber,
+  world,
+  meta,
+  onOpen,
+  onEdit,
+  onDelete,
+}: {
+  slotNumber: number;
+  world: WorldWithMembers;
+  meta?: WorldMeta;
+  onOpen: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const [photoUrl, setPhotoUrl] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl = '';
+
+    if (!meta?.lastPhotoPath) {
+      setPhotoUrl('');
+      return;
+    }
+
+    getPhotoUrl(meta.lastPhotoPath)
+      .then((url) => {
+        if (!active) {
+          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url.startsWith('blob:') ? url : '';
+        setPhotoUrl(url);
+      })
+      .catch(() => {
+        if (active) setPhotoUrl('');
+      });
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [meta?.lastPhotoPath]);
+
+  const membersLabel = world.members.map((member) => member.name).join('・');
+  const formattedLastRecordDate = meta?.lastLocationDate
+    ? new Date(meta.lastLocationDate).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    : null;
+
   return (
-    <div onClick={onOpen} className="selectable-pulse group relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-950/25 via-zinc-900/90 to-zinc-900/85 border border-emerald-950/70 shadow-[0_0_16px_rgba(16,185,129,0.05)] cursor-pointer hover:-translate-y-0.5 hover:from-emerald-950/35 hover:via-zinc-900/90 hover:to-zinc-900/85 hover:border-emerald-700/60 hover:shadow-[0_0_18px_rgba(16,185,129,0.08)] transition-all duration-200">
-      <div className="p-3.5 pr-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-lg bg-zinc-950/80 border border-emerald-900/60 flex items-center justify-center flex-shrink-0 shadow-[inset_0_0_10px_rgba(16,185,129,0.04)]"><Globe className="w-5 h-5 text-emerald-400" /></div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 min-w-0"><h3 className="font-bold text-sm text-zinc-100 truncate group-hover:text-emerald-300 transition-colors">{world.name}</h3></div>
-            {world.player && <p className="text-sm text-zinc-400 truncate mt-0.5">プレイヤー: {world.player}</p>}
-            <div className="flex items-center gap-1 mt-1.5 text-xs text-zinc-500"><Users className="w-3.5 h-3.5 text-emerald-500/80" /><span>{world.members.length}名</span>{world.memo && <span className="truncate">· {world.memo}</span>}</div>
-            {formattedLastLocationDate && <p className="text-[11px] text-zinc-600 mt-1.5 font-mono">最終ロケーション：{formattedLastLocationDate}</p>}
+    <article className="selectable-pulse group relative overflow-hidden rounded-xl border border-emerald-900/70 bg-gradient-to-r from-emerald-950/55 via-zinc-950/95 to-zinc-900/95 shadow-[0_0_18px_rgba(16,185,129,0.07)] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-600/70 hover:shadow-[0_0_22px_rgba(16,185,129,0.11)]">
+      {photoUrl && <div className="pointer-events-none absolute inset-0"><img src={photoUrl} alt="" className="h-full w-full object-cover opacity-[0.12]" /></div>}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-zinc-950/92 via-zinc-950/88 to-zinc-950/72" />
+
+      <div className="relative p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-14 shrink-0 items-center justify-center rounded-lg border border-emerald-800/70 bg-zinc-950/80 font-mono text-xs font-bold tracking-[0.12em] text-emerald-400 shadow-[inset_0_0_12px_rgba(16,185,129,0.05)]">
+            DATA {String(slotNumber).padStart(2, '0')}
           </div>
-          <div className="flex items-center gap-1 shrink-0 pl-1">
-            <div className="flex items-center gap-1 sm:opacity-0 sm:pointer-events-none sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto sm:group-focus-within:opacity-100 sm:group-focus-within:pointer-events-auto transition-opacity">
-              <button type="button" aria-label={`${world.name}を編集`} title="編集" onClick={(event) => { event.stopPropagation(); onEdit(); }} className="w-8 h-8 rounded-lg bg-zinc-950/70 border border-zinc-800 text-zinc-400 hover:border-emerald-900/70 hover:bg-emerald-950/30 hover:text-emerald-300 flex items-center justify-center transition-colors"><Pencil className="w-4 h-4" /></button>
-              <button type="button" aria-label={`${world.name}を削除`} title="削除" onClick={(event) => { event.stopPropagation(); playDeleteSound(); onDelete(); }} className="w-8 h-8 rounded-lg bg-red-950/30 border border-red-950/50 text-red-300 hover:bg-red-950/50 hover:border-red-900/60 hover:text-red-200 flex items-center justify-center transition-colors"><Trash2 className="w-4 h-4" /></button>
+
+          <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left" aria-label={`${world.name}をロード`}>
+            <div className="flex items-center gap-2 min-w-0">
+              <h3 className="truncate text-base font-bold text-zinc-100 group-hover:text-emerald-200 transition-colors">{world.name}</h3>
+              <span className="shrink-0 rounded border border-emerald-900/70 bg-emerald-950/40 px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-emerald-500/80">SAVE</span>
             </div>
-            <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-emerald-300 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
+            {world.player && <p className="mt-1 truncate text-xs text-zinc-400">PLAYER / {world.player}</p>}
+          </button>
+
+          <div className="flex shrink-0 items-center gap-1">
+            <button type="button" aria-label={`${world.name}を編集`} title="編集" onClick={(event) => { event.stopPropagation(); onEdit(); }} className="w-8 h-8 rounded-lg bg-zinc-950/70 border border-zinc-800 text-zinc-400 hover:border-emerald-900/70 hover:bg-emerald-950/30 hover:text-emerald-300 flex items-center justify-center transition-colors"><Pencil className="w-4 h-4" /></button>
+            <button type="button" aria-label={`${world.name}を削除`} title="削除" onClick={(event) => { event.stopPropagation(); playDeleteSound(); onDelete(); }} className="w-8 h-8 rounded-lg bg-red-950/30 border border-red-950/50 text-red-300 hover:bg-red-950/50 hover:border-red-900/60 hover:text-red-200 flex items-center justify-center transition-colors"><Trash2 className="w-4 h-4" /></button>
           </div>
         </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-emerald-950/70 py-3 sm:grid-cols-4">
+          <Stat label="DAY" value={String(meta?.dayCount ?? 0)} />
+          <Stat label="RECORDS" value={String(meta?.recordCount ?? 0)} />
+          <div className="min-w-0">
+            <div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">MEMBERS</div>
+            {world.members.length > 0 ? (
+              <div title={membersLabel} className="mt-1 line-clamp-2 break-words text-xs leading-4 text-zinc-300">{membersLabel}</div>
+            ) : (
+              <div className="mt-1 text-xs text-zinc-600">---</div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">LAST RECORD</div>
+            <div className="mt-1 truncate text-xs text-zinc-300">{formattedLastRecordDate ?? '---'}</div>
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_88px] items-center gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] text-zinc-600"><MapPin className="h-3 w-3 text-emerald-600" />LAST LOCATION</div>
+            <div className="mt-1 truncate text-sm font-semibold text-zinc-100">{meta?.lastLocationName ?? '---'}</div>
+          </div>
+
+          <div className="relative h-16 w-[88px] overflow-hidden rounded-md border border-emerald-900/60 bg-zinc-950/80">
+            {photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center"><Globe className="h-5 w-5 text-emerald-900" /></div>}
+            <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 py-0.5 text-[8px] font-mono tracking-wider text-zinc-300">PHOTO</span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex justify-end border-t border-emerald-950/60 pt-3">
+          <button type="button" onClick={onOpen} className="selectable-pulse group/load flex items-center gap-2 rounded-lg border border-emerald-700/70 bg-emerald-950/45 px-5 py-2 text-xs font-bold tracking-[0.14em] text-emerald-300 transition-all hover:border-emerald-400/80 hover:bg-emerald-900/45 hover:text-emerald-100 active:scale-[0.98]">
+            LOAD
+            <ChevronRight className="h-4 w-4 transition-transform group-hover/load:translate-x-0.5" />
+          </button>
+        </div>
       </div>
+    </article>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">{label}</div>
+      <div className="mt-1 truncate text-sm font-bold text-zinc-200">{value}</div>
     </div>
   );
 }
