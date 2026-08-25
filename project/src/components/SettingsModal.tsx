@@ -1,12 +1,12 @@
 import { Download, Settings, Volume2, VolumeX, X, Sliders, Music2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
 import {
   getSoundVolume,
   isSoundEnabled,
   playCancelSound,
   playConfirmSound,
   playModalCloseSound,
-  playModalOpenSound,
   playToggleSound,
   setSoundVolume,
   toggleSound,
@@ -65,6 +65,7 @@ export function SettingsModal({
 }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
+  const [soundStudioOpen, setSoundStudioOpen] = useState(false);
 
   const handleSoundToggle = () => {
     const next = toggleSound();
@@ -89,6 +90,10 @@ export function SettingsModal({
     onInstallPromptUsed();
   };
 
+  if (soundStudioOpen && import.meta.env.DEV) {
+    return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
@@ -104,10 +109,13 @@ export function SettingsModal({
           {import.meta.env.DEV && (
             <button
               type="button"
-              disabled
+              onClick={() => {
+                playConfirmSound();
+                setSoundStudioOpen(true);
+              }}
               aria-label="開発音源"
-              title="開発音源画面は次工程で接続します"
-              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-emerald-500/50 bg-emerald-950/30 px-2.5 py-2 text-[10px] font-bold tracking-wider text-emerald-400/80 cursor-default"
+              title="開発音源"
+              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-emerald-500/50 bg-emerald-950/30 px-2.5 py-2 text-[10px] font-bold tracking-wider text-emerald-400 hover:border-emerald-400 hover:bg-emerald-950/50 transition-all cursor-pointer"
             >
               <Music2 className="h-3.5 w-3.5" />
               開発音源
