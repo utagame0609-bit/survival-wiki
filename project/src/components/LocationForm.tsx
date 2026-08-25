@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Camera, X } from 'lucide-react';
+import { ChevronDown, Camera, X, Compass } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
@@ -110,7 +110,15 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     setCoordsError('');
 
     try {
-      const locationId = await onSave({ name, x: coords.x, y: coords.y, z: coords.z, detail_memo: detailMemo, created_at: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(), member_ids: Array.from(selectedMembers) });
+      const locationId = await onSave({
+        name,
+        x: coords.x,
+        y: coords.y,
+        z: coords.z,
+        detail_memo: detailMemo,
+        created_at: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),
+        member_ids: Array.from(selectedMembers),
+      });
       if (mainFile) {
         if (existingMainPhoto) await deletePhoto(existingMainPhoto.id, existingMainPhoto.storage_path);
         await uploadPhoto(locationId, mainFile, true);
@@ -129,80 +137,184 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   };
 
   return (
-    <div className="px-5 py-5 max-w-3xl mx-auto space-y-4 text-zinc-100">
-      {error && <div className="p-3 rounded-xl bg-red-950/35 border border-red-900/60 text-red-300 text-sm">{error}</div>}
+    <div className="px-5 py-5 max-w-3xl mx-auto space-y-4 text-slate-100 font-mono">
+      {error && (
+        <div className="p-3 rounded-sm bg-rose-950/40 border border-rose-500/60 text-rose-300 text-xs font-mono shadow-[0_0_12px_rgba(244,63,94,0.15)] flex items-center gap-2">
+          <span className="text-rose-400 font-bold">[!]</span>
+          <span>{error}</span>
+        </div>
+      )}
 
       <div>
-        <label className="block text-sm font-medium text-zinc-300 mb-1.5">座標</label>
-        <input type="text" inputMode="numeric" value={coordsText} onChange={(e) => setCoordsText(e.target.value)} placeholder="100 64 -20" className="modal-input text-lg font-mono tabular-nums" />
-        {coordsError && <p className="mt-1 text-xs text-red-400">{coordsError}</p>}
+        <label className="flex items-center justify-between text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+          <span className="flex items-center gap-1.5 text-emerald-400 font-mono">
+            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+            <span>COORDINATES // 空間座標</span>
+          </span>
+          <span className="text-[10px] text-slate-500 font-normal">FORMAT: X Y Z</span>
+        </label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={coordsText}
+          onChange={(e) => setCoordsText(e.target.value)}
+          placeholder="100 64 -20"
+          className="modal-input text-base font-mono tabular-nums text-emerald-300 placeholder-slate-600"
+        />
+        {coordsError && <p className="mt-1 text-xs text-rose-400 font-mono">{coordsError}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-zinc-300 mb-1.5">ロケーション名</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="例: 拠点" className="modal-input" />
+        <label className="block text-xs font-bold text-amber-400 mb-1.5 uppercase tracking-wider">
+          LOCATION NAME // ロケーション名
+        </label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="例: 始原のキャンプサイト"
+          className="modal-input text-sm text-slate-100 placeholder-slate-600"
+        />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-zinc-300 mb-1.5">メイン写真</label>
+        <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+          TACTICAL PHOTO // 記録写真
+        </label>
         {mainPreview ? (
-          <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-[0_0_14px_rgba(0,0,0,0.18)]">
+          <div className="relative overflow-hidden rounded-sm border-2 border-slate-700 bg-[#050a14] shadow-md group">
             <img src={mainPreview} alt="メイン写真" className="w-full h-44 object-cover" />
-            <button type="button" onClick={clearMainPreview} className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-950/85 border border-zinc-700 text-zinc-300 hover:text-red-300 hover:border-red-900/60 transition-colors" aria-label="写真を削除"><X className="w-4 h-4" /></button>
+            <div className="absolute inset-0 border border-emerald-500/20 pointer-events-none" />
+            <button
+              type="button"
+              onClick={clearMainPreview}
+              className="absolute top-2 right-2 p-1.5 rounded-sm bg-[#0a1120]/90 border border-slate-700 text-slate-300 hover:text-rose-400 hover:border-rose-500 transition-colors shadow-md"
+              aria-label="写真を削除"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         ) : (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="group w-full h-28 rounded-xl border border-zinc-700/80 bg-zinc-900/88 flex flex-col items-center justify-center text-zinc-500 hover:border-zinc-600 hover:text-zinc-300 hover:bg-zinc-900 transition-all"><Camera className="w-8 h-8 mb-1 group-hover:scale-105 transition-transform" /><span className="text-sm">撮影・選択</span></button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="group w-full h-28 rounded-sm border-2 border-dashed border-slate-700 bg-[#090d16] flex flex-col items-center justify-center text-slate-400 hover:border-amber-500 hover:text-amber-400 hover:bg-[#0d1627] transition-all"
+          >
+            <Camera className="w-7 h-7 mb-1.5 group-hover:scale-110 text-amber-500/80 transition-transform" />
+            <span className="text-xs font-bold tracking-wide">📸 撮影 / 探検画像を選択</span>
+          </button>
         )}
-        <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleMainSelect(e.target.files?.[0] ?? null)} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => handleMainSelect(e.target.files?.[0] ?? null)}
+        />
       </div>
 
-      <button type="button" onClick={() => setDetailOpen(!detailOpen)} className="flex items-center gap-1.5 text-sm font-medium text-zinc-300 hover:text-zinc-100 transition-colors"><ChevronDown className={`w-4 h-4 transition-transform ${detailOpen ? 'rotate-180' : ''}`} />詳細{detailOpen ? '▲' : '▼'}</button>
+      <button
+        type="button"
+        onClick={() => setDetailOpen(!detailOpen)}
+        className="flex items-center gap-1.5 text-xs font-bold text-sky-400 hover:text-sky-300 transition-colors pt-1"
+      >
+        <ChevronDown className={`w-4 h-4 transition-transform ${detailOpen ? 'rotate-180' : ''}`} />
+        <span>EXPAND PARAMETERS // 詳細メモ・仲間{detailOpen ? ' ▲' : ' ▼'}</span>
+      </button>
 
       {detailOpen && (
-        <div className="space-y-4 p-4 rounded-xl bg-zinc-950/30 border border-zinc-800">
+        <div className="space-y-4 p-4 rounded-sm bg-[#090d16] border border-slate-800">
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1.5">詳細メモ</label>
-            <textarea value={detailMemo} onChange={(e) => setDetailMemo(e.target.value)} placeholder="この場所についてのメモ" rows={3} className="modal-input resize-none" />
+            <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              FIELD NOTES // 詳細メモ
+            </label>
+            <textarea
+              value={detailMemo}
+              onChange={(e) => setDetailMemo(e.target.value)}
+              placeholder="この場所についての地形・資源・魔物などのメモ"
+              rows={3}
+              className="modal-input resize-none text-xs leading-relaxed text-slate-200"
+            />
           </div>
           {members.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1.5">関連メンバー</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+                COMPANIONS // 同行メンバー
+              </label>
               <div className="flex flex-wrap gap-2">
                 {members.map((m) => {
                   const checked = selectedMembers.has(m.id);
-                  return <button type="button" key={m.id} onClick={() => toggleMember(m.id)} className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${checked ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/40' : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200'}`}>{m.name}</button>;
+                  return (
+                    <button
+                      type="button"
+                      key={m.id}
+                      onClick={() => toggleMember(m.id)}
+                      className={`px-3 py-1.5 rounded-sm text-xs font-mono border transition-all ${
+                        checked
+                          ? 'bg-amber-500/15 text-amber-400 border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)] font-bold'
+                          : 'bg-[#0d1627] text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'
+                      }`}
+                    >
+                      {checked ? '▶ ' : '+ '}
+                      {m.name}
+                    </button>
+                  );
                 })}
               </div>
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1.5">作成日時</label>
-            <input type="datetime-local" value={createdAt} onChange={(e) => setCreatedAt(e.target.value)} className="modal-input" />
+            <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              TIMESTAMP // 記録日時
+            </label>
+            <input
+              type="datetime-local"
+              value={createdAt}
+              onChange={(e) => setCreatedAt(e.target.value)}
+              className="modal-input text-xs"
+            />
           </div>
         </div>
       )}
 
-      <div className="flex gap-2 px-0 py-4 border-t border-zinc-800/90 bg-zinc-950/30">
-        <button type="button" onClick={() => { playCancelSound(); onCancel(); }} className="flex-1 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 font-medium hover:bg-zinc-800 hover:border-zinc-600 active:scale-[0.98] transition-all">キャンセル</button>
-        <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 font-bold shadow-[0_0_16px_rgba(16,185,129,0.08)] hover:bg-emerald-500/15 hover:border-emerald-400/60 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? '保存中...' : '保存'}</button>
+      <div className="flex gap-3 px-0 pt-4 pb-2 border-t border-slate-800 bg-transparent">
+        <button
+          type="button"
+          onClick={() => {
+            playCancelSound();
+            onCancel();
+          }}
+          className="flex-1 py-2.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 active:scale-[0.98] transition-all text-xs uppercase tracking-wider"
+        >
+          キャンセル
+        </button>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={saving}
+          className="flex-1 py-2.5 rounded-sm bg-amber-500 text-slate-950 font-black border border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.25)] hover:bg-amber-400 active:scale-[0.98] transition-all disabled:opacity-50 text-xs uppercase tracking-wider"
+        >
+          {saving ? 'SAVING // 保存中...' : '▶ 保存する (SAVE)'}
+        </button>
       </div>
 
       <style>{`
         .modal-input {
           width: 100%;
           padding: 0.65rem 0.75rem;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(63, 63, 70, 0.9);
-          background: rgba(24, 24, 27, 0.88);
-          color: #f4f4f5;
+          border-radius: 0.25rem;
+          border: 1px solid #334155;
+          background: #090d16;
+          color: #f1f5f9;
           outline: none;
           transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
         }
-        .modal-input::placeholder { color: #71717a; }
+        .modal-input::placeholder { color: #64748b; }
         .modal-input:focus {
-          border-color: rgba(16, 185, 0, 0.75);
-          background: rgba(24, 24, 27, 0.96);
-          box-shadow: 0 0 0 2px rgba(16, 185, 0, 0.12), 0 0 14px rgba(16, 185, 0, 0.05);
+          border-color: #38bdf8;
+          background: #0d1627;
+          box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.15);
         }
       `}</style>
     </div>
