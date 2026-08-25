@@ -28,7 +28,6 @@
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:hover:not(:disabled) { border-color: rgba(16, 185, 129, 0.5) !important; background: rgba(6, 78, 59, 0.28) !important; color: #a7f3d0 !important; }
 .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600::after { color: rgba(167, 243, 208, 0.65); }
 
-/* Wiki style selection: reuse the shared selectable pulse. */
 @media (hover: hover) and (pointer: fine) {
   .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button:hover:not(:disabled) { animation: selectable-pulse 1.8s ease-in-out infinite; }
   .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button.bg-emerald-600:hover:not(:disabled) { animation-name: selectable-pulse-active; }
@@ -40,30 +39,25 @@
 
 .w-full.px-4.py-4.max-w-3xl.mx-auto > div:not(.mb-4) > .flex.gap-2.mb-4.px-4.pt-4 { display: none; }
 
-/* Timeline detail memo: keep the card compact and scroll only the memo when it exceeds the visible area. */
 article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.shadow-sm p.whitespace-pre-wrap.break-words { max-height: 6.5rem; overflow-y: auto; overscroll-behavior: contain; padding-right: 0.25rem; }
 
-/* Location detail modal: modern rounded treatment. */
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl { border-radius: 1rem; overflow: hidden; background: linear-gradient(90deg, rgba(6, 78, 59, 0.18), rgba(24, 24, 27, 0.96), rgba(24, 24, 27, 0.92)); border-color: rgba(6, 78, 59, 0.6); box-shadow: 0 0 28px rgba(16, 185, 129, 0.08), 0 20px 50px rgba(0, 0, 0, 0.45); }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child { border-bottom-color: rgba(39, 39, 42, 0.9); background: transparent; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2 { display: flex; align-items: center; gap: 0.5rem; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: #34d399; box-shadow: 0 0 8px rgba(52, 211, 153, 0.6); flex-shrink: 0; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child button { border-radius: 0.5rem; }
 
-/* Location detail coordinates: replace the flat block with the same restrained rounded treatment. */
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] { border-radius: 0.75rem; border-color: rgba(63, 63, 70, 0.9); background: linear-gradient(90deg, rgba(6, 78, 59, 0.08), rgba(32, 34, 29, 0.96), rgba(24, 24, 27, 0.92)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02); }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] > div:first-child { color: rgba(168, 162, 158, 0.9); }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] .grid > div > div:first-child { color: rgba(163, 230, 53, 0.82); font-style: normal; font-size: 0.7rem; letter-spacing: 0.12em; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .mt-4.bg-\[\#20221d\] .grid > div > div:last-child { margin-top: 0.25rem; color: #f4f4f5; font-weight: 650; }
 
-/* Location detail actions: use the same modern rounded treatment as the location add/edit UI. */
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button { border-radius: 0.75rem; min-height: 2.75rem; transition: all 0.2s; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:first-child { background: rgba(6, 78, 59, 0.55); border-color: rgba(16, 185, 129, 0.75); color: #6ee7b7; box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.04); }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:first-child:hover { background: rgba(6, 78, 59, 0.72); border-color: rgba(52, 211, 153, 0.9); color: #a7f3d0; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:last-child { background: linear-gradient(90deg, rgba(69, 10, 10, 0.55), rgba(39, 24, 24, 0.95)); border-color: rgba(127, 29, 29, 0.55); color: #fca5a5; }
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl .flex.gap-3.pt-1 > button:last-child:hover { background: linear-gradient(90deg, rgba(80, 12, 12, 0.65), rgba(45, 26, 26, 0.95)); }
 
-/* Location edit/create modal: make the outer modal the single scroll container so wheel and touch gestures scroll it. */
 .fixed.inset-0.z-50 > div.w-full.max-w-lg.max-h-\[calc\(100vh-2rem\)\] { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .fixed.inset-0.z-50 > div.w-full.max-w-lg.max-h-\[calc\(100vh-2rem\)\] > div.overflow-y-auto { overflow: visible; }
 
@@ -72,14 +66,12 @@ article.relative.overflow-hidden.rounded-xl.border.border-stone-200.bg-white.sha
   .w-full.px-4.py-4.max-w-3xl.mx-auto > .mb-4 > div > button::after { font-size: 0.65rem; }
 }
 
-/* Shared press feedback: a subtle, short physical response for app buttons. */
 button:not(:disabled) {
   transition: transform 160ms cubic-bezier(.22,.8,.35,1), filter 160ms ease;
 }
 button:not(:disabled):hover { transform: translateY(-3px); filter: brightness(1.06); }
 button:not(:disabled):active { transform: scale(0.985); filter: brightness(0.98); }
 
-/* Shared focus pulse for selectable objects. */
 @keyframes selectable-pulse {
   0% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0), 0 0 0 rgba(16, 185, 129, 0); filter: brightness(1); }
   50% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.58), 0 0 16px rgba(16, 185, 129, 0.18); filter: brightness(1.08); }
@@ -100,13 +92,39 @@ button:not(:disabled):active { transform: scale(0.985); filter: brightness(0.98)
   .selectable-pulse.selectable-pulse-active:active { animation-name: selectable-pulse-active; }
 }
 
-/* Timeline card expansion: reveal the newly opened records with a short, subtle motion. */
 @keyframes timeline-card-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 section.relative.scroll-mt-24 > div.relative.pb-2 { animation: timeline-card-reveal 180ms cubic-bezier(.22,.8,.35,1); transform-origin: top center; }
 
-/* Wiki style selection: transition into the selected article/content view. */
 @keyframes wiki-content-enter { from { opacity: 0; transform: translateY(8px) scale(.992); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .w-full.px-4.py-4.max-w-3xl.mx-auto:has(> .mb-4) > :last-child { animation: wiki-content-enter 200ms cubic-bezier(.22,.8,.35,1); }
+
+/* World select: make the latest location photo a primary save-slot thumbnail. */
+.world-select-screen .save-slot-card .mt-3.grid.items-center {
+  grid-template-columns: minmax(0, 1fr) 150px !important;
+  gap: 1rem;
+}
+.world-select-screen .save-slot-card .mt-3.grid.items-center > div:last-child {
+  height: 104px;
+  width: 150px;
+  border-width: 2px;
+  box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.08), 0 0 12px rgba(16, 185, 129, 0.06);
+}
+.world-select-screen .save-slot-card .mt-3.grid.items-center > div:last-child img {
+  image-rendering: auto;
+}
+.world-select-screen .save-slot-card .mt-3.grid.items-center > div:first-child {
+  align-self: center;
+}
+@media (max-width: 640px) {
+  .world-select-screen .save-slot-card .mt-3.grid.items-center {
+    grid-template-columns: minmax(0, 1fr) 116px !important;
+    gap: 0.75rem;
+  }
+  .world-select-screen .save-slot-card .mt-3.grid.items-center > div:last-child {
+    height: 92px;
+    width: 116px;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   button:not(:disabled) { transition: none; }
