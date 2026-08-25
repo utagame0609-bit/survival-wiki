@@ -188,9 +188,9 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
       {selectedLocation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 font-dot">
           <button aria-label="閉じる" className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeLocationDetail} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-sm bg-[#0a1120] text-[#e2e8f0] border-4 border-double border-[#ffb000] shadow-[0_0_30px_rgba(255,176,0,0.25)] flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-            <div className="flex items-center justify-between px-5 py-3.5 flex-shrink-0 border-b-2 border-[#1a2333] bg-[#0d1627]">
-              <div className="flex items-center gap-2"><span className="text-[#ffb000] font-mono text-sm">▶</span><h2 className="text-sm sm:text-base font-bold text-[#ffb000] uppercase tracking-wide">LOCATION STATUS // 拠点詳細記録</h2></div>
+          <div className="relative z-10 w-full max-w-2xl max-h-[calc(100vh-24px)] sm:max-h-[calc(100vh-48px)] overflow-hidden rounded-sm bg-[#0a1120] text-[#e2e8f0] border-2 border-[#ffb000] shadow-[0_0_24px_rgba(255,176,0,0.2)] flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+            <div className="flex items-center justify-between px-5 py-3.5 flex-shrink-0 border-b border-[#1a2333] bg-[#0d1627]">
+              <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-[#32cd32] shadow-[0_0_8px_#32cd32]" /><h2 className="text-sm sm:text-base font-bold text-[#ffb000] uppercase tracking-wide">LOCATION STATUS // 拠点詳細記録</h2></div>
               <button onClick={closeLocationDetail} aria-label="閉じる" className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]"><X className="w-5 h-5" /></button>
             </div>
             <div className="overflow-y-auto overscroll-contain">
@@ -201,18 +201,18 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
                     {mainPhoto ? <div className="group w-full h-56 sm:h-64 rounded-sm overflow-hidden bg-[#050a14] border-2 border-[#334155]"><PhotoImage storagePath={mainPhoto.storage_path} alt={selectedLocation.name} className="w-full h-full object-cover" /></div> : <div className="w-full h-56 sm:h-64 rounded-sm bg-[#0d1627] border-2 border-[#334155] flex items-center justify-center"><MapPin className="w-12 h-12 text-zinc-600" /></div>}
                     <div>
                       <div className="flex items-center gap-2 border-l-4 border-[#ffb000] pl-3"><h3 className="text-xl sm:text-2xl font-bold text-[#ffb000] break-words">{selectedLocation.name}</h3></div>
-                      <div className="mt-4 bg-[#0d1627] border-2 border-[#1a2333] rounded-sm p-4 sm:p-5">
+                      <div className="mt-4 bg-[#0d1627] border border-[#334155] rounded-sm p-4 sm:p-5">
                         <div className="flex items-center gap-2 text-xs font-bold text-[#32cd32] mb-3 font-mono"><Compass className="w-4 h-4 text-[#32cd32]" /><span>WORLD COORDINATES // 空間座標</span></div>
                         <div className="grid grid-cols-3 gap-3 text-center font-mono">
-                          <div className="p-3 rounded-sm bg-[#050a14] border border-[#1a2333]"><div className="text-xs font-bold text-[#ffb000]">X AXIS</div><div className="mt-1 text-lg sm:text-xl font-bold text-[#e2e8f0]">{selectedLocation.x}</div></div>
-                          <div className="p-3 rounded-sm bg-[#050a14] border border-[#1a2333]"><div className="text-xs font-bold text-[#32cd32]">Y HEIGHT</div><div className="mt-1 text-lg sm:text-xl font-bold text-[#e2e8f0]">{selectedLocation.y}</div></div>
-                          <div className="p-3 rounded-sm bg-[#050a14] border border-[#1a2333]"><div className="text-xs font-bold text-sky-400">Z AXIS</div><div className="mt-1 text-lg sm:text-xl font-bold text-[#e2e8f0]">{selectedLocation.z}</div></div>
+                          <div className="p-3 rounded-sm bg-[#050a14] border border-[#334155]"><div className="text-xs font-bold text-[#ffb000]">X AXIS</div><div className="mt-1 text-lg sm:text-xl font-bold text-[#e2e8f0]">{selectedLocation.x}</div></div>
+                          <div className="p-3 rounded-sm bg-[#050a14] border border-[#334155]"><div className="text-xs font-bold text-[#32cd32]">Y HEIGHT</div><div className="mt-1 text-lg sm:text-xl font-bold text-[#e2e8f0]">{selectedLocation.y}</div></div>
+                          <div className="p-3 rounded-sm bg-[#050a14] border border-[#334155]"><div className="text-xs font-bold text-sky-400">Z AXIS</div><div className="mt-1 text-lg sm:text-xl font-bold text-[#e2e8f0]">{selectedLocation.z}</div></div>
                         </div>
                       </div>
-                      {selectedLocation.detail_memo && <div className="mt-4 p-4 rounded-sm bg-[#0d1627] border border-[#1a2333] text-xs sm:text-sm text-zinc-300 leading-relaxed font-mono"><div className="text-[11px] font-bold text-[#ffb000] mb-1">【冒険記録メモ】</div><p className="whitespace-pre-wrap">{selectedLocation.detail_memo}</p></div>}
+                      {selectedLocation.detail_memo && <div className="mt-4 p-4 rounded-sm bg-[#0d1627] border border-[#334155] text-xs sm:text-sm text-zinc-300 leading-relaxed font-mono"><div className="text-[11px] font-bold text-[#ffb000] mb-1">【冒険記録メモ】</div><p className="whitespace-pre-wrap">{selectedLocation.detail_memo}</p></div>}
                     </div>
                     <div className="flex gap-3 pt-2">
-                      <button onClick={() => { playConfirmSound(); handleDetailEdit(); }} className="command-btn flex-1 flex items-center justify-center gap-2 py-3 bg-[#1a2333] text-[#ffb000] font-bold text-xs sm:text-sm"><Pencil className="w-4 h-4" /><span>記録を編集</span></button>
+                      <button onClick={() => { playConfirmSound(); handleDetailEdit(); }} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-sm bg-[#1a2333] border-2 border-[#334155] text-[#ffb000] font-bold text-xs sm:text-sm hover:border-[#ffb000] hover:bg-[#111c2d] active:scale-[0.98] transition-all"><Pencil className="w-4 h-4" /><span>記録を編集</span></button>
                       <button onClick={() => handleDelete(selectedLocation)} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-sm bg-red-950/80 text-red-300 border-2 border-red-800 font-bold hover:bg-red-900 hover:text-white active:scale-[0.98] transition-all text-xs sm:text-sm"><Trash2 className="w-4 h-4" /><span>記録を抹消</span></button>
                     </div>
                   </div>
