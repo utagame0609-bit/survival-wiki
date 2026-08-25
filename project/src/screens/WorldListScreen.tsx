@@ -164,16 +164,31 @@ function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }: { slot
 
   return (
     <article className="save-slot-card selectable-pulse group relative overflow-hidden bg-gradient-to-r from-emerald-950/55 via-zinc-950/95 to-zinc-900/95 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200/70 hover:shadow-[0_0_26px_rgba(16,185,129,0.16)]">
-      {photoUrl && <div className="pointer-events-none absolute inset-0"><img src={photoUrl} alt="" className="h-full w-full object-cover opacity-[0.12]" /></div>}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-zinc-950/92 via-zinc-950/88 to-zinc-950/72" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-zinc-950/95 via-zinc-950/92 to-zinc-950/90" />
       <div className="relative p-4 sm:p-5">
         <div className="flex items-start gap-3">
-          {photoUrl ? <div className="h-11 w-14 shrink-0 overflow-hidden rounded-[2px] border-2 border-emerald-200/45 bg-zinc-950/80 shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]"><img src={photoUrl} alt="" className="h-full w-full object-cover" /></div> : <div className="flex h-11 w-14 shrink-0 items-center justify-center rounded-[2px] border-2 border-emerald-200/45 bg-zinc-950/80 font-mono text-xs font-bold tracking-[0.12em] text-emerald-300 shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]">DATA {String(slotNumber).padStart(2, '0')}</div>}
+          <div className="flex h-11 w-14 shrink-0 items-center justify-center rounded-[2px] border-2 border-emerald-200/45 bg-zinc-950/80 font-mono text-xs font-bold tracking-[0.12em] text-emerald-300 shadow-[inset_0_0_12px_rgba(16,185,129,0.08)]">DATA {String(slotNumber).padStart(2, '0')}</div>
           <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left" aria-label={`${world.name}をロード`}><div className="flex items-center gap-2 min-w-0"><h3 className="truncate text-base font-bold text-zinc-100 group-hover:text-emerald-100 transition-colors">{world.name}</h3><span className="shrink-0 rounded-[2px] border border-emerald-200/30 bg-emerald-950/50 px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-emerald-300">SAVE</span></div>{world.player && <p className="mt-1 truncate text-xs text-zinc-400">PLAYER / {world.player}</p>}</button>
           <div className="flex shrink-0 items-center gap-1"><button type="button" aria-label={`${world.name}を編集`} title="編集" onClick={(event) => { event.stopPropagation(); onEdit(); }} className="w-8 h-8 rounded-[2px] bg-zinc-950/70 border border-zinc-700 text-zinc-400 hover:border-emerald-300/60 hover:bg-emerald-950/30 hover:text-emerald-200 flex items-center justify-center transition-colors"><Pencil className="w-4 h-4" /></button><button type="button" aria-label={`${world.name}を削除`} title="削除" onClick={(event) => { event.stopPropagation(); playDeleteSound(); onDelete(); }} className="w-8 h-8 rounded-[2px] bg-red-950/30 border border-red-950/50 text-red-300 hover:bg-red-950/50 hover:border-red-900/60 hover:text-red-200 flex items-center justify-center transition-colors"><Trash2 className="w-4 h-4" /></button></div>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-emerald-950/70 py-3 sm:grid-cols-4"><Stat label="DAY" value={String(meta?.dayCount ?? 0)} /><Stat label="RECORDS" value={String(meta?.recordCount ?? 0)} /><div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">MEMBERS</div>{world.members.length > 0 ? <div title={membersLabel} className="mt-1 line-clamp-2 break-words text-xs leading-4 text-zinc-300">{membersLabel}</div> : <div className="mt-1 text-xs text-zinc-600">---</div>}</div><div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">LAST RECORD</div><div className="mt-1 truncate text-xs text-zinc-300">{formattedLastRecordDate ?? '---'}</div></div></div>
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_88px] items-center gap-3"><div className="min-w-0"><div className="flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] text-zinc-600"><MapPin className="h-3 w-3 text-emerald-600" />LAST LOCATION</div><div className="mt-1 truncate text-sm font-semibold text-zinc-100">{meta?.lastLocationName ?? '---'}</div></div><div className="relative h-16 w-[88px] overflow-hidden rounded-[2px] border-2 border-emerald-200/30 bg-zinc-950/80">{photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center"><Globe className="h-5 w-5 text-emerald-900" /></div>}<span className="absolute bottom-1 left-1 rounded-[1px] bg-black/65 px-1 py-0.5 text-[8px] font-mono tracking-wider text-zinc-200">PHOTO</span></div></div>
+        <div className="mt-4 grid grid-cols-[132px_minmax(0,1fr)] gap-4 sm:grid-cols-[164px_minmax(0,1fr)] sm:gap-5">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2px] border-2 border-emerald-200/35 bg-zinc-950/90 shadow-[inset_0_0_18px_rgba(16,185,129,0.08),0_0_14px_rgba(16,185,129,0.06)]">
+            {photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover [image-rendering:auto]" /> : <div className="flex h-full w-full items-center justify-center"><Globe className="h-8 w-8 text-emerald-900" /></div>}
+            <span className="absolute bottom-1 left-1 rounded-[1px] bg-black/70 px-1.5 py-0.5 text-[8px] font-mono tracking-wider text-zinc-200">PHOTO</span>
+          </div>
+          <div className="min-w-0">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+              <Stat label="DAY" value={String(meta?.dayCount ?? 0)} />
+              <Stat label="RECORDS" value={String(meta?.recordCount ?? 0)} />
+              <div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">MEMBERS</div>{world.members.length > 0 ? <div title={membersLabel} className="mt-1 line-clamp-2 break-words text-xs leading-4 text-zinc-300">{membersLabel}</div> : <div className="mt-1 text-xs text-zinc-600">---</div>}</div>
+              <div className="min-w-0"><div className="font-mono text-[9px] tracking-[0.16em] text-zinc-600">LAST RECORD</div><div className="mt-1 truncate text-xs text-zinc-300">{formattedLastRecordDate ?? '---'}</div></div>
+            </div>
+            <div className="mt-5 border-t border-emerald-950/70 pt-4">
+              <div className="flex items-center gap-1.5 text-[9px] font-mono tracking-[0.16em] text-zinc-600"><MapPin className="h-3 w-3 text-emerald-600" />LAST LOCATION</div>
+              <div className="mt-1 truncate text-sm font-semibold text-zinc-100">{meta?.lastLocationName ?? '---'}</div>
+            </div>
+          </div>
+        </div>
         <div className="mt-4 flex justify-end border-t border-emerald-950/60 pt-3"><button type="button" onClick={onOpen} className="save-slot-load selectable-pulse group/load flex items-center justify-center gap-2 font-mono text-sm font-bold tracking-[0.16em] text-emerald-100 transition-all hover:text-white active:scale-[0.98]">LOAD <ChevronRight className="h-5 w-5 transition-transform group-hover/load:translate-x-0.5" /></button></div>
       </div>
     </article>
