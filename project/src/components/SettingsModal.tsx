@@ -1,6 +1,7 @@
-import { Download, Settings, Volume2, VolumeX, X, Sliders, Music2 } from 'lucide-react';
+import { Download, Settings, Volume2, VolumeX, X, Sliders, Music2, Waves } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
+import { getStoredReverbAmount, setStoredReverbAmount } from '@/lib/soundReverb';
 import {
   getSoundVolume,
   isSoundEnabled,
@@ -65,6 +66,7 @@ export function SettingsModal({
 }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
+  const [reverbAmount, setReverbAmount] = useState(getStoredReverbAmount());
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
 
   const handleSoundToggle = () => {
@@ -75,6 +77,11 @@ export function SettingsModal({
 
   const handleVolumeChange = (value: number) => {
     setSoundVolumeState(setSoundVolume(value));
+  };
+
+  const handleReverbChange = (value: number) => {
+    const normalized = setStoredReverbAmount(value / 100);
+    setReverbAmount(Math.round(normalized * 100));
   };
 
   const handleInstall = async () => {
@@ -133,14 +140,7 @@ export function SettingsModal({
                   <p className="mt-0.5 text-[11px] text-slate-500 font-mono">操作フィードバック音の再生</p>
                 </div>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={soundEnabled}
-                aria-label="SEのオンオフ"
-                onClick={handleSoundToggle}
-                className={`relative flex h-6 w-11 shrink-0 items-center rounded-sm border p-0.5 transition-colors cursor-pointer ${soundEnabled ? 'border-emerald-500 bg-emerald-950 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-slate-700 bg-slate-900'}`}
-              >
+              <button type="button" role="switch" aria-checked={soundEnabled} aria-label="SEのオンオフ" onClick={handleSoundToggle} className={`relative flex h-6 w-11 shrink-0 items-center rounded-sm border p-0.5 transition-colors cursor-pointer ${soundEnabled ? 'border-emerald-500 bg-emerald-950 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-slate-700 bg-slate-900'}`}>
                 <span className={`block h-4 w-4 rounded-sm transition-transform ${soundEnabled ? 'translate-x-5 bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'translate-x-0 bg-slate-600'}`} />
               </button>
             </div>
@@ -150,49 +150,30 @@ export function SettingsModal({
                 <label htmlFor="se-volume" className="text-xs font-bold text-slate-300 uppercase tracking-wider">SE VOLUME // 音量</label>
                 <span className="font-mono text-xs font-bold text-emerald-400 px-2 py-0.5 rounded-sm bg-[#050a14] border border-slate-800">{soundVolume}%</span>
               </div>
-              <input
-                id="se-volume"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={soundVolume}
-                onChange={(event) => handleVolumeChange(Number(event.target.value))}
-                disabled={!soundEnabled}
-                className="mt-3 w-full accent-amber-500 disabled:opacity-40 cursor-pointer"
-              />
-              <div className="mt-1 flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>0 MUTE</span>
-                <span>50 DEFAULT</span>
-                <span>100 MAX</span>
-              </div>
+              <input id="se-volume" type="range" min="0" max="100" step="1" value={soundVolume} onChange={(event) => handleVolumeChange(Number(event.target.value))} disabled={!soundEnabled} className="mt-3 w-full accent-amber-500 disabled:opacity-40 cursor-pointer" />
+              <div className="mt-1 flex justify-between text-[10px] text-slate-500 font-mono"><span>0 MUTE</span><span>50 DEFAULT</span><span>100 MAX</span></div>
               <p className="mt-3 text-[11px] leading-relaxed text-slate-500 font-mono">※Web Audio合成エンジンにより低負荷でタクティカルな操作音を生成します。</p>
             </div>
 
+            <div className="mt-5 border-t border-slate-800/80 pt-4">
+              <div className="flex items-center justify-between">
+                <label htmlFor="se-reverb" className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider"><Waves className="h-4 w-4 text-cyan-400" /> SE REVERB // 残響</label>
+                <span className="font-mono text-xs font-bold text-cyan-300 px-2 py-0.5 rounded-sm bg-[#050a14] border border-slate-800">{Math.round(reverbAmount)}%</span>
+              </div>
+              <input id="se-reverb" type="range" min="0" max="100" step="1" value={reverbAmount} onChange={(event) => handleReverbChange(Number(event.target.value))} disabled={!soundEnabled} className="mt-3 w-full accent-cyan-500 disabled:opacity-40 cursor-pointer" />
+              <div className="mt-1 flex justify-between text-[10px] text-slate-500 font-mono"><span>0 DRY</span><span>18 DEFAULT</span><span>100 MAX</span></div>
+              <p className="mt-3 text-[11px] leading-relaxed text-slate-500 font-mono">アプリ全体のSEに共通でかかる短い残響量を調整します。</p>
+            </div>
+
             <div className="mt-5 border-t border-slate-800 pt-4">
-              <button
-                type="button"
-                onClick={handleInstall}
-                className="flex w-full items-center justify-center gap-2 rounded-sm border border-sky-500/70 bg-sky-950/40 px-4 py-2.5 text-xs font-bold text-sky-300 hover:bg-sky-900/50 hover:border-sky-400 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
-              >
-                <Download className="h-4 w-4 text-sky-400" />
-                ホーム画面に追加 (PWA INSTALL)
-              </button>
+              <button type="button" onClick={handleInstall} className="flex w-full items-center justify-center gap-2 rounded-sm border border-sky-500/70 bg-sky-950/40 px-4 py-2.5 text-xs font-bold text-sky-300 hover:bg-sky-900/50 hover:border-sky-400 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"><Download className="h-4 w-4 text-sky-400" />ホーム画面に追加 (PWA INSTALL)</button>
               <p className="mt-2 text-center text-[11px] leading-5 text-slate-500 font-mono">オフラインでも高速起動できるスタンドアロンHUDとして利用できます。</p>
             </div>
           </section>
         </div>
 
         <div className="flex justify-end border-t border-slate-800 bg-[#0d1627] px-5 py-3">
-          <button
-            onClick={() => {
-              playCancelSound();
-              onClose();
-            }}
-            className="rounded-sm border border-slate-700 bg-[#0a1120] px-4 py-1.5 text-xs font-bold text-slate-400 hover:border-slate-500 hover:text-slate-100 active:scale-95 transition-all cursor-pointer uppercase tracking-wider"
-          >
-            閉じる (CLOSE)
-          </button>
+          <button onClick={() => { playCancelSound(); onClose(); }} className="rounded-sm border border-slate-700 bg-[#0a1120] px-4 py-1.5 text-xs font-bold text-slate-400 hover:border-slate-500 hover:text-slate-100 active:scale-95 transition-all cursor-pointer uppercase tracking-wider">閉じる (CLOSE)</button>
         </div>
       </div>
     </div>
