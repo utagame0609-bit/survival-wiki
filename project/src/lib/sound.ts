@@ -27,7 +27,7 @@ type SoundProfile = {
 
 const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   confirm: { frequency: 880, duration: 0.06, volume: 0.22, type: 'square', secondFrequency: 1760, secondDelay: 0.045 },
-  cancel: { frequency: 440, endFrequency: 220, duration: 0.1, volume: 0.12, type: 'sine' },
+  cancel: { frequency: 659.25, endFrequency: 329.63, duration: 0.14, volume: 0.12, type: 'square' },
   hover: { frequency: 1200, endFrequency: 600, duration: 0.03, volume: 0.05, type: 'triangle' },
   tabSwitch: { frequency: 320, endFrequency: 640, duration: 0.06, volume: 0.18, type: 'triangle' },
   footstep: { frequency: 155, endFrequency: 85, duration: 0.11, volume: 0.32, type: 'triangle', noise: true },
