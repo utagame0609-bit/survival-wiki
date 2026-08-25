@@ -110,12 +110,12 @@ export function SettingsModal({
             <button
               type="button"
               onClick={() => {
-                playConfirmSound();
                 setSoundStudioOpen(true);
+                playConfirmSound();
               }}
               aria-label="開発音源"
               title="開発音源"
-              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-emerald-500/50 bg-emerald-950/30 px-2.5 py-2 text-[10px] font-bold tracking-wider text-emerald-400 hover:border-emerald-400 hover:bg-emerald-950/50 transition-all cursor-pointer"
+              className="relative z-20 pointer-events-auto flex shrink-0 items-center gap-1.5 rounded-sm border border-emerald-500/50 bg-emerald-950/30 px-2.5 py-2 text-[10px] font-bold tracking-wider text-emerald-400 hover:border-emerald-400 hover:bg-emerald-950/50 transition-all cursor-pointer"
             >
               <Music2 className="h-3.5 w-3.5" />
               開発音源
