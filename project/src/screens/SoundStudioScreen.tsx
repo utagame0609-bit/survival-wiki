@@ -1,5 +1,5 @@
 import { ArrowLeft, Play, Volume2 } from 'lucide-react';
-import { playNewRecordSound } from '@/lib/sound';
+import { playNewRecordSound, playCursorMoveSound } from '@/lib/sound';
 import { SOUND_CANDIDATES, SoundCandidate } from '@/lib/soundCandidates';
 
 const categoryOrder = ['system', 'screen', 'action', 'wiki'] as const;
@@ -59,6 +59,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
 
 function SoundCandidateCard({ sound }: { sound: SoundCandidate }) {
   const isNewRecord = sound.id === 'new_record';
+  const isCursorMove = sound.id === 'cursor_move';
 
   return (
     <article className="rounded-sm border border-slate-800 bg-[#0d1627] p-4 shadow-[0_0_18px_rgba(0,0,0,0.18)]">
@@ -78,8 +79,12 @@ function SoundCandidateCard({ sound }: { sound: SoundCandidate }) {
 
       <p className="mt-3 text-[11px] leading-5 text-slate-500">{sound.keyCharacteristic}</p>
 
-      {isNewRecord && (
-        <button type="button" onClick={playNewRecordSound} className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-amber-500/70 bg-transparent px-3 py-2 text-xs font-bold text-amber-400 hover:bg-amber-500/10">
+      {(isNewRecord || isCursorMove) && (
+        <button
+          type="button"
+          onClick={isCursorMove ? playCursorMoveSound : playNewRecordSound}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-amber-500/70 bg-transparent px-3 py-2 text-xs font-bold text-amber-400 hover:bg-amber-500/10"
+        >
           <Play className="h-3.5 w-3.5 fill-current" /> 試聴
         </button>
       )}
