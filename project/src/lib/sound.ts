@@ -249,6 +249,36 @@ function playModalSound(): void {
   osc.stop(now + 0.13);
 }
 
+function playNewRecord(audioCtx: AudioContext): void {
+  const now = audioCtx.currentTime;
+  const notes = [1318.51, 1760.0, 2637.02];
+
+  notes.forEach((freq, idx) => {
+    const noteTime = now + idx * 0.03;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, noteTime);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(freq * 1.2, noteTime);
+    filter.Q.setValueAtTime(3.5, noteTime);
+
+    gain.gain.setValueAtTime(0.001, noteTime);
+    gain.gain.linearRampToValueAtTime(0.24, noteTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12));
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(noteTime);
+    osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
+  });
+}
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
   if (sound === 'error') {
@@ -305,6 +335,35 @@ export const playSaveSound = () => playSound('save');
 export const playDeleteSound = () => playSound('delete');
 export const playToggleSound = () => playSound('toggle');
 export const playErrorSound = () => playSound('error');
+export const playNewRecordSound = () => {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return;
+  if (context.state === 'suspended') void context.resume();
+  const now = context.currentTime;
+  const notes = [1318.51, 1760.0, 2637.02];
+
+  notes.forEach((freq, idx) => {
+    const noteTime = now + idx * 0.03;
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+    const filter = context.createBiquadFilter();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, noteTime);
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(freq * 1.2, noteTime);
+    filter.Q.setValueAtTime(3.5, noteTime);
+    gain.gain.setValueAtTime(0.001, noteTime);
+    gain.gain.linearRampToValueAtTime(0.24, noteTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12));
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    osc.start(noteTime);
+    osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
+  });
+};
 
 export const playChestOpenSound = () => {
   const context = getAudioContext();
