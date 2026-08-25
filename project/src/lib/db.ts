@@ -167,9 +167,14 @@ export async function deleteLocation(id: string): Promise<void> {
 // ---- Photos ----
 
 const MAX_IMAGE_SIZE = 1280;
+const MEMBER_PHOTO_MAX_SIZE = 256;
 const WEBP_QUALITY = 0.82;
 
 async function resizeAndConvertToWebP(file: File): Promise<Blob> {
+  return resizeAndConvertToWebPWithMaxSize(file, MAX_IMAGE_SIZE);
+}
+
+async function resizeAndConvertToWebPWithMaxSize(file: File, maxImageSize: number): Promise<Blob> {
   if (!file.type.startsWith('image/')) throw new Error('画像ファイルを選択してください');
   const objectUrl = URL.createObjectURL(file);
   try {
@@ -179,7 +184,7 @@ async function resizeAndConvertToWebP(file: File): Promise<Blob> {
       img.onerror = () => reject(new Error('画像を読み込めませんでした'));
       img.src = objectUrl;
     });
-    const scale = Math.min(1, MAX_IMAGE_SIZE / Math.max(image.naturalWidth, image.naturalHeight));
+    const scale = Math.min(1, maxImageSize / Math.max(image.naturalWidth, image.naturalHeight));
     const width = Math.max(1, Math.round(image.naturalWidth * scale));
     const height = Math.max(1, Math.round(image.naturalHeight * scale));
     const canvas = document.createElement('canvas');
@@ -214,6 +219,23 @@ export async function uploadPhoto(locationId: string, file: File, isMain: boolea
     throw error;
   }
   return data as LocationPhoto;
+}
+
+export async function uploadWorldMemberPhoto(memberId: string, file: File): Promise<string> {
+  const imageBlob = await resizeAndConvertToWebPWithMaxSize(file, MEMBER_PHOTO_MAX_SIZE);
+  const result = await uploadR2Photo(memberId, imageBlob);
+  if (!result.storagePath) throw new Error('R2保存先が取得できませんでした');
+  return result.storagePath;
+}
+
+export async function deleteWorldMemberPhoto(storagePath: string): Promise<void> {
+  if (!isR2StoragePath(storagePath)) {
+    const { error } = await supabase.storage.from(PHOTOS_BUCKET).remove([storagePath]);
+    if (error) throw error;
+    return;
+  }
+  const result = await deleteR2Photo(storagePath);
+  if (!result.deleted) throw new Error(result.error ?? 'R2写真の削除に失敗しました');
 }
 
 export async function deletePhoto(photoId: string, storagePath: string): Promise<void> {
