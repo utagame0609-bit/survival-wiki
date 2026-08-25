@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X, Camera } from 'lucide-react';
 import { createWorld, fetchWorld, saveWorldMemberPhoto, saveWorldPlayerPhoto } from '@/lib/db';
-import { playCloseSound, playModalCloseSound, playAddSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playNewRecordSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 
 type MemberDraft = { name: string; photo: File | null };
@@ -52,7 +52,7 @@ export function WorldCreateModal({
         }
       }
 
-      playAddSound();
+      playNewRecordSound();
       onCreated();
       onClose();
     } catch (e) {
@@ -128,7 +128,7 @@ export function WorldCreateModal({
       <style>{`
         .modal-input { width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.25rem; border: 1px solid #334155; background: #090d16; color: #f1f5f9; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
         .modal-input::placeholder { color: #64748b; }
-        .modal-input:focus { border-color: #38bdf8; background: #0d1627; box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56, 189, 242, 0.15); }
+        .modal-input:focus { border-color: #38bdf8; background: #0d1627; box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.15); }
         .world-create-modal-panel { animation: world-create-modal-in 180ms cubic-bezier(.22,.8,.35,1) both; transform-origin: center; }
         @keyframes world-create-modal-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @media (prefers-reduced-motion: reduce) { .world-create-modal-panel { animation: none; } }
