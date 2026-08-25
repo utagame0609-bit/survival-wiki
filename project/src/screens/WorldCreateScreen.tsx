@@ -91,6 +91,15 @@ export function WorldCreateScreen({
     try {
       const memberNames = members.map((m) => m.name.trim()).filter(Boolean);
       const oldPlayerPath = playerExistingPath;
+      const existingMemberBlobs = new Map<string, Blob>();
+      if (isEdit) {
+        const existingMembers = members.filter((member) => member.name.trim() && member.existingPath && !member.file);
+        for (const member of existingMembers) {
+          if (member.existingPath) {
+            existingMemberBlobs.set(member.existingPath, await fetchPhotoBlob(member.existingPath));
+          }
+        }
+      }
       let savedWorldId = worldId;
 
       if (isEdit && worldId) {
@@ -121,7 +130,8 @@ export function WorldCreateScreen({
         if (memberState.file) {
           await saveWorldMemberPhoto(savedMember.id, memberState.file);
         } else if (memberState.existingPath) {
-          const blob = await fetchPhotoBlob(memberState.existingPath);
+          const blob = existingMemberBlobs.get(memberState.existingPath);
+          if (!blob) throw new Error('既存メンバー写真を保持できませんでした');
           await saveWorldMemberPhoto(savedMember.id, new File([blob], 'member.webp', { type: 'image/webp' }));
           oldPathsToDelete.push(memberState.existingPath);
         }
