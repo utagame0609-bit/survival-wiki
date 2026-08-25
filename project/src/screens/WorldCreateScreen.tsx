@@ -3,7 +3,7 @@ import { Camera, X, Plus } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playSaveSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playSaveSound } from '@/lib/sound';
 
 type MemberPhotoState = {
   name: string;
@@ -74,7 +74,7 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) { playCloseSound(); navigate({ name: 'worldList', gameId, gameName }); }
+      if (event.target === event.currentTarget) { playModalCloseSound(); navigate({ name: 'worldList', gameId, gameName }); }
     }}>
       <div className="world-edit-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-md bg-slate-950 border border-amber-500/70 shadow-[0_0_24px_rgba(245,158,11,0.12),0_20px_50px_rgba(0,0,0,0.55)]">
         <div className="flex items-center px-5 py-4 border-b border-slate-800"><div className="flex items-center gap-3"><span className="font-mono text-[10px] px-2 py-1 border border-amber-500/50 bg-amber-500/10 text-amber-400 rounded">WORLD CONFIG</span><h2 className="text-lg font-bold text-slate-100">{isEdit ? 'ワールドを編集' : 'ワールドを追加'}</h2></div></div>
