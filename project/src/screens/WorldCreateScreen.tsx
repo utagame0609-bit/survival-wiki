@@ -3,7 +3,7 @@ import { Camera, X, Plus } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playSaveSound } from '@/lib/sound';
+import { playModalOpenSound, playModalCloseSound, playSaveSound } from '@/lib/sound';
 
 type MemberPhotoState = {
   name: string;
@@ -36,6 +36,10 @@ export function WorldCreateScreen({
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    playModalOpenSound();
+  }, []);
 
   useEffect(() => {
     if (!worldId) return;
@@ -162,7 +166,7 @@ export function WorldCreateScreen({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
-          playCloseSound();
+          playModalCloseSound();
           goBack();
         }
       }}
@@ -173,7 +177,7 @@ export function WorldCreateScreen({
             <span className="font-mono text-[10px] px-2 py-1 border border-amber-500/50 bg-amber-500/10 text-amber-400 rounded">WORLD CONFIG</span>
             <h2 className="text-lg font-bold text-slate-100">{isEdit ? 'ワールドを編集' : 'ワールドを追加'}</h2>
           </div>
-          <button type="button" onClick={() => { playCloseSound(); goBack(); }} aria-label="閉じる" className="w-9 h-9 border border-slate-700 bg-slate-900 text-slate-400 hover:border-amber-500 hover:text-amber-400 flex items-center justify-center transition-all"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={() => { playModalCloseSound(); goBack(); }} aria-label="閉じる" className="w-9 h-9 border border-slate-700 bg-slate-900 text-slate-400 hover:border-amber-500 hover:text-amber-400 flex items-center justify-center transition-all"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-5 space-y-4">
@@ -212,7 +216,7 @@ export function WorldCreateScreen({
         </div>
 
         <div className="flex gap-2 px-5 py-4 border-t border-slate-800 bg-slate-950">
-          <button type="button" onClick={() => { playCloseSound(); goBack(); }} disabled={saving} className="flex-1 py-2.5 border border-slate-700 bg-slate-900 text-slate-300 font-medium hover:border-sky-500/60 hover:text-sky-400 disabled:opacity-50 transition-all">キャンセル</button>
+          <button type="button" onClick={() => { playModalCloseSound(); goBack(); }} disabled={saving} className="flex-1 py-2.5 border border-slate-700 bg-slate-900 text-slate-300 font-medium hover:border-sky-500/60 hover:text-sky-400 disabled:opacity-50 transition-all">キャンセル</button>
           <button type="button" onClick={handleSave} disabled={saving} className="flex-1 py-2.5 bg-amber-500 text-black font-bold shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-[0.98] disabled:opacity-50 transition-all">▶ {saving ? '保存中...' : isEdit ? '更新する' : '追加する'}</button>
         </div>
       </div>
