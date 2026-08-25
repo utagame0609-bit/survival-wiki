@@ -168,12 +168,11 @@ export function WorldCreateScreen({
       }}
     >
       <div className="world-edit-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-md bg-slate-950 border border-amber-500/70 shadow-[0_0_24px_rgba(245,158,11,0.12),0_20px_50px_rgba(0,0,0,0.55)]">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+        <div className="flex items-center px-5 py-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <span className="font-mono text-[10px] px-2 py-1 border border-amber-500/50 bg-amber-500/10 text-amber-400 rounded">WORLD CONFIG</span>
             <h2 className="text-lg font-bold text-slate-100">{isEdit ? 'ワールドを編集' : 'ワールドを追加'}</h2>
           </div>
-          <button type="button" onClick={() => { playCloseSound(); goBack(); }} aria-label="閉じる" className="w-9 h-9 border border-slate-700 bg-slate-900 text-slate-400 hover:border-amber-500 hover:text-amber-400 flex items-center justify-center transition-all"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-5 space-y-4">
@@ -218,7 +217,7 @@ export function WorldCreateScreen({
       </div>
 
       <style>{`
-        .modal-input { width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.25rem; border: 1px solid rgb(51 65 85); background: #090d16; color: rgb(226 232 240); outline: none; font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, monospace; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+        .modal-input { width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.25rem; border: 1px solid rgb(51 65 85); background: #090d16; color: rgb(226 232 240); outline: none; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
         .modal-input::placeholder { color: rgb(71 85 105); }
         .modal-input:focus { border-color: rgb(14 165 233); box-shadow: 0 0 0 1px rgb(14 165 233), 0 0 12px rgba(14,165,233,0.12); }
         .world-edit-modal-panel { animation: world-edit-modal-in 180ms cubic-bezier(.22,.8,.35,1) both; transform-origin: center; }
