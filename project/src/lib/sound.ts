@@ -273,13 +273,12 @@ function playNewRecord(audioCtx: AudioContext): void {
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(audioCtx.destination);
-
     osc.start(noteTime);
     osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
   });
 }
 
-function playCursorMoveSound(): void {
+function playCursorMoveSoundDirect(): void {
   const context = getAudioContext();
   if (!context || !masterGain || !enabled) return;
   if (context.state === 'suspended') void context.resume();
@@ -386,7 +385,6 @@ export const playNewRecordSound = () => {
     const osc = context.createOscillator();
     const gain = context.createGain();
     const filter = context.createBiquadFilter();
-
     osc.type = 'square';
     osc.frequency.setValueAtTime(freq, noteTime);
     filter.type = 'bandpass';
@@ -395,7 +393,6 @@ export const playNewRecordSound = () => {
     gain.gain.setValueAtTime(0.001, noteTime);
     gain.gain.linearRampToValueAtTime(0.24, noteTime + 0.005);
     gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12));
-
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(masterGain);
@@ -444,4 +441,4 @@ export const playChestOpenSound = () => {
   noise.stop(now + 0.35);
 };
 
-export const playCursorMoveSound = () => playCursorMoveSound();
+export const playCursorMoveSound = () => playCursorMoveSoundDirect();
