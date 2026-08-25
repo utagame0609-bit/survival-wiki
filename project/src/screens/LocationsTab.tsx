@@ -176,7 +176,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
           {sortedLocations.length > 0 ? (
             <div className="space-y-3">
               {sortedLocations.map((loc, index) => (
-                <LocationCard key={loc.id} slotNumber={index + 1} loc={loc} onToggle={() => { playModalOpenSound(); setSelectedLocation(loc); }} />
+                <LocationCard key={loc.id} slotNumber={index + 1} loc={loc} onToggle={() => { playConfirmSound(); setSelectedLocation(loc); }} />
               ))}
             </div>
           ) : <EmptyState message="該当するロケーションが見つかりません。" />}
