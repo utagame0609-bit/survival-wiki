@@ -13,6 +13,7 @@ export type World = {
   game_id: string;
   name: string;
   player: string | null;
+  player_photo_path: string | null;
   memo: string | null;
   created_at: string;
   updated_at: string;
