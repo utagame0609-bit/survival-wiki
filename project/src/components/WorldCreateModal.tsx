@@ -73,7 +73,7 @@ export function WorldCreateModal({
       }}
     >
       <div className="world-create-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-sm bg-[#0a1120] border-2 border-amber-500/80 shadow-[0_0_35px_rgba(245,158,11,0.25)] text-slate-100">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-[#0d1627]">
+        <div className="flex items-center px-5 py-4 border-b border-slate-800 bg-[#0d1627]">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-sm bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-xs shadow-[0_0_10px_rgba(245,158,11,0.4)]">W</div>
             <div>
@@ -81,7 +81,6 @@ export function WorldCreateModal({
               <h2 className="text-sm sm:text-base font-bold text-amber-400 uppercase tracking-wider">新規ワールド作成</h2>
             </div>
           </div>
-          <button type="button" onClick={() => { playCloseSound(); onClose(); }} aria-label="閉じる" className="w-8 h-8 rounded-sm text-slate-400 hover:text-amber-400 hover:bg-[#1a2333] flex items-center justify-center transition-colors border border-transparent hover:border-slate-700 cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-5 space-y-4">
