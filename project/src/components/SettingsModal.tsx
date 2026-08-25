@@ -1,4 +1,4 @@
-import { Download, Settings, Volume2, VolumeX, X, Sliders } from 'lucide-react';
+import { Download, Settings, Volume2, VolumeX, X, Sliders, Music2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
   getSoundVolume,
@@ -93,7 +93,7 @@ export function SettingsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
       <div className="relative z-10 w-full max-w-md overflow-hidden rounded-sm border-2 border-amber-500/70 bg-[#0a1120] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.8),0_0_24px_rgba(245,158,11,0.15)]">
-        <div className="flex items-center border-b border-slate-800 bg-[#0d1627] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4">
           <div>
             <p className="text-[11px] font-extrabold tracking-widest text-emerald-400 uppercase font-mono flex items-center gap-1.5">
               <Sliders className="w-3.5 h-3.5 text-emerald-400" />
@@ -101,6 +101,18 @@ export function SettingsModal({
             </p>
             <h2 className="mt-0.5 text-base font-bold text-amber-400">システム環境設定</h2>
           </div>
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              disabled
+              aria-label="開発音源"
+              title="開発音源画面は次工程で接続します"
+              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-emerald-500/50 bg-emerald-950/30 px-2.5 py-2 text-[10px] font-bold tracking-wider text-emerald-400/80 cursor-default"
+            >
+              <Music2 className="h-3.5 w-3.5" />
+              開発音源
+            </button>
+          )}
         </div>
 
         <div className="p-5">
