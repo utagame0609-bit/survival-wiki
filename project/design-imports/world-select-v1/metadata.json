@@ -1,6 +1,0 @@
-{
-  "name": "Retro World Save Selector",
-  "description": "昭和後期〜平成初期のレトロゲーム・FC/SFC風ワールドセーブデータ選択画面",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
