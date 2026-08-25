@@ -18,31 +18,51 @@ type ChestModalProps = {
 
 export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestModalProps) {
   return (
-    <div className="fixed inset-0 z-40 bg-[#11120f] text-stone-100 overflow-y-auto">
-      <div className="min-h-full px-4 py-4 max-w-3xl mx-auto">
-        <div className="flex items-center justify-between h-12 border-b border-[#2d3028] mb-5">
-          <div className="flex items-center gap-2">
-            <span className="relative block w-5 h-4 rounded-[2px] border border-amber-700/80 bg-gradient-to-b from-amber-700/90 to-amber-900/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.35)]" aria-hidden="true">
-              <span className="absolute left-[-1px] right-[-1px] top-[4px] h-[3px] border-y border-amber-500/60 bg-amber-800/90" />
-              <span className="absolute left-1/2 top-[5px] -translate-x-1/2 w-[3px] h-[4px] rounded-[1px] border border-amber-300/60 bg-amber-500/80" />
+    <div className="fixed inset-0 z-40 bg-black/85 backdrop-blur-md text-slate-100 overflow-y-auto font-mono flex items-center justify-center p-3 sm:p-6">
+      <div className="relative z-10 w-full max-w-4xl max-h-[calc(100vh-32px)] overflow-hidden rounded-sm bg-[#0a1120] border-2 border-amber-500/80 shadow-[0_0_35px_rgba(245,158,11,0.25)] flex flex-col">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-[#0d1627] flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="relative block w-5 h-4 rounded-[1px] border border-amber-500 bg-amber-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]" aria-hidden="true">
+              <span className="absolute left-[-1px] right-[-1px] top-[4px] h-[2px] bg-[#06090e]" />
+              <span className="absolute left-1/2 top-[5px] -translate-x-1/2 w-[2px] h-[3px] bg-amber-300" />
             </span>
-            <h2 className="text-sm font-semibold tracking-[0.14em] text-zinc-200">COLLECTION</h2>
+            <div>
+              <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">TACTICAL PHOTO ARCHIVE</p>
+              <h2 className="text-sm sm:text-base font-bold text-amber-400 uppercase tracking-wider">宝箱コレクション (CHEST LOG)</h2>
+            </div>
           </div>
-          <button type="button" onClick={onClose} aria-label="コレクションを閉じる" className="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:bg-[#292b24] hover:text-stone-100 active:scale-[0.96] transition-all"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label="コレクションを閉じる" className="w-8 h-8 flex items-center justify-center rounded-sm text-slate-400 hover:bg-[#1a2333] hover:text-amber-400 transition-colors border border-transparent hover:border-slate-700 cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
         </div>
-        {collectionItems.length === 0 ? (
-          <EmptyState message="まだ記録写真がありません。" />
-        ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
-            {collectionItems.map((item) => <CollectionSlot key={`${item.location.id}-${item.storagePath}`} item={item} onOpen={() => { playModalOpenSound(); onOpenLocation(item.location); }} />)}
-          </div>
-        )}
+
+        {/* Modal Body */}
+        <div className="overflow-y-auto overscroll-contain p-4 sm:p-6">
+          {collectionItems.length === 0 ? (
+            <EmptyState message="まだ記録写真がありません。" />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+              {collectionItems.map((item, idx) => (
+                <CollectionSlot key={`${item.location.id}-${item.storagePath}`} slotNumber={idx + 1} item={item} onOpen={() => { playModalOpenSound(); onOpenLocation(item.location); }} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="flex items-center justify-between px-5 py-3 border-t border-slate-800 bg-[#0d1627] flex-shrink-0 text-xs text-slate-400">
+          <span>TOTAL ARCHIVES: <strong className="text-emerald-400">{collectionItems.length}</strong></span>
+          <button type="button" onClick={onClose} className="px-4 py-1.5 rounded-sm bg-[#1a2333] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-bold text-xs uppercase cursor-pointer">
+            閉じる (CLOSE)
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function CollectionSlot({ item, onOpen }: { item: CollectionItem; onOpen: () => void }) {
+function CollectionSlot({ item, slotNumber, onOpen }: { item: CollectionItem; slotNumber: number; onOpen: () => void }) {
   const [src, setSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,12 +88,21 @@ function CollectionSlot({ item, onOpen }: { item: CollectionItem; onOpen: () => 
     };
   }, [item.storagePath]);
 
-  return <button type="button" onClick={onOpen} className="group aspect-square rounded-md border border-zinc-700/90 bg-[#1b1c18] p-1.5 sm:p-2 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02),inset_0_0_14px_rgba(0,0,0,0.45)] hover:border-emerald-700/70 hover:bg-[#20221d] active:scale-[0.98] transition-all">
-    <div className="relative w-full h-full overflow-hidden rounded-sm bg-zinc-950 border border-zinc-800/90">
-      {src ? <img src={src} alt={item.location.name} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.03]" /> : <div className="w-full h-full bg-zinc-900" aria-hidden="true" />}
-      <div className="absolute inset-x-0 bottom-0 px-1.5 py-1 bg-gradient-to-t from-black/80 via-black/45 to-transparent pt-4">
-        <div className="text-[10px] sm:text-[11px] text-zinc-200 truncate">{item.location.name}</div>
+  return (
+    <button type="button" onClick={onOpen} className="group relative aspect-square rounded-sm border border-slate-800 bg-[#090d16] p-1 text-left shadow-md hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] active:scale-[0.98] transition-all cursor-pointer overflow-hidden flex flex-col">
+      <div className="relative w-full h-full overflow-hidden rounded-sm bg-[#050a14] border border-slate-800">
+        {src ? (
+          <img src={src} alt={item.location.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+        ) : (
+          <div className="w-full h-full bg-[#050a14]" aria-hidden="true" />
+        )}
+        <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-sm bg-[#06090e]/90 border border-slate-700 text-[9px] font-mono text-amber-400 font-bold">
+          SLOT {String(slotNumber).padStart(2, '0')}
+        </span>
+        <div className="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-gradient-to-t from-[#06090e] via-[#06090e]/80 to-transparent pt-4">
+          <div className="text-[11px] font-bold text-slate-200 group-hover:text-amber-400 truncate">{item.location.name}</div>
+        </div>
       </div>
-    </div>
-  </button>;
+    </button>
+  );
 }
