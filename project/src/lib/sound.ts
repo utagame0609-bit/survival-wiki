@@ -1,3 +1,5 @@
+import { createSwitchStyleReverb, type SoundReverb } from './soundReverb';
+
 export type SoundType =
   | 'confirm'
   | 'cancel'
@@ -48,6 +50,7 @@ const DEFAULT_SOUND_VOLUME = 50;
 
 let audioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
+let soundReverb: SoundReverb | null = null;
 let enabled = true;
 let soundVolume = DEFAULT_SOUND_VOLUME;
 
@@ -76,7 +79,9 @@ function getAudioContext(): AudioContext | null {
     audioContext = new AudioContextClass();
     masterGain = audioContext.createGain();
     masterGain.gain.setValueAtTime(getMasterGainValue(), audioContext.currentTime);
-    masterGain.connect(audioContext.destination);
+    soundReverb = createSwitchStyleReverb(audioContext);
+    masterGain.connect(soundReverb.input);
+    soundReverb.output.connect(audioContext.destination);
   }
   return audioContext;
 }
@@ -272,7 +277,7 @@ function playNewRecord(audioCtx: AudioContext): void {
 
     osc.connect(filter);
     filter.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(masterGain);
     osc.start(noteTime);
     osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
   });
