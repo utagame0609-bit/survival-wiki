@@ -145,7 +145,7 @@ function PhotoPicker({ file, onChange, label }: { file: File | null; onChange: (
   };
 
   return (
-    <label className="relative h-11 w-14 shrink-0 cursor-pointer overflow-hidden rounded-[2px] border border-emerald-700/60 bg-zinc-950/80 flex items-center justify-center text-emerald-700 hover:border-emerald-400/70 hover:text-emerald-300 transition-colors" title={label}>
+    <label className="relative h-11 w-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-emerald-700/60 bg-zinc-950/80 flex items-center justify-center text-emerald-700 hover:border-emerald-400/70 hover:text-emerald-300 transition-colors" title={label}>
       {preview ? <img src={preview} alt="" className="h-full w-full object-cover" /> : <Camera className="h-5 w-5" />}
       <input type="file" accept="image/*" className="sr-only" onChange={(event) => handleChange(event.target.files?.[0] ?? null)} />
     </label>
