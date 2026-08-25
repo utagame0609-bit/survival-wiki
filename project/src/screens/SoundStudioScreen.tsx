@@ -2,7 +2,7 @@ import { ArrowLeft, Play, Volume2, Waves } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { playNewRecordSound, playCursorMoveSound } from '@/lib/sound';
 import { playSoundCandidatePreview } from '@/lib/soundCandidatePreviewEngine';
-import { getStoredReverbAmount, setStoredReverbAmount, subscribeReverbAmount } from '@/lib/soundReverb';
+import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { SOUND_CANDIDATES, SoundCandidate } from '@/lib/soundCandidates';
 
 const categoryOrder = ['system', 'screen', 'action', 'wiki'] as const;
@@ -10,7 +10,7 @@ const categoryOrder = ['system', 'screen', 'action', 'wiki'] as const;
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [reverbAmount, setReverbAmount] = useState(Math.round(getStoredReverbAmount() * 100));
 
-  useEffect(() => subscribeReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
+  useEffect(() => subscribeToReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
 
   const handleReverbChange = (value: number) => {
     setStoredReverbAmount(value / 100);
