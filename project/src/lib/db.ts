@@ -211,11 +211,7 @@ export async function uploadPhoto(locationId: string, file: File, isMain: boolea
   if (!result.storagePath) throw new Error('R2保存先が取得できませんでした');
   const { data, error } = await supabase.from('location_photos').insert({ location_id: locationId, storage_path: result.storagePath, is_main: isMain, sort_order: 0 }).select().single();
   if (error) {
-    try {
-      await deleteR2Photo(result.storagePath);
-    } catch {
-      // Keep the database error as the primary failure.
-    }
+    try { await deleteR2Photo(result.storagePath); } catch { /* Keep the database error as the primary failure. */ }
     throw error;
   }
   return data as LocationPhoto;
@@ -226,6 +222,45 @@ export async function uploadWorldMemberPhoto(memberId: string, file: File): Prom
   const result = await uploadR2Photo(memberId, imageBlob);
   if (!result.storagePath) throw new Error('R2保存先が取得できませんでした');
   return result.storagePath;
+}
+
+export async function saveWorldMemberPhoto(memberId: string, file: File): Promise<string> {
+  const storagePath = await uploadWorldMemberPhoto(memberId, file);
+  const { data: current, error: currentError } = await supabase.from('world_members').select('photo_path').eq('id', memberId).maybeSingle();
+  if (currentError) {
+    await deleteWorldMemberPhoto(storagePath).catch(() => undefined);
+    throw currentError;
+  }
+  const { error } = await supabase.from('world_members').update({ photo_path: storagePath }).eq('id', memberId);
+  if (error) {
+    await deleteWorldMemberPhoto(storagePath).catch(() => undefined);
+    throw error;
+  }
+  if (current?.photo_path && current.photo_path !== storagePath) await deleteWorldMemberPhoto(current.photo_path).catch(() => undefined);
+  return storagePath;
+}
+
+export async function uploadWorldPlayerPhoto(worldId: string, file: File): Promise<string> {
+  const imageBlob = await resizeAndConvertToWebPWithMaxSize(file, MEMBER_PHOTO_MAX_SIZE);
+  const result = await uploadR2Photo(worldId, imageBlob);
+  if (!result.storagePath) throw new Error('R2保存先が取得できませんでした');
+  return result.storagePath;
+}
+
+export async function saveWorldPlayerPhoto(worldId: string, file: File): Promise<string> {
+  const storagePath = await uploadWorldPlayerPhoto(worldId, file);
+  const { data: current, error: currentError } = await supabase.from('worlds').select('player_photo_path').eq('id', worldId).maybeSingle();
+  if (currentError) {
+    await deleteWorldMemberPhoto(storagePath).catch(() => undefined);
+    throw currentError;
+  }
+  const { error } = await supabase.from('worlds').update({ player_photo_path: storagePath }).eq('id', worldId);
+  if (error) {
+    await deleteWorldMemberPhoto(storagePath).catch(() => undefined);
+    throw error;
+  }
+  if (current?.player_photo_path && current.player_photo_path !== storagePath) await deleteWorldMemberPhoto(current.player_photo_path).catch(() => undefined);
+  return storagePath;
 }
 
 export async function deleteWorldMemberPhoto(storagePath: string): Promise<void> {
