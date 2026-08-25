@@ -85,6 +85,7 @@ export function WorldCreateModal({
               <h2 className="text-sm sm:text-base font-bold text-amber-400 uppercase tracking-wider">新規ワールド作成</h2>
             </div>
           </div>
+        </div>
 
         <div className="p-5 space-y-4">
           {error && <ErrorBanner message={error} />}
