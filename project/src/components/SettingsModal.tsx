@@ -4,6 +4,7 @@ import {
   getSoundVolume,
   isSoundEnabled,
   playCancelSound,
+  playConfirmSound,
   playModalCloseSound,
   playModalOpenSound,
   playToggleSound,
@@ -27,11 +28,11 @@ export function SettingsButton() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallPrompt', handleBeforeInstallPrompt);
   }, []);
 
   const openSettings = () => {
-    playModalOpenSound();
+    playConfirmSound();
     setSettingsOpen(true);
   };
 
