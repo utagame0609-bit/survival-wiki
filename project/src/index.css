@@ -151,3 +151,13 @@ section.relative.scroll-mt-24 > div.relative.pb-2 { animation: timeline-card-rev
 .fixed.inset-0.z-50 > div.relative.z-10.w-full.max-w-2xl > div:first-child h2::before {
   display: none;
 }
+
+/* Timeline memo: keep long text inside the record card and scroll only the memo area. */
+section.relative.scroll-mt-24 article p.whitespace-pre-wrap.break-words {
+  max-height: 9rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+}
