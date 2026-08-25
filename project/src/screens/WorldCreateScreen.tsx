@@ -158,7 +158,15 @@ export function WorldCreateScreen({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          playCloseSound();
+          goBack();
+        }
+      }}
+    >
       <div className="world-edit-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-md bg-slate-950 border border-amber-500/70 shadow-[0_0_24px_rgba(245,158,11,0.12),0_20px_50px_rgba(0,0,0,0.55)]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
