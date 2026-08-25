@@ -99,6 +99,17 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
         .save-slot-card { border: 2px solid rgba(167,243,208,.48); box-shadow: inset 0 0 0 2px rgba(16,185,129,.08), inset 0 0 28px rgba(16,185,129,.045), 0 0 20px rgba(16,185,129,.08); border-radius: 4px; }
         .save-slot-card::after { content: ""; position: absolute; inset: 4px; pointer-events: none; border: 1px solid rgba(167,243,208,.14); border-radius: 2px; }
         .save-slot-load { min-height: 44px; border: 2px solid rgba(167,243,208,.45); border-radius: 3px; background: linear-gradient(180deg, rgba(16,185,129,.22), rgba(6,78,59,.42)); box-shadow: inset 0 0 0 2px rgba(16,185,129,.08), 0 0 14px rgba(16,185,129,.08); }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] { border: 4px double #ef4444 !important; box-shadow: 0 0 0 2px #0a1120, 0 0 0 4px #ef4444, 0 0 24px rgba(239,68,68,.2) !important; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > .pixel-font { display: none; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > h2 { margin-top: .5rem; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > div.mt-3 { margin-top: .75rem; border-color: transparent; background: transparent; padding: 0; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > div.mt-3 p { color: #fbbf24; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > p.mt-3 { margin-top: .75rem; text-align: center; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 { margin-top: 1.25rem; border-top: 0; padding-top: 0; gap: .75rem; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:first-child { background: #1a2333; color: #e2e8f0; box-shadow: none; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:first-child:hover { background: #202b3e; }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:last-child { background: #b91c1c; color: #fff; border: 2px solid #ef4444; box-shadow: 0 0 14px rgba(239,68,68,.18); }
+        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:last-child:hover { background: #dc2626; }
       `}</style>
     </div>
   );
