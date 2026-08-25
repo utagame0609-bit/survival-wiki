@@ -39,7 +39,7 @@ const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   save: { frequency: 783.99, duration: 0.11, volume: 0.12, type: 'sine', secondFrequency: 1046.5, secondDelay: 0.06 },
   delete: { frequency: 440, endFrequency: 65, duration: 0.28, volume: 0.16, type: 'sawtooth', noise: true },
   toggle: { frequency: 900, endFrequency: 300, duration: 0.02, volume: 0.08, type: 'square' },
-  error: { frequency: 180, endFrequency: 110, duration: 0.15, volume: 0.15, type: 'sawtooth' },
+  error: { frequency: 220, endFrequency: 65, duration: 0.24, volume: 0.18, type: 'sawtooth', noise: true },
 };
 
 const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
