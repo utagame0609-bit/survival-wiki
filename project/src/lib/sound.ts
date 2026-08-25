@@ -37,7 +37,7 @@ const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   modalClose: { frequency: 659.25, duration: 0.1, volume: 0.1, type: 'sine', secondFrequency: 440, secondDelay: 0.04 },
   add: { frequency: 587.33, duration: 0.18, volume: 0.15, type: 'sine', secondFrequency: 880, secondDelay: 0.07 },
   save: { frequency: 783.99, duration: 0.11, volume: 0.12, type: 'sine', secondFrequency: 1046.5, secondDelay: 0.06 },
-  delete: { frequency: 220, endFrequency: 110, duration: 0.12, volume: 0.15, type: 'triangle' },
+  delete: { frequency: 440, endFrequency: 65, duration: 0.28, volume: 0.16, type: 'sawtooth', noise: true },
   toggle: { frequency: 900, endFrequency: 300, duration: 0.02, volume: 0.08, type: 'square' },
   error: { frequency: 180, endFrequency: 110, duration: 0.15, volume: 0.15, type: 'sawtooth' },
 };
