@@ -1,0 +1,6 @@
+{
+  "name": "冒険の書 - クエスト日記・旅の書",
+  "description": "16bitレトロRPGの冒険の書スタイルでワールドのロケーション、タイムライン、Wiki（旅の書）を記録・閲覧するクエスト日記システム",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
