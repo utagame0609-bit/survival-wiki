@@ -124,28 +124,13 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
-      <button
-        aria-label="設定を閉じる"
-        className="absolute inset-0"
-        onClick={() => {
-          playModalCloseSound();
-          onClose();
-        }}
-      />
+      <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
 
       <div className="relative z-10 w-full max-w-md overflow-hidden rounded-sm border-2 border-amber-500/70 bg-[#0a1120] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.8),0_0_24px_rgba(245,158,11,0.15)]">
         <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4">
           <div className="flex items-center gap-3">
             {soundDetailOpen && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSoundDetailOpen(false);
-                  playCancelSound();
-                }}
-                aria-label="音声設定に戻る"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-slate-700 bg-[#0a1120] text-slate-400 hover:border-slate-500 hover:text-slate-100 transition-all cursor-pointer"
-              >
+              <button type="button" onClick={() => { setSoundDetailOpen(false); playCancelSound(); }} aria-label="音声設定に戻る" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-slate-700 bg-[#0a1120] text-slate-400 hover:border-slate-500 hover:text-slate-100 transition-all cursor-pointer">
                 <ArrowLeft className="h-4 w-4" />
               </button>
             )}
@@ -157,20 +142,6 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
               <h2 className="mt-0.5 text-base font-bold text-amber-400">{soundDetailOpen ? '音声詳細設定' : 'システム環境設定'}</h2>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setSoundStudioOpen(true);
-              playConfirmSound();
-            }}
-            aria-label="サウンド開発コンソール"
-            title="サウンド開発コンソール"
-            className="relative z-20 pointer-events-auto flex shrink-0 items-center gap-1.5 rounded-sm border border-cyan-500/60 bg-cyan-950/20 px-2.5 py-2 text-[10px] font-bold tracking-wider text-cyan-300 hover:border-cyan-400 hover:bg-cyan-950/40 transition-all cursor-pointer"
-          >
-            <Music2 className="h-3.5 w-3.5" />
-            開発音源
-          </button>
         </div>
 
         <div className="max-h-[75vh] overflow-y-auto p-5">
