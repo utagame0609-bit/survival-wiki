@@ -5,7 +5,7 @@ import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhot
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
-import { playRecordSelectSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playDangerConfirmSound, playChestOpenSound } from '@/lib/sound';
+import { playConfirmSound, playRecordSelectSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playDangerConfirmSound, playChestOpenSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -104,7 +104,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   };
 
   const openCreateModal = () => {
-    playRecordSelectSound();
+    playConfirmSound();
     setMode({ type: 'create' });
   };
 
