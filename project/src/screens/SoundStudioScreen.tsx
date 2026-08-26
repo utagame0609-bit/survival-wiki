@@ -43,7 +43,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#161922] text-[#f0f0f0] font-sans flex flex-col select-none overflow-x-hidden">
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#161922] text-[#f0f0f0] font-sans flex flex-col select-none overflow-x-hidden">
       <div className="scanline-overlay" />
       <Header title="SOUND STUDIO // 16BIT 音響研究所" onBack={onBack} />
 
