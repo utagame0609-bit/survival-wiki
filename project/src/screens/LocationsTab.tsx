@@ -5,7 +5,7 @@ import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhot
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
-import { playConfirmSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playErrorSound, playChestOpenSound } from '@/lib/sound';
+import { playRecordSelectSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playDangerConfirmSound, playChestOpenSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -85,7 +85,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   };
 
   const handleDelete = (loc: LocationWithPhotos) => {
-    playErrorSound();
+    playDangerConfirmSound();
     setDeleteTarget(loc);
   };
 
@@ -104,7 +104,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
   };
 
   const openCreateModal = () => {
-    playConfirmSound();
+    playRecordSelectSound();
     setMode({ type: 'create' });
   };
 
@@ -220,7 +220,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
           {sortedLocations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {sortedLocations.map((loc, index) => (
-                <LocationCard key={loc.id} index={index + 1} location={loc} onSelect={() => { playConfirmSound(); setSelectedLocation(loc); }} />
+                <LocationCard key={loc.id} index={index + 1} location={loc} onSelect={() => { playRecordSelectSound(); setSelectedLocation(loc); }} />
               ))}
             </div>
           ) : (
