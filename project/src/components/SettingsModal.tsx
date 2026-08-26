@@ -124,7 +124,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={handleClose} />
 
       <div className="relative z-10 flex w-full max-w-md flex-col overflow-hidden rounded-sm border-2 border-amber-500/70 bg-[#0a1120] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.8),0_0_24px_rgba(245,158,11,0.15)]">
-        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-3.5">
           <div>
             <p className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-emerald-400">
               <span>⌁</span>
@@ -142,8 +142,8 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           </button>
         </div>
 
-        <div className="max-h-[75vh] space-y-4 overflow-y-auto p-5">
-          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
+        <div className="max-h-[75vh] space-y-3 overflow-y-auto p-4">
+          <section className="border border-slate-800 bg-[#090d16] p-3 space-y-1.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-cyan-400">
                 <Music2 className="h-4 w-4" />
@@ -161,16 +161,16 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
               onChange={(event) => handleMasterBgmVolumeChange(Number(event.target.value))}
               className="w-full cursor-pointer accent-cyan-400"
             />
-            <p className="text-[10px] text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
+            <p className="text-[10px] leading-4 text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
           </section>
 
-          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
+          <section className="border border-violet-500/30 bg-[#090d16] p-3 space-y-1.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 font-bold text-amber-400">
+              <div className="flex items-center gap-2 font-bold text-violet-400">
                 <Waves className="h-4 w-4" />
                 <span>残響リバーブ効果 (REVERB)</span>
               </div>
-              <span className="font-bold text-amber-300">{reverbAmount}%</span>
+              <span className="font-bold text-violet-300">{reverbAmount}%</span>
             </div>
             <input
               id="se-reverb"
@@ -181,18 +181,30 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
               value={reverbAmount}
               onChange={(event) => handleReverbChange(Number(event.target.value))}
               disabled={!soundEnabled}
-              className="w-full cursor-pointer accent-amber-400 disabled:opacity-40"
+              className="w-full cursor-pointer accent-violet-400 disabled:opacity-40"
             />
-            <p className="text-[10px] text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
+            <p className="text-[10px] leading-4 text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
           </section>
 
-          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
+          <section className="border border-slate-800 bg-[#090d16] p-3 space-y-1.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-emerald-400">
                 {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                 <span>SE 効果音音量</span>
               </div>
-              <span className="w-10 text-right font-bold text-amber-400">{soundVolume}%</span>
+              <div className="flex items-center gap-2">
+                <span className="w-10 text-right font-bold text-amber-400">{soundVolume}%</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={soundEnabled}
+                  aria-label="SEのオンオフ"
+                  onClick={handleSoundToggle}
+                  className={`border px-2 py-0.5 text-[10px] font-bold ${soundEnabled ? 'border-slate-700 bg-[#0d1627] text-slate-300' : 'border-red-500 bg-red-950/40 text-red-400'}`}
+                >
+                  {soundEnabled ? 'ACTIVE' : 'MUTED'}
+                </button>
+              </div>
             </div>
             <input
               id="se-volume"
@@ -207,7 +219,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
             />
           </section>
 
-          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-3">
+          <section className="border border-slate-800 bg-[#090d16] p-3 space-y-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-cyan-400">
                 <Music2 className="h-4 w-4" />
@@ -217,7 +229,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
             </div>
             <div className="grid grid-cols-2 gap-2">
               {channelRows.map(({ key, label, detail }) => (
-                <div key={key} className="flex items-center justify-between gap-2 border border-slate-800 bg-[#050a14] px-3 py-2.5">
+                <div key={key} className="flex items-center justify-between gap-2 border border-slate-800 bg-[#050a14] px-3 py-2">
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold text-slate-300">{label}</p>
                     <p className="mt-0.5 truncate text-[9px] tracking-wider text-slate-600">{detail}</p>
@@ -235,7 +247,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
                 </div>
               ))}
             </div>
-            <p className="text-[10px] leading-relaxed text-slate-500">メロディ・アルペジオ・ベース・ドラムを個別にON/OFFできます。</p>
+            <p className="text-[10px] leading-4 text-slate-500">メロディ・アルペジオ・ベース・ドラムを個別にON/OFFできます。</p>
           </section>
 
           <button
@@ -247,7 +259,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
             <span className="text-center text-xs leading-5">サウンド開発コンソール (Sound Studio) を開く</span>
           </button>
 
-          <div className="border-t border-slate-800 pt-4">
+          <div className="border-t border-slate-800 pt-3">
             <button
               type="button"
               onClick={handleInstall}
@@ -256,10 +268,10 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
               <Download className="h-4 w-4 text-sky-400" />
               ホーム画面に追加 (PWA INSTALL)
             </button>
-            <p className="mt-2 text-center text-[11px] leading-5 text-slate-500">オフラインでも高速起動できるスタンドアロンHUDとして利用できます。</p>
+            <p className="mt-1.5 text-center text-[11px] leading-4 text-slate-500">オフラインでも高速起動できるスタンドアロンHUDとして利用できます。</p>
           </div>
 
-          <div className="border-t border-slate-800 pt-4">
+          <div className="border-t border-slate-800 pt-3">
             <button
               type="button"
               onClick={() => void handleLogout()}
@@ -268,7 +280,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
               <LogOut className="h-4 w-4 text-rose-400" />
               ログアウト (LOG OUT)
             </button>
-            <p className="mt-2 text-center text-[11px] leading-5 text-slate-500">現在のアカウントからログアウトします。</p>
+            <p className="mt-1.5 text-center text-[11px] leading-4 text-slate-500">現在のアカウントからログアウトします。</p>
           </div>
         </div>
 
