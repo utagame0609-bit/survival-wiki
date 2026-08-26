@@ -4,6 +4,7 @@ import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { saveUserSoundSettings } from '@/lib/userSoundSettings';
 import { getBgmChannelSettings, setBgmChannelEnabled, subscribeToBgmChannelSettings, type BgmChannelSettings } from '@/lib/bgmSettings';
+import { getMasterBgmVolume, setMasterBgmVolume } from '@/lib/bgm';
 import { supabase } from '@/lib/supabase';
 import { getSoundVolume, isSoundEnabled, playCancelSound, playConfirmSound, playModalCloseSound, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
 
@@ -46,6 +47,7 @@ export function SettingsButton() {
 export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: SettingsModalProps) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
+  const [masterBgmVolume, setMasterBgmVolumeState] = useState(Math.round(getMasterBgmVolume() * 100));
   const [reverbAmount, setReverbAmount] = useState(Math.round(getStoredReverbAmount() * 100));
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
   const [bgmChannels, setBgmChannels] = useState<BgmChannelSettings>(getBgmChannelSettings());
@@ -71,6 +73,11 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
       seVolume: normalized,
       seReverb: Math.round(getStoredReverbAmount() * 100),
     }).catch((error) => console.error('Failed to save SE volume:', error));
+  };
+
+  const handleMasterBgmVolumeChange = (value: number) => {
+    const normalized = setMasterBgmVolume(value / 100);
+    setMasterBgmVolumeState(Math.round(normalized * 100));
   };
 
   const handleReverbChange = (value: number) => {
@@ -138,23 +145,54 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
         <div className="max-h-[75vh] space-y-4 overflow-y-auto p-5">
           <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
             <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-cyan-400">
+                <Music2 className="h-4 w-4" />
+                <span>BGM MASTER</span>
+              </div>
+              <span className="w-10 text-right font-bold text-cyan-300">{masterBgmVolume}%</span>
+            </div>
+            <input
+              id="bgm-master-volume"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={masterBgmVolume}
+              onChange={(event) => handleMasterBgmVolumeChange(Number(event.target.value))}
+              className="w-full cursor-pointer accent-cyan-400"
+            />
+            <p className="text-[10px] text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
+          </section>
+
+          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-amber-400">
+                <Waves className="h-4 w-4" />
+                <span>残響リバーブ効果 (REVERB)</span>
+              </div>
+              <span className="font-bold text-amber-300">{reverbAmount}%</span>
+            </div>
+            <input
+              id="se-reverb"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={reverbAmount}
+              onChange={(event) => handleReverbChange(Number(event.target.value))}
+              disabled={!soundEnabled}
+              className="w-full cursor-pointer accent-amber-400 disabled:opacity-40"
+            />
+            <p className="text-[10px] text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
+          </section>
+
+          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-emerald-400">
                 {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                 <span>SE 効果音音量</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={soundEnabled}
-                  aria-label="SEのオンオフ"
-                  onClick={handleSoundToggle}
-                  className={`border px-2 py-0.5 text-[10px] font-bold ${soundEnabled ? 'border-slate-700 bg-[#0d1627] text-slate-300' : 'border-red-500 bg-red-950/40 text-red-400'}`}
-                >
-                  {soundEnabled ? 'ACTIVE' : 'MUTED'}
-                </button>
-                <span className="w-9 text-right font-bold text-amber-400">{soundVolume}%</span>
-              </div>
+              <span className="w-10 text-right font-bold text-amber-400">{soundVolume}%</span>
             </div>
             <input
               id="se-volume"
@@ -200,35 +238,13 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
             <p className="text-[10px] leading-relaxed text-slate-500">メロディ・アルペジオ・ベース・ドラムを個別にON/OFFできます。</p>
           </section>
 
-          <section className="border border-slate-800 bg-[#090d16] p-3.5 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 font-bold text-amber-400">
-                <Waves className="h-4 w-4" />
-                <span>残響リバーブ効果 (REVERB)</span>
-              </div>
-              <span className="font-bold text-amber-300">{reverbAmount}%</span>
-            </div>
-            <input
-              id="se-reverb"
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value={reverbAmount}
-              onChange={(event) => handleReverbChange(Number(event.target.value))}
-              disabled={!soundEnabled}
-              className="w-full cursor-pointer accent-amber-400 disabled:opacity-40"
-            />
-            <p className="text-[10px] text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
-          </section>
-
           <button
             type="button"
             onClick={() => { setSoundStudioOpen(true); playConfirmSound(); }}
             className="flex w-full items-center justify-center gap-2 border border-cyan-500/60 bg-[#070c18] py-2.5 font-bold text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)] transition-all hover:border-cyan-400 hover:bg-cyan-950/40 cursor-pointer"
           >
             <Disc className="h-4 w-4 text-cyan-400" />
-            <span>サウンド開発コンソール (Sound Studio) を開く</span>
+            <span className="text-center text-xs leading-5">サウンド開発コンソール (Sound Studio) を開く</span>
           </button>
 
           <div className="border-t border-slate-800 pt-4">
