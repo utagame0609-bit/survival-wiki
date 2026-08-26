@@ -487,6 +487,18 @@ export const playNewRecordSound = () => {
     osc.start(noteTime);
     osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
   });
+
+  // V1 new-record sparkle: bright triangle A7 overtone.
+  const sparkleOsc = context.createOscillator();
+  const sparkleGain = context.createGain();
+  sparkleOsc.type = 'triangle';
+  sparkleOsc.frequency.setValueAtTime(3520, now + 0.06);
+  sparkleGain.gain.setValueAtTime(0.12, now + 0.06);
+  sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+  sparkleOsc.connect(sparkleGain);
+  sparkleGain.connect(masterGain);
+  sparkleOsc.start(now + 0.06);
+  sparkleOsc.stop(now + 0.42);
 };
 
 export const playChestOpenSound = () => {
@@ -522,9 +534,9 @@ export const playChestOpenSound = () => {
   bodyGain.gain.setValueAtTime(0.32, now);
   bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
   bodyOsc.connect(bodyGain);
-  bodyGain.connect(masterGain);
   bodyOsc.start(now);
   bodyOsc.stop(now + 0.08);
+  bodyGain.connect(masterGain);
 
   const chimeOsc = context.createOscillator();
   const chimeGain = context.createGain();
