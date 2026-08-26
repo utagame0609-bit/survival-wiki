@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { playConfirmSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
+import { playNewRecordSound, playInputFocusSound } from '@/lib/sound';
 
 export function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -12,6 +12,7 @@ export function AuthScreen() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    playNewRecordSound();
     setLoading(true);
     setMessage('');
     setError('');
@@ -34,7 +35,6 @@ export function AuthScreen() {
       });
 
       if (signInError) throw signInError;
-      playNewRecordSound();
       setMessage('ログインしました。');
     } catch (e) {
       setError(e instanceof Error ? e.message : '認証に失敗しました。');
@@ -85,7 +85,7 @@ export function AuthScreen() {
           <button
             type="submit"
             disabled={loading}
-            onPointerDown={playConfirmSound}
+            onPointerDown={playNewRecordSound}
             className="w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? '処理中…' : isSignUp ? 'アカウントを作成' : 'ログイン'}
@@ -94,7 +94,7 @@ export function AuthScreen() {
 
         <button
           type="button"
-          onPointerDown={playConfirmSound}
+          onPointerDown={playNewRecordSound}
           onClick={() => {
             setIsSignUp((value) => !value);
             setMessage('');
