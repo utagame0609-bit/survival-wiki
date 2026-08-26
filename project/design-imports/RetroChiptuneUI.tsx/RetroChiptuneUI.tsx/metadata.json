@@ -1,6 +1,0 @@
-{
-  "name": "Chiptune & Retro Game Music Studio",
-  "description": "Generate, synthesize, and loop 8-bit and 16-bit retro game music, save menu themes, and neon synthwave tracks powered by Lyria AI and real-time audio synthesis.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

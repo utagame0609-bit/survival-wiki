@@ -1,6 +1,0 @@
-{
-  "name": "冒険ログ Tac-HUD",
-  "description": "Tac-HUD UIスタイルに統一された高機能冒険ログ・サバイバル探検記録システム",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
