@@ -3,7 +3,7 @@ import { Camera, X, Plus } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playAddSound, playDeleteSound } from '@/lib/sound';
 
 type MemberPhotoState = {
   name: string;
@@ -39,8 +39,8 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
   const setPlayerPhoto = (file: File | null) => { if (!file) return; setPlayerPhotoFile(file); setPlayerPhotoPreview(URL.createObjectURL(file)); };
   const setMemberPhoto = (index: number, file: File | null) => { if (!file) return; const url = URL.createObjectURL(file); setMembers((current) => current.map((member, i) => i === index ? { ...member, file, previewUrl: url } : member)); };
   const updateMemberName = (index: number, value: string) => setMembers((current) => current.map((member, i) => i === index ? { ...member, name: value } : member));
-  const addMember = () => setMembers((current) => [...current, { name: '', file: null, previewUrl: '', existingPath: null }]);
-  const removeMember = (index: number) => setMembers((current) => current.filter((_, i) => i !== index));
+  const addMember = () => { playAddSound(); setMembers((current) => [...current, { name: '', file: null, previewUrl: '', existingPath: null }]); };
+  const removeMember = (index: number) => { playDeleteSound(); setMembers((current) => current.filter((_, i) => i !== index)); };
 
   const handleSave = async () => {
     setError('');
