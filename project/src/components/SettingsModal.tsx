@@ -1,8 +1,9 @@
-import { Download, Settings, Volume2, VolumeX, X, Sliders, Music2, Waves } from 'lucide-react';
+import { Download, LogOut, Settings, Volume2, VolumeX, Sliders, Music2, Waves } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { saveUserSoundSettings } from '@/lib/userSoundSettings';
+import { supabase } from '@/lib/supabase';
 import {
   getSoundVolume,
   isSoundEnabled,
@@ -50,6 +51,11 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: {
     if (!installPrompt) { window.alert('この環境ではアプリのインストール確認画面を直接開けません。ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。'); return; }
     await installPrompt.prompt(); await installPrompt.userChoice; onInstallPromptUsed();
   };
+  const handleLogout = async () => {
+    playCancelSound();
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error('Failed to log out:', error);
+  };
   if (soundStudioOpen && import.meta.env.DEV) return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
     <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
@@ -60,6 +66,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: {
         <div className="mt-5 border-t border-slate-800/80 pt-4"><div className="flex items-center justify-between"><label htmlFor="se-volume" className="text-xs font-bold text-slate-300 uppercase tracking-wider">SE VOLUME // 音量</label><span className="font-mono text-xs font-bold text-emerald-400 px-2 py-0.5 rounded-sm bg-[#050a14] border border-slate-800">{soundVolume}%</span></div><input id="se-volume" type="range" min="0" max="100" step="1" value={soundVolume} onChange={(event) => handleVolumeChange(Number(event.target.value))} disabled={!soundEnabled} className="mt-3 w-full accent-amber-500 disabled:opacity-40 cursor-pointer" /><div className="mt-1 flex justify-between text-[10px] text-slate-500 font-mono"><span>0 MUTE</span><span>50 DEFAULT</span><span>100 MAX</span></div><p className="mt-3 text-[11px] leading-relaxed text-slate-500 font-mono">※Web Audio合成エンジンにより低負荷でタクティカルな操作音を生成します。</p></div>
         <div className="mt-5 border-t border-slate-800/80 pt-4"><div className="flex items-center justify-between"><label htmlFor="se-reverb" className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider"><Waves className="h-4 w-4 text-cyan-400" /> SE REVERB // 残響</label><span className="font-mono text-xs font-bold text-cyan-300 px-2 py-0.5 rounded-sm bg-[#050a14] border border-slate-800">{reverbAmount}%</span></div><input id="se-reverb" type="range" min="0" max="100" step="1" value={reverbAmount} onChange={(event) => handleReverbChange(Number(event.target.value))} disabled={!soundEnabled} className="mt-3 w-full accent-cyan-500 disabled:opacity-40 cursor-pointer" /><div className="mt-1 flex justify-between text-[10px] text-slate-500 font-mono"><span>0 DRY</span><span>18 DEFAULT</span><span>100 MAX</span></div><p className="mt-3 text-[11px] leading-relaxed text-slate-500 font-mono">アプリ全体のSEに共通でかかる短い残響量を調整します。</p></div>
         <div className="mt-5 border-t border-slate-800 pt-4"><button type="button" onClick={handleInstall} className="flex w-full items-center justify-center gap-2 rounded-sm border border-sky-500/70 bg-sky-950/40 px-4 py-2.5 text-xs font-bold text-sky-300 hover:bg-sky-900/50 hover:border-sky-400 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"><Download className="h-4 w-4 text-sky-400" />ホーム画面に追加 (PWA INSTALL)</button><p className="mt-2 text-center text-[11px] leading-5 text-slate-500 font-mono">オフラインでも高速起動できるスタンドアロンHUDとして利用できます。</p></div>
+        <div className="mt-5 border-t border-slate-800 pt-4"><button type="button" onClick={() => void handleLogout()} className="flex w-full items-center justify-center gap-2 rounded-sm border border-rose-500/60 bg-rose-950/20 px-4 py-2.5 text-xs font-bold text-rose-300 hover:border-rose-400 hover:bg-rose-950/40 hover:text-rose-200 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"><LogOut className="h-4 w-4 text-rose-400" />ログアウト (LOG OUT)</button><p className="mt-2 text-center text-[11px] leading-5 text-slate-500 font-mono">現在のアカウントからログアウトします。</p></div>
       </section></div>
       <div className="flex justify-end border-t border-slate-800 bg-[#0d1627] px-5 py-3"><button onClick={() => { playCancelSound(); onClose(); }} className="rounded-sm border border-slate-700 bg-[#0a1120] px-4 py-1.5 text-xs font-bold text-slate-400 hover:border-slate-500 hover:text-slate-100 active:scale-95 transition-all cursor-pointer uppercase tracking-wider">閉じる (CLOSE)</button></div>
     </div>
