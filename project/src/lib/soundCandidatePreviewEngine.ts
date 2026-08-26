@@ -39,6 +39,16 @@ export const PREVIEW_SOUNDS: Record<string, () => void> = {
   achievement: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; [523.25,659.25,783.99,987.77,1046.5,1318.51].forEach((f,i)=>tone(c,f,t+i*.09,.22,.13,'square')); },
   wiki_generating_noise: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; hiss(c,t,1.2,.06,'bandpass',1450); tone(c,60,t,1.2,.015,'sine'); },
   wiki_complete: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; [523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.51].forEach((f,i)=>tone(c,f,t+i*.1,.3,.11,'triangle')); tone(c,2093,t+.82,.35,.12,'sine'); },
+
+  // V2 優先度【大】 8種
+  footstep: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,140,t,.065,.13,'triangle',65); hiss(c,t,.055,.025,'lowpass',1800); },
+  hover: () => { const c=getCtx(); if(!c)return; tone(c,2200,c.currentTime,.022,.055,'square'); },
+  card_open: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,520,t,.095,.12,'square',1480); hiss(c,t,.08,.025,'highpass',4200); },
+  card_close: () => { const c=getCtx(); if(!c)return; tone(c,980,c.currentTime,.085,.11,'triangle',320); },
+  add: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; [783.99,1046.5,1318.51].forEach((f,i)=>tone(c,f,t+i*.04,.09,.12,'square')); },
+  save: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,1046.5,t,.24,.1,'sine'); tone(c,1568,t+.025,.21,.08,'square'); },
+  toggle: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,1800,t,.04,.1,'square',850); hiss(c,t,.035,.02,'highpass',3000); },
+  error: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,185,t,.22,.14,'sawtooth'); tone(c,196,t,.22,.1,'sawtooth'); },
 };
 
 export function playSoundCandidatePreview(id: string): void { PREVIEW_SOUNDS[id]?.(); }
