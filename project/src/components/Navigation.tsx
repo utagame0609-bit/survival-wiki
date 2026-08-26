@@ -35,41 +35,43 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b-2 border-[#263244] bg-[#06090e]/95 backdrop-blur-md shadow-[0_4px_18px_rgba(0,0,0,0.35)]">
-      <div className="mx-auto flex min-h-14 max-w-4xl items-center gap-2 px-3 py-2 sm:px-4">
-        {onBack && (
-          <button
-            onClick={() => {
-              playCancelSound();
-              onBack();
-            }}
-            className="group flex shrink-0 items-center gap-1.5 border border-slate-700 bg-slate-900 px-2.5 py-2 font-mono text-xs font-bold text-slate-300 transition-all hover:border-amber-500 hover:text-amber-400 active:scale-[0.98]"
-          >
-            <ChevronLeft className="h-4 w-4 text-amber-500 transition-colors group-hover:text-amber-400" />
-            <span className="hidden sm:inline">WORLD SELECT</span>
-            <span className="sm:hidden">戻る</span>
-          </button>
-        )}
+    <header className="sticky top-0 z-30 border-b-2 border-amber-500/60 bg-[#1a1e29]/95 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
+      <div className="mx-auto flex min-h-[52px] max-w-4xl items-center justify-between gap-2 px-3 sm:min-h-[56px] sm:px-6">
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
+          {onBack && (
+            <button
+              type="button"
+              onClick={() => {
+                playCancelSound();
+                onBack();
+              }}
+              className="flex min-h-[40px] shrink-0 items-center gap-1.5 border border-amber-500/50 bg-[#12151d] px-3 py-2 font-mono text-xs font-bold text-amber-400 transition-all hover:border-amber-400 hover:bg-amber-500/10 active:scale-95 cursor-pointer"
+              aria-label="戻る"
+            >
+              <ChevronLeft className="h-4 w-4 stroke-[2.5]" />
+              <span>戻る</span>
+            </button>
+          )}
 
-        <div className="min-w-0 flex-1 border-x border-slate-800 px-2 sm:px-4">
-          <div className="flex items-center justify-center gap-2 min-w-0">
-            <div className="hidden sm:flex h-7 w-7 shrink-0 items-center justify-center border-2 border-amber-500 bg-amber-500/10 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.12)]">
-              <Shield className="h-4 w-4" />
+          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-500 bg-amber-500/20 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.25)] sm:h-9 sm:w-9">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div className="min-w-0 text-center">
-              <div className="text-[9px] font-mono font-bold tracking-[0.2em] text-emerald-400">ADVENTURE LOG SYSTEM</div>
-              <h1 className="truncate text-sm font-bold tracking-wide text-slate-100 sm:text-base">{title}</h1>
+            <div className="min-w-0">
+              <h1 className="truncate text-xs font-bold tracking-wide text-white sm:text-sm">{title}</h1>
+              <p className="hidden truncate font-mono text-[10px] font-bold text-emerald-400 opacity-90 sm:block">ADVENTURE LOG SYSTEM // SYSTEM STATUS: NOMINAL</p>
             </div>
           </div>
         </div>
 
         {onBack && (
           <button
+            type="button"
             onClick={handleHome}
             aria-label="ホームへ"
-            className="group flex shrink-0 items-center gap-1.5 border border-slate-700 bg-slate-900 px-2.5 py-2 font-mono text-xs font-bold text-slate-300 transition-all hover:border-amber-500 hover:text-amber-400 active:scale-[0.98]"
+            className="flex min-h-[40px] shrink-0 items-center gap-1.5 border border-slate-700 bg-[#12151d] px-2.5 py-2 font-mono text-xs font-bold text-slate-300 transition-all hover:border-amber-500 hover:text-amber-400 active:scale-95 cursor-pointer"
           >
-            <Home className="h-4 w-4 text-amber-500 transition-colors group-hover:text-amber-400" />
+            <Home className="h-4 w-4 text-amber-500" />
             <span className="hidden sm:inline">HOME</span>
           </button>
         )}
