@@ -73,25 +73,61 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
   if (loading) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"><Spinner label="読み込み中" /></div>;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onMouseDown={(event) => {
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4 font-sans" onMouseDown={(event) => {
       if (event.target === event.currentTarget) { playModalCloseSound(); navigate({ name: 'worldList', gameId, gameName }); }
     }}>
-      <div className="world-edit-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto rounded-md bg-slate-950 border border-amber-500/70 shadow-[0_0_24px_rgba(245,158,11,0.12),0_20px_50px_rgba(0,0,0,0.55)]">
-        <div className="flex items-center px-5 py-4 border-b border-slate-800"><div className="flex items-center gap-3"><span className="font-mono text-[10px] px-2 py-1 border border-amber-500/50 bg-amber-500/10 text-amber-400 rounded">WORLD CONFIG</span><h2 className="text-lg font-bold text-slate-100">{isEdit ? 'ワールドを編集' : 'ワールドを追加'}</h2></div></div>
-        <div className="p-5 space-y-4">
+      <div className="world-edit-modal-panel w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto bg-[#1e2330] border-2 border-amber-500/70 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b-2 border-[#2d3548] bg-[#161a24]">
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[10px] sm:text-xs px-2 py-0.5 border border-amber-400 bg-amber-500/20 text-amber-300 font-bold">WORLD CONFIG</span>
+            <h2 className="text-sm sm:text-base font-bold text-white">{isEdit ? 'ワールドを編集' : 'ワールドを追加'}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => { playCloseSound(); goBack(); }}
+            className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
+            aria-label="閉じる"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-4 sm:p-5 space-y-4">
           {error && <ErrorBanner message={error} />}
           <Field label="ワールド名" required><input type="text" value={name} onChange={(event) => setName(event.target.value)} placeholder="例: サバイバル第1ワールド" className="modal-input" /></Field>
           <Field label="プレイヤー"><div className="flex items-center gap-3"><PhotoPicker previewUrl={playerPhotoPreview} onChange={setPlayerPhoto} label="プレイヤー写真" /><input type="text" value={player} onChange={(event) => setPlayer(event.target.value)} placeholder="あなたの名前" className="modal-input flex-1" /></div></Field>
-          <div><div className="flex items-center justify-between mb-1.5"><label className="text-sm font-medium text-slate-300">関連メンバー</label><button type="button" onClick={addMember} className="flex items-center gap-1 font-mono text-xs text-amber-400 hover:text-amber-300 transition-colors"><Plus className="w-4 h-4" />追加</button></div><div className="space-y-2">{members.map((member, index) => <div key={index} className="flex items-center gap-2"><PhotoPicker previewUrl={member.previewUrl} onChange={(file) => setMemberPhoto(index, file)} label={`メンバー${index + 1}写真`} /><input type="text" value={member.name} onChange={(event) => updateMemberName(index, event.target.value)} placeholder={`メンバー${index + 1}`} className="modal-input flex-1" />{members.length > 1 && <button type="button" onClick={() => removeMember(index)} className="w-10 h-10 border border-slate-700 text-slate-500 hover:border-rose-500 hover:text-rose-400 flex items-center justify-center transition-colors" aria-label="メンバーを削除"><X className="w-5 h-5" /></button>}</div>)}</div></div>
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs sm:text-sm font-bold text-slate-200">関連メンバー</label>
+              <button type="button" onClick={addMember} className="min-h-[36px] px-2.5 flex items-center gap-1 text-xs sm:text-sm font-bold text-amber-400 hover:text-amber-300 cursor-pointer">
+                <Plus className="w-4 h-4" />追加
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              {members.map((member, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <PhotoPicker previewUrl={member.previewUrl} onChange={(file) => setMemberPhoto(index, file)} label={`メンバー${index + 1}写真`} />
+                  <input type="text" value={member.name} onChange={(event) => updateMemberName(index, event.target.value)} placeholder={`メンバー${index + 1}`} className="modal-input flex-1" />
+                  {members.length > 1 && (
+                    <button type="button" onClick={() => removeMember(index)} className="min-h-[44px] min-w-[44px] border-2 border-slate-700 bg-[#141824] text-slate-400 hover:border-rose-500 hover:text-rose-300 flex items-center justify-center transition-colors cursor-pointer" aria-label="メンバーを削除">
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
           <Field label="メモ"><textarea value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="ワールドの概要や目標など" rows={3} className="modal-input resize-none" /></Field>
         </div>
-        <div className="flex gap-2 px-5 py-4 border-t border-slate-800 bg-slate-950"><button type="button" onClick={() => { playCloseSound(); goBack(); }} disabled={saving} className="flex-1 py-2.5 border border-slate-700 bg-slate-900 text-slate-300 font-medium hover:border-sky-500/60 hover:text-sky-400 disabled:opacity-50 transition-all">キャンセル</button><button type="button" onClick={handleSave} disabled={saving} className="flex-1 py-2.5 bg-amber-500 text-black font-bold shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-[0.98] disabled:opacity-50 transition-all">▶ {saving ? '保存中...' : isEdit ? '更新する' : '追加する'}</button></div>
+        <div className="flex gap-3 px-4 sm:px-5 py-4 border-t-2 border-[#2d3548] bg-[#161a24]">
+          <button type="button" onClick={() => { playCloseSound(); goBack(); }} disabled={saving} className="flex-1 min-h-[44px] border-2 border-slate-700 bg-[#141824] text-slate-200 font-bold hover:border-slate-500 hover:text-white disabled:opacity-50 transition-all text-xs sm:text-sm cursor-pointer">キャンセル</button>
+          <button type="button" onClick={handleSave} disabled={saving} className="flex-1 min-h-[44px] bg-amber-500 text-black font-black border-b-3 border-amber-700 shadow-[0_2px_12px_rgba(245,158,11,0.25)] hover:bg-amber-400 active:border-b-0 disabled:opacity-50 transition-all text-xs sm:text-sm cursor-pointer">▶ {saving ? '保存中...' : isEdit ? '更新する' : '追加する'}</button>
+        </div>
       </div>
-      <style>{`.modal-input { width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.25rem; border: 1px solid rgb(51 65 85); background: #090d16; color: rgb(226 232 240); outline: none; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }.modal-input::placeholder { color: rgb(71 85 105); }.modal-input:focus { border-color: rgb(14 165 233); box-shadow: 0 0 0 1px rgb(14 165 233), 0 0 12px rgba(14,165,233,0.12); }.world-edit-modal-panel { animation: world-edit-modal-in 180ms cubic-bezier(.22,.8,.35,1) both; transform-origin: center; }@keyframes world-edit-modal-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }@media (prefers-reduced-motion: reduce) { .world-edit-modal-panel { animation: none; } }`}</style>
+      <style>{`.modal-input { width: 100%; min-height: 44px; padding: 0.625rem 0.875rem; border: 2px solid #334155; background: #141824; color: #ffffff; outline: none; font-size: 0.875rem; transition: border-color 160ms ease, box-shadow 160ms ease; }.modal-input::placeholder { color: #64748b; }.modal-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 1px #f59e0b, 0 0 12px rgba(245,158,11,0.25); }.world-edit-modal-panel { animation: world-edit-modal-in 180ms cubic-bezier(.22,.8,.35,1) both; transform-origin: center; }@keyframes world-edit-modal-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }@media (prefers-reduced-motion: reduce) { .world-edit-modal-panel { animation: none; } }`}</style>
     </div>
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) { return <div><label className="block text-sm font-medium text-slate-300 mb-1.5">{label}{required && <span className="text-amber-400 ml-1">*</span>}</label>{children}</div>; }
-function PhotoPicker({ previewUrl, onChange, label }: { previewUrl: string; onChange: (file: File | null) => void; label: string }) { return <label className="relative h-11 w-14 shrink-0 cursor-pointer overflow-hidden border border-amber-500/50 bg-slate-950 flex items-center justify-center text-amber-500 hover:border-amber-400 hover:text-amber-300 transition-colors" title={label}>{previewUrl ? <img src={previewUrl} alt="" className="h-full w-full object-cover" /> : <Camera className="h-5 w-5" />}<input type="file" accept="image/*" className="sr-only" onChange={(event) => onChange(event.target.files?.[0] ?? null)} /></label>; }
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) { return <div><label className="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">{label}{required && <span className="text-amber-400 ml-1">*</span>}</label>{children}</div>; }
+function PhotoPicker({ previewUrl, onChange, label }: { previewUrl: string; onChange: (file: File | null) => void; label: string }) { return <label className="relative min-h-[44px] w-14 shrink-0 cursor-pointer overflow-hidden border-2 border-slate-700 bg-[#141824] flex items-center justify-center text-amber-400 hover:border-amber-400 hover:text-amber-300 transition-colors" title={label}>{previewUrl ? <img src={previewUrl} alt="" className="h-full w-full object-cover pixelated" /> : <Camera className="h-5 w-5" />}<input type="file" accept="image/*" className="sr-only" onChange={(event) => onChange(event.target.files?.[0] ?? null)} /></label>; }
 async function fetchPhotoBlob(storagePath: string): Promise<Blob> { const url = await getPhotoUrl(storagePath); const response = await fetch(url); if (!response.ok) throw new Error('既存写真を読み込めませんでした'); const blob = await response.blob(); if (url.startsWith('blob:')) URL.revokeObjectURL(url); return blob; }
