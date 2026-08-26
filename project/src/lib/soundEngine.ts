@@ -37,9 +37,7 @@ export class SoundEngine {
     return this.ctx;
   }
 
-  public getContext(): AudioContext {
-    return this.init();
-  }
+  public getContext(): AudioContext { return this.init(); }
 
   public getAnalyser(): AnalyserNode | null {
     if (!this.ctx) return null;
@@ -49,39 +47,31 @@ export class SoundEngine {
 
   private setupMasterGraph(): void {
     if (!this.ctx || this.masterGain) return;
-
     this.compressor = this.ctx.createDynamicsCompressor();
     this.compressor.threshold.setValueAtTime(-4, this.ctx.currentTime);
     this.compressor.knee.setValueAtTime(10, this.ctx.currentTime);
     this.compressor.ratio.setValueAtTime(12, this.ctx.currentTime);
     this.compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
     this.compressor.release.setValueAtTime(0.15, this.ctx.currentTime);
-
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.setValueAtTime(this.masterVolume, this.ctx.currentTime);
-
     this.analyser = this.ctx.createAnalyser();
     this.analyser.fftSize = 512;
     this.analyser.smoothingTimeConstant = 0.8;
-
     this.reverbNode = this.ctx.createConvolver();
     this.reverbNode.buffer = this.createImpulseResponse(1.8, 2.5);
     this.reverbGain = this.ctx.createGain();
     this.reverbGain.gain.setValueAtTime(this.reverbWet, this.ctx.currentTime);
-
     this.dryGain = this.ctx.createGain();
     this.dryGain.gain.setValueAtTime(1 - this.reverbWet * 0.5, this.ctx.currentTime);
-
     this.delayNode = this.ctx.createDelay();
     this.delayNode.delayTime.setValueAtTime(0.18, this.ctx.currentTime);
     this.delayGain = this.ctx.createGain();
     this.delayGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-
     const feedback = this.ctx.createGain();
     feedback.gain.setValueAtTime(0.35, this.ctx.currentTime);
     this.delayNode.connect(feedback);
     feedback.connect(this.delayNode);
-
     this.reverbNode.connect(this.reverbGain);
     this.reverbGain.connect(this.compressor);
     this.delayNode.connect(this.delayGain);
@@ -122,6 +112,28 @@ export class SoundEngine {
       sourceNode.connect(send);
       send.connect(this.delayNode);
     }
+  }
+
+  /** 音源候補v1: カーソル移動音「ピコッ」 */
+  public playCursorMove(): void {
+    const ctx = this.init();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1320, now);
+    osc.frequency.exponentialRampToValueAtTime(1980, now + 0.02);
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(4500, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.18, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+    osc.connect(filter);
+    filter.connect(gain);
+    this.routeSound(gain, 0.15, 0);
+    osc.start(now);
+    osc.stop(now + 0.05);
   }
 
   public setMasterVolume(volume: number): void {
