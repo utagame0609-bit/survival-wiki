@@ -495,38 +495,49 @@ export const playChestOpenSound = () => {
   if (context.state === 'suspended') void context.resume();
   const now = context.currentTime;
 
-  const clickOsc = context.createOscillator();
-  const clickGain = context.createGain();
-  clickOsc.type = 'square';
-  clickOsc.frequency.setValueAtTime(800, now);
-  clickOsc.frequency.exponentialRampToValueAtTime(100, now + 0.03);
-  clickGain.gain.setValueAtTime(0.2, now);
-  clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
-  clickOsc.connect(clickGain);
-  clickGain.connect(masterGain);
-  clickOsc.start(now);
-  clickOsc.stop(now + 0.03);
-
-  const bufferSize = context.sampleRate * 0.4;
-  const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i += 1) data[i] = Math.random() * 2 - 1;
-  const noise = context.createBufferSource();
-  noise.buffer = buffer;
-  const filter = context.createBiquadFilter();
-  filter.type = 'bandpass';
-  filter.frequency.setValueAtTime(300, now + 0.02);
-  filter.frequency.linearRampToValueAtTime(500, now + 0.35);
-  filter.Q.value = 8;
+  // V1 chest sound: wooden latch knock + wooden body resonance + rising harmonic chime.
+  const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.04), context.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < noiseBuffer.length; i += 1) {
+    noiseData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (context.sampleRate * 0.008));
+  }
+  const noiseNode = context.createBufferSource();
+  noiseNode.buffer = noiseBuffer;
+  const noiseFilter = context.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.setValueAtTime(650, now);
+  noiseFilter.Q.setValueAtTime(3.0, now);
   const noiseGain = context.createGain();
-  noiseGain.gain.setValueAtTime(0, now);
-  noiseGain.gain.setValueAtTime(0.25, now + 0.02);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-  noise.connect(filter);
-  filter.connect(noiseGain);
+  noiseGain.gain.setValueAtTime(0.3, now);
+  noiseNode.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
   noiseGain.connect(masterGain);
-  noise.start(now + 0.02);
-  noise.stop(now + 0.35);
+  noiseNode.start(now);
+
+  const bodyOsc = context.createOscillator();
+  const bodyGain = context.createGain();
+  bodyOsc.type = 'triangle';
+  bodyOsc.frequency.setValueAtTime(260, now);
+  bodyOsc.frequency.exponentialRampToValueAtTime(130, now + 0.06);
+  bodyGain.gain.setValueAtTime(0.32, now);
+  bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+  bodyOsc.connect(bodyGain);
+  bodyGain.connect(masterGain);
+  bodyOsc.start(now);
+  bodyOsc.stop(now + 0.08);
+
+  const chimeOsc = context.createOscillator();
+  const chimeGain = context.createGain();
+  chimeOsc.type = 'square';
+  chimeOsc.frequency.setValueAtTime(523.25, now + 0.025);
+  chimeOsc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.07);
+  chimeGain.gain.setValueAtTime(0.001, now + 0.025);
+  chimeGain.gain.linearRampToValueAtTime(0.25, now + 0.035);
+  chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+  chimeOsc.connect(chimeGain);
+  chimeGain.connect(masterGain);
+  chimeOsc.start(now + 0.025);
+  chimeOsc.stop(now + 0.2);
 };
 
 export const playCursorMoveSound = () => playCursorMoveSoundDirect();
