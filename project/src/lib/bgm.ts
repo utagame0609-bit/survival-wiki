@@ -4,6 +4,7 @@ import { getBgmChannelSettings, subscribeToBgmChannelSettings } from './bgmSetti
 import { soundEngine } from './soundEngine';
 
 const MASTER_BGM_VOLUME = 0.32;
+let masterBgmVolume = 1;
 let fadeTimerId: number | null = null;
 let settingsUnsubscribe: (() => void) | null = null;
 
@@ -12,7 +13,19 @@ function syncChannels(): void {
 }
 
 function syncVolume(): void {
-  soundEngine.setMasterVolume(isSoundEnabled() ? (getSoundVolume() / 50) * MASTER_BGM_VOLUME : 0);
+  soundEngine.setMasterVolume(
+    isSoundEnabled() ? (getSoundVolume() / 50) * MASTER_BGM_VOLUME * masterBgmVolume : 0,
+  );
+}
+
+export function setMasterBgmVolume(value: number): number {
+  masterBgmVolume = Math.max(0, Math.min(1, value));
+  syncVolume();
+  return masterBgmVolume;
+}
+
+export function getMasterBgmVolume(): number {
+  return masterBgmVolume;
 }
 
 function ensureSettingsSubscription(): void {
@@ -36,7 +49,7 @@ export function playWorldBgm(): void {
 
 export function stopWorldBgm(fadeMs = 300): void {
   if (fadeTimerId !== null) window.clearTimeout(fadeTimerId);
-  const currentVolume = (getSoundVolume() / 50) * MASTER_BGM_VOLUME;
+  const currentVolume = (getSoundVolume() / 50) * MASTER_BGM_VOLUME * masterBgmVolume;
   const ctx = soundEngine.getContext();
   const steps = Math.max(1, Math.ceil(fadeMs / 30));
   const stepMs = fadeMs / steps;
