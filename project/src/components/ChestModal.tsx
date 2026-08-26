@@ -86,7 +86,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
           className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md font-mono"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) {
-              playCancelSound();
+              playModalCloseSound();
               setSelectedPhoto(null);
             }
           }}
@@ -97,7 +97,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
                 <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
                 <span className="font-bold text-sm sm:text-base text-white truncate">{selectedPhoto.location.name}</span>
               </div>
-              <button type="button" onClick={() => { playCancelSound(); setSelectedPhoto(null); }} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white cursor-pointer" aria-label="写真を閉じる">
+              <button type="button" onClick={() => { playModalCloseSound(); setSelectedPhoto(null); }} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white cursor-pointer" aria-label="写真を閉じる">
                 <X className="w-5 h-5" />
               </button>
             </div>
