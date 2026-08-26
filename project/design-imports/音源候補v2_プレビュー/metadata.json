@@ -1,0 +1,6 @@
+{
+  "name": "Survival Wiki Sound Studio",
+  "description": "Survival Wikiの音響デザイン・新規SE候補およびWIKI生成NPC3人格専用BGMの試聴コンソール",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
