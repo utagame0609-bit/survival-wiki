@@ -41,7 +41,10 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: {
     setSoundVolumeState(normalized);
     void saveUserSoundSettings({ seVolume: normalized, seReverb: Math.round(getStoredReverbAmount() * 100) }).catch((error) => console.error('Failed to save SE volume:', error));
   };
-  const handleReverbChange = (value: number) => { setStoredReverbAmount(value / 100); };
+  const handleReverbChange = (value: number) => {
+    const normalized = setStoredReverbAmount(value / 100);
+    void saveUserSoundSettings({ seVolume: getSoundVolume(), seReverb: Math.round(normalized * 100) }).catch((error) => console.error('Failed to save SE reverb:', error));
+  };
   const handleInstall = async () => {
     playToggleSound();
     if (!installPrompt) { window.alert('この環境ではアプリのインストール確認画面を直接開けません。ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。'); return; }
