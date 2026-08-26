@@ -276,7 +276,7 @@ function playNewRecord(audioCtx: AudioContext): void {
     gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12));
     osc.connect(filter);
     filter.connect(gain);
-    gain.connect(masterGain);
+    gain.connect(masterGain!);
     osc.start(noteTime);
     osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
   });
@@ -416,7 +416,7 @@ export function playSound(sound: SoundType): void {
     return;
   }
   if (sound === 'error') {
-    playWarningSound();
+    playTone(SOUND_PROFILES.error);
     return;
   }
   playTone(SOUND_PROFILES[sound]);
@@ -483,7 +483,7 @@ export const playNewRecordSound = () => {
     gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12));
     osc.connect(filter);
     filter.connect(gain);
-    gain.connect(masterGain);
+    gain.connect(masterGain!);
     osc.start(noteTime);
     osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15));
   });
@@ -496,7 +496,7 @@ export const playNewRecordSound = () => {
   sparkleGain.gain.setValueAtTime(0.12, now + 0.06);
   sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
   sparkleOsc.connect(sparkleGain);
-  sparkleGain.connect(masterGain);
+  sparkleGain.connect(masterGain!);
   sparkleOsc.start(now + 0.06);
   sparkleOsc.stop(now + 0.42);
 };
@@ -518,12 +518,12 @@ export const playChestOpenSound = () => {
   const noiseFilter = context.createBiquadFilter();
   noiseFilter.type = 'bandpass';
   noiseFilter.frequency.setValueAtTime(650, now);
-  noiseFilter.Q.setValueAtTime(3.0, now);
+  noiseFilter.Q.setValueAtTime(3, now);
   const noiseGain = context.createGain();
   noiseGain.gain.setValueAtTime(0.3, now);
   noiseNode.connect(noiseFilter);
   noiseFilter.connect(noiseGain);
-  noiseGain.connect(masterGain);
+  noiseGain.connect(masterGain!);
   noiseNode.start(now);
 
   const bodyOsc = context.createOscillator();
@@ -536,7 +536,7 @@ export const playChestOpenSound = () => {
   bodyOsc.connect(bodyGain);
   bodyOsc.start(now);
   bodyOsc.stop(now + 0.08);
-  bodyGain.connect(masterGain);
+  bodyGain.connect(masterGain!);
 
   const chimeOsc = context.createOscillator();
   const chimeGain = context.createGain();
@@ -547,7 +547,7 @@ export const playChestOpenSound = () => {
   chimeGain.gain.linearRampToValueAtTime(0.25, now + 0.035);
   chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
   chimeOsc.connect(chimeGain);
-  chimeGain.connect(masterGain);
+  chimeGain.connect(masterGain!);
   chimeOsc.start(now + 0.025);
   chimeOsc.stop(now + 0.2);
 };
