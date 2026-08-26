@@ -90,13 +90,28 @@ export class SoundEngine {
     const ctx = this.init(); const now = ctx.currentTime;
     const playTone = (type: OscillatorType, freq: number, start: number, end: number, peak: number) => {
       const osc = ctx.createOscillator(); const gain = ctx.createGain(); const filter = ctx.createBiquadFilter();
-      osc.type = type; osc.frequency.setValueAtTime(freq, start); osc.frequency.exponentialRampToValueAtTime(freq * 0.5, end);
-      filter.type = 'lowpass'; filter.frequency.setValueAtTime(1200, start);
+      osc.type = type; osc.frequency.setValueAtTime(freq, start); osc.frequency.exponentialRampToValueAtTime(freq * 0.5, end); filter.type = 'lowpass'; filter.frequency.setValueAtTime(1200, start);
       gain.gain.setValueAtTime(0.001, start); gain.gain.linearRampToValueAtTime(peak, start + 0.005); gain.gain.exponentialRampToValueAtTime(0.001, end);
       osc.connect(filter); filter.connect(gain); this.routeSound(gain, 0.12, 0); osc.start(start); osc.stop(end + 0.01);
     };
-    playTone('square', 659.25, now, now + 0.05, 0.18);
-    playTone('triangle', 329.63, now + 0.045, now + 0.11, 0.16);
+    playTone('square', 659.25, now, now + 0.05, 0.18); playTone('triangle', 329.63, now + 0.045, now + 0.11, 0.16);
+  }
+
+  /** 音源候補v1: 警告・削除音「デンッ / ブブー」 */
+  public playWarning(): void {
+    const ctx = this.init(); const now = ctx.currentTime;
+    const playTone = (type: OscillatorType, frequency: number, detune: number, duration: number, peak: number) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = type; osc.frequency.setValueAtTime(frequency, now); osc.detune.setValueAtTime(detune, now);
+      gain.gain.setValueAtTime(0.0001, now); gain.gain.linearRampToValueAtTime(peak, now + 0.008); gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc.connect(gain); this.routeSound(gain, 0.28, 0.08); osc.start(now); osc.stop(now + duration + 0.01);
+    };
+    playTone('sawtooth', 116, -7, 0.28, 0.20);
+    playTone('square', 123, 7, 0.28, 0.16);
+    const kick = ctx.createOscillator(); const kickGain = ctx.createGain();
+    kick.type = 'sine'; kick.frequency.setValueAtTime(65, now); kick.frequency.exponentialRampToValueAtTime(38, now + 0.12);
+    kickGain.gain.setValueAtTime(0.0001, now); kickGain.gain.linearRampToValueAtTime(0.22, now + 0.004); kickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+    kick.connect(kickGain); this.routeSound(kickGain, 0.12, 0.04); kick.start(now); kick.stop(now + 0.18);
   }
 
   public setMasterVolume(volume: number): void { this.masterVolume = Math.max(0, Math.min(1, volume)); if (this.masterGain && this.ctx) this.masterGain.gain.setTargetAtTime(this.masterVolume, this.ctx.currentTime, 0.02); }
