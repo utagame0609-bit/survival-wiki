@@ -6,7 +6,6 @@ import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { SettingsButton } from '@/components/SettingsModal';
 import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound, playModalCloseSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
@@ -155,8 +154,6 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
           </div>
         </footer>
       </div>
-
-      <SettingsButton onOpenSoundStudio={() => navigate({ name: 'soundStudio' })} />
 
       {showCreateModal && <WorldCreateModal gameId={gameId} onClose={() => setShowCreateModal(false)} onCreated={load} />}
       {deleteTarget && (
