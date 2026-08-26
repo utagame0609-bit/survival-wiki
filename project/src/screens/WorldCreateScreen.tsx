@@ -3,7 +3,7 @@ import { Camera, X, Plus } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playModalCloseSound, playSaveSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound } from '@/lib/sound';
 
 type MemberPhotoState = {
   name: string;
@@ -66,6 +66,7 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
       }
       for (const path of oldPathsToDelete) await deleteWorldMemberPhoto(path).catch(() => undefined);
       if (isEdit) playSaveSound();
+      else playNewRecordSound();
       goBack();
     } catch (e) { setError((e as Error).message); } finally { setSaving(false); }
   };
