@@ -266,15 +266,12 @@ function playNewRecord(audioCtx: AudioContext): void {
 
     osc.type = 'square';
     osc.frequency.setValueAtTime(freq, noteTime);
-
     filter.type = 'bandpass';
     filter.frequency.setValueAtTime(freq * 1.2, noteTime);
     filter.Q.setValueAtTime(3.5, noteTime);
-
     gain.gain.setValueAtTime(0.001, noteTime);
     gain.gain.linearRampToValueAtTime(0.24, noteTime + 0.005);
     gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12));
-
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(masterGain);
@@ -322,18 +319,102 @@ function playCursorMoveSoundDirect(): void {
   airSource.stop(now + 0.045);
 }
 
+function playV1Tone(c: AudioContext, destination: AudioNode, frequency: number, time: number, duration: number, volume: number, type: OscillatorType, endFrequency?: number): void {
+  const oscillator = c.createOscillator();
+  const gain = c.createGain();
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, time);
+  if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, time + duration);
+  gain.gain.setValueAtTime(0.0001, time);
+  gain.gain.linearRampToValueAtTime(volume, time + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+  oscillator.connect(gain);
+  gain.connect(destination);
+  oscillator.start(time);
+  oscillator.stop(time + duration + 0.01);
+}
+
+function playV1Hiss(c: AudioContext, destination: AudioNode, time: number, duration: number, volume: number, type: BiquadFilterType, frequency: number): void {
+  const buffer = c.createBuffer(1, Math.floor(c.sampleRate * duration), c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
+  const source = c.createBufferSource();
+  const filter = c.createBiquadFilter();
+  const gain = c.createGain();
+  source.buffer = buffer;
+  filter.type = type;
+  filter.frequency.value = frequency;
+  gain.gain.setValueAtTime(volume, time);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(destination);
+  source.start(time);
+  source.stop(time + duration);
+}
+
+function playV1Confirm(): void {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  playV1Tone(c, masterGain, 880, t, 0.08, 0.18, 'square');
+  playV1Tone(c, masterGain, 1760, t + 0.045, 0.095, 0.16, 'square');
+}
+
+function playV1Cancel(): void {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  playV1Tone(c, masterGain, 659, c.currentTime, 0.11, 0.13, 'square', 330);
+}
+
+function playV1TabSwitch(): void {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  playV1Tone(c, masterGain, 950, t, 0.055, 0.15, 'square', 1600);
+  playV1Hiss(c, masterGain, t, 0.05, 0.07, 'bandpass', 3200);
+}
+
+function playV1Modal(): void {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  playV1Tone(c, masterGain, 480, c.currentTime, 0.12, 0.22, 'sine', 110);
+}
+
+function playV1Warning(): void {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  playV1Tone(c, masterGain, 116, t, 0.28, 0.18, 'sawtooth');
+  playV1Tone(c, masterGain, 123, t, 0.28, 0.14, 'square');
+  playV1Tone(c, masterGain, 65, t, 0.16, 0.2, 'triangle', 50);
+  playV1Hiss(c, masterGain, t, 0.28, 0.05, 'lowpass', 1200);
+}
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
-  if (sound === 'error') {
-    playWarningSound();
+  if (sound === 'confirm') {
+    playV1Confirm();
+    return;
+  }
+  if (sound === 'cancel') {
+    playV1Cancel();
     return;
   }
   if (sound === 'tabSwitch') {
-    playTabSwitchSoundDirect();
+    playV1TabSwitch();
     return;
   }
   if (sound === 'modalOpen' || sound === 'modalClose') {
-    playModalSound();
+    playV1Modal();
+    return;
+  }
+  if (sound === 'delete') {
+    playV1Warning();
+    return;
+  }
+  if (sound === 'error') {
+    playWarningSound();
     return;
   }
   playTone(SOUND_PROFILES[sound]);
