@@ -1,0 +1,6 @@
+{
+  "name": "Survival Wiki",
+  "description": "16bit Retro-Cyber style Adventure Log & AI Wiki App for games and records",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
