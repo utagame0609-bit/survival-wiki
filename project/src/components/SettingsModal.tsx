@@ -8,23 +8,17 @@ import { supabase } from '@/lib/supabase';
 import { getSoundVolume, isSoundEnabled, playCancelSound, playConfirmSound, playModalCloseSound, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
 
 type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
-
 type SettingsModalProps = { onClose: () => void; installPrompt: BeforeInstallPromptEvent | null; onInstallPromptUsed: () => void };
 
 export function SettingsButton() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => { event.preventDefault(); setInstallPrompt(event as BeforeInstallPromptEvent); };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
-
-  return <>
-    <button onClick={() => { playConfirmSound(); setSettingsOpen(true); }} aria-label="設定" className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-sm bg-[#0d1627] text-amber-400 border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:bg-amber-500 hover:text-slate-950 active:scale-95 transition-all cursor-pointer"><Settings className="w-5 h-5" /></button>
-    {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} installPrompt={installPrompt} onInstallPromptUsed={() => setInstallPrompt(null)} />}
-  </>;
+  return <><button onClick={() => { playConfirmSound(); setSettingsOpen(true); }} aria-label="設定" className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-sm bg-[#0d1627] text-amber-400 border-2 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:bg-amber-500 hover:text-slate-950 active:scale-95 transition-all cursor-pointer"><Settings className="w-5 h-5" /></button>{settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} installPrompt={installPrompt} onInstallPromptUsed={() => setInstallPrompt(null)} />}</>;
 }
 
 export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: SettingsModalProps) {
@@ -34,7 +28,6 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
   const [soundDetailOpen, setSoundDetailOpen] = useState(false);
   const [bgmChannels, setBgmChannels] = useState<BgmChannelSettings>(getBgmChannelSettings());
-
   useEffect(() => subscribeToReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
   useEffect(() => subscribeToBgmChannelSettings(setBgmChannels), []);
 
@@ -44,7 +37,6 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   const handleBgmChannelToggle = (channel: keyof BgmChannelSettings) => { setBgmChannelEnabled(channel, !bgmChannels[channel]); playToggleSound(); };
   const handleInstall = async () => { playToggleSound(); if (!installPrompt) { window.alert('この環境ではアプリのインストール確認画面を直接開けません。ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。'); return; } await installPrompt.prompt(); await installPrompt.userChoice; onInstallPromptUsed(); };
   const handleLogout = async () => { playCancelSound(); const { error } = await supabase.auth.signOut(); if (error) console.error('Failed to log out:', error); };
-
   if (soundStudioOpen && import.meta.env.DEV) return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;
 
   const channelRows: Array<{ key: keyof BgmChannelSettings; label: string; detail: string }> = [
@@ -57,13 +49,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
     <button aria-label="設定を閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
     <div className="relative z-10 w-full max-w-md overflow-hidden rounded-sm border-2 border-amber-500/70 bg-[#0a1120] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.8),0_0_24px_rgba(245,158,11,0.15)]">
-      <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4">
-        <div className="flex items-center gap-3">
-          {soundDetailOpen && <button type="button" onClick={() => { setSoundDetailOpen(false); playCancelSound(); }} aria-label="音声設定に戻る" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-slate-700 bg-[#0a1120] text-slate-400 hover:border-slate-500 hover:text-slate-100 transition-all cursor-pointer"><ArrowLeft className="h-4 w-4" /></button>}
-          <div><p className="text-[11px] font-extrabold tracking-widest text-emerald-400 uppercase font-mono flex items-center gap-1.5"><Sliders className="w-3.5 h-3.5 text-emerald-400" /><span>{soundDetailOpen ? 'AUDIO DETAIL // 音声詳細' : 'SYSTEM CONFIGURATION // 設定'}</span></p><h2 className="mt-0.5 text-base font-bold text-amber-400">{soundDetailOpen ? '音声詳細設定' : 'システム環境設定'}</h2></div>
-        </div>
-      </div>
-
+      <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-5 py-4"><div className="flex items-center gap-3">{soundDetailOpen && <button type="button" onClick={() => { setSoundDetailOpen(false); playCancelSound(); }} aria-label="音声設定に戻る" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-slate-700 bg-[#0a1120] text-slate-400 hover:border-slate-500 hover:text-slate-100 transition-all cursor-pointer"><ArrowLeft className="h-4 w-4" /></button>}<div><p className="text-[11px] font-extrabold tracking-widest text-emerald-400 uppercase font-mono flex items-center gap-1.5"><Sliders className="w-3.5 h-3.5 text-emerald-400" /><span>{soundDetailOpen ? 'AUDIO DETAIL // 音声詳細' : 'SYSTEM CONFIGURATION // 設定'}</span></p><h2 className="mt-0.5 text-base font-bold text-amber-400">{soundDetailOpen ? '音声詳細設定' : 'システム環境設定'}</h2></div></div></div>
       <div className="max-h-[75vh] overflow-y-auto p-5">
         {soundDetailOpen ? <section className="rounded-sm border border-slate-800 bg-[#090d16] p-4">
           <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3">{soundEnabled ? <Volume2 className="w-5 h-5 text-emerald-400" /> : <VolumeX className="w-5 h-5 text-slate-600" />}<div><p className="text-xs font-bold text-slate-200 uppercase tracking-wider">SOUND EFFECTS // 効果音</p><p className="mt-0.5 text-[11px] text-slate-500 font-mono">操作フィードバック音の再生</p></div></div><button type="button" role="switch" aria-checked={soundEnabled} aria-label="SEのオンオフ" onClick={handleSoundToggle} className={`relative flex h-6 w-11 shrink-0 items-center rounded-sm border p-0.5 transition-colors cursor-pointer ${soundEnabled ? 'border-emerald-500 bg-emerald-950 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-slate-700 bg-slate-900'}`}><span className={`block h-4 w-4 rounded-sm transition-transform ${soundEnabled ? 'translate-x-5 bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'translate-x-0 bg-slate-600'}`} /></button></div>
@@ -77,7 +63,6 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           <div className="mt-5 border-t border-slate-800 pt-4"><button type="button" onClick={() => void handleLogout()} className="flex w-full items-center justify-center gap-2 rounded-sm border border-rose-500/60 bg-rose-950/20 px-4 py-2.5 text-xs font-bold text-rose-300 hover:border-rose-400 hover:bg-rose-950/40 hover:text-rose-200 active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"><LogOut className="h-4 w-4 text-rose-400" />ログアウト (LOG OUT)</button><p className="mt-2 text-center text-[11px] leading-5 text-slate-500 font-mono">現在のアカウントからログアウトします。</p></div>
         </section>}
       </div>
-
       <div className="flex justify-end border-t border-slate-800 bg-[#0d1627] px-5 py-3"><button onClick={() => { playCancelSound(); onClose(); }} className="rounded-sm border border-slate-700 bg-[#0a1120] px-4 py-1.5 text-xs font-bold text-slate-400 hover:border-slate-500 hover:text-slate-100 active:scale-95 transition-all cursor-pointer uppercase tracking-wider">閉じる (CLOSE)</button></div>
     </div>
   </div>;
