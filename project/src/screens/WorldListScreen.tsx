@@ -6,6 +6,7 @@ import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
+import { SettingsButton } from '@/components/SettingsModal';
 import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound, playModalCloseSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
@@ -78,46 +79,107 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0a1120] text-[#f0f0f0] font-mono overflow-x-hidden flex flex-col select-none world-select-screen">
+    <div className="relative min-h-screen bg-[#161922] text-white font-sans overflow-x-hidden flex flex-col select-none world-select-screen">
       <div className="scanline-overlay" />
       <Header title={gameName} onBack={goBack} />
-      <div className="relative z-10 mx-auto w-full max-w-5xl px-4 py-6 sm:px-8 flex-1 flex flex-col">
-        <header className="relative z-10 flex flex-col items-center mb-8 text-center">
-          <div className="double-border px-8 sm:px-12 py-3 bg-[#0a1120] mb-2"><h1 className="pixel-font text-xl sm:text-2xl tracking-widest crt-glow text-[#f0f0f0]">WORLD SELECT</h1></div>
-          <p className="retro-font text-amber-500 tracking-[0.5em] text-sm font-bold">たびの きろく を えらぶ</p>
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-3 sm:px-8 py-5 sm:py-8 flex-1 flex flex-col">
+        <header className="relative z-10 flex flex-col items-center mb-6 text-center">
+          <div className="border-2 border-amber-500/60 bg-[#1f2432] px-6 sm:px-12 py-3 mb-2 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+            <h1 className="text-amber-400 font-black tracking-widest text-base sm:text-lg font-mono crt-glow">
+              UTAPEDIA // WORLD SELECT
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-emerald-400 font-bold tracking-wider opacity-90 font-mono">
+            冒険の書を選択してください // SELECT SAVE SLOT
+          </p>
         </header>
+
         {loading && <Spinner label="セーブデータをよみこみ中..." />}
         {error && <ErrorBanner message={error} />}
-        {!loading && !error && worlds.length === 0 && <div className="double-border relative mb-6 bg-[#10192d] p-8 text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center border-2 border-white bg-[#1a2333] text-amber-400"><Gamepad2 className="h-7 w-7" /></div><p className="retro-font text-lg font-bold text-amber-400">セーブデータがありません</p><p className="retro-font mt-1 text-xs text-zinc-400">「NEW GAME」から最初の冒険の書を作成してください。</p></div>}
-        {!loading && !error && worlds.length > 0 && <main className="relative z-10 grid grid-cols-1 gap-6">{worlds.map((world, index) => <WorldCard key={world.id} slotNumber={index + 1} world={world} meta={worldMeta[world.id]} onOpen={() => { playConfirmSound(); localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id); navigate({ name: 'world', worldId: world.id, worldName: world.name }); }} onEdit={() => { playConfirmSound(); navigate({ name: 'worldCreate', gameId, gameName, worldId: world.id }); }} onDelete={() => handleDelete(world)} />)}</main>}
-        {!loading && !error && <button type="button" onClick={() => { playConfirmSound(); setShowCreateModal(true); }} className="relative overflow-hidden group p-1 w-full text-left mt-6"><div className="w-full border-4 border-dashed border-white/30 p-6 sm:p-8 flex items-center justify-center gap-6 group-hover:border-emerald-500/60 transition-colors bg-[#0a1120]/80"><div className="w-14 h-14 sm:w-16 sm:h-16 border-2 border-white/30 flex items-center justify-center group-hover:border-emerald-500 transition-all shrink-0"><Plus className="w-6 h-6 text-white/40 group-hover:text-emerald-400 group-hover:scale-110 transition-transform" /></div><div className="text-left"><div className="pixel-font text-xs text-white/40 mb-1 group-hover:text-emerald-400">NEW GAME</div><div className="retro-font text-base sm:text-lg font-bold tracking-widest text-white/70 group-hover:text-white">新しいワールドを作成</div></div></div></button>}
-        <footer className="relative z-10 mt-10 pb-4 flex flex-wrap gap-4 justify-between items-center opacity-70"><div className="flex gap-6 retro-font text-[11px] uppercase tracking-widest"><span className="flex items-center gap-2"><div className="w-2 h-2 bg-white rounded-full" /> BACK</span><span className="flex items-center gap-2"><div className="w-2 h-2 bg-amber-500 rounded-full" /> OPTION</span></div><div className="pixel-font text-[9px] sm:text-[10px] text-zinc-500">SURVIVAL_WIKI_OS_V1.02</div></footer>
+
+        {!loading && !error && worlds.length === 0 && (
+          <div className="border-2 border-[#2d3446] relative mb-6 bg-[#1e222f] p-8 text-center shadow-lg">
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center border-2 border-amber-500/50 bg-[#141824] text-amber-400 shadow-md">
+              <Gamepad2 className="h-8 w-8" />
+            </div>
+            <p className="text-base font-bold text-white">セーブデータがありません</p>
+            <p className="mt-2 text-xs sm:text-sm text-slate-300">「+ 新しいワールドを作成」から最初の冒険の書を作成してください。</p>
+          </div>
+        )}
+
+        {!loading && !error && worlds.length > 0 && (
+          <main className="relative z-10 grid grid-cols-1 gap-4 sm:gap-5">
+            {worlds.map((world, index) => (
+              <WorldCard
+                key={world.id}
+                slotNumber={index + 1}
+                world={world}
+                meta={worldMeta[world.id]}
+                onOpen={() => {
+                  playConfirmSound();
+                  localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id);
+                  navigate({ name: 'world', worldId: world.id, worldName: world.name });
+                }}
+                onEdit={() => {
+                  playConfirmSound();
+                  navigate({ name: 'worldCreate', gameId, gameName, worldId: world.id });
+                }}
+                onDelete={() => handleDelete(world)}
+              />
+            ))}
+          </main>
+        )}
+
+        {!loading && !error && (
+          <button
+            type="button"
+            onClick={() => {
+              playConfirmSound();
+              setShowCreateModal(true);
+            }}
+            className="w-full mt-5 bg-amber-500 text-black px-5 py-3.5 sm:py-4 font-bold text-sm sm:text-base hover:bg-amber-400 border-b-4 border-amber-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(245,158,11,0.25)] cursor-pointer min-h-[48px]"
+          >
+            <Plus className="w-5 h-5 stroke-[3]" />
+            <span className="font-mono font-black tracking-wide">+ NEW_WORLD // 新しいワールドを作成</span>
+          </button>
+        )}
+
+        <footer className="relative z-10 mt-auto pt-8 pb-4 border-t border-[#2a3142] flex flex-wrap gap-4 justify-between items-center text-[10px] sm:text-xs text-slate-400 font-mono">
+          <div className="flex gap-4 items-center">
+            <span className="text-emerald-400 font-bold animate-pulse">● ONLINE</span>
+            <span>STORAGE: LOCAL</span>
+            <span>SYSTEM: READY</span>
+          </div>
+          <div className="tracking-wider text-slate-400">
+            UTAPEDIA SURVIVAL LOG
+          </div>
+        </footer>
       </div>
+
+      <SettingsButton onOpenSoundStudio={() => navigate({ name: 'soundStudio' })} />
+
       {showCreateModal && <WorldCreateModal gameId={gameId} onClose={() => setShowCreateModal(false)} onCreated={load} />}
-      {deleteTarget && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playModalCloseSound(); setDeleteTarget(null); } }}><div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="double-border w-full max-w-md bg-[#0a1120] p-6 text-[#f0f0f0] shadow-[0_0_50px_rgba(244,63,94,0.3)]"><div className="text-center"><div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center border-2 border-red-500 bg-red-950/60 text-red-400"><AlertTriangle className="h-6 w-6 animate-pulse" /></div><div className="pixel-font text-[9px] tracking-widest text-red-400">SYSTEM WARNING // WORLD DATA DELETION</div><h2 id="delete-world-title" className="retro-font mt-2 text-lg font-bold text-white">ワールドを削除しますか？</h2><div className="mt-3 border border-rose-500/40 bg-rose-950/20 p-2.5"><p className="retro-font break-words text-sm font-bold text-rose-300">「{deleteTarget.name}」</p></div><p className="retro-font mt-3 text-xs leading-relaxed text-zinc-400">※この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p></div><div className="mt-6 grid grid-cols-2 gap-4 border-t border-rose-500/30 pt-4"><button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} className="pixel-btn bg-zinc-800 text-white hover:bg-zinc-700 py-3 text-xs"><X className="mr-1 inline h-3.5 w-3.5" />CANCEL</button><button type="button" onClick={confirmDelete} className="pixel-btn bg-rose-600 text-white hover:bg-rose-500 py-3 text-xs"><Trash2 className="mr-1 inline h-3.5 w-3.5" />DELETE</button></div></div></div>}
-      <style>{`
-        .world-select-screen { position: relative; isolation: isolate; overflow: hidden; }
-        .world-select-screen::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: .32; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.028) 0, rgba(255,255,255,.028) 1px, transparent 1px, transparent 4px), radial-gradient(circle at 50% 0%, rgba(16,185,129,.09), transparent 42%); }
-        .world-select-screen .double-border { border: 4px double #fff; box-shadow: 0 0 0 2px #0a1120, 0 0 0 4px #fff; }
-        .world-select-screen .pixel-btn { font-family: 'Press Start 2P', monospace; background: #fff; color: #0a1120; box-shadow: 4px 4px 0 #000; transition: all .15s ease; }
-        .world-select-screen .pixel-btn:hover { background: #34d399; }
-        .world-select-screen .pixel-btn:active { transform: translateY(2px); box-shadow: 2px 2px 0 #000; }
-        .world-select-screen .crt-glow { text-shadow: 0 0 8px currentColor; }
-        .save-slot-card { border: 2px solid rgba(100,116,139,.55); box-shadow: inset 0 0 0 1px rgba(100,116,139,.08); border-radius: 4px; }
-        .save-slot-card::after { content: ""; position: absolute; inset: 4px; pointer-events: none; border: 1px solid rgba(100,116,139,.14); border-radius: 2px; }
-        .save-slot-load { min-height: 44px; border: 2px solid rgba(100,116,139,.55); border-radius: 3px; background: #10192d; box-shadow: inset 0 0 0 1px rgba(100,116,139,.08); color: #cbd5e1; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] { border: 4px double #ef4444 !important; box-shadow: 0 0 0 2px #0a1120, 0 0 0 4px #ef4444, 0 0 24px rgba(239,68,68,.2) !important; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > .pixel-font { display: none; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > h2 { margin-top: .5rem; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > div.mt-3 { margin-top: .75rem; border-color: transparent; background: transparent; padding: 0; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > div.mt-3 p { color: #fbbf24; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > .text-center > p.mt-3 { margin-top: .75rem; text-align: center; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 { margin-top: 1.25rem; border-top: 0; padding-top: 0; gap: .75rem; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:first-child { background: #1a2333; color: #e2e8f0; box-shadow: none; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:first-child:hover { background: #202b3e; }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:last-child { background: #b91c1c; color: #fff; border: 2px solid #ef4444; box-shadow: 0 0 14px rgba(239,68,68,.18); }
-        .world-select-screen [role="dialog"][aria-labelledby="delete-world-title"] > div.mt-6 > .pixel-btn:last-child:hover { background: #dc2626; }
-      `}</style>
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playModalCloseSound(); setDeleteTarget(null); } }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="border-2 border-red-500 bg-[#1a1e29] w-full max-w-md p-6 text-white shadow-[0_0_40px_rgba(239,68,68,0.35)]">
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center border-2 border-red-500/50 bg-red-950/50 text-red-400 shadow-md">
+                <AlertTriangle className="h-7 w-7 animate-pulse" />
+              </div>
+              <div className="text-xs tracking-widest text-red-400 font-bold font-mono">SYSTEM WARNING // DATA DELETION</div>
+              <h2 id="delete-world-title" className="mt-1.5 text-lg font-bold text-white">ワールドを削除しますか？</h2>
+              <div className="mt-3 border border-red-500/40 bg-red-950/40 p-3">
+                <p className="break-words text-sm font-bold text-amber-300">「{deleteTarget.name}」</p>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-slate-300">※この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-3 border-t border-[#2a3142] pt-4">
+              <button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} className="min-h-[44px] py-2.5 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-bold flex items-center justify-center border border-slate-600 cursor-pointer"><X className="mr-1 inline h-4 w-4" />CANCEL</button>
+              <button type="button" onClick={confirmDelete} className="min-h-[44px] py-2.5 bg-red-600 text-white hover:bg-red-500 text-xs font-bold flex items-center justify-center border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] cursor-pointer"><Trash2 className="mr-1 inline h-4 w-4" />DELETE</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -147,22 +209,110 @@ function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }: { slot
   const formattedLastRecordDate = meta?.lastLocationDate ? new Date(meta.lastLocationDate).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : null;
   const slotLabel = String(slotNumber).padStart(2, '0');
   return (
-    <article className="save-slot-card selectable-pulse group relative overflow-hidden bg-[#10192d] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-[0_0_26px_rgba(16,185,129,.20)]">
-      {photoUrl && <img src={photoUrl} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.10]" />}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a1120]/[.96] via-[#0a1120]/[.90] to-[#0a1120]/[.72]" />
-      <div className="relative z-10 p-5">
-        <div className="flex justify-between items-start mb-4"><div className="flex items-center gap-3 min-w-0"><span className="pixel-font text-xs text-amber-400 bg-white/10 px-2.5 py-1 border border-white/10 shrink-0">SLOT {slotLabel}</span><h2 className="retro-font text-lg sm:text-xl font-bold tracking-wider truncate text-[#f0f0f0]">{world.name}</h2></div><div className="flex gap-2 shrink-0"><button type="button" onClick={(e) => { e.stopPropagation(); playConfirmSound(); onEdit(); }} title="編集" aria-label={`${world.name}を編集`} className="w-7 h-7 border border-zinc-500 hover:border-white hover:text-white flex items-center justify-center text-zinc-400 bg-[#0a1120] transition-colors active:scale-95"><Pencil className="h-3.5 w-3.5" /></button><button type="button" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="削除" aria-label={`${world.name}を削除`} className="w-7 h-7 border border-red-900 hover:border-red-500 hover:text-red-400 flex items-center justify-center text-red-500 bg-[#0a1120] transition-colors active:scale-95"><Trash2 className="h-3.5 w-3.5" /></button></div></div>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-          <div className="md:col-span-5 flex gap-2 sm:gap-3 overflow-x-auto pb-1 md:pb-0"><MemberBadge name={world.player ?? '---'} photoUrl={playerPhotoUrl} player />{world.members.slice(0, 4).map((member) => <MemberBadge key={member.id} name={member.name} photoUrl={memberPhotoUrls[member.id] ?? ''} />)}{Array.from({ length: Math.max(0, 5 - (1 + Math.min(world.members.length, 4))) }).map((_, idx) => <div key={`empty-${idx}`} className="flex flex-col items-center shrink-0"><div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center border-2 border-dashed border-white/20 bg-black/40"><span className="pixel-font text-[9px] text-zinc-600">--</span></div><span className="retro-font text-[10px] text-zinc-600">EMPTY</span></div>)}</div>
-          <div className="md:col-span-4 grid grid-cols-2 gap-x-4 gap-y-1 md:border-x border-white/20 px-0 md:px-4 py-3 md:py-0 border-y md:border-y-0"><div><div className="retro-font text-[10px] text-amber-400 opacity-80 uppercase">Days</div><div className="pixel-font text-base sm:text-lg crt-glow text-[#f0f0f0]">{String(meta?.dayCount ?? 0).padStart(3, '0')}</div></div><div><div className="retro-font text-[10px] text-emerald-400 opacity-80 uppercase">Records</div><div className="pixel-font text-base sm:text-lg crt-glow text-[#f0f0f0]">{String(meta?.recordCount ?? 0).padStart(3, '0')}</div></div><div className="col-span-2 mt-1"><div className="retro-font text-[10px] text-cyan-400 opacity-80 uppercase">Last Location</div><div className="retro-font text-xs truncate text-[#f0f0f0]">{meta?.lastLocationName ?? '--- (未記録)'}</div></div></div>
-          <div className="md:col-span-3 flex justify-end"><button type="button" onClick={onOpen} className="save-slot-load w-full md:w-auto px-6 py-3.5 text-xs sm:text-sm tracking-wider flex items-center justify-center gap-2 font-mono font-bold text-slate-300 transition-all hover:border-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 hover:shadow-[0_0_18px_rgba(16,185,129,.18)] active:scale-[.98]"><span>LOAD</span><ChevronRight className="h-4 w-4" /></button></div>
+    <article
+      onClick={onOpen}
+      className="group relative overflow-hidden bg-[#1e2330] border-2 border-[#2d3548] hover:border-amber-500/80 transition-all duration-150 hover:shadow-[0_4px_24px_rgba(0,0,0,0.5)] cursor-pointer"
+    >
+      {photoUrl && <img src={photoUrl} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10" />}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#1e2330]/98 via-[#1e2330]/95 to-[#1e2330]/85" />
+      <div className="relative z-10 p-4 sm:p-5">
+        <div className="flex justify-between items-start mb-3 gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-xs font-bold text-amber-400 bg-amber-500/15 px-2.5 py-1 border border-amber-500/40 shrink-0 font-mono shadow-sm">
+              SLOT_{slotLabel}
+            </span>
+            <h2 className="text-base sm:text-lg font-bold tracking-wide truncate text-white group-hover:text-amber-300 transition-colors">
+              {world.name}
+            </h2>
+          </div>
+          <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={onEdit}
+              title="編集"
+              aria-label={`${world.name}を編集`}
+              className="min-h-[36px] min-w-[36px] border border-slate-600 hover:border-amber-400 hover:text-amber-400 flex items-center justify-center text-slate-300 bg-[#141824] transition-colors cursor-pointer"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              title="削除"
+              aria-label={`${world.name}を削除`}
+              className="min-h-[36px] min-w-[36px] border border-slate-600 hover:border-red-500 hover:text-red-400 flex items-center justify-center text-red-400 bg-[#141824] transition-colors cursor-pointer"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <div className="mt-3 text-right text-[10px] text-zinc-500 retro-font uppercase">Last Record: {formattedLastRecordDate || 'NO DATA'}</div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center my-2">
+          <div className="md:col-span-5 flex gap-2.5 overflow-x-auto pb-1 md:pb-0">
+            <MemberBadge name={world.player ?? '---'} photoUrl={playerPhotoUrl} player />
+            {world.members.slice(0, 4).map((member) => (
+              <MemberBadge key={member.id} name={member.name} photoUrl={memberPhotoUrls[member.id] ?? ''} />
+            ))}
+            {Array.from({ length: Math.max(0, 4 - (1 + Math.min(world.members.length, 3))) }).map((_, idx) => (
+              <div key={`empty-${idx}`} className="flex flex-col items-center shrink-0">
+                <div className="w-11 h-11 flex items-center justify-center border border-dashed border-slate-700 bg-slate-900/50">
+                  <span className="text-[10px] text-slate-500 font-mono">--</span>
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1 font-mono">EMPTY</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="md:col-span-4 grid grid-cols-2 gap-x-4 gap-y-1.5 md:border-x border-[#2d3548] px-0 md:px-4 py-2 md:py-0 border-y md:border-y-0 text-xs">
+            <div>
+              <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">DAYS</div>
+              <div className="text-base sm:text-lg font-black text-emerald-400 font-mono">{String(meta?.dayCount ?? 0).padStart(3, '0')} 日</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">RECORDS</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 font-mono">{String(meta?.recordCount ?? 0).padStart(3, '0')} 件</div>
+            </div>
+            <div className="col-span-2 mt-1">
+              <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">LAST_CHECKPOINT</div>
+              <div className="text-xs truncate text-slate-200 font-medium">{meta?.lastLocationName ?? '--- (未記録)'}</div>
+            </div>
+          </div>
+
+          <div className="md:col-span-3 flex justify-end mt-1 md:mt-0" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={onOpen}
+              className="w-full md:w-auto px-6 py-3 text-xs sm:text-sm font-black tracking-wider flex items-center justify-center gap-2 bg-amber-500 text-black hover:bg-amber-400 border-b-3 border-amber-700 active:border-b-0 active:translate-y-0.5 transition-all shadow-[0_2px_12px_rgba(245,158,11,0.25)] cursor-pointer min-h-[44px]"
+            >
+              <span>▶ 冒険を再開 (LOAD)</span>
+              <ChevronRight className="h-4 w-4 stroke-[3]" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-3 flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 font-mono border-t border-[#2a3142] pt-2">
+          <span className="text-emerald-400 font-bold">● READY</span>
+          <span>最終記録: {formattedLastRecordDate || 'NO_DATA'}</span>
+        </div>
       </div>
     </article>
   );
 }
 
 function MemberBadge({ name, photoUrl, player = false }: { name: string; photoUrl: string; player?: boolean }) {
-  return <div className="flex flex-col items-center shrink-0 min-w-[56px]"><div className="pixel-avatar w-12 h-12 sm:w-14 sm:h-14 overflow-hidden mb-1 flex items-center justify-center relative border-2 border-white bg-[#1a2333]">{photoUrl ? <img src={photoUrl} alt="" className="w-full h-full object-cover pixelated" /> : <div className="w-full h-full flex items-center justify-center pixel-font text-xs text-emerald-300 bg-[#162032]">{name.slice(0, 1)}</div>}</div><span className="retro-font text-[10px] opacity-80 truncate max-w-[64px] text-center">{name}</span>{player && <span className="pixel-font text-[7px] text-emerald-500">PLAYER</span>}</div>;
+  return (
+    <div className="flex flex-col items-center shrink-0 min-w-[50px]">
+      <div className="w-11 h-11 overflow-hidden mb-1 flex items-center justify-center relative border border-slate-600 bg-[#141824] shadow-sm">
+        {photoUrl ? (
+          <img src={photoUrl} alt="" className="w-full h-full object-cover pixelated" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-xs font-black text-emerald-400 bg-slate-900 font-mono">
+            {name.slice(0, 1)}
+          </div>
+        )}
+      </div>
+      <span className="text-[10px] text-slate-300 truncate max-w-[56px] text-center font-medium">{name}</span>
+      {player && <span className="text-[8px] text-amber-400 font-black font-mono">CMD</span>}
+    </div>
+  );
 }
