@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { playConfirmSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
+import { playConfirmSound, playInputFocusSound } from '@/lib/sound';
 
 export function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -84,7 +84,6 @@ export function AuthScreen() {
           <button
             type="submit"
             disabled={loading}
-            onPointerDown={playNewRecordSound}
             className="w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? '処理中…' : isSignUp ? 'アカウントを作成' : 'ログイン'}
