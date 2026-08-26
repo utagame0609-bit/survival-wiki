@@ -37,7 +37,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   const handleBgmChannelToggle = (channel: keyof BgmChannelSettings) => { setBgmChannelEnabled(channel, !bgmChannels[channel]); playToggleSound(); };
   const handleInstall = async () => { playToggleSound(); if (!installPrompt) { window.alert('この環境ではアプリのインストール確認画面を直接開けません。ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。'); return; } await installPrompt.prompt(); await installPrompt.userChoice; onInstallPromptUsed(); };
   const handleLogout = async () => { playCancelSound(); const { error } = await supabase.auth.signOut(); if (error) console.error('Failed to log out:', error); };
-  if (soundStudioOpen && import.meta.env.DEV) return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;
+  if (soundStudioOpen) return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;
 
   const channelRows: Array<{ key: keyof BgmChannelSettings; label: string; detail: string }> = [
     { key: 'lead', label: 'メロディ', detail: 'CH1 // PULSE LEAD' },
