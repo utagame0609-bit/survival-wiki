@@ -1,26 +1,174 @@
-import { ArrowLeft, Play, Volume2, Waves } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { playNewRecordSound, playCursorMoveSound } from '@/lib/sound';
+import { Volume2, Play, Waves, Radio, ArrowLeft } from 'lucide-react';
+import { Header } from '@/components/Navigation';
+import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { playSoundCandidatePreview } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
-import { SOUND_CANDIDATES, SoundCandidate } from '@/lib/soundCandidates';
-
-const categoryOrder = ['system', 'screen', 'action', 'wiki'] as const;
+import { playCancelSound, playConfirmSound, playCursorMoveSound, playNewRecordSound } from '@/lib/sound';
 
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
-  const [reverbAmount, setReverbAmount] = useState(Math.round(getStoredReverbAmount() * 100));
+  const [reverb, setReverb] = useState<number>(() => Math.round(getStoredReverbAmount() * 100));
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [activePlayingId, setActivePlayingId] = useState<string | null>(null);
 
-  useEffect(() => subscribeToReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
+  useEffect(() => subscribeToReverbAmount((value) => setReverb(Math.round(value * 100))), []);
 
   const handleReverbChange = (value: number) => {
+    setReverb(value);
     setStoredReverbAmount(value / 100);
   };
 
-  return <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#050811] text-slate-100 font-mono"><header className="sticky top-0 z-10 border-b border-slate-800 bg-[#070c18]/95 px-4 py-3 backdrop-blur-md"><div className="mx-auto flex max-w-7xl items-center gap-3"><button type="button" onClick={onBack} className="flex items-center gap-1.5 rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-300 hover:border-amber-500 hover:text-amber-400"><ArrowLeft className="h-4 w-4" /> 戻る</button><div className="min-w-0 flex-1"><p className="text-[10px] font-bold tracking-[0.2em] text-emerald-400">DEVELOPMENT AUDIO // 開発音源</p><h1 className="text-base font-bold text-amber-400">16bit × Switch Sound Studio</h1></div><div className="hidden items-center gap-2 rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-[10px] text-slate-400 sm:flex"><Volume2 className="h-3.5 w-3.5 text-cyan-400" /> アプリ内試聴環境</div></div></header><main className="mx-auto max-w-7xl p-4 sm:p-6"><section className="rounded-sm border border-slate-800 bg-[#0a1120] p-5 shadow-[0_0_30px_rgba(0,0,0,0.35)]"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-800 pb-4"><div><p className="text-[10px] font-bold tracking-widest text-emerald-400">SOUND DEVELOPMENT CONSOLE</p><h2 className="mt-1 text-lg font-black text-slate-100">音源候補</h2><p className="mt-1 text-xs leading-5 text-slate-500">正式採用前のSEをアプリ内で確認するための開発画面</p></div><div className="flex items-center gap-3 rounded-sm border border-cyan-500/40 bg-cyan-950/20 px-3 py-2"><Waves className="h-4 w-4 text-cyan-400" /><div><div className="flex items-center gap-2"><span className="text-[10px] font-bold text-slate-400">REVERB</span><span className="text-xs font-bold text-cyan-300">{reverbAmount}%</span></div><input aria-label="開発音源の残響量" type="range" min="0" max="100" step="1" value={reverbAmount} onChange={(event)=>handleReverbChange(Number(event.target.value))} className="mt-1 w-32 accent-cyan-500 cursor-pointer" /></div></div><span className="rounded-sm border border-amber-500/50 bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-400">DEV ONLY</span></div><div className="mt-5 space-y-7">{categoryOrder.map((category)=>{const candidates=SOUND_CANDIDATES.filter((sound)=>sound.category===category);if(!candidates.length)return null;return <section key={category}><div className="mb-3 flex items-center gap-2 border-b border-slate-800/80 pb-2"><div className="h-2 w-2 rounded-full bg-amber-400"/><h3 className="text-sm font-bold text-slate-100">{candidates[0].categoryJa}</h3><span className="text-[10px] text-slate-500">({candidates.length}種)</span></div><div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">{candidates.map((sound)=><SoundCandidateCard key={sound.id} sound={sound}/>)}</div></section>})}</div></section></main></div>;
-}
+  const categories = [
+    { id: 'all', label: '全SE (ALL)' },
+    { id: 'system', label: 'システム操作音' },
+    { id: 'screen', label: '画面・ナビゲーション音' },
+    { id: 'action', label: 'キャラクター＆アクション音' },
+    { id: 'wiki', label: 'Wiki編纂・AI演出音' },
+  ];
 
-function SoundCandidateCard({sound}:{sound:SoundCandidate}) {
-  const playable = ['cursor_move','confirm','cancel','warning','tab_switch','modal_open_close','dialogue_char','new_record','chest_open','achievement','wiki_generating_noise','wiki_complete'].includes(sound.id);
-  const preview = () => { if(sound.id==='cursor_move') playCursorMoveSound(); else if(sound.id==='new_record') playNewRecordSound(); else playSoundCandidatePreview(sound.id); };
-  return <article className="rounded-sm border border-slate-800 bg-[#0d1627] p-4 shadow-[0_0_18px_rgba(0,0,0,0.18)]"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h4 className="text-sm font-bold text-slate-100">{sound.nameJa}</h4><p className="mt-1 text-[11px] text-slate-500">{sound.name}</p></div><span className="shrink-0 rounded-sm border border-amber-500/50 px-1.5 py-0.5 text-[9px] font-bold text-amber-400">{sound.category.toUpperCase()}</span></div><p className="mt-3 text-xs leading-5 text-slate-400">{sound.description}</p><div className="mt-3 rounded-sm border border-slate-800 bg-[#070c18] px-3 py-2"><p className="text-[10px] leading-4 text-cyan-300">✣ {sound.toneInfo}</p></div><p className="mt-3 text-[11px] leading-5 text-slate-500">{sound.keyCharacteristic}</p>{playable&&<button type="button" onClick={preview} className="mt-4 flex w-full items-center justify-center gap-2 rounded-sm border border-amber-500/70 bg-transparent px-3 py-2 text-xs font-bold text-amber-400 hover:bg-amber-500/10"><Play className="h-3.5 w-3.5 fill-current"/> 試聴</button>}</article>;
+  const filteredCandidates = SOUND_CANDIDATES.filter((candidate) =>
+    selectedCategory === 'all' ? true : candidate.category === selectedCategory,
+  );
+
+  const handlePlay = (candidate: SoundCandidate) => {
+    setActivePlayingId(candidate.id);
+    if (candidate.id === 'cursor_move') {
+      playCursorMoveSound();
+    } else if (candidate.id === 'new_record') {
+      playNewRecordSound();
+    } else {
+      playSoundCandidatePreview(candidate.id);
+    }
+    window.setTimeout(() => setActivePlayingId(null), 500);
+  };
+
+  return (
+    <div className="relative min-h-screen bg-[#161922] text-[#f0f0f0] font-sans flex flex-col select-none overflow-x-hidden">
+      <div className="scanline-overlay" />
+      <Header title="SOUND STUDIO // 16BIT 音響研究所" onBack={onBack} />
+
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-3.5 py-4 sm:py-6 sm:px-8 flex-1 flex flex-col space-y-5">
+        <div className="bg-[#1e2330] border-2 border-amber-500/70 p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span className="text-[10px] sm:text-xs font-bold text-emerald-400 font-mono uppercase">
+                WEB AUDIO API 16BIT SYNTHESIS ENGINE
+              </span>
+            </div>
+            <h1 className="text-base sm:text-lg font-black text-white">効果音・BGM デザインコンソール</h1>
+            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+              本番アプリへ移植可能な各UI・画面アクション用SEの試聴・検証用スタジオです。
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              playCancelSound();
+              onBack();
+            }}
+            className="min-h-[42px] px-4 py-2 bg-[#141824] border-2 border-slate-700 text-slate-200 hover:text-amber-400 hover:border-amber-500 text-xs sm:text-sm font-bold flex items-center gap-1.5 self-start md:self-auto cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>アプリへ戻る</span>
+          </button>
+        </div>
+
+        <div className="p-4 sm:p-5 bg-[#1e2330] border-2 border-[#2d3548] space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-400 font-bold text-xs sm:text-sm">
+              <Waves className="w-4 h-4" />
+              <span>グローバル空間反響 (MASTER REVERB)</span>
+            </div>
+            <span className="text-sm font-bold text-amber-400 font-mono">{reverb}%</span>
+          </div>
+          <input
+            aria-label="サウンドスタジオの残響量"
+            type="range"
+            min="0"
+            max="100"
+            value={reverb}
+            onChange={(event) => handleReverbChange(Number(event.target.value))}
+            className="w-full h-2 bg-[#12151f] rounded-lg appearance-none cursor-pointer accent-amber-500"
+          />
+          <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 font-mono">
+            <span>DRY (0% - クリスプ・直接音)</span>
+            <span>DUNGEON (50% - 地下洞窟)</span>
+            <span>CATHEDRAL (100% - 深宇宙)</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 border-b-2 border-[#2d3548] pb-3">
+          {categories.map((category) => {
+            const isSelected = selectedCategory === category.id;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => {
+                  playConfirmSound();
+                  setSelectedCategory(category.id);
+                }}
+                className={`min-h-[40px] px-3.5 py-2 text-xs sm:text-sm font-bold transition-all border-2 cursor-pointer ${
+                  isSelected
+                    ? 'border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
+                    : 'border-slate-700 bg-[#1e2330] text-slate-300 hover:text-white hover:border-slate-500'
+                }`}
+              >
+                {category.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          {filteredCandidates.map((candidate) => {
+            const isPlaying = activePlayingId === candidate.id;
+            return (
+              <div
+                key={candidate.id}
+                className={`bg-[#1e2330] border-2 p-4 flex flex-col justify-between transition-all ${
+                  isPlaying
+                    ? 'border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)] bg-[#142820]'
+                    : 'border-[#2d3548] hover:border-slate-500'
+                }`}
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div>
+                      <span className="text-[10px] px-2 py-0.5 bg-[#141824] border border-slate-700 text-slate-300 font-bold">
+                        {candidate.categoryJa}
+                      </span>
+                      <h3 className="font-bold text-sm sm:text-base text-white mt-1.5">{candidate.nameJa}</h3>
+                      <p className="text-[10px] text-slate-400 font-mono">{candidate.name}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handlePlay(candidate)}
+                      className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                        isPlaying
+                          ? 'border-emerald-400 bg-emerald-400 text-black scale-105 shadow-[0_0_12px_#34d399]'
+                          : 'border-amber-500 bg-amber-500/20 text-amber-300 hover:bg-amber-400 hover:text-black active:scale-95'
+                      }`}
+                      title="試聴・再生"
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-200 leading-relaxed mb-3">{candidate.description}</p>
+                </div>
+                <div className="pt-2.5 border-t border-[#2d3548] space-y-1 text-[10px] sm:text-xs font-mono text-slate-300">
+                  <div className="flex items-center justify-between text-emerald-400 font-bold">
+                    <span>TONE: {candidate.toneInfo}</span>
+                  </div>
+                  <div className="text-slate-400">演出: {candidate.keyCharacteristic}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
