@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { playNewRecordSound, playInputFocusSound } from '@/lib/sound';
+import { playConfirmSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 
 export function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -12,7 +12,6 @@ export function AuthScreen() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    playNewRecordSound();
     setLoading(true);
     setMessage('');
     setError('');
@@ -94,7 +93,7 @@ export function AuthScreen() {
 
         <button
           type="button"
-          onPointerDown={playNewRecordSound}
+          onPointerDown={playConfirmSound}
           onClick={() => {
             setIsSignUp((value) => !value);
             setMessage('');
