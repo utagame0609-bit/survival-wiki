@@ -27,21 +27,23 @@ type SoundProfile = {
   noise?: boolean;
 };
 
+// V2 master profiles for the eight existing application sound routes.
+// The SoundType keys and all public playback functions remain unchanged.
 const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   confirm: { frequency: 880, duration: 0.06, volume: 0.22, type: 'square', secondFrequency: 1760, secondDelay: 0.045 },
   cancel: { frequency: 659.25, endFrequency: 329.63, duration: 0.14, volume: 0.12, type: 'square' },
-  hover: { frequency: 1200, endFrequency: 600, duration: 0.03, volume: 0.05, type: 'triangle' },
+  hover: { frequency: 2200, duration: 0.022, volume: 0.045, type: 'square' },
   tabSwitch: { frequency: 320, endFrequency: 640, duration: 0.06, volume: 0.18, type: 'triangle' },
-  footstep: { frequency: 155, endFrequency: 85, duration: 0.11, volume: 0.32, type: 'triangle', noise: true },
-  cardOpen: { frequency: 250, endFrequency: 500, duration: 0.09, volume: 0.15, type: 'sine' },
-  cardClose: { frequency: 450, endFrequency: 200, duration: 0.07, volume: 0.12, type: 'sine' },
+  footstep: { frequency: 140, endFrequency: 65, duration: 0.065, volume: 0.28, type: 'triangle', noise: true },
+  cardOpen: { frequency: 520, endFrequency: 1480, duration: 0.095, volume: 0.15, type: 'square' },
+  cardClose: { frequency: 980, endFrequency: 320, duration: 0.085, volume: 0.12, type: 'triangle' },
   modalOpen: { frequency: 523.25, duration: 0.14, volume: 0.12, type: 'sine', secondFrequency: 659.25, secondDelay: 0.05 },
   modalClose: { frequency: 659.25, duration: 0.1, volume: 0.1, type: 'sine', secondFrequency: 440, secondDelay: 0.04 },
-  add: { frequency: 587.33, duration: 0.18, volume: 0.15, type: 'sine', secondFrequency: 880, secondDelay: 0.07 },
-  save: { frequency: 783.99, duration: 0.11, volume: 0.12, type: 'sine', secondFrequency: 1046.5, secondDelay: 0.06 },
+  add: { frequency: 783.99, duration: 0.13, volume: 0.15, type: 'square', secondFrequency: 1046.5, secondDelay: 0.055 },
+  save: { frequency: 1046.5, duration: 0.18, volume: 0.12, type: 'square', secondFrequency: 1568, secondDelay: 0.065 },
   delete: { frequency: 440, endFrequency: 65, duration: 0.28, volume: 0.16, type: 'sawtooth', noise: true },
-  toggle: { frequency: 900, endFrequency: 300, duration: 0.02, volume: 0.08, type: 'square' },
-  error: { frequency: 220, endFrequency: 65, duration: 0.24, volume: 0.18, type: 'sawtooth', noise: true },
+  toggle: { frequency: 1800, endFrequency: 850, duration: 0.04, volume: 0.08, type: 'square' },
+  error: { frequency: 185, endFrequency: 170, duration: 0.22, volume: 0.18, type: 'sawtooth' },
 };
 
 const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
