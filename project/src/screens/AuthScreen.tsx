@@ -12,7 +12,6 @@ export function AuthScreen() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    playConfirmSound();
     setLoading(true);
     setMessage('');
     setError('');
@@ -58,7 +57,7 @@ export function AuthScreen() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              onFocus={playInputFocusSound}
+              onPointerDown={playInputFocusSound}
               autoComplete="email"
               required
               className="mt-2 w-full rounded-xl border border-[#3a3d34] bg-[#11120f] px-4 py-3 text-stone-100 outline-none focus:border-emerald-600"
@@ -71,7 +70,7 @@ export function AuthScreen() {
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              onFocus={playInputFocusSound}
+              onPointerDown={playInputFocusSound}
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
               minLength={6}
               required
@@ -85,6 +84,7 @@ export function AuthScreen() {
           <button
             type="submit"
             disabled={loading}
+            onPointerDown={playConfirmSound}
             className="w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? '処理中…' : isSignUp ? 'アカウントを作成' : 'ログイン'}
@@ -93,8 +93,8 @@ export function AuthScreen() {
 
         <button
           type="button"
+          onPointerDown={playConfirmSound}
           onClick={() => {
-            playConfirmSound();
             setIsSignUp((value) => !value);
             setMessage('');
             setError('');
