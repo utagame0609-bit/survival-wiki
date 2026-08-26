@@ -15,7 +15,10 @@ export type SoundType =
   | 'delete'
   | 'toggle'
   | 'error'
-  | 'inputFocus';
+  | 'inputFocus'
+  | 'dangerConfirm'
+  | 'recordSelect'
+  | 'chestClose';
 
 type SoundProfile = {
   frequency: number;
@@ -46,6 +49,9 @@ const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   toggle: { frequency: 1800, endFrequency: 850, duration: 0.04, volume: 0.08, type: 'square' },
   error: { frequency: 185, endFrequency: 170, duration: 0.22, volume: 0.18, type: 'sawtooth' },
   inputFocus: { frequency: 1600, endFrequency: 800, duration: 0.028, volume: 0.08, type: 'sine' },
+  dangerConfirm: { frequency: 90, endFrequency: 45, duration: 0.38, volume: 0.2, type: 'sine' },
+  recordSelect: { frequency: 680, endFrequency: 340, duration: 0.05, volume: 0.14, type: 'triangle' },
+  chestClose: { frequency: 1400, endFrequency: 700, duration: 0.14, volume: 0.16, type: 'square' },
 };
 
 const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
@@ -260,6 +266,9 @@ export const playDeleteSound = () => playSound('delete');
 export const playToggleSound = () => playSound('toggle');
 export const playErrorSound = () => playSound('error');
 export const playInputFocusSound = () => playSound('inputFocus');
+export const playDangerConfirmSound = () => playSound('dangerConfirm');
+export const playRecordSelectSound = () => playSound('recordSelect');
+export const playChestCloseSound = () => playSound('chestClose');
 
 export const playNewRecordSound = () => {
   const context = getAudioContext();
