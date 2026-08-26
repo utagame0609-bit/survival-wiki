@@ -7,6 +7,7 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
 import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound, playModalCloseSound } from '@/lib/sound';
+import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
 type WorldMeta = {
   recordCount: number;
@@ -60,6 +61,12 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
   };
 
   useEffect(() => { load(); }, [gameId]);
+
+  useEffect(() => {
+    playWorldBgm();
+    return () => stopWorldBgm(300);
+  }, []);
+
   const handleDelete = (world: WorldWithMembers) => { playErrorSound(); setDeleteTarget(world); };
   const confirmDelete = async () => {
     if (!deleteTarget) return;
