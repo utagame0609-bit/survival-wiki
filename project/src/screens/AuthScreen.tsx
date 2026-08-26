@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { playConfirmSound, playInputFocusSound } from '@/lib/sound';
+import { playConfirmSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 
 export function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -34,6 +34,7 @@ export function AuthScreen() {
       });
 
       if (signInError) throw signInError;
+      playNewRecordSound();
       setMessage('ログインしました。');
     } catch (e) {
       setError(e instanceof Error ? e.message : '認証に失敗しました。');
