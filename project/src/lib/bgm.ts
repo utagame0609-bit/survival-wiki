@@ -1,7 +1,10 @@
 import { getSoundVolume, isSoundEnabled } from './sound';
+import { getBgmChannelSettings, type BgmChannelKey } from './bgmSettings';
 
 type Note = { step: number; duration: number; freq: number; velocity: number };
 type Drum = { step: number; type: 'kick' | 'snare' | 'hihat' | 'openhat'; velocity: number };
+
+type BgmNoteChannel = Exclude<BgmChannelKey, 'drums'>;
 
 const BPM = 96;
 const TOTAL_STEPS = 192;
@@ -87,7 +90,12 @@ function volumeMultiplier(): number {
   return (getSoundVolume() / 50) * MASTER_BGM_VOLUME;
 }
 
-function scheduleNote(note: Note, time: number, kind: 'lead' | 'harmony' | 'bass'): void {
+function isChannelEnabled(channel: BgmChannelKey): boolean {
+  return getBgmChannelSettings()[channel];
+}
+
+function scheduleNote(note: Note, time: number, kind: BgmNoteChannel): void {
+  if (!isChannelEnabled(kind)) return;
   const ctx = getContext();
   if (!ctx || !masterGain || !isSoundEnabled()) return;
   const osc = ctx.createOscillator();
@@ -106,6 +114,7 @@ function scheduleNote(note: Note, time: number, kind: 'lead' | 'harmony' | 'bass
 }
 
 function scheduleDrum(drum: Drum, time: number): void {
+  if (!isChannelEnabled('drums')) return;
   const ctx = getContext();
   if (!ctx || !masterGain || !isSoundEnabled()) return;
   const gain = ctx.createGain();
@@ -122,7 +131,7 @@ function scheduleDrum(drum: Drum, time: number): void {
   const data = buffer.getChannelData(0);
   for (let i = 0; i < data.length; i += 1) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * (drum.type === 'snare' ? .02 : .08)));
   const source = ctx.createBufferSource(); source.buffer = buffer;
-  const filter = ctx.createBiquadFilter(); filter.type = drum.type === 'snare' ? 'highpass' : 'highpass'; filter.frequency.setValueAtTime(drum.type === 'snare' ? 900 : 7000, time);
+  const filter = ctx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.setValueAtTime(drum.type === 'snare' ? 900 : 7000, time);
   source.connect(filter); filter.connect(gain); gain.connect(masterGain); source.start(time); source.stop(time + duration + .01);
 }
 
