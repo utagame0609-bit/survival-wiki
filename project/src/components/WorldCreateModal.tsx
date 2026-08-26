@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X, Camera } from 'lucide-react';
 import { createWorld, fetchWorld, saveWorldMemberPhoto, saveWorldPlayerPhoto } from '@/lib/db';
-import { playCloseSound, playModalCloseSound, playNewRecordSound } from '@/lib/sound';
+import { playAddSound, playCloseSound, playDeleteSound, playModalCloseSound, playNewRecordSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 
 type MemberDraft = { name: string; photo: File | null };
@@ -100,7 +100,7 @@ export function WorldCreateModal({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">COMPANION MEMBERS // 関連同行メンバー</label>
-              <button type="button" onClick={() => setMembers([...members, { name: '', photo: null }])} className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-wider cursor-pointer"><Plus className="w-3.5 h-3.5" />スロット追加</button>
+              <button type="button" onClick={() => { playAddSound(); setMembers([...members, { name: '', photo: null }]); }} className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-wider cursor-pointer"><Plus className="w-3.5 h-3.5" />スロット追加</button>
             </div>
             <div className="space-y-2">
               {members.map((member, index) => (
@@ -108,7 +108,7 @@ export function WorldCreateModal({
                   <span className="text-[10px] font-mono text-slate-500 font-bold w-6 text-center">#{index + 1}</span>
                   <PhotoPicker file={member.photo} onChange={(photo) => { const next = [...members]; next[index] = { ...next[index], photo }; setMembers(next); }} label={`メンバー${index + 1}写真`} />
                   <input type="text" value={member.name} onChange={(event) => { const next = [...members]; next[index] = { ...next[index], name: event.target.value }; setMembers(next); }} placeholder={`メンバー${index + 1} (例: リリス)`} className="modal-input flex-1 text-xs" />
-                  {members.length > 1 && <button type="button" onClick={() => setMembers(members.filter((_, i) => i !== index))} className="w-8 h-8 rounded-sm text-slate-500 hover:text-rose-400 hover:bg-rose-950/30 flex items-center justify-center transition-colors cursor-pointer" aria-label="メンバーを削除"><X className="w-4 h-4" /></button>}
+                  {members.length > 1 && <button type="button" onClick={() => { playDeleteSound(); setMembers(members.filter((_, i) => i !== index)); }} className="w-8 h-8 rounded-sm text-slate-500 hover:text-rose-400 hover:bg-rose-950/30 flex items-center justify-center transition-colors cursor-pointer" aria-label="メンバーを削除"><X className="w-4 h-4" /></button>}
                 </div>
               ))}
             </div>
