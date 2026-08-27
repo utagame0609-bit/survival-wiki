@@ -12,6 +12,7 @@ const DEFAULT_SOUND_VOLUME = 50;
 const SOURCE_LEVEL = 4.5;
 let audioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
+let bgmGain: GainNode | null = null;
 let soundReverb: SoundReverb | null = null;
 let enabled = true;
 let soundVolume = DEFAULT_SOUND_VOLUME;
@@ -41,17 +42,20 @@ function getAudioContext(): AudioContext | null {
     if (!AudioContextClass) return null;
     audioContext = new AudioContextClass();
     masterGain = audioContext.createGain();
+    bgmGain = audioContext.createGain();
     masterGain.gain.setValueAtTime(getMasterGainValue(), audioContext.currentTime);
+    bgmGain.gain.setValueAtTime(1, audioContext.currentTime);
     soundReverb = createSwitchStyleReverb(audioContext);
     masterGain.connect(soundReverb.input);
+    bgmGain.connect(soundReverb.input);
     soundReverb.output.connect(audioContext.destination);
   }
   if (audioContext.state === 'suspended') void audioContext.resume();
   return audioContext;
 }
 
-function tone(c: AudioContext, frequency: number, time: number, duration: number, volume: number, type: OscillatorType, endFrequency?: number): void {
-  if (!masterGain) return;
+function tone(c: AudioContext, frequency: number, time: number, duration: number, volume: number, type: OscillatorType, endFrequency?: number, destination: GainNode | null = masterGain): void {
+  if (!destination) return;
   const oscillator = c.createOscillator();
   const gain = c.createGain();
   oscillator.type = type;
@@ -61,13 +65,13 @@ function tone(c: AudioContext, frequency: number, time: number, duration: number
   gain.gain.linearRampToValueAtTime(volume * SOURCE_LEVEL, time + 0.004);
   gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
   oscillator.connect(gain);
-  gain.connect(masterGain);
+  gain.connect(destination);
   oscillator.start(time);
   oscillator.stop(time + duration + 0.01);
 }
 
-function hiss(c: AudioContext, time: number, duration: number, volume: number, type: BiquadFilterType, frequency: number): void {
-  if (!masterGain) return;
+function hiss(c: AudioContext, time: number, duration: number, volume: number, type: BiquadFilterType, frequency: number, destination: GainNode | null = masterGain): void {
+  if (!destination) return;
   const bufferSize = Math.max(1, Math.floor(c.sampleRate * duration));
   const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
   const data = buffer.getChannelData(0);
@@ -82,7 +86,7 @@ function hiss(c: AudioContext, time: number, duration: number, volume: number, t
   gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
   source.connect(filter);
   filter.connect(gain);
-  gain.connect(masterGain);
+  gain.connect(destination);
   source.start(time);
   source.stop(time + duration);
 }
@@ -224,8 +228,8 @@ function createWikipediaBgm(c: AudioContext): ActiveNpcBgm {
     const t = audioContext.currentTime;
     const m = melodyNotes[step % 16];
     const b = bassNotes[step % 16];
-    tone(c, m, t, 0.12, 0.08, 'square');
-    if (b) tone(c, b, t, 0.18, 0.05, 'triangle');
+    tone(c, m, t, 0.12, 0.08, 'square', undefined, bgmGain);
+    if (b) tone(c, b, t, 0.18, 0.05, 'triangle', undefined, bgmGain);
     step = (step + 1) % 16;
   }, stepTime * 1000);
   return { id: 'npc_bgm_wikipedia', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
@@ -244,15 +248,15 @@ function createScpBgm(c: AudioContext): ActiveNpcBgm {
   droneGain.gain.value = 0.04;
   droneOsc.connect(droneFilter);
   droneFilter.connect(droneGain);
-  droneGain.connect(masterGain!);
+  droneGain.connect(bgmGain!);
   droneOsc.start();
   let step = 0;
   const pulseNotes = [110, 110, 123.47, 110, 146.83, 123.47, 110, 98];
   const interval = window.setInterval(() => {
     if (!audioContext || audioContext.state === 'suspended') return;
     const t = audioContext.currentTime;
-    tone(c, pulseNotes[step % pulseNotes.length], t, 0.16, 0.05, 'square');
-    if (step % 4 === 0) hiss(c, t, 0.09, 0.02, 'bandpass', 2400);
+    tone(c, pulseNotes[step % pulseNotes.length], t, 0.16, 0.05, 'square', undefined, bgmGain);
+    if (step % 4 === 0) hiss(c, t, 0.09, 0.02, 'bandpass', 2400, bgmGain);
     step += 1;
   }, stepTime * 1000);
   return {
@@ -277,15 +281,15 @@ function createAncientBgm(c: AudioContext): ActiveNpcBgm {
     const t = audioContext.currentTime;
     const note = luteNotes[step % 16];
     if (note) {
-      tone(c, note, t, 0.28, 0.1, 'triangle');
-      tone(c, note * 0.5, t, 0.32, 0.06, 'sine');
+      tone(c, note, t, 0.28, 0.1, 'triangle', undefined, bgmGain);
+      tone(c, note * 0.5, t, 0.32, 0.06, 'sine', undefined, bgmGain);
     }
     if (step % 8 === 0) {
-      tone(c, 1046.5, t, 0.8, 0.05, 'sine');
-      tone(c, 1567.98, t, 0.6, 0.03, 'triangle');
-      tone(c, 1661.22, t, 0.5, 0.02, 'sine');
+      tone(c, 1046.5, t, 0.8, 0.05, 'sine', undefined, bgmGain);
+      tone(c, 1567.98, t, 0.6, 0.03, 'triangle', undefined, bgmGain);
+      tone(c, 1661.22, t, 0.5, 0.02, 'sine', undefined, bgmGain);
     }
-    if (step % 8 === 0) hiss(c, t, 0.6, 0.02, 'bandpass', 850);
+    if (step % 8 === 0) hiss(c, t, 0.6, 0.02, 'bandpass', 850, bgmGain);
     step = (step + 1) % 16;
   }, stepTime * 1000);
   return { id: 'npc_bgm_ancient', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
