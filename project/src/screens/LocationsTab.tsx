@@ -4,7 +4,6 @@ import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
-import { LocationCard } from '@/components/LocationCard';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
 import { DeleteLocationConfirmModal } from '@/components/DeleteLocationConfirmModal';
 import { LocationFormModal } from '@/components/LocationFormModal';
@@ -12,6 +11,7 @@ import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { LocationsToolbar } from '@/components/LocationsToolbar';
 import { LocationsListHeader } from '@/components/LocationsListHeader';
 import { LocationsGrid } from '@/components/LocationsGrid';
+import { buildCollectionItems, type CollectionItem } from '@/components/locations/locationData';
 import {
   playRecordSelectSound,
   playModalOpenSound,
@@ -26,11 +26,6 @@ type Mode =
   | { type: 'edit'; location: LocationWithPhotos };
 
 type SortOrder = 'asc' | 'desc';
-
-type CollectionItem = {
-  location: LocationWithPhotos;
-  storagePath: string;
-};
 
 type LocationFormInput = {
   name: string;
@@ -178,16 +173,7 @@ export function LocationsTab({
     return sortOrder === 'asc' ? aTime - bTime : bTime - aTime;
   });
 
-  const collectionItems: CollectionItem[] = locations
-    .flatMap((location) =>
-      location.photos.map((photo) => ({
-        location,
-        storagePath: photo.storage_path,
-        createdAt: photo.created_at,
-      })),
-    )
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .map(({ location, storagePath }) => ({ location, storagePath }));
+  const collectionItems: CollectionItem[] = buildCollectionItems(locations);
 
   return (
     <div className="space-y-4 sm:space-y-6 font-sans">
@@ -268,18 +254,6 @@ export function LocationsTab({
           onCancel={closeModal}
         />
       )}
-
-      <style>{` 
-        @keyframes modal-enter {
-          from { opacity: 0; transform: translateY(8px) scale(.985); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\.35\\,1)\\] {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
