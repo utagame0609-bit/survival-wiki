@@ -11,9 +11,9 @@ import { LocationFormModal } from '@/components/LocationFormModal';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { LocationsToolbar } from '@/components/LocationsToolbar';
 import { LocationsListHeader } from '@/components/LocationsListHeader';
+import { LocationsGrid } from '@/components/LocationsGrid';
 import {
   playRecordSelectSound,
-  playToggleSound,
   playModalOpenSound,
   playModalCloseSound,
   playDeleteSound,
@@ -220,28 +220,14 @@ export function LocationsTab({
             onSortOrderChange={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}
           />
 
-          {sortedLocations.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedLocations.map((loc, index) => (
-                <LocationCard
-                  key={loc.id}
-                  index={index + 1}
-                  location={loc}
-                  onSelect={() => {
-                    playRecordSelectSound();
-                    setSelectedLocation(loc);
-                  }}
-                  PhotoImage={LocationPhotoImage}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="py-14 text-center border-2 border-dashed border-[#2d3548] bg-[#141824]/60 p-6">
-              <MapPin className="w-10 h-10 mx-auto text-slate-500 mb-3" />
-              <p className="text-sm font-bold text-white">該当するロケーションが見つかりません</p>
-              <p className="text-xs text-slate-400 mt-1">検索条件を変更してください。</p>
-            </div>
-          )}
+          <LocationsGrid
+            locations={sortedLocations}
+            onSelect={(location) => {
+              playRecordSelectSound();
+              setSelectedLocation(location);
+            }}
+            PhotoImage={LocationPhotoImage}
+          />
         </>
       )}
 
