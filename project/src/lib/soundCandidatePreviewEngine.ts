@@ -1,5 +1,14 @@
 let ctx: AudioContext | null = null;
 
+interface ActiveLoopTrack {
+  id: string;
+  intervalId: number | null;
+  nodes: (AudioNode | { stop: () => void })[];
+  stop: () => void;
+}
+
+let activeLoop: ActiveLoopTrack | null = null;
+
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!ctx) {
@@ -13,7 +22,7 @@ function getCtx(): AudioContext | null {
 
 function tone(c: AudioContext, f: number, t: number, d: number, v: number, type: OscillatorType, end?: number): void {
   const o = c.createOscillator(); const g = c.createGain();
-  o.type = type; o.frequency.setValueAtTime(f, t); if (end) o.frequency.exponentialRampToValueAtTime(end, t + d);
+  o.type = type; o.frequency.setValueAtTime(f, t); if (end) o.frequency.exponentialRampToValueAtTime(Math.max(1, end), t + d);
   g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
   o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + 0.01);
 }
@@ -51,4 +60,84 @@ export const PREVIEW_SOUNDS: Record<string, () => void> = {
   error: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,185,t,.22,.14,'sawtooth'); tone(c,196,t,.22,.1,'sawtooth'); },
 };
 
-export function playSoundCandidatePreview(id: string): void { PREVIEW_SOUNDS[id]?.(); }
+function createWikipediaBgmEngine(c: AudioContext): ActiveLoopTrack {
+  let step = 0;
+  const bpm = 112;
+  const stepTime = 60 / bpm / 2;
+  const melodyNotes = [880, 1046.5, 1318.51, 1046.5, 830.61, 987.77, 1244.51, 987.77, 880, 1174.66, 1396.91, 1174.66, 1046.5, 987.77, 880, 830.61];
+  const bassNotes = [220, null, 220, null, 207.65, null, 207.65, null, 293.66, null, 293.66, null, 220, null, 164.81, 207.65];
+  const interval = window.setInterval(() => {
+    if (!ctx || ctx.state === 'suspended') return;
+    const t = ctx.currentTime;
+    const mNote = melodyNotes[step % melodyNotes.length];
+    const bNote = bassNotes[step % bassNotes.length];
+    if (mNote) { tone(ctx, mNote, t, 0.12, 0.08, 'square'); tone(ctx, mNote * 0.5, t, 0.09, 0.04, 'triangle'); }
+    if (bNote) tone(ctx, bNote, t, 0.22, 0.1, 'triangle');
+    if (step % 4 === 0) hiss(ctx, t, 0.03, 0.015, 'highshelf', 4000);
+    step = (step + 1) % 16;
+  }, stepTime * 1000);
+  return { id: 'npc_bgm_wikipedia', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
+}
+
+function createScpBgmEngine(c: AudioContext): ActiveLoopTrack {
+  let step = 0;
+  const bpm = 96;
+  const stepTime = 60 / bpm / 2;
+  const leadNotes = [440, null, 440, null, 466.16, null, null, null, 440, null, 554.37, null, 523.25, 493.88, 466.16, null];
+  const droneOsc = c.createOscillator();
+  const droneGain = c.createGain();
+  const droneFilter = c.createBiquadFilter();
+  droneOsc.type = 'sawtooth'; droneOsc.frequency.setValueAtTime(55, c.currentTime);
+  droneFilter.type = 'lowpass'; droneFilter.frequency.setValueAtTime(220, c.currentTime);
+  droneGain.gain.setValueAtTime(0.0001, c.currentTime); droneGain.gain.linearRampToValueAtTime(0.12, c.currentTime + 0.5);
+  droneOsc.connect(droneFilter); droneFilter.connect(droneGain); droneGain.connect(c.destination); droneOsc.start();
+  const interval = window.setInterval(() => {
+    if (!ctx || ctx.state === 'suspended') return;
+    const t = ctx.currentTime; const note = leadNotes[step % leadNotes.length];
+    if (note) { tone(ctx, note, t, 0.16, 0.07, 'sawtooth'); tone(ctx, note * 2, t, 0.06, 0.03, 'square'); }
+    if (Math.random() > 0.4) hiss(ctx, t, 0.015, 0.025, 'bandpass', 3800 + Math.random() * 800);
+    if (step % 4 === 0) tone(ctx, 110, t, 0.14, 0.12, 'triangle', 40);
+    step = (step + 1) % 16;
+  }, stepTime * 1000);
+  return { id: 'npc_bgm_scp', intervalId: interval, nodes: [droneOsc, droneGain, droneFilter], stop: () => { window.clearInterval(interval); if (ctx) { droneGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.3); setTimeout(() => { try { droneOsc.stop(); droneOsc.disconnect(); } catch {} }, 350); } } };
+}
+
+function createAncientBgmEngine(c: AudioContext): ActiveLoopTrack {
+  let step = 0;
+  const bpm = 78;
+  const stepTime = 60 / bpm / 2;
+  const luteNotes = [329.63, null, 392, 493.88, 587.33, null, 523.25, 493.88, 392, null, 329.63, null, 293.66, 311.13, 329.63, null];
+  const bellSteps = [0, 8];
+  const interval = window.setInterval(() => {
+    if (!ctx || ctx.state === 'suspended') return;
+    const t = ctx.currentTime; const note = luteNotes[step % luteNotes.length];
+    if (note) { tone(ctx, note, t, 0.28, 0.1, 'triangle'); tone(ctx, note * 0.5, t, 0.32, 0.06, 'sine'); }
+    if (bellSteps.includes(step % 16)) { tone(ctx, 1046.5, t, 0.8, 0.05, 'sine'); tone(ctx, 1567.98, t, 0.6, 0.03, 'triangle'); tone(ctx, 1661.22, t, 0.5, 0.02, 'sine'); }
+    if (step % 8 === 0) hiss(ctx, t, 0.6, 0.02, 'bandpass', 850);
+    step = (step + 1) % 16;
+  }, stepTime * 1000);
+  return { id: 'npc_bgm_ancient', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
+}
+
+export function stopActiveAudio(): void {
+  if (activeLoop) { activeLoop.stop(); activeLoop = null; }
+}
+
+export function isAudioPlaying(id?: string): boolean {
+  if (!id) return activeLoop !== null;
+  return activeLoop?.id === id;
+}
+
+export function playSoundCandidatePreview(id: string): void {
+  const c = getCtx();
+  if (!c) return;
+  if (activeLoop) {
+    const isSame = activeLoop.id === id;
+    stopActiveAudio();
+    if (isSame) return;
+  }
+  if (id === 'npc_bgm_wikipedia') activeLoop = createWikipediaBgmEngine(c);
+  else if (id === 'npc_bgm_scp') activeLoop = createScpBgmEngine(c);
+  else if (id === 'npc_bgm_ancient') activeLoop = createAncientBgmEngine(c);
+  else PREVIEW_SOUNDS[id]?.();
+}
