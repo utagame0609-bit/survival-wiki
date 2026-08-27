@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, X, Search, ArrowUpDown, AlertTriangle } from 'lucide-react';
+import { Plus, MapPin, Trash2, Search, ArrowUpDown, AlertTriangle } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -188,25 +188,14 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
 
       {selectedLocation && <LocationDetailModal location={selectedLocation} onClose={closeLocationDetail} onEdit={handleDetailEdit} onDelete={() => handleDelete(selectedLocation)} PhotoImage={PhotoImage} />}
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-sans" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setDeleteTarget(null); } }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-location-title" className="w-full max-w-md overflow-hidden bg-[#1e2330] border-2 border-red-600 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
-            <div className="px-5 pt-6 pb-5 text-center"><div className="mx-auto mb-4 w-14 h-14 rounded-full bg-red-950/80 border-2 border-red-700 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)]"><AlertTriangle className="w-7 h-7 text-red-400" /></div><h2 id="delete-location-title" className="text-base sm:text-lg font-bold text-red-200 font-mono uppercase">ロケーションを抹消しますか？</h2><p className="mt-2 text-sm text-amber-400 font-bold break-words">「{deleteTarget.name}」</p><p className="mt-3 text-xs leading-5 text-slate-400 font-mono">この操作は冒険の書から元に戻せません。<br />保存された写真と座標データもすべて破棄されます。</p></div>
-            <div className="grid grid-cols-2 gap-3 px-5 pb-5"><button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} onMouseEnter={playHoverSound} className="min-h-[40px] bg-[#12151f] border border-slate-700 text-slate-300 hover:text-white text-xs font-bold font-mono"><X className="w-4 h-4 inline mr-1" />キャンセル</button><button type="button" onClick={confirmDelete} onMouseEnter={playHoverSound} className="min-h-[40px] rounded-sm bg-red-800 border-2 border-red-500 text-white hover:bg-red-700 active:scale-[0.98] transition-all text-xs font-bold font-mono shadow-[0_0_15px_rgba(239,68,68,0.4)]"><Trash2 className="w-4 h-4 inline mr-1" />抹消する</button></div>
-          </div>
-        </div>
-      )}
+      {deleteTarget && <DeleteLocationConfirmModal location={deleteTarget} onCancel={() => setDeleteTarget(null)} onConfirm={confirmDelete} />}
 
       {mode.type !== 'list' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/85 backdrop-blur-sm font-sans" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); closeModal(); } }}>
           <div className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto bg-[#1e2330] border-2 border-amber-500/70 shadow-[0_0_40px_rgba(0,0,0,0.6)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-            <div className="px-4 sm:px-5 py-3 bg-[#161a24] border-b-2 border-[#2d3548] flex items-center justify-between"><div className="flex items-center gap-2.5"><span className="text-xs px-2.5 py-0.5 border border-amber-500/50 bg-amber-500/15 text-amber-300 font-bold font-mono">{mode.type === 'edit' ? 'EDIT' : 'NEW'}</span><h2 className="text-sm sm:text-base font-bold text-white">{mode.type === 'edit' ? 'ロケーション編集' : '新規拠点記録'}</h2></div><button type="button" onClick={() => { playCancelSound(); closeModal(); }} onMouseEnter={playHoverSound} disabled={saving} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white text-lg cursor-pointer" aria-label="閉じる">×</button></div>
-            <LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} />
-          </div>
-        </div>
-      )}
+            <div className="px-4 sm:px-5 py-3 bg-[#161a24] border-b-2 border-[#2d3548] flex items-center justify-between"><div className="flex items-center gap-2.5"><span className="text-xs px-2.5 py-0.5 border border-amber-500/50 bg-amber-500/15 text-amber-300 font-bold font-mono">{mode.type === 'edit' ? 'EDIT' : 'NEW'}</span><h2 className="text-sm sm:text-base font-bold text-white">{mode.type === 'edit' ? 'ロケーション編集' : '新規拠点記録'}</h2></div><button type="button" onClick={() => { playCancelSound(); closeModal(); }} onMouseEnter={playHoverSound} disabled={saving} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white text-lg cursor-pointer" aria-label="閉じる">×</button></div><LocationForm worldId={world.id} members={world.members} editing={mode.type === 'edit' ? mode.location : null} onSave={handleSave} onComplete={handleComplete} onCancel={closeModal} saving={saving} /></div></div>}
 
-      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1\\)\\] { animation: none !important; } }`}</style>
+      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1)\\] { animation: none !important; } }`}</style>
     </div>
   );
 }
