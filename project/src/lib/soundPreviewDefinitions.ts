@@ -1,21 +1,19 @@
-import type { AudioContext } from 'web-audio-api';
-
-function tone(c: AudioContext, f: number, t: number, d: number, v: number, type: OscillatorType, end?: number): void {
-  const o = c.createOscillator(); const g = c.createGain();
-  o.type = type; o.frequency.setValueAtTime(f, t); if (end) o.frequency.exponentialRampToValueAtTime(Math.max(1, end), t + d);
-  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + 0.01);
-}
-
-function hiss(c: AudioContext, t: number, d: number, v: number, type: BiquadFilterType, f: number): void {
-  const b = c.createBuffer(1, Math.floor(c.sampleRate * d), c.sampleRate); const data = b.getChannelData(0);
-  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
-  const s = c.createBufferSource(); const filter = c.createBiquadFilter(); const g = c.createGain();
-  s.buffer = b; filter.type = type; filter.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-  s.connect(filter); filter.connect(g); g.connect(c.destination); s.start(t); s.stop(t + d);
-}
-
 export function createPreviewSounds(getContext: () => AudioContext | null): Record<string, () => void> {
+  function tone(c: AudioContext, f: number, t: number, d: number, v: number, type: OscillatorType, end?: number): void {
+    const o = c.createOscillator(); const g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (end) o.frequency.exponentialRampToValueAtTime(Math.max(1, end), t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + 0.01);
+  }
+
+  function hiss(c: AudioContext, t: number, d: number, v: number, type: BiquadFilterType, f: number): void {
+    const b = c.createBuffer(1, Math.floor(c.sampleRate * d), c.sampleRate); const data = b.getChannelData(0);
+    for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
+    const s = c.createBufferSource(); const filter = c.createBiquadFilter(); const g = c.createGain();
+    s.buffer = b; filter.type = type; filter.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(filter); filter.connect(g); g.connect(c.destination); s.start(t); s.stop(t + d);
+  }
+
   return {
     cursor_move: () => { const c=getContext(); if(!c)return; const t=c.currentTime; tone(c,1320,t,.045,.16,'square',1980); hiss(c,t,.045,.04,'highshelf',3000); },
     confirm: () => { const c=getContext(); if(!c)return; const t=c.currentTime; tone(c,880,t,.08,.18,'square'); tone(c,1760,t+.045,.095,.16,'square'); },
