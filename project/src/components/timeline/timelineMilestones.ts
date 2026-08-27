@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 export function getMilestoneStorageKey(worldId: string) {
   return `survival-wiki:milestones:${worldId}`;
 }
