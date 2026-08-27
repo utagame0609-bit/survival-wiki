@@ -1,4 +1,3 @@
-import type { ComponentType } from 'react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { LocationCard } from '@/components/LocationCard';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
