@@ -206,7 +206,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
         </div>
       )}
 
-      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\.8\\.35\\.1)\\] { animation: none !important; } }`}</style>
+      <style>{`@keyframes modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1\\)\\] { animation: none !important; } }`}</style>
     </div>
   );
 }
