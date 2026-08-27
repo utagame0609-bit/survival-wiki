@@ -3,8 +3,8 @@ import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
 import { playSaveSound, playCancelSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
+import { LocationBasicFields } from '@/components/LocationBasicFields';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
-import { LocationCoordinatesField } from '@/components/LocationCoordinatesField';
 import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
 import { LocationFormActions } from '@/components/LocationFormActions';
 
@@ -50,9 +50,6 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     setMainPreview((current) => { if (current?.startsWith('blob:')) URL.revokeObjectURL(current); return null; });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
-  const toggleMember = (id: string) => {
-    const next = new Set(selectedMembers); if (next.has(id)) next.delete(id); else next.add(id); setSelectedMembers(next);
-  };
   const handleSubmit = async () => {
     setError('');
     if (!name.trim()) { setError('ロケーション名を入力してください'); return; }
@@ -76,16 +73,13 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     <div className="px-4 sm:px-5 py-4 sm:py-5 max-w-3xl mx-auto space-y-4 text-slate-100 font-mono">
       {error && <div className="p-3 rounded-sm bg-rose-950/50 border-2 border-rose-500/60 text-rose-200 text-xs shadow-[0_0_14px_rgba(244,63,94,0.15)] flex items-center gap-2"><span className="font-black text-rose-400">[!]</span><span>{error}</span></div>}
 
-      <LocationCoordinatesField
-        value={coordsText}
-        error={coordsError}
-        onChange={setCoordsText}
+      <LocationBasicFields
+        coordsText={coordsText}
+        coordsError={coordsError}
+        name={name}
+        onCoordsChange={setCoordsText}
+        onNameChange={setName}
       />
-
-      <div>
-        <label className="block text-xs font-bold text-amber-400 mb-1.5 uppercase tracking-wider">LOCATION NAME // ロケーション名</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} onFocus={playInputFocusSound} placeholder="例: 始原のキャンプサイト" className="location-input text-sm text-slate-100 placeholder-slate-600" />
-      </div>
 
       <LocationPhotoField
         preview={mainPreview}
