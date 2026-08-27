@@ -1,22 +1,8 @@
 import type { ReactNode } from 'react';
 import { ChevronDown, ChevronUp, Crown } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
+import type { DayGroup, Milestone } from '@/components/timeline/timelineData';
 import { playHoverSound } from '@/lib/sound';
-
-type DayGroup = {
-  dateKey: string;
-  label: string;
-  dayNumber: number;
-  dateLabel: string;
-  dayLabel: string;
-  locations: LocationWithPhotos[];
-  bgPhotoPath?: string;
-};
-
-type Milestone = {
-  day: number;
-  label: string;
-};
 
 type DayChapterProps = {
   group: DayGroup;
