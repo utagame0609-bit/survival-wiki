@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Volume2, Play, Waves, Radio, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Navigation';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
-import { isAudioPlaying, playSoundCandidatePreview, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
+import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
+import { isWorldBgmPlaying, playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 import { playCancelSound, playConfirmSound, playCursorMoveSound, playNewRecordSound } from '@/lib/sound';
 
 type BgmCandidate = {
-  id: 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
+  id: 'bgm_world_select' | 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
   name: string;
   nameJa: string;
   description: string;
@@ -16,6 +17,14 @@ type BgmCandidate = {
 };
 
 const BGM_CANDIDATES: BgmCandidate[] = [
+  {
+    id: 'bgm_world_select',
+    name: 'WORLD SELECT / SAVE',
+    nameJa: 'セーブ／ワールド選択画面BGM',
+    description: 'セーブやワールド選択画面に使用している、16-bitレトロゲーム風のシームレスループBGM。',
+    toneInfo: 'BPM 96 / 30秒ループ / Pulse Lead + Triangle Bass + Chiptune Arp + Noise Drums',
+    keyCharacteristic: '現在のワールド選択画面で使用しているBGMを、そのまま試聴できます。',
+  },
   {
     id: 'npc_bgm_wikipedia',
     name: 'WUTAPEDIA',
@@ -62,7 +71,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     { id: 'action', label: 'キャラクター＆アクション音' },
     { id: 'wiki', label: 'Wiki編纂・AI演出音' },
     { id: 'new_high', label: 'V2新規SE【大】' },
-    { id: 'bgm', label: 'NPC専用BGM' },
+    { id: 'bgm', label: 'BGM候補' },
   ];
 
   const filteredCandidates = SOUND_CANDIDATES.filter((candidate) =>
@@ -73,6 +82,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const showBgm = selectedCategory === 'all' || selectedCategory === 'bgm';
 
   const handlePlay = (candidate: SoundCandidate) => {
+    if (isWorldBgmPlaying()) stopWorldBgm(0);
     setActivePlayingId(candidate.id);
     if (candidate.id === 'cursor_move') {
       playCursorMoveSound();
@@ -87,6 +97,19 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   };
 
   const handleBgmPlay = (candidate: BgmCandidate) => {
+    if (candidate.id === 'bgm_world_select') {
+      if (isWorldBgmPlaying()) {
+        stopWorldBgm(0);
+        setActivePlayingId(null);
+        return;
+      }
+      stopActiveAudio();
+      playWorldBgm();
+      setActivePlayingId(candidate.id);
+      return;
+    }
+
+    if (isWorldBgmPlaying()) stopWorldBgm(0);
     playSoundCandidatePreview(candidate.id);
   };
 
@@ -174,7 +197,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
           <section className="space-y-3">
             <div className="flex items-center gap-2 border-b border-cyan-500/30 pb-2">
               <Volume2 className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-sm sm:text-base font-black text-cyan-300">NPC PERSONALITY BGM // 3 TRACKS</h2>
+              <h2 className="text-sm sm:text-base font-black text-cyan-300">BGM CANDIDATES // 4 TRACKS</h2>
               <span className="text-[10px] text-slate-500 font-mono">LOOP / PREVIEW</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -193,7 +216,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div>
                           <span className="text-[10px] px-2 py-0.5 bg-[#141824] border border-cyan-500/30 text-cyan-300 font-bold">
-                            NPC PERSONALITY BGM
+                            {candidate.id === 'bgm_world_select' ? 'WORLD / SAVE BGM' : 'NPC PERSONALITY BGM'}
                           </span>
                           <h3 className="font-bold text-sm sm:text-base text-white mt-1.5">{candidate.nameJa}</h3>
                           <p className="text-[10px] text-cyan-400 font-mono">{candidate.name}</p>
