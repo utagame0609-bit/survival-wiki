@@ -4,7 +4,7 @@ export type SoundType =
   | 'confirm' | 'cancel' | 'hover' | 'tabSwitch' | 'footstep' | 'cardOpen' | 'cardClose'
   | 'modalOpen' | 'modalClose' | 'add' | 'save' | 'delete' | 'toggle' | 'error'
   | 'inputFocus' | 'dangerConfirm' | 'recordSelect' | 'aiGenerateStart' | 'aiGenerateComplete'
-  | 'chestClose' | 'screenTransition';
+  | 'chestClose' | 'screenTransition' | 'notification';
 
 const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
 const SOUND_ENABLED_KEY = 'survival-wiki-se-enabled';
@@ -46,15 +46,7 @@ function getAudioContext(): AudioContext | null {
   return audioContext;
 }
 
-function tone(
-  c: AudioContext,
-  frequency: number,
-  time: number,
-  duration: number,
-  volume: number,
-  type: OscillatorType,
-  endFrequency?: number,
-): void {
+function tone(c: AudioContext, frequency: number, time: number, duration: number, volume: number, type: OscillatorType, endFrequency?: number): void {
   if (!masterGain) return;
   const oscillator = c.createOscillator();
   const gain = c.createGain();
@@ -70,14 +62,7 @@ function tone(
   oscillator.stop(time + duration + 0.01);
 }
 
-function hiss(
-  c: AudioContext,
-  time: number,
-  duration: number,
-  volume: number,
-  type: BiquadFilterType,
-  frequency: number,
-): void {
+function hiss(c: AudioContext, time: number, duration: number, volume: number, type: BiquadFilterType, frequency: number): void {
   if (!masterGain) return;
   const bufferSize = Math.max(1, Math.floor(c.sampleRate * duration));
   const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
@@ -104,7 +89,6 @@ function playV2Sound(sound: SoundType): void {
   const t = c.currentTime;
 
   switch (sound) {
-    // V2: existing 12 sounds
     case 'confirm':
       tone(c, 880, t, 0.08, 0.18, 'square');
       tone(c, 1760, t + 0.045, 0.095, 0.16, 'square');
@@ -127,87 +111,75 @@ function playV2Sound(sound: SoundType): void {
       tone(c, 480, t, 0.12, 0.22, 'sine', 110);
       return;
     case 'footstep':
-      tone(c, 140, t, 0.055, 0.14, 'triangle', 65);
-      tone(c, 80, t, 0.04, 0.1, 'sine', 40);
-      hiss(c, t, 0.04, 0.035, 'bandpass', 1800);
+      tone(c, 140, t, 0.065, 0.13, 'triangle', 65);
+      hiss(c, t, 0.055, 0.025, 'lowpass', 1800);
       return;
     case 'hover':
-      tone(c, 2200, t, 0.022, 0.07, 'square', 2400);
+      tone(c, 2200, t, 0.022, 0.055, 'square');
       return;
     case 'cardOpen':
-      tone(c, 520, t, 0.09, 0.14, 'square', 1480);
-      tone(c, 1040, t + 0.02, 0.08, 0.09, 'triangle', 2080);
-      hiss(c, t, 0.065, 0.045, 'highpass', 4200);
+      tone(c, 520, t, 0.095, 0.12, 'square', 1480);
+      hiss(c, t, 0.08, 0.025, 'highpass', 4200);
       return;
     case 'cardClose':
-      tone(c, 980, t, 0.085, 0.13, 'triangle', 320);
-      tone(c, 490, t + 0.015, 0.07, 0.09, 'sine', 160);
-      hiss(c, t, 0.05, 0.03, 'lowpass', 1500);
+      tone(c, 980, t, 0.085, 0.11, 'triangle', 320);
       return;
     case 'add':
-      tone(c, 783.99, t, 0.085, 0.15, 'square');
-      tone(c, 1046.5, t + 0.04, 0.085, 0.15, 'square');
-      tone(c, 1318.51, t + 0.08, 0.085, 0.15, 'square');
-      hiss(c, t + 0.08, 0.06, 0.03, 'highshelf', 3500);
+      tone(c, 783.99, t, 0.09, 0.12, 'square');
+      tone(c, 1046.5, t + 0.04, 0.09, 0.12, 'square');
+      tone(c, 1318.51, t + 0.08, 0.09, 0.12, 'square');
       return;
     case 'save':
-      tone(c, 1046.5, t, 0.22, 0.16, 'sine');
-      tone(c, 1567.98, t + 0.02, 0.24, 0.13, 'triangle');
-      tone(c, 2093.0, t + 0.04, 0.18, 0.08, 'square');
-      hiss(c, t, 0.12, 0.025, 'bandpass', 5000);
+      tone(c, 1046.5, t, 0.24, 0.1, 'sine');
+      tone(c, 1568, t + 0.025, 0.21, 0.08, 'square');
       return;
     case 'toggle':
-      tone(c, 1800, t, 0.035, 0.18, 'square', 900);
-      tone(c, 320, t + 0.008, 0.03, 0.15, 'triangle', 120);
-      hiss(c, t, 0.028, 0.06, 'bandpass', 2400);
+      tone(c, 1800, t, 0.04, 0.1, 'square', 850);
+      hiss(c, t, 0.035, 0.02, 'highpass', 3000);
       return;
     case 'error':
-      tone(c, 185, t, 0.22, 0.18, 'sawtooth');
-      tone(c, 196, t, 0.22, 0.16, 'square');
-      tone(c, 92.5, t, 0.18, 0.22, 'triangle', 60);
-      hiss(c, t, 0.18, 0.05, 'lowpass', 900);
+      tone(c, 185, t, 0.22, 0.14, 'sawtooth');
+      tone(c, 196, t, 0.22, 0.1, 'sawtooth');
       return;
     case 'dangerConfirm':
-      tone(c, 90, t, 0.35, 0.24, 'triangle', 45);
-      tone(c, 293.66, t + 0.03, 0.25, 0.12, 'square');
-      tone(c, 311.13, t + 0.03, 0.25, 0.1, 'sawtooth');
-      tone(c, 1174.66, t + 0.06, 0.15, 0.06, 'sine');
-      hiss(c, t, 0.25, 0.04, 'lowpass', 600);
+      tone(c, 90, t, 0.38, 0.2, 'sine', 45);
+      tone(c, 293.66, t, 0.38, 0.08, 'square', 311.13);
       return;
     case 'recordSelect':
-      tone(c, 680, t, 0.045, 0.15, 'triangle', 340);
-      tone(c, 1200, t, 0.02, 0.08, 'square', 800);
-      hiss(c, t, 0.03, 0.03, 'bandpass', 2800);
+      tone(c, 680, t, 0.05, 0.14, 'triangle', 340);
+      hiss(c, t, 0.05, 0.025, 'bandpass', 1800);
       return;
     case 'aiGenerateStart':
       tone(c, 320, t, 0.32, 0.16, 'sawtooth', 2400);
-      tone(c, 640, t + 0.05, 0.27, 0.12, 'square', 3200);
-      [1200, 1600, 2000, 2400].forEach((frequency, i) => tone(c, frequency, t + i * 0.06, 0.04, 0.06, 'triangle'));
-      hiss(c, t, 0.3, 0.045, 'bandpass', 3600);
+      tone(c, 320, t, 0.32, 0.05, 'square', 2400);
       return;
     case 'aiGenerateComplete':
-      [659.25, 830.61, 987.77, 1318.51, 1661.22, 2637.02].forEach((frequency, i) => {
-        tone(c, frequency, t + i * 0.065, 0.45, 0.12, 'square');
-        tone(c, frequency * 0.5, t + i * 0.065, 0.35, 0.08, 'triangle');
-      });
-      hiss(c, t + 0.2, 0.4, 0.03, 'highpass', 4800);
+      [659.25, 830.61, 987.77, 1318.51].forEach((frequency, i) =>
+        tone(c, frequency, t + i * 0.12, 0.75 - i * 0.1, 0.12, 'square')
+      );
+      hiss(c, t + 0.2, 0.6, 0.02, 'highpass', 3200);
       return;
     case 'chestClose':
-      tone(c, 1400, t, 0.04, 0.16, 'square', 600);
-      tone(c, 180, t + 0.02, 0.11, 0.18, 'triangle', 70);
-      hiss(c, t, 0.08, 0.06, 'lowpass', 1200);
+      tone(c, 1400, t, 0.14, 0.16, 'square', 700);
+      tone(c, 180, t, 0.14, 0.09, 'triangle', 120);
+      hiss(c, t, 0.08, 0.03, 'lowpass', 900);
       return;
     case 'screenTransition':
-      hiss(c, t, 0.36, 0.08, 'bandpass', 2400);
-      tone(c, 85, t, 0.36, 0.22, 'sine', 35);
-      tone(c, 440, t + 0.05, 0.28, 0.09, 'triangle', 180);
+      hiss(c, t, 0.36, 0.1, 'bandpass', 4500);
+      tone(c, 85, t, 0.36, 0.14, 'sine', 55);
+      return;
+    case 'notification':
+      tone(c, 1046.5, t, 0.16, 0.1, 'sine');
+      tone(c, 1318.5, t + 0.06, 0.1, 0.08, 'square');
+      return;
+    case 'inputFocus':
+      tone(c, 1600, t, 0.028, 0.08, 'sine', 800);
       return;
     default:
       return;
   }
 }
 
-// V2 existing 12 sounds kept as public helpers where the app already uses them.
 export const playConfirmSound = () => playSound('confirm');
 export const playCancelSound = () => playSound('cancel');
 export const playHoverSound = () => playSound('hover');
@@ -232,7 +204,6 @@ export const playAiGenerateCompleteSound = () => playSound('aiGenerateComplete')
 export const playChestCloseSound = () => playSound('chestClose');
 export const playScreenTransitionSound = () => playSound('screenTransition');
 
-// These are direct V2 implementations for the remaining existing sounds.
 export const playNewRecordSound = () => {
   const c = getAudioContext();
   if (!c || !masterGain || !enabled) return;
@@ -271,9 +242,7 @@ export const playAchievementSound = () => {
   const c = getAudioContext();
   if (!c || !masterGain || !enabled) return;
   const t = c.currentTime;
-  [523.25, 659.25, 783.99, 987.77, 1046.5, 1318.51].forEach((frequency, i) =>
-    tone(c, frequency, t + i * 0.09, 0.22, 0.13, 'square')
-  );
+  [523.25, 659.25, 783.99, 987.77, 1046.5, 1318.51].forEach((frequency, i) => tone(c, frequency, t + i * 0.09, 0.22, 0.13, 'square'));
 };
 
 export const playWikiGeneratingNoiseSound = () => {
@@ -288,9 +257,7 @@ export const playWikiCompleteSound = () => {
   const c = getAudioContext();
   if (!c || !masterGain || !enabled) return;
   const t = c.currentTime;
-  [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51].forEach((frequency, i) =>
-    tone(c, frequency, t + i * 0.1, 0.3, 0.11, 'triangle')
-  );
+  [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51].forEach((frequency, i) => tone(c, frequency, t + i * 0.1, 0.3, 0.11, 'triangle'));
   tone(c, 2093, t + 0.82, 0.35, 0.12, 'sine');
 };
 
