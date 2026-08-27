@@ -2,9 +2,45 @@ import { useEffect, useState } from 'react';
 import { Volume2, Play, Waves, Radio, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Navigation';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
-import { playSoundCandidatePreview } from '@/lib/soundCandidatePreviewEngine';
+import { isAudioPlaying, playSoundCandidatePreview, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { playCancelSound, playConfirmSound, playCursorMoveSound, playNewRecordSound } from '@/lib/sound';
+
+type BgmCandidate = {
+  id: 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
+  name: string;
+  nameJa: string;
+  description: string;
+  toneInfo: string;
+  keyCharacteristic: string;
+};
+
+const BGM_CANDIDATES: BgmCandidate[] = [
+  {
+    id: 'npc_bgm_wikipedia',
+    name: 'WUTAPEDIA',
+    nameJa: 'ウタペディア',
+    description: '百科事典・民俗学者をイメージした、クラシカル × レトロサイバーの知的なBGM。',
+    toneInfo: 'A Minor / 112 BPM / Square Arpeggio + Triangle Bass',
+    keyCharacteristic: '整然としたアルペジオに半音階の不穏さを混ぜた、洗練された学術系サウンド。',
+  },
+  {
+    id: 'npc_bgm_scp',
+    name: 'SCP FOUNDATION',
+    nameJa: 'SCP FOUNDATION',
+    description: '機密報告・特異点研究員をイメージした、ミリタリー × サイバー × インダストリアルBGM。',
+    toneInfo: 'A / 96 BPM / Saw Drone + Industrial Pulse',
+    keyCharacteristic: '55Hzの重低音ドローンと金属的パルス、ランダムなノイズで無機質な緊張感を演出。',
+  },
+  {
+    id: 'npc_bgm_ancient',
+    name: 'LOST CHRONICLE',
+    nameJa: 'LOST CHRONICLE',
+    description: '絶望古文書・老吟遊詩人をイメージした、レトロファンタジー × 16bitアンビエントBGM。',
+    toneInfo: 'E Minor / 78 BPM / Triangle Lute + Ruin Bell',
+    keyCharacteristic: '哀愁の古楽器旋律、遠くの鐘、風のノイズで「失われた世界」の空気を表現。',
+  },
+];
 
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [reverb, setReverb] = useState<number>(() => Math.round(getStoredReverbAmount() * 100));
@@ -12,6 +48,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [activePlayingId, setActivePlayingId] = useState<string | null>(null);
 
   useEffect(() => subscribeToReverbAmount((value) => setReverb(Math.round(value * 100))), []);
+  useEffect(() => subscribeSoundState((id, isPlaying) => setActivePlayingId(isPlaying ? id : null)), []);
 
   const handleReverbChange = (value: number) => {
     setReverb(value);
@@ -24,11 +61,16 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     { id: 'screen', label: '画面・ナビゲーション音' },
     { id: 'action', label: 'キャラクター＆アクション音' },
     { id: 'wiki', label: 'Wiki編纂・AI演出音' },
+    { id: 'new_high', label: 'V2新規SE【大】' },
+    { id: 'bgm', label: 'NPC専用BGM' },
   ];
 
   const filteredCandidates = SOUND_CANDIDATES.filter((candidate) =>
-    selectedCategory === 'all' ? true : candidate.category === selectedCategory,
+    selectedCategory === 'all' || selectedCategory === 'bgm'
+      ? selectedCategory === 'all'
+      : candidate.category === selectedCategory,
   );
+  const showBgm = selectedCategory === 'all' || selectedCategory === 'bgm';
 
   const handlePlay = (candidate: SoundCandidate) => {
     setActivePlayingId(candidate.id);
@@ -39,7 +81,13 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     } else {
       playSoundCandidatePreview(candidate.id);
     }
-    window.setTimeout(() => setActivePlayingId(null), 500);
+    window.setTimeout(() => {
+      if (!isAudioPlaying(candidate.id)) setActivePlayingId(null);
+    }, 500);
+  };
+
+  const handleBgmPlay = (candidate: BgmCandidate) => {
+    playSoundCandidatePreview(candidate.id);
   };
 
   return (
@@ -122,52 +170,110 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
           })}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-          {filteredCandidates.map((candidate) => {
-            const isPlaying = activePlayingId === candidate.id;
-            return (
-              <div
-                key={candidate.id}
-                className={`bg-[#1e2330] border-2 p-4 flex flex-col justify-between transition-all ${
-                  isPlaying
-                    ? 'border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)] bg-[#142820]'
-                    : 'border-[#2d3548] hover:border-slate-500'
-                }`}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-2">
+        {showBgm && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 border-b border-cyan-500/30 pb-2">
+              <Volume2 className="w-4 h-4 text-cyan-400" />
+              <h2 className="text-sm sm:text-base font-black text-cyan-300">NPC PERSONALITY BGM // 3 TRACKS</h2>
+              <span className="text-[10px] text-slate-500 font-mono">LOOP / PREVIEW</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {BGM_CANDIDATES.map((candidate) => {
+                const isPlaying = activePlayingId === candidate.id;
+                return (
+                  <div
+                    key={candidate.id}
+                    className={`bg-[#1e2330] border-2 p-4 flex flex-col justify-between transition-all ${
+                      isPlaying
+                        ? 'border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.25)] bg-[#12262d]'
+                        : 'border-cyan-500/30 hover:border-cyan-500/60'
+                    }`}
+                  >
                     <div>
-                      <span className="text-[10px] px-2 py-0.5 bg-[#141824] border border-slate-700 text-slate-300 font-bold">
-                        {candidate.categoryJa}
-                      </span>
-                      <h3 className="font-bold text-sm sm:text-base text-white mt-1.5">{candidate.nameJa}</h3>
-                      <p className="text-[10px] text-slate-400 font-mono">{candidate.name}</p>
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <span className="text-[10px] px-2 py-0.5 bg-[#141824] border border-cyan-500/30 text-cyan-300 font-bold">
+                            NPC PERSONALITY BGM
+                          </span>
+                          <h3 className="font-bold text-sm sm:text-base text-white mt-1.5">{candidate.nameJa}</h3>
+                          <p className="text-[10px] text-cyan-400 font-mono">{candidate.name}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleBgmPlay(candidate)}
+                          className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                            isPlaying
+                              ? 'border-cyan-400 bg-cyan-400 text-black scale-105 shadow-[0_0_12px_#22d3ee]'
+                              : 'border-cyan-500 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-400 hover:text-black active:scale-95'
+                          }`}
+                          title={isPlaying ? '停止' : 'ループ試聴'}
+                        >
+                          <Play className="w-4 h-4 fill-current" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-slate-200 leading-relaxed mb-3">{candidate.description}</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handlePlay(candidate)}
-                      className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
-                        isPlaying
-                          ? 'border-emerald-400 bg-emerald-400 text-black scale-105 shadow-[0_0_12px_#34d399]'
-                          : 'border-amber-500 bg-amber-500/20 text-amber-300 hover:bg-amber-400 hover:text-black active:scale-95'
-                      }`}
-                      title="試聴・再生"
-                    >
-                      <Play className="w-4 h-4 fill-current" />
-                    </button>
+                    <div className="pt-2.5 border-t border-[#2d3548] space-y-1 text-[10px] sm:text-xs font-mono text-slate-300">
+                      <div className="flex items-center justify-between text-cyan-400 font-bold">
+                        <span>TONE: {candidate.toneInfo}</span>
+                      </div>
+                      <div className="text-slate-400">演出: {candidate.keyCharacteristic}</div>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-200 leading-relaxed mb-3">{candidate.description}</p>
-                </div>
-                <div className="pt-2.5 border-t border-[#2d3548] space-y-1 text-[10px] sm:text-xs font-mono text-slate-300">
-                  <div className="flex items-center justify-between text-emerald-400 font-bold">
-                    <span>TONE: {candidate.toneInfo}</span>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {selectedCategory !== 'bgm' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {filteredCandidates.map((candidate) => {
+              const isPlaying = activePlayingId === candidate.id;
+              return (
+                <div
+                  key={candidate.id}
+                  className={`bg-[#1e2330] border-2 p-4 flex flex-col justify-between transition-all ${
+                    isPlaying
+                      ? 'border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)] bg-[#142820]'
+                      : 'border-[#2d3548] hover:border-slate-500'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div>
+                        <span className="text-[10px] px-2 py-0.5 bg-[#141824] border border-slate-700 text-slate-300 font-bold">
+                          {candidate.categoryJa}
+                        </span>
+                        <h3 className="font-bold text-sm sm:text-base text-white mt-1.5">{candidate.nameJa}</h3>
+                        <p className="text-[10px] text-slate-400 font-mono">{candidate.name}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handlePlay(candidate)}
+                        className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                          isPlaying
+                            ? 'border-emerald-400 bg-emerald-400 text-black scale-105 shadow-[0_0_12px_#34d399]'
+                            : 'border-amber-500 bg-amber-500/20 text-amber-300 hover:bg-amber-400 hover:text-black active:scale-95'
+                        }`}
+                        title="試聴・再生"
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-200 leading-relaxed mb-3">{candidate.description}</p>
                   </div>
-                  <div className="text-slate-400">演出: {candidate.keyCharacteristic}</div>
+                  <div className="pt-2.5 border-t border-[#2d3548] space-y-1 text-[10px] sm:text-xs font-mono text-slate-300">
+                    <div className="flex items-center justify-between text-emerald-400 font-bold">
+                      <span>TONE: {candidate.toneInfo}</span>
+                    </div>
+                    <div className="text-slate-400">演出: {candidate.keyCharacteristic}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
