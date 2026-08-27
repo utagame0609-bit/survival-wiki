@@ -13,7 +13,6 @@ const DEFAULT_SOUND_VOLUME = 50;
 const SOURCE_LEVEL = 1.0;
 let audioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
-let bgmGain: GainNode | null = null;
 let soundReverb: SoundReverb | null = null;
 let enabled = true;
 let soundVolume = DEFAULT_SOUND_VOLUME;
@@ -43,12 +42,9 @@ function getAudioContext(): AudioContext | null {
     if (!AudioContextClass) return null;
     audioContext = new AudioContextClass();
     masterGain = audioContext.createGain();
-    bgmGain = audioContext.createGain();
     masterGain.gain.setValueAtTime(getMasterGainValue(), audioContext.currentTime);
-    bgmGain.gain.setValueAtTime(1, audioContext.currentTime);
     soundReverb = createSwitchStyleReverb(audioContext);
     masterGain.connect(soundReverb.input);
-    bgmGain.connect(soundReverb.input);
     soundReverb.output.connect(audioContext.destination);
   }
   if (audioContext.state === 'suspended') void audioContext.resume();
