@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Compass } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
 import { playSaveSound, playCancelSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
+import { LocationCoordinatesField } from '@/components/LocationCoordinatesField';
 import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
 import { LocationFormActions } from '@/components/LocationFormActions';
 
@@ -76,14 +76,11 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     <div className="px-4 sm:px-5 py-4 sm:py-5 max-w-3xl mx-auto space-y-4 text-slate-100 font-mono">
       {error && <div className="p-3 rounded-sm bg-rose-950/50 border-2 border-rose-500/60 text-rose-200 text-xs shadow-[0_0_14px_rgba(244,63,94,0.15)] flex items-center gap-2"><span className="font-black text-rose-400">[!]</span><span>{error}</span></div>}
 
-      <div>
-        <label className="flex items-center justify-between text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-          <span className="flex items-center gap-1.5 text-emerald-400"><Compass className="w-4 h-4" /><span>COORDINATES // 空間座標</span></span>
-          <span className="text-[10px] text-slate-500 font-normal">FORMAT: X Y Z</span>
-        </label>
-        <input type="text" inputMode="numeric" value={coordsText} onChange={(e) => setCoordsText(e.target.value)} onFocus={playInputFocusSound} placeholder="100 64 -20" className="location-input text-base font-mono tabular-nums text-emerald-300 placeholder-slate-600" />
-        {coordsError && <p className="mt-1 text-xs text-rose-400">{coordsError}</p>}
-      </div>
+      <LocationCoordinatesField
+        value={coordsText}
+        error={coordsError}
+        onChange={setCoordsText}
+      />
 
       <div>
         <label className="block text-xs font-bold text-amber-400 mb-1.5 uppercase tracking-wider">LOCATION NAME // ロケーション名</label>
