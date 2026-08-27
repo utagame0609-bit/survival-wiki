@@ -152,6 +152,7 @@ function createAncientBgm(): ActiveNpcBgm {
 
 export function playNpcBgm(id: NpcBgmId): void {
   soundEngine.init();
+  syncVolume();
   if (activeNpcBgm?.id === id) {
     stopNpcBgm();
     return;
