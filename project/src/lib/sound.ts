@@ -31,23 +31,21 @@ type SoundProfile = {
   noise?: boolean;
 };
 
-// V2 master profiles for the existing application sound routes.
-// inputFocus is the V2 input_focus sound from the source preview.
 const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
   confirm: { frequency: 880, duration: 0.06, volume: 0.22, type: 'square', secondFrequency: 1760, secondDelay: 0.045 },
   cancel: { frequency: 659.25, endFrequency: 329.63, duration: 0.14, volume: 0.12, type: 'square' },
-  hover: { frequency: 2200, duration: 0.022, volume: 0.045, type: 'square' },
+  hover: { frequency: 2200, duration: 0.022, volume: 0.055, type: 'square' },
   tabSwitch: { frequency: 320, endFrequency: 640, duration: 0.06, volume: 0.18, type: 'triangle' },
-  footstep: { frequency: 140, endFrequency: 65, duration: 0.065, volume: 0.28, type: 'triangle', noise: true },
-  cardOpen: { frequency: 520, endFrequency: 1480, duration: 0.095, volume: 0.15, type: 'square' },
-  cardClose: { frequency: 980, endFrequency: 320, duration: 0.085, volume: 0.12, type: 'triangle' },
+  footstep: { frequency: 140, endFrequency: 65, duration: 0.065, volume: 0.13, type: 'triangle', noise: true },
+  cardOpen: { frequency: 520, endFrequency: 1480, duration: 0.095, volume: 0.12, type: 'square', noise: true },
+  cardClose: { frequency: 980, endFrequency: 320, duration: 0.085, volume: 0.11, type: 'triangle' },
   modalOpen: { frequency: 523.25, duration: 0.14, volume: 0.12, type: 'sine', secondFrequency: 659.25, secondDelay: 0.05 },
   modalClose: { frequency: 659.25, duration: 0.1, volume: 0.1, type: 'sine', secondFrequency: 440, secondDelay: 0.04 },
-  add: { frequency: 783.99, duration: 0.13, volume: 0.15, type: 'square', secondFrequency: 1046.5, secondDelay: 0.055 },
-  save: { frequency: 1046.5, duration: 0.18, volume: 0.12, type: 'square', secondFrequency: 1568, secondDelay: 0.065 },
+  add: { frequency: 783.99, duration: 0.09, volume: 0.12, type: 'square', secondFrequency: 1046.5, secondDelay: 0.04 },
+  save: { frequency: 1046.5, duration: 0.24, volume: 0.1, type: 'sine', secondFrequency: 1568, secondDelay: 0.025 },
   delete: { frequency: 440, endFrequency: 65, duration: 0.28, volume: 0.16, type: 'sawtooth', noise: true },
-  toggle: { frequency: 1800, endFrequency: 850, duration: 0.04, volume: 0.08, type: 'square' },
-  error: { frequency: 185, endFrequency: 170, duration: 0.22, volume: 0.18, type: 'sawtooth' },
+  toggle: { frequency: 1800, endFrequency: 850, duration: 0.04, volume: 0.1, type: 'square' },
+  error: { frequency: 185, endFrequency: 170, duration: 0.22, volume: 0.14, type: 'sawtooth' },
   inputFocus: { frequency: 1600, endFrequency: 800, duration: 0.028, volume: 0.08, type: 'sine' },
   dangerConfirm: { frequency: 90, endFrequency: 45, duration: 0.38, volume: 0.2, type: 'sine' },
   recordSelect: { frequency: 680, endFrequency: 340, duration: 0.05, volume: 0.14, type: 'triangle' },
@@ -151,6 +149,45 @@ function playTone(profile: SoundProfile): void {
   }
 }
 
+function playV2AdditionalSound(sound: SoundType): boolean {
+  const context = getAudioContext();
+  if (!context || !masterGain || !enabled) return true;
+  if (context.state === 'suspended') void context.resume();
+  const now = context.currentTime;
+  const osc = (frequency: number, duration: number, volume: number, type: OscillatorType, start = now, endFrequency?: number): void => {
+    const o = context.createOscillator(); const g = context.createGain();
+    o.type = type; o.frequency.setValueAtTime(frequency, start);
+    if (endFrequency) o.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration);
+    g.gain.setValueAtTime(0.0001, start); g.gain.linearRampToValueAtTime(volume, start + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    o.connect(g); g.connect(masterGain); o.start(start); o.stop(start + duration + 0.01);
+  };
+  const noise = (duration: number, volume: number, filterType: BiquadFilterType, frequency: number, start = now): void => {
+    const buffer = context.createBuffer(1, Math.floor(context.sampleRate * duration), context.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
+    const source = context.createBufferSource(); const filter = context.createBiquadFilter(); const gain = context.createGain();
+    source.buffer = buffer; filter.type = filterType; filter.frequency.value = frequency;
+    gain.gain.setValueAtTime(volume, start); gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    source.connect(filter); filter.connect(gain); gain.connect(masterGain); source.start(start); source.stop(start + duration);
+  };
+
+  switch (sound) {
+    case 'footstep': osc(140, 0.065, 0.13, 'triangle', now, 65); noise(0.055, 0.025, 'lowpass', 1800); return true;
+    case 'hover': osc(2200, 0.022, 0.055, 'square'); return true;
+    case 'cardOpen': osc(520, 0.095, 0.12, 'square', now, 1480); noise(0.08, 0.025, 'highpass', 4200); return true;
+    case 'cardClose': osc(980, 0.085, 0.11, 'triangle', now, 320); return true;
+    case 'add': osc(783.99, 0.09, 0.12, 'square'); osc(1046.5, 0.09, 0.12, 'square', now + 0.04); osc(1318.51, 0.09, 0.12, 'square', now + 0.08); return true;
+    case 'save': osc(1046.5, 0.24, 0.1, 'sine'); osc(1568, 0.21, 0.08, 'square', now + 0.025); return true;
+    case 'toggle': osc(1800, 0.04, 0.1, 'square', now, 850); noise(0.035, 0.02, 'highpass', 3000); return true;
+    case 'error': osc(185, 0.22, 0.14, 'sawtooth'); osc(196, 0.22, 0.1, 'sawtooth'); return true;
+    case 'dangerConfirm': osc(90, 0.38, 0.2, 'sine', now, 45); osc(293.66, 0.38, 0.08, 'square', now, 311.13); return true;
+    case 'recordSelect': osc(680, 0.05, 0.14, 'triangle', now, 340); noise(0.05, 0.025, 'bandpass', 1800); return true;
+    case 'inputFocus': osc(1600, 0.028, 0.08, 'sine', now, 800); return true;
+    case 'chestClose': osc(1400, 0.14, 0.16, 'square', now, 700); osc(180, 0.14, 0.09, 'triangle', now, 120); noise(0.08, 0.03, 'lowpass', 900); return true;
+    default: return false;
+  }
+}
+
 function playV1Confirm(): void {
   const c = getAudioContext();
   if (!c || !masterGain || !enabled) return;
@@ -230,7 +267,9 @@ export function playSound(sound: SoundType): void {
   if (sound === 'tabSwitch') { playV1TabSwitch(); return; }
   if (sound === 'modalOpen' || sound === 'modalClose') { playV1Modal(); return; }
   if (sound === 'delete') { playV1Warning(); return; }
-  if (sound === 'error') { playTone(SOUND_PROFILES.error); return; }
+  if (sound === 'error' || sound === 'hover' || sound === 'footstep' || sound === 'cardOpen' || sound === 'cardClose' || sound === 'add' || sound === 'save' || sound === 'toggle' || sound === 'inputFocus' || sound === 'dangerConfirm' || sound === 'recordSelect' || sound === 'chestClose') {
+    if (playV2AdditionalSound(sound)) return;
+  }
   playTone(SOUND_PROFILES[sound]);
 }
 
