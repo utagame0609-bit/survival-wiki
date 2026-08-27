@@ -9,7 +9,7 @@ export type SoundType =
 const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
 const SOUND_ENABLED_KEY = 'survival-wiki-se-enabled';
 const DEFAULT_SOUND_VOLUME = 50;
-const SOURCE_LEVEL = 1.5;
+const SOURCE_LEVEL = 1.0;
 let audioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
 let bgmGain: GainNode | null = null;
@@ -95,7 +95,6 @@ function playV2Sound(sound: SoundType): void {
   const c = getAudioContext();
   if (!c || !masterGain || !enabled) return;
   const t = c.currentTime;
-
   switch (sound) {
     case 'confirm': tone(c, 880, t, 0.08, 0.18, 'square'); tone(c, 1760, t + 0.045, 0.095, 0.16, 'square'); return;
     case 'cancel': tone(c, 659, t, 0.11, 0.13, 'square', 330); return;
