@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, Home, Shield } from 'lucide-react';
-import { playCancelSound } from '../lib/sound';
+import { playCancelSound, playHoverSound } from '../lib/sound';
 
 type Screen =
   | { name: 'top' }
@@ -45,6 +45,7 @@ export function Header({
                 playCancelSound();
                 onBack();
               }}
+              onMouseEnter={playHoverSound}
               className="flex min-h-[40px] shrink-0 items-center gap-1.5 border border-amber-500/50 bg-[#12151d] px-3 py-2 font-mono text-xs font-bold text-amber-400 transition-all hover:border-amber-400 hover:bg-amber-500/10 active:scale-95 cursor-pointer"
               aria-label="戻る"
             >
@@ -68,6 +69,7 @@ export function Header({
           <button
             type="button"
             onClick={handleHome}
+            onMouseEnter={playHoverSound}
             aria-label="ホームへ"
             className="flex min-h-[40px] shrink-0 items-center gap-1.5 border border-slate-700 bg-[#12151d] px-2.5 py-2 font-mono text-xs font-bold text-slate-300 transition-all hover:border-amber-500 hover:text-amber-400 active:scale-95 cursor-pointer"
           >
