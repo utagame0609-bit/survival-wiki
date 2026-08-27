@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Sparkles, MapPin, ExternalLink, Camera } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
+import { getPhotoUrl } from '@/lib/db';
 import { playConfirmSound, playCancelSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { ChestPhotoCard } from '@/components/ChestPhotoCard';
-import { ChestFullImage } from '@/components/ChestFullImage';
 
 type CollectionItem = {
   location: LocationWithPhotos;
@@ -129,4 +129,13 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
       )}
     </div>
   );
+}
+
+function ChestFullImage({ storagePath, alt }: { storagePath: string; alt: string }) {
+  const [src, setSrc] = useState('');
+  useEffect(() => {
+    getPhotoUrl(storagePath).then(setSrc).catch(() => {});
+  }, [storagePath]);
+  if (!src) return <div className="w-full h-72 bg-[#070c18] animate-pulse" />;
+  return <img src={src} alt={alt} className="w-full max-h-[60vh] object-contain bg-black pixelated" />;
 }
