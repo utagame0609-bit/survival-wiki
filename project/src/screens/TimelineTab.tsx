@@ -8,6 +8,7 @@ import { DayChapter } from '@/components/timeline/DayChapter';
 import { TimelineEntry } from '@/components/timeline/TimelineEntry';
 import { TimelineHeader } from '@/components/timeline/TimelineHeader';
 import { groupByDay, getMilestone, type DayGroup } from '@/components/timeline/timelineData';
+import { loadUnlockedMilestones, saveUnlockedMilestones } from '@/components/timeline/timelineMilestones';
 
 type SortOrder = 'newest' | 'oldest';
 
@@ -33,12 +34,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
   }, [world.id, reloadKey]);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(`survival-wiki:milestones:${world.id}`);
-      setUnlockedMilestones(stored ? JSON.parse(stored) : []);
-    } catch {
-      setUnlockedMilestones([]);
-    }
+    setUnlockedMilestones(loadUnlockedMilestones(world.id));
   }, [world.id]);
 
   const groups = useMemo(() => {
@@ -76,7 +72,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       setUnlockedMilestones((current) => {
         if (current.includes(milestone.day)) return current;
         const next = [...current, milestone.day].sort((a, b) => a - b);
-        try { localStorage.setItem(`survival-wiki:milestones:${world.id}`, JSON.stringify(next)); } catch {}
+        saveUnlockedMilestones(world.id, next);
         return next;
       });
     }
