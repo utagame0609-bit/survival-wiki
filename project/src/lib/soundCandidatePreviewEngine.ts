@@ -8,6 +8,16 @@ interface ActiveLoopTrack {
 }
 
 let activeLoop: ActiveLoopTrack | null = null;
+const soundStateListeners = new Set<(id: string | null, isPlaying: boolean) => void>();
+
+function notifySoundState(id: string | null, isPlaying: boolean): void {
+  soundStateListeners.forEach((listener) => listener(id, isPlaying));
+}
+
+export function subscribeSoundState(listener: (id: string | null, isPlaying: boolean) => void): () => void {
+  soundStateListeners.add(listener);
+  return () => soundStateListeners.delete(listener);
+}
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -48,8 +58,6 @@ export const PREVIEW_SOUNDS: Record<string, () => void> = {
   achievement: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; [523.25,659.25,783.99,987.77,1046.5,1318.51].forEach((f,i)=>tone(c,f,t+i*.09,.22,.13,'square')); },
   wiki_generating_noise: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; hiss(c,t,1.2,.06,'bandpass',1450); tone(c,60,t,1.2,.015,'sine'); },
   wiki_complete: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; [523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.51].forEach((f,i)=>tone(c,f,t+i*.1,.3,.11,'triangle')); tone(c,2093,t+.82,.35,.12,'sine'); },
-
-  // V2 優先度【大】 8種
   footstep: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,140,t,.065,.13,'triangle',65); hiss(c,t,.055,.025,'lowpass',1800); },
   hover: () => { const c=getCtx(); if(!c)return; tone(c,2200,c.currentTime,.022,.055,'square'); },
   card_open: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,520,t,.095,.12,'square',1480); hiss(c,t,.08,.025,'highpass',4200); },
@@ -60,84 +68,10 @@ export const PREVIEW_SOUNDS: Record<string, () => void> = {
   error: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,185,t,.22,.14,'sawtooth'); tone(c,196,t,.22,.1,'sawtooth'); },
 };
 
-function createWikipediaBgmEngine(c: AudioContext): ActiveLoopTrack {
-  let step = 0;
-  const bpm = 112;
-  const stepTime = 60 / bpm / 2;
-  const melodyNotes = [880, 1046.5, 1318.51, 1046.5, 830.61, 987.77, 1244.51, 987.77, 880, 1174.66, 1396.91, 1174.66, 1046.5, 987.77, 880, 830.61];
-  const bassNotes = [220, null, 220, null, 207.65, null, 207.65, null, 293.66, null, 293.66, null, 220, null, 164.81, 207.65];
-  const interval = window.setInterval(() => {
-    if (!ctx || ctx.state === 'suspended') return;
-    const t = ctx.currentTime;
-    const mNote = melodyNotes[step % melodyNotes.length];
-    const bNote = bassNotes[step % bassNotes.length];
-    if (mNote) { tone(ctx, mNote, t, 0.12, 0.08, 'square'); tone(ctx, mNote * 0.5, t, 0.09, 0.04, 'triangle'); }
-    if (bNote) tone(ctx, bNote, t, 0.22, 0.1, 'triangle');
-    if (step % 4 === 0) hiss(ctx, t, 0.03, 0.015, 'highshelf', 4000);
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_wikipedia', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
-}
+function createWikipediaBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/112/2; const melodyNotes=[880,1046.5,1318.51,1046.5,830.61,987.77,1244.51,987.77,880,1174.66,1396.91,1174.66,1046.5,987.77,880,830.61]; const bassNotes=[220,null,220,null,207.65,null,207.65,null,293.66,null,293.66,null,220,null,164.81,207.65]; const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime;const m=melodyNotes[step%16],b=bassNotes[step%16];if(m){tone(ctx,m,t,.12,.08,'square');tone(ctx,m*.5,t,.09,.04,'triangle');}if(b)tone(ctx,b,t,.22,.1,'triangle');if(step%4===0)hiss(ctx,t,.03,.015,'highshelf',4000);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_wikipedia',intervalId:interval,nodes:[],stop:()=>window.clearInterval(interval)}; }
+function createScpBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/96/2; const notes=[440,null,440,null,466.16,null,null,null,440,null,554.37,null,523.25,493.88,466.16,null]; const o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter(); o.type='sawtooth';o.frequency.setValueAtTime(55,c.currentTime);f.type='lowpass';f.frequency.setValueAtTime(220,c.currentTime);g.gain.setValueAtTime(.0001,c.currentTime);g.gain.linearRampToValueAtTime(.12,c.currentTime+.5);o.connect(f);f.connect(g);g.connect(c.destination);o.start();const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime,n=notes[step%16];if(n){tone(ctx,n,t,.16,.07,'sawtooth');tone(ctx,n*2,t,.06,.03,'square');}if(Math.random()>.4)hiss(ctx,t,.015,.025,'bandpass',3800+Math.random()*800);if(step%4===0)tone(ctx,110,t,.14,.12,'triangle',40);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_scp',intervalId:interval,nodes:[o,g,f],stop:()=>{window.clearInterval(interval);if(ctx){g.gain.linearRampToValueAtTime(.0001,ctx.currentTime+.3);setTimeout(()=>{try{o.stop();o.disconnect();}catch{}},350);}}}; }
+function createAncientBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/78/2; const notes=[329.63,null,392,493.88,587.33,null,523.25,493.88,392,null,329.63,null,293.66,311.13,329.63,null];const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime,n=notes[step%16];if(n){tone(ctx,n,t,.28,.1,'triangle');tone(ctx,n*.5,t,.32,.06,'sine');}if(step%16===0||step%16===8){tone(ctx,1046.5,t,.8,.05,'sine');tone(ctx,1567.98,t,.6,.03,'triangle');tone(ctx,1661.22,t,.5,.02,'sine');}if(step%8===0)hiss(ctx,t,.6,.02,'bandpass',850);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_ancient',intervalId:interval,nodes:[],stop:()=>window.clearInterval(interval)}; }
 
-function createScpBgmEngine(c: AudioContext): ActiveLoopTrack {
-  let step = 0;
-  const bpm = 96;
-  const stepTime = 60 / bpm / 2;
-  const leadNotes = [440, null, 440, null, 466.16, null, null, null, 440, null, 554.37, null, 523.25, 493.88, 466.16, null];
-  const droneOsc = c.createOscillator();
-  const droneGain = c.createGain();
-  const droneFilter = c.createBiquadFilter();
-  droneOsc.type = 'sawtooth'; droneOsc.frequency.setValueAtTime(55, c.currentTime);
-  droneFilter.type = 'lowpass'; droneFilter.frequency.setValueAtTime(220, c.currentTime);
-  droneGain.gain.setValueAtTime(0.0001, c.currentTime); droneGain.gain.linearRampToValueAtTime(0.12, c.currentTime + 0.5);
-  droneOsc.connect(droneFilter); droneFilter.connect(droneGain); droneGain.connect(c.destination); droneOsc.start();
-  const interval = window.setInterval(() => {
-    if (!ctx || ctx.state === 'suspended') return;
-    const t = ctx.currentTime; const note = leadNotes[step % leadNotes.length];
-    if (note) { tone(ctx, note, t, 0.16, 0.07, 'sawtooth'); tone(ctx, note * 2, t, 0.06, 0.03, 'square'); }
-    if (Math.random() > 0.4) hiss(ctx, t, 0.015, 0.025, 'bandpass', 3800 + Math.random() * 800);
-    if (step % 4 === 0) tone(ctx, 110, t, 0.14, 0.12, 'triangle', 40);
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_scp', intervalId: interval, nodes: [droneOsc, droneGain, droneFilter], stop: () => { window.clearInterval(interval); if (ctx) { droneGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.3); setTimeout(() => { try { droneOsc.stop(); droneOsc.disconnect(); } catch {} }, 350); } } };
-}
-
-function createAncientBgmEngine(c: AudioContext): ActiveLoopTrack {
-  let step = 0;
-  const bpm = 78;
-  const stepTime = 60 / bpm / 2;
-  const luteNotes = [329.63, null, 392, 493.88, 587.33, null, 523.25, 493.88, 392, null, 329.63, null, 293.66, 311.13, 329.63, null];
-  const bellSteps = [0, 8];
-  const interval = window.setInterval(() => {
-    if (!ctx || ctx.state === 'suspended') return;
-    const t = ctx.currentTime; const note = luteNotes[step % luteNotes.length];
-    if (note) { tone(ctx, note, t, 0.28, 0.1, 'triangle'); tone(ctx, note * 0.5, t, 0.32, 0.06, 'sine'); }
-    if (bellSteps.includes(step % 16)) { tone(ctx, 1046.5, t, 0.8, 0.05, 'sine'); tone(ctx, 1567.98, t, 0.6, 0.03, 'triangle'); tone(ctx, 1661.22, t, 0.5, 0.02, 'sine'); }
-    if (step % 8 === 0) hiss(ctx, t, 0.6, 0.02, 'bandpass', 850);
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_ancient', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
-}
-
-export function stopActiveAudio(): void {
-  if (activeLoop) { activeLoop.stop(); activeLoop = null; }
-}
-
-export function isAudioPlaying(id?: string): boolean {
-  if (!id) return activeLoop !== null;
-  return activeLoop?.id === id;
-}
-
-export function playSoundCandidatePreview(id: string): void {
-  const c = getCtx();
-  if (!c) return;
-  if (activeLoop) {
-    const isSame = activeLoop.id === id;
-    stopActiveAudio();
-    if (isSame) return;
-  }
-  if (id === 'npc_bgm_wikipedia') activeLoop = createWikipediaBgmEngine(c);
-  else if (id === 'npc_bgm_scp') activeLoop = createScpBgmEngine(c);
-  else if (id === 'npc_bgm_ancient') activeLoop = createAncientBgmEngine(c);
-  else PREVIEW_SOUNDS[id]?.();
-}
+export function stopActiveAudio(): void { if (activeLoop) { const id=activeLoop.id; activeLoop.stop(); activeLoop=null; notifySoundState(id,false); } }
+export function isAudioPlaying(id?: string): boolean { if(!id)return activeLoop!==null; return activeLoop?.id===id; }
+export function playSoundCandidatePreview(id: string): void { const c=getCtx();if(!c)return;if(activeLoop){const same=activeLoop.id===id;stopActiveAudio();if(same)return;}if(id==='npc_bgm_wikipedia')activeLoop=createWikipediaBgmEngine(c);else if(id==='npc_bgm_scp')activeLoop=createScpBgmEngine(c);else if(id==='npc_bgm_ancient')activeLoop=createAncientBgmEngine(c);else PREVIEW_SOUNDS[id]?.();notifySoundState(id,true); }
