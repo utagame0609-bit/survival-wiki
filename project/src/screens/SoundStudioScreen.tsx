@@ -5,7 +5,7 @@ import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { isWorldBgmPlaying, playWorldBgm, stopWorldBgm } from '@/lib/bgm';
-import { playCancelSound, playConfirmSound, playCursorMoveSound, playNewRecordSound } from '@/lib/sound';
+import { playCancelSound, playConfirmSound } from '@/lib/sound';
 
 type BgmCandidate = {
   id: 'bgm_world_select' | 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
@@ -85,13 +85,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const handlePlay = (candidate: SoundCandidate) => {
     if (isWorldBgmPlaying()) stopWorldBgm(0);
     setActivePlayingId(candidate.id);
-    if (candidate.id === 'cursor_move') {
-      playCursorMoveSound();
-    } else if (candidate.id === 'new_record') {
-      playNewRecordSound();
-    } else {
-      playSoundCandidatePreview(candidate.id);
-    }
+    playSoundCandidatePreview(candidate.id);
     window.setTimeout(() => {
       if (!isAudioPlaying(candidate.id)) setActivePlayingId(null);
     }, 500);
