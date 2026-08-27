@@ -82,7 +82,10 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
         <ChestPhotoDetailModal
           item={selectedPhoto}
           onClose={() => setSelectedPhoto(null)}
-          onOpenLocation={onOpenLocation}
+          onOpenLocation={(location) => {
+            onClose();
+            onOpenLocation(location);
+          }}
         />
       )}
     </div>
