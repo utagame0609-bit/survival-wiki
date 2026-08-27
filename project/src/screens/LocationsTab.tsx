@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Plus, MapPin, Search, ArrowUpDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
-import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
+import { fetchLocations, createLocation, updateLocation, deleteLocation } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
 import { LocationCard } from '@/components/LocationCard';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
 import { DeleteLocationConfirmModal } from '@/components/DeleteLocationConfirmModal';
 import { LocationFormModal } from '@/components/LocationFormModal';
+import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import {
   playConfirmSound,
   playRecordSelectSound,
@@ -29,7 +30,10 @@ type Mode =
 
 type SortOrder = 'asc' | 'desc';
 
-type CollectionItem = { location: LocationWithPhotos; storagePath: string };
+type CollectionItem = {
+  location: LocationWithPhotos;
+  storagePath: string;
+};
 
 type LocationFormInput = {
   name: string;
@@ -292,7 +296,7 @@ export function LocationsTab({
                     playRecordSelectSound();
                     setSelectedLocation(loc);
                   }}
-                  PhotoImage={PhotoImage}
+                  PhotoImage={LocationPhotoImage}
                 />
               ))}
             </div>
@@ -320,7 +324,7 @@ export function LocationsTab({
           onClose={closeLocationDetail}
           onEdit={handleDetailEdit}
           onDelete={() => handleDelete(selectedLocation)}
-          PhotoImage={PhotoImage}
+          PhotoImage={LocationPhotoImage}
         />
       )}
 
@@ -350,50 +354,11 @@ export function LocationsTab({
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1)\\] {
+          .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\.35\\,1)\\] {
             animation: none !important;
           }
         }
       `}</style>
     </div>
   );
-}
-
-function PhotoImage({
-  storagePath,
-  alt,
-  className,
-}: {
-  storagePath: string;
-  alt: string;
-  className?: string;
-}) {
-  const [src, setSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    let objectUrl: string | null = null;
-
-    setSrc(null);
-    getPhotoUrl(storagePath)
-      .then((url) => {
-        if (!active) {
-          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-          return;
-        }
-        objectUrl = url.startsWith('blob:') ? url : null;
-        setSrc(url);
-      })
-      .catch(() => {
-        if (active) setSrc(null);
-      });
-
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [storagePath]);
-
-  if (!src) return <div className={className} aria-hidden="true" />;
-  return <img src={src} alt={alt} className={className} />;
 }
