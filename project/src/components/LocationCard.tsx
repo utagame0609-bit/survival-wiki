@@ -1,7 +1,8 @@
 import type { ComponentType } from 'react';
-import { ChevronRight, Compass, MapPin } from 'lucide-react';
+import { ChevronRight, Compass } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { playHoverSound } from '@/lib/sound';
+import { LocationCardMedia } from '@/components/LocationCardMedia';
 
 type PhotoImageProps = {
   storagePath: string;
@@ -17,7 +18,6 @@ type LocationCardProps = {
 };
 
 export function LocationCard({ location, index, onSelect, PhotoImage }: LocationCardProps) {
-  const mainPhoto = location.photos.find((p) => p.is_main) || location.photos[0];
   const locCode = String(index).padStart(2, '0');
 
   return (
@@ -28,15 +28,7 @@ export function LocationCard({ location, index, onSelect, PhotoImage }: Location
       className="group relative text-left bg-[#1e2330] border-2 border-[#2d3548] hover:border-amber-500/80 p-4 flex flex-col justify-between transition-all duration-150 hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)] cursor-pointer w-full"
     >
       <div className="w-full">
-        {mainPhoto ? (
-          <div className="w-full h-36 mb-3 overflow-hidden bg-[#12151f] border border-[#2d3548]">
-            <PhotoImage storagePath={mainPhoto.storage_path} alt={location.name} className="w-full h-full object-cover pixelated group-hover:scale-105 transition-transform duration-300" />
-          </div>
-        ) : (
-          <div className="w-full h-36 mb-3 overflow-hidden bg-[#12151f] border border-[#2d3548] flex items-center justify-center">
-            <MapPin className="w-10 h-10 text-slate-600" />
-          </div>
-        )}
+        <LocationCardMedia location={location} PhotoImage={PhotoImage} />
 
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 min-w-0">
