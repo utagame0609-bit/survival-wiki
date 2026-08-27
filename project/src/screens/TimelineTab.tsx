@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Crown, Footprints } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations } from '@/lib/db';
 import { playCardOpenSound } from '@/lib/sound';
@@ -7,6 +6,7 @@ import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { DayChapter } from '@/components/timeline/DayChapter';
 import { TimelineEntry } from '@/components/timeline/TimelineEntry';
 import { TimelineHeader } from '@/components/timeline/TimelineHeader';
+import { TimelineProgressMarker } from '@/components/timeline/TimelineProgressMarker';
 import { groupByDay, getMilestone, type DayGroup } from '@/components/timeline/timelineData';
 import { loadUnlockedMilestones, saveUnlockedMilestones } from '@/components/timeline/timelineMilestones';
 
@@ -107,14 +107,12 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       {!loading && groups.length > 0 && (
         <div ref={timelineRef} className="relative">
           <div className="pointer-events-none absolute left-[8px] top-0 bottom-0 w-0.5 bg-[#2d3548]" />
-          <div className="pointer-events-none absolute left-[7px] top-[18px] z-10 w-[3px] origin-top rounded-full bg-gradient-to-b from-amber-500 via-amber-500 to-emerald-400 shadow-[0_0_12px_rgba(245,158,11,0.6)] transition-[height] duration-500 ease-out" style={{ height: `${trailHeight}px` }} />
-          <div className="pointer-events-none absolute left-[-6px] z-20 transition-[top] duration-500 ease-out" style={{ top: `${activeIconTop}px` }} aria-hidden="true">
-            <div className={`relative flex items-center justify-center w-7 h-7 rounded-full text-[#12151f] shadow-lg ring-2 ring-[#12151f] ${activeMilestone ? 'bg-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.7)]' : 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)]'} ${isRevealingMilestone ? 'milestone-reveal' : ''}`}>
-              {isRevealingMilestone && <span className="milestone-burst pointer-events-none absolute inset-0 rounded-full border-2 border-amber-400" />}
-              {activeMilestone ? <Crown className="w-4 h-4" /> : <Footprints className="w-4 h-4" />}
-              {activeMilestone && <span className={`absolute left-8 whitespace-nowrap rounded-sm bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-black shadow-md border border-white/40 ${isRevealingMilestone ? 'milestone-text' : ''}`}>{activeMilestone.label}</span>}
-            </div>
-          </div>
+          <TimelineProgressMarker
+            top={activeIconTop}
+            trailHeight={trailHeight}
+            activeMilestone={activeMilestone}
+            isRevealing={isRevealingMilestone}
+          />
 
           <div className="space-y-4 sm:space-y-5 pl-7 sm:pl-9">
             {groups.map((group: DayGroup) => (
