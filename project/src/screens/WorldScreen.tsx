@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Clock3, MapPin } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWorld, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -9,9 +8,10 @@ import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
 import { SettingsButton } from '@/components/SettingsModal';
-import { playHoverSound, playModalOpenSound, playTabSwitchSound } from '@/lib/sound';
+import { playHoverSound, playModalCloseSound, playModalOpenSound } from '@/lib/sound';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
 import { WorldHeader } from '@/components/WorldHeader';
+import { WorldTabs } from '@/components/WorldTabs';
 
 type Tab = 'locations' | 'timeline' | 'wiki';
 
@@ -77,7 +77,6 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
 
   const handleTabChange = (nextTab: Tab) => {
     if (nextTab === tab) return;
-    playTabSwitchSound();
     setWikiArticleBack(false);
     setTabHistory([]);
     setTab(nextTab);
@@ -104,12 +103,6 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
     goBack();
   };
 
-  const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
-    { id: 'locations', label: 'ロケーション', icon: MapPin },
-    { id: 'timeline', label: 'タイムライン', icon: Clock3 },
-    { id: 'wiki', label: 'Wiki', icon: BookOpen },
-  ];
-
   return (
     <div className="relative min-h-screen bg-[#161922] text-white font-sans flex flex-col select-none overflow-x-hidden">
       <div className="scanline-overlay" />
@@ -122,31 +115,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
         {!loading && world && (
           <>
             <WorldHeader world={world} playerPhotoUrl={playerPhotoUrl} />
-
-            <div className="grid grid-cols-3 border-b-2 border-[#2d3548] mb-5 gap-1.5 sm:gap-2">
-              {tabs.map((item) => {
-                const Icon = item.icon;
-                const isActive = tab === item.id;
-                const count = item.id === 'locations' ? <span className="text-[10px] sm:text-xs px-1.5 py-0.2 bg-[#12151f] border border-emerald-500/50 text-emerald-400 font-mono font-bold">—</span> : null;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleTabChange(item.id)}
-                    onMouseEnter={playHoverSound}
-                    className={`min-h-[48px] sm:min-h-[44px] px-2 sm:px-6 py-2.5 text-xs sm:text-sm font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all border-b-[3px] -mb-[2px] cursor-pointer ${
-                      isActive
-                        ? 'border-amber-500 bg-[#1e2330] text-amber-400 shadow-[0_2px_12px_rgba(245,158,11,0.2)]'
-                        : 'border-transparent bg-[#141824] text-slate-300 hover:text-white hover:bg-[#181d2c]'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="tracking-wide whitespace-nowrap">{item.id === 'wiki' ? '旅の書 (Wiki)' : item.label}</span>
-                    {count}
-                  </button>
-                );
-              })}
-            </div>
+            <WorldTabs activeTab={tab} onTabChange={handleTabChange} />
 
             <div className="flex-1">
               {tab === 'locations' && (
