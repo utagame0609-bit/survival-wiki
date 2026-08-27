@@ -1,5 +1,4 @@
 import { X } from 'lucide-react';
-import type { ComponentType } from 'react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { LocationForm } from '@/components/LocationForm';
 import { playCancelSound, playHoverSound } from '@/lib/sound';
