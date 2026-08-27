@@ -1,6 +1,6 @@
 import { FileText, MapPin, X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
-import { playHoverSound, playModalCloseSound } from '@/lib/sound';
+import { playHoverSound } from '@/lib/sound';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 
@@ -12,7 +12,7 @@ type WikiLocationDetailModalProps = {
 export function WikiLocationDetailModal({ location, onClose }: WikiLocationDetailModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <button aria-label="閉じる" className="absolute inset-0" onClick={() => { playModalCloseSound(); onClose(); }} />
+      <button aria-label="閉じる" className="absolute inset-0" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-hidden rounded-sm bg-[#0a1120] text-[#e2e8f0] border-4 border-double border-[#ffb000] shadow-[0_0_25px_rgba(255,176,0,0.2),inset_0_0_10px_rgba(255,176,0,0.1)] flex flex-col motion-safe:animate-[wiki-modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between px-5 py-3 flex-shrink-0 border-b-2 border-[#1a2333] bg-[#0d1627] text-[#ffb000]">
           <div className="text-xs tracking-wider flex items-center gap-2.5">
@@ -21,7 +21,7 @@ export function WikiLocationDetailModal({ location, onClose }: WikiLocationDetai
             <span className="text-zinc-600 font-mono">//</span>
             <span className="text-zinc-300">ロケーション詳細</span>
           </div>
-          <button onClick={() => { playModalCloseSound(); onClose(); }} aria-label="閉じる" onMouseEnter={playHoverSound} className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]">
+          <button onClick={onClose} aria-label="閉じる" onMouseEnter={playHoverSound} className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]">
             <X className="w-[18px] h-[18px]" />
           </button>
         </div>
@@ -64,7 +64,7 @@ export function WikiLocationDetailModal({ location, onClose }: WikiLocationDetai
         </div>
 
         <div className="p-3 bg-[#0d1627] border-t-2 border-[#1a2333] flex justify-end">
-          <button onClick={() => { playModalCloseSound(); onClose(); }} onMouseEnter={playHoverSound} className="px-4 py-2 bg-[#1a2333] text-[#ffb000] text-xs font-bold font-mono border border-[#334155] hover:border-[#ffb000] transition-colors">閉じる (ESC)</button>
+          <button onClick={onClose} onMouseEnter={playHoverSound} className="px-4 py-2 bg-[#1a2333] text-[#ffb000] text-xs font-bold font-mono border border-[#334155] hover:border-[#ffb000] transition-colors">閉じる (ESC)</button>
         </div>
       </div>
 
