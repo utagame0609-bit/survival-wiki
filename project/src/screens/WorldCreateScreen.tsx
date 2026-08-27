@@ -4,6 +4,7 @@ import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
 import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playAddSound, playDeleteSound } from '@/lib/sound';
+import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
 type MemberPhotoState = {
   name: string;
@@ -24,6 +25,11 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    playWorldBgm();
+    return () => stopWorldBgm(300);
+  }, []);
 
   useEffect(() => {
     if (!worldId) return;
