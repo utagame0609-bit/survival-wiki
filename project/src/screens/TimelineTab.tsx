@@ -1,26 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Crown, Footprints, MapPin } from 'lucide-react';
+import { Crown, Footprints } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations } from '@/lib/db';
-import { playHoverSound, playCardOpenSound } from '@/lib/sound';
+import { playCardOpenSound } from '@/lib/sound';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { DayChapter } from '@/components/timeline/DayChapter';
 import { TimelineEntry } from '@/components/timeline/TimelineEntry';
 import { TimelineHeader } from '@/components/timeline/TimelineHeader';
+import { groupByDay, getMilestone, type DayGroup } from '@/components/timeline/timelineData';
 
-type DayGroup = { dateKey: string; label: string; dayNumber: number; dateLabel: string; dayLabel: string; locations: LocationWithPhotos[]; bgPhotoPath?: string };
 type SortOrder = 'newest' | 'oldest';
-type Milestone = { day: number; label: string };
-
-const MILESTONES: Milestone[] = [
-  { day: 3, label: '3日目、生存確認。' },
-  { day: 7, label: 'まだ生きている。7日目。' },
-  { day: 30, label: '奇跡が起きた。30日生存。' },
-];
-
-function getMilestone(dayNumber: number) {
-  return MILESTONES.find((milestone) => milestone.day === dayNumber);
-}
 
 export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
@@ -132,7 +121,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
           </div>
 
           <div className="space-y-4 sm:space-y-5 pl-7 sm:pl-9">
-            {groups.map((group) => (
+            {groups.map((group: DayGroup) => (
               <DayChapter
                 key={group.dateKey}
                 group={group}
@@ -156,39 +145,4 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
       )}
     </div>
   );
-}
-
-function groupByDay(locations: LocationWithPhotos[]): DayGroup[] {
-  const sorted = [...locations].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  const map = new Map<string, LocationWithPhotos[]>();
-  for (const loc of sorted) {
-    const d = new Date(loc.created_at);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const arr = map.get(key) ?? [];
-    arr.push(loc);
-    map.set(key, arr);
-  }
-  const sortedKeysAsc = Array.from(map.keys()).sort((a, b) => a.localeCompare(b));
-  const dateKeyToDayNum = new Map<string, number>();
-  sortedKeysAsc.forEach((key, index) => dateKeyToDayNum.set(key, index + 1));
-  const groups: DayGroup[] = [];
-  for (const [key, locs] of map) {
-    const d = new Date(key);
-    const dateLabel = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-    const dayLabel = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
-    const dayNum = dateKeyToDayNum.get(key) ?? 1;
-    const label = `${dayNum}日目`;
-    const firstWithPhoto = [...locs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).find((location) => location.photos.some((photo) => photo.is_main));
-    const bgPhotoPath = firstWithPhoto?.photos.find((photo) => photo.is_main)?.storage_path;
-    groups.push({
-      dateKey: key,
-      label,
-      dayNumber: dayNum,
-      dateLabel,
-      dayLabel,
-      locations: [...locs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
-      bgPhotoPath,
-    });
-  }
-  return groups;
 }
