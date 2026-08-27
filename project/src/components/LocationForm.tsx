@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Compass, Users, Check } from 'lucide-react';
+import { Compass } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
-import { playSaveSound, playCancelSound, playConfirmSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
+import { playSaveSound, playCancelSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
+import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
 
 type SaveInput = {
   name: string; x: number; y: number; z: number; detail_memo: string; created_at: string; member_ids: string[];
@@ -49,7 +50,6 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
   const toggleMember = (id: string) => {
-    playConfirmSound();
     const next = new Set(selectedMembers); if (next.has(id)) next.delete(id); else next.add(id); setSelectedMembers(next);
   };
   const handleSubmit = async () => {
@@ -96,26 +96,21 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         onClear={clearMainPreview}
       />
 
-      <button type="button" onClick={() => { setDetailOpen(!detailOpen); playConfirmSound(); }} onMouseEnter={playHoverSound} className="flex w-full items-center justify-between gap-2 px-3 py-2.5 rounded-sm border border-sky-500/30 bg-sky-950/10 text-xs font-bold text-sky-400 hover:text-sky-300 hover:border-sky-400/60 transition-colors pt-2 cursor-pointer">
-        <span className="flex items-center gap-1.5"><ChevronDown className={`w-4 h-4 transition-transform ${detailOpen ? 'rotate-180' : ''}`} />EXPAND PARAMETERS // 詳細メモ・仲間</span><span className="text-[10px] text-slate-500">{detailOpen ? 'OPEN' : 'CLOSED'}</span>
-      </button>
-
-      {detailOpen && <div className="space-y-4 p-4 rounded-sm bg-[#090d16] border border-slate-800">
-        <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">FIELD NOTES // 詳細メモ</label>
-          <textarea value={detailMemo} onChange={(e) => setDetailMemo(e.target.value)} onFocus={playInputFocusSound} placeholder="この場所についての地形・資源・魔物などのメモ" rows={3} className="location-input resize-none text-xs leading-relaxed text-slate-200" />
-        </div>
-        {members.length > 0 && <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider flex items-center gap-1.5"><Users className="w-4 h-4 text-cyan-400" />COMPANIONS // 同行メンバー</label>
-          <div className="flex flex-wrap gap-2">
-            {members.map((m) => { const checked = selectedMembers.has(m.id); return <button type="button" key={m.id} onClick={() => toggleMember(m.id)} onMouseEnter={playHoverSound} className={`min-h-[40px] px-3 py-1.5 rounded-sm text-xs font-mono border-2 transition-all cursor-pointer flex items-center gap-1.5 ${checked ? 'bg-cyan-950/50 text-cyan-200 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.18)] font-bold' : 'bg-[#0d1627] text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'}`}>{checked && <Check className="w-3.5 h-3.5 text-cyan-400 stroke-[3]" />}{m.name}</button>; })}
-          </div>
-        </div>}
-        <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">TIMESTAMP // 記録日時</label>
-          <input type="datetime-local" value={createdAt} onChange={(e) => setCreatedAt(e.target.value)} onFocus={playInputFocusSound} className="location-input text-xs" />
-        </div>
-      </div>}
+      <LocationAdvancedFields
+        open={detailOpen}
+        detailMemo={detailMemo}
+        members={members}
+        selectedMembers={selectedMembers}
+        createdAt={createdAt}
+        onToggleOpen={() => setDetailOpen((current) => !current)}
+        onDetailMemoChange={setDetailMemo}
+        onToggleMember={(id) => {
+          const next = new Set(selectedMembers);
+          if (next.has(id)) next.delete(id); else next.add(id);
+          setSelectedMembers(next);
+        }}
+        onCreatedAtChange={setCreatedAt}
+      />
 
       <div className="flex gap-3 pt-4 pb-1 border-t border-slate-800">
         <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} className="flex-1 min-h-[44px] py-2.5 rounded-sm bg-[#141824] border-2 border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 active:scale-[0.98] transition-all text-xs uppercase tracking-wider cursor-pointer">キャンセル</button>
