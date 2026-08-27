@@ -10,7 +10,7 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
 import { SettingsButton } from '@/components/SettingsModal';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
-import { playModalCloseSound, playModalOpenSound, playTabSwitchSound } from '@/lib/sound';
+import { playHoverSound, playModalCloseSound, playModalOpenSound, playTabSwitchSound } from '@/lib/sound';
 
 type Tab = 'locations' | 'timeline' | 'wiki';
 
@@ -171,6 +171,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
                     key={item.id}
                     type="button"
                     onClick={() => handleTabChange(item.id)}
+                    onMouseEnter={playHoverSound}
                     className={`min-h-[48px] sm:min-h-[44px] px-2 sm:px-6 py-2.5 text-xs sm:text-sm font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all border-b-[3px] -mb-[2px] cursor-pointer ${
                       isActive
                         ? 'border-amber-500 bg-[#1e2330] text-amber-400 shadow-[0_2px_12px_rgba(245,158,11,0.2)]'
@@ -225,7 +226,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
                 <span className="text-zinc-600 font-mono">//</span>
                 <span className="text-zinc-300">ロケーション詳細</span>
               </div>
-              <button onClick={handleCloseWikiLocation} aria-label="閉じる" className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]">
+              <button onClick={handleCloseWikiLocation} aria-label="閉じる" onMouseEnter={playHoverSound} className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]">
                 <X className="w-[18px] h-[18px]" />
               </button>
             </div>
@@ -268,7 +269,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
             </div>
 
             <div className="p-3 bg-[#0d1627] border-t-2 border-[#1a2333] flex justify-end">
-              <button onClick={handleCloseWikiLocation} className="px-4 py-2 bg-[#1a2333] text-[#ffb000] text-xs font-bold font-mono border border-[#334155] hover:border-[#ffb000] transition-colors">閉じる (ESC)</button>
+              <button onClick={handleCloseWikiLocation} onMouseEnter={playHoverSound} className="px-4 py-2 bg-[#1a2333] text-[#ffb000] text-xs font-bold font-mono border border-[#334155] hover:border-[#ffb000] transition-colors">閉じる (ESC)</button>
             </div>
           </div>
         </div>
