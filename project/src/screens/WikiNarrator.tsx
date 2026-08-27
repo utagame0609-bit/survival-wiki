@@ -1,4 +1,4 @@
-import { Glasses, Shield, ScrollText, MessageSquareQuote } from 'lucide-react';
+import { MessageSquareQuote } from 'lucide-react';
 
 const NARRATORS: Record<string, { name: string; role: string; quote: string; accent: string; panel: string; text: string }> = {
   wikipedia: { name: '民俗学者 エルナン', role: '百科事典編纂官', quote: 'ふむ……この記録から判断するに、君はまた随分と無計画だったようだね。', accent: '#ffb000', panel: 'bg-[#17130a] border-[#ffb000]', text: 'text-[#ffb000]' },
@@ -7,8 +7,6 @@ const NARRATORS: Record<string, { name: string; role: string; quote: string; acc
 };
 
 export function WikiNarrator({ style }: { style: string }) {
-  const isWikipedia = style === 'wikipedia';
-  const isScp = style === 'scp';
   const narrator = NARRATORS[style] ?? NARRATORS.ancient;
   return (
     <div className={`mt-5 rounded-sm border-2 p-4 sm:p-5 ${narrator.panel} shadow-[0_0_20px_rgba(0,0,0,.25)]`}>
