@@ -72,6 +72,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     { id: 'action', label: 'キャラクター＆アクション音' },
     { id: 'wiki', label: 'Wiki編纂・AI演出音' },
     { id: 'new_high', label: 'V2新規SE【大】' },
+    { id: 'new_medium', label: 'V2新規SE【中】' },
     { id: 'bgm', label: 'BGM候補' },
   ];
 
