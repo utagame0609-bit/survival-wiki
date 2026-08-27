@@ -5,7 +5,7 @@ import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, ge
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { StyleSelector } from '@/components/wiki/StyleSelector';
-import { NarratorDialogue } from '@/components/wiki/WikiNarrator';
+import { NarratorDialogue, NARRATORS } from '@/components/wiki/WikiNarrator';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
