@@ -3,33 +3,8 @@ import { createSwitchStyleReverb, type SoundReverb } from './soundReverb';
 export type SoundType =
   | 'confirm' | 'cancel' | 'hover' | 'tabSwitch' | 'footstep' | 'cardOpen' | 'cardClose'
   | 'modalOpen' | 'modalClose' | 'add' | 'save' | 'delete' | 'toggle' | 'error'
-  | 'inputFocus' | 'dangerConfirm' | 'recordSelect' | 'chestClose';
-
-type SoundProfile = {
-  frequency: number; duration: number; volume: number; type: OscillatorType;
-  endFrequency?: number; secondFrequency?: number; secondDelay?: number; noise?: boolean;
-};
-
-const SOUND_PROFILES: Record<SoundType, SoundProfile> = {
-  confirm: { frequency: 880, duration: 0.06, volume: 0.22, type: 'square', secondFrequency: 1760, secondDelay: 0.045 },
-  cancel: { frequency: 659.25, endFrequency: 329.63, duration: 0.14, volume: 0.12, type: 'square' },
-  hover: { frequency: 2200, duration: 0.022, volume: 0.055, type: 'square' },
-  tabSwitch: { frequency: 320, endFrequency: 640, duration: 0.06, volume: 0.18, type: 'triangle' },
-  footstep: { frequency: 140, endFrequency: 65, duration: 0.065, volume: 0.13, type: 'triangle', noise: true },
-  cardOpen: { frequency: 520, endFrequency: 1480, duration: 0.095, volume: 0.12, type: 'square', noise: true },
-  cardClose: { frequency: 980, endFrequency: 320, duration: 0.085, volume: 0.11, type: 'triangle' },
-  modalOpen: { frequency: 523.25, duration: 0.14, volume: 0.12, type: 'sine', secondFrequency: 659.25, secondDelay: 0.05 },
-  modalClose: { frequency: 659.25, duration: 0.1, volume: 0.1, type: 'sine', secondFrequency: 440, secondDelay: 0.04 },
-  add: { frequency: 783.99, duration: 0.09, volume: 0.12, type: 'square', secondFrequency: 1046.5, secondDelay: 0.04 },
-  save: { frequency: 1046.5, duration: 0.24, volume: 0.1, type: 'sine', secondFrequency: 1568, secondDelay: 0.025 },
-  delete: { frequency: 440, endFrequency: 65, duration: 0.28, volume: 0.16, type: 'sawtooth', noise: true },
-  toggle: { frequency: 1800, endFrequency: 850, duration: 0.04, volume: 0.1, type: 'square' },
-  error: { frequency: 185, endFrequency: 170, duration: 0.22, volume: 0.14, type: 'sawtooth' },
-  inputFocus: { frequency: 1600, endFrequency: 800, duration: 0.028, volume: 0.08, type: 'sine' },
-  dangerConfirm: { frequency: 90, endFrequency: 45, duration: 0.38, volume: 0.2, type: 'sine' },
-  recordSelect: { frequency: 680, endFrequency: 340, duration: 0.05, volume: 0.14, type: 'triangle' },
-  chestClose: { frequency: 1400, endFrequency: 700, duration: 0.14, volume: 0.16, type: 'square' },
-};
+  | 'inputFocus' | 'dangerConfirm' | 'recordSelect' | 'aiGenerateStart' | 'aiGenerateComplete'
+  | 'chestClose' | 'screenTransition';
 
 const SOUND_VOLUME_KEY = 'survival-wiki-se-volume';
 const SOUND_ENABLED_KEY = 'survival-wiki-se-enabled';
@@ -43,91 +18,298 @@ let soundVolume = DEFAULT_SOUND_VOLUME;
 function readStoredSettings(): void {
   if (typeof window === 'undefined') return;
   const storedVolume = window.localStorage.getItem(SOUND_VOLUME_KEY);
-  if (storedVolume !== null) { const parsedVolume = Number(storedVolume); if (Number.isFinite(parsedVolume)) soundVolume = Math.min(100, Math.max(0, parsedVolume)); }
+  if (storedVolume !== null) {
+    const parsedVolume = Number(storedVolume);
+    if (Number.isFinite(parsedVolume)) soundVolume = Math.min(100, Math.max(0, parsedVolume));
+  }
   const storedEnabled = window.localStorage.getItem(SOUND_ENABLED_KEY);
   if (storedEnabled !== null) enabled = storedEnabled === 'true';
 }
 readStoredSettings();
+
 function getMasterGainValue(): number { return soundVolume / DEFAULT_SOUND_VOLUME; }
+
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!audioContext) {
-    const AudioContextClass = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass = window.AudioContext ??
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return null;
-    audioContext = new AudioContextClass(); masterGain = audioContext.createGain();
+    audioContext = new AudioContextClass();
+    masterGain = audioContext.createGain();
     masterGain.gain.setValueAtTime(getMasterGainValue(), audioContext.currentTime);
-    soundReverb = createSwitchStyleReverb(audioContext); masterGain.connect(soundReverb.input); soundReverb.output.connect(audioContext.destination);
+    soundReverb = createSwitchStyleReverb(audioContext);
+    masterGain.connect(soundReverb.input);
+    soundReverb.output.connect(audioContext.destination);
   }
+  if (audioContext.state === 'suspended') void audioContext.resume();
   return audioContext;
 }
-function playTone(profile: SoundProfile): void {
-  const context = getAudioContext(); if (!context || !masterGain) return;
-  if (context.state === 'suspended') void context.resume(); const now = context.currentTime;
-  const oscillator = context.createOscillator(); const gain = context.createGain(); oscillator.type = profile.type; oscillator.frequency.setValueAtTime(profile.frequency, now);
-  if (profile.endFrequency) oscillator.frequency.exponentialRampToValueAtTime(profile.endFrequency, now + profile.duration);
-  gain.gain.setValueAtTime(0.0001, now); gain.gain.exponentialRampToValueAtTime(profile.volume, now + 0.008); gain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
-  oscillator.connect(gain); gain.connect(masterGain); oscillator.start(now); oscillator.stop(now + profile.duration + 0.01);
-  if (profile.noise) {
-    const bufferSize = Math.floor(context.sampleRate * profile.duration); const buffer = context.createBuffer(1, bufferSize, context.sampleRate); const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i += 1) data[i] = Math.random() * 2 - 1;
-    const noiseSource = context.createBufferSource(); const filter = context.createBiquadFilter(); const noiseGain = context.createGain(); noiseSource.buffer = buffer;
-    filter.type = 'lowpass'; filter.frequency.setValueAtTime(900, now); filter.frequency.exponentialRampToValueAtTime(220, now + profile.duration);
-    noiseGain.gain.setValueAtTime(0.0001, now); noiseGain.gain.exponentialRampToValueAtTime(0.24, now + 0.004); noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
-    noiseSource.connect(filter); filter.connect(noiseGain); noiseGain.connect(masterGain); noiseSource.start(now); noiseSource.stop(now + profile.duration + 0.01);
-  }
-  if (profile.secondFrequency !== undefined && profile.secondDelay !== undefined) {
-    const secondOscillator = context.createOscillator(); const secondGain = context.createGain(); const secondStart = now + profile.secondDelay; const secondDuration = Math.max(0.04, profile.duration - profile.secondDelay);
-    secondOscillator.type = profile.type; secondOscillator.frequency.setValueAtTime(profile.secondFrequency, secondStart); secondGain.gain.setValueAtTime(0.0001, secondStart);
-    secondGain.gain.exponentialRampToValueAtTime(profile.volume, secondStart + 0.008); secondGain.gain.exponentialRampToValueAtTime(0.0001, secondStart + secondDuration);
-    secondOscillator.connect(secondGain); secondGain.connect(masterGain); secondOscillator.start(secondStart); secondOscillator.stop(secondStart + secondDuration + 0.01);
-  }
+
+function tone(
+  c: AudioContext,
+  frequency: number,
+  time: number,
+  duration: number,
+  volume: number,
+  type: OscillatorType,
+  endFrequency?: number,
+): void {
+  if (!masterGain) return;
+  const oscillator = c.createOscillator();
+  const gain = c.createGain();
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, time);
+  if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), time + duration);
+  gain.gain.setValueAtTime(0.0001, time);
+  gain.gain.linearRampToValueAtTime(volume, time + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+  oscillator.connect(gain);
+  gain.connect(masterGain);
+  oscillator.start(time);
+  oscillator.stop(time + duration + 0.01);
 }
-function playV2AdditionalSound(sound: SoundType): boolean {
-  const context = getAudioContext(); if (!context || !masterGain || !enabled) return true;
-  if (context.state === 'suspended') void context.resume(); const now = context.currentTime;
-  const osc = (frequency: number, duration: number, volume: number, type: OscillatorType, start = now, endFrequency?: number): void => {
-    const o = context.createOscillator(); const g = context.createGain(); o.type = type; o.frequency.setValueAtTime(frequency, start);
-    if (endFrequency) o.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration); g.gain.setValueAtTime(0.0001, start); g.gain.linearRampToValueAtTime(volume, start + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, start + duration); o.connect(g); g.connect(masterGain); o.start(start); o.stop(start + duration + 0.01);
-  };
-  const noise = (duration: number, volume: number, filterType: BiquadFilterType, frequency: number, start = now): void => {
-    const buffer = context.createBuffer(1, Math.floor(context.sampleRate * duration), context.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
-    const source = context.createBufferSource(); const filter = context.createBiquadFilter(); const gain = context.createGain(); source.buffer = buffer; filter.type = filterType; filter.frequency.value = frequency; gain.gain.setValueAtTime(volume, start); gain.gain.exponentialRampToValueAtTime(0.0001, start + duration); source.connect(filter); filter.connect(gain); gain.connect(masterGain); source.start(start); source.stop(start + duration);
-  };
+
+function hiss(
+  c: AudioContext,
+  time: number,
+  duration: number,
+  volume: number,
+  type: BiquadFilterType,
+  frequency: number,
+): void {
+  if (!masterGain) return;
+  const bufferSize = Math.max(1, Math.floor(c.sampleRate * duration));
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
+  const source = c.createBufferSource();
+  const filter = c.createBiquadFilter();
+  const gain = c.createGain();
+  source.buffer = buffer;
+  filter.type = type;
+  filter.frequency.value = frequency;
+  gain.gain.setValueAtTime(volume, time);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  source.start(time);
+  source.stop(time + duration);
+}
+
+function playV2Sound(sound: SoundType): void {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+
   switch (sound) {
-    case 'footstep': osc(140, 0.065, 0.13, 'triangle', now, 65); noise(0.055, 0.025, 'lowpass', 1800); return true;
-    case 'hover': osc(2200, 0.022, 0.055, 'square'); return true;
-    case 'cardOpen': osc(520, 0.095, 0.12, 'square', now, 1480); noise(0.08, 0.025, 'highpass', 4200); return true;
-    case 'cardClose': osc(980, 0.085, 0.11, 'triangle', now, 320); return true;
-    case 'add': osc(783.99, 0.09, 0.12, 'square'); osc(1046.5, 0.09, 0.12, 'square', now + 0.04); osc(1318.51, 0.09, 0.12, 'square', now + 0.08); return true;
-    case 'save': osc(1046.5, 0.24, 0.1, 'sine'); osc(1568, 0.21, 0.08, 'square', now + 0.025); return true;
-    case 'toggle': osc(1800, 0.04, 0.1, 'square', now, 850); noise(0.035, 0.02, 'highpass', 3000); return true;
-    case 'error': osc(185, 0.22, 0.14, 'sawtooth'); osc(196, 0.22, 0.1, 'sawtooth'); return true;
-    case 'dangerConfirm': osc(90, 0.38, 0.2, 'sine', now, 45); osc(293.66, 0.38, 0.08, 'square', now, 311.13); return true;
-    case 'recordSelect': osc(680, 0.05, 0.14, 'triangle', now, 340); noise(0.05, 0.025, 'bandpass', 1800); return true;
-    case 'inputFocus': osc(1600, 0.028, 0.08, 'sine', now, 800); return true;
-    case 'chestClose': osc(1400, 0.14, 0.16, 'square', now, 700); osc(180, 0.14, 0.09, 'triangle', now, 120); noise(0.08, 0.03, 'lowpass', 900); return true;
-    default: return false;
+    // V2: existing 12 sounds
+    case 'confirm':
+      tone(c, 880, t, 0.08, 0.18, 'square');
+      tone(c, 1760, t + 0.045, 0.095, 0.16, 'square');
+      return;
+    case 'cancel':
+      tone(c, 659, t, 0.11, 0.13, 'square', 330);
+      return;
+    case 'delete':
+      tone(c, 116, t, 0.28, 0.18, 'sawtooth');
+      tone(c, 123, t, 0.28, 0.14, 'square');
+      tone(c, 65, t, 0.16, 0.2, 'triangle', 50);
+      hiss(c, t, 0.28, 0.05, 'lowpass', 1200);
+      return;
+    case 'tabSwitch':
+      tone(c, 950, t, 0.055, 0.15, 'square', 1600);
+      hiss(c, t, 0.05, 0.07, 'bandpass', 3200);
+      return;
+    case 'modalOpen':
+    case 'modalClose':
+      tone(c, 480, t, 0.12, 0.22, 'sine', 110);
+      return;
+    case 'footstep':
+      tone(c, 140, t, 0.055, 0.14, 'triangle', 65);
+      tone(c, 80, t, 0.04, 0.1, 'sine', 40);
+      hiss(c, t, 0.04, 0.035, 'bandpass', 1800);
+      return;
+    case 'hover':
+      tone(c, 2200, t, 0.022, 0.07, 'square', 2400);
+      return;
+    case 'cardOpen':
+      tone(c, 520, t, 0.09, 0.14, 'square', 1480);
+      tone(c, 1040, t + 0.02, 0.08, 0.09, 'triangle', 2080);
+      hiss(c, t, 0.065, 0.045, 'highpass', 4200);
+      return;
+    case 'cardClose':
+      tone(c, 980, t, 0.085, 0.13, 'triangle', 320);
+      tone(c, 490, t + 0.015, 0.07, 0.09, 'sine', 160);
+      hiss(c, t, 0.05, 0.03, 'lowpass', 1500);
+      return;
+    case 'add':
+      tone(c, 783.99, t, 0.085, 0.15, 'square');
+      tone(c, 1046.5, t + 0.04, 0.085, 0.15, 'square');
+      tone(c, 1318.51, t + 0.08, 0.085, 0.15, 'square');
+      hiss(c, t + 0.08, 0.06, 0.03, 'highshelf', 3500);
+      return;
+    case 'save':
+      tone(c, 1046.5, t, 0.22, 0.16, 'sine');
+      tone(c, 1567.98, t + 0.02, 0.24, 0.13, 'triangle');
+      tone(c, 2093.0, t + 0.04, 0.18, 0.08, 'square');
+      hiss(c, t, 0.12, 0.025, 'bandpass', 5000);
+      return;
+    case 'toggle':
+      tone(c, 1800, t, 0.035, 0.18, 'square', 900);
+      tone(c, 320, t + 0.008, 0.03, 0.15, 'triangle', 120);
+      hiss(c, t, 0.028, 0.06, 'bandpass', 2400);
+      return;
+    case 'error':
+      tone(c, 185, t, 0.22, 0.18, 'sawtooth');
+      tone(c, 196, t, 0.22, 0.16, 'square');
+      tone(c, 92.5, t, 0.18, 0.22, 'triangle', 60);
+      hiss(c, t, 0.18, 0.05, 'lowpass', 900);
+      return;
+    case 'dangerConfirm':
+      tone(c, 90, t, 0.35, 0.24, 'triangle', 45);
+      tone(c, 293.66, t + 0.03, 0.25, 0.12, 'square');
+      tone(c, 311.13, t + 0.03, 0.25, 0.1, 'sawtooth');
+      tone(c, 1174.66, t + 0.06, 0.15, 0.06, 'sine');
+      hiss(c, t, 0.25, 0.04, 'lowpass', 600);
+      return;
+    case 'recordSelect':
+      tone(c, 680, t, 0.045, 0.15, 'triangle', 340);
+      tone(c, 1200, t, 0.02, 0.08, 'square', 800);
+      hiss(c, t, 0.03, 0.03, 'bandpass', 2800);
+      return;
+    case 'aiGenerateStart':
+      tone(c, 320, t, 0.32, 0.16, 'sawtooth', 2400);
+      tone(c, 640, t + 0.05, 0.27, 0.12, 'square', 3200);
+      [1200, 1600, 2000, 2400].forEach((frequency, i) => tone(c, frequency, t + i * 0.06, 0.04, 0.06, 'triangle'));
+      hiss(c, t, 0.3, 0.045, 'bandpass', 3600);
+      return;
+    case 'aiGenerateComplete':
+      [659.25, 830.61, 987.77, 1318.51, 1661.22, 2637.02].forEach((frequency, i) => {
+        tone(c, frequency, t + i * 0.065, 0.45, 0.12, 'square');
+        tone(c, frequency * 0.5, t + i * 0.065, 0.35, 0.08, 'triangle');
+      });
+      hiss(c, t + 0.2, 0.4, 0.03, 'highpass', 4800);
+      return;
+    case 'chestClose':
+      tone(c, 1400, t, 0.04, 0.16, 'square', 600);
+      tone(c, 180, t + 0.02, 0.11, 0.18, 'triangle', 70);
+      hiss(c, t, 0.08, 0.06, 'lowpass', 1200);
+      return;
+    case 'screenTransition':
+      hiss(c, t, 0.36, 0.08, 'bandpass', 2400);
+      tone(c, 85, t, 0.36, 0.22, 'sine', 35);
+      tone(c, 440, t + 0.05, 0.28, 0.09, 'triangle', 180);
+      return;
+    default:
+      return;
   }
 }
-function playV1Confirm(): void { const c = getAudioContext(); if (!c || !masterGain || !enabled) return; const t = c.currentTime; playV1Tone(c, masterGain, 880, t, 0.08, 0.18, 'square'); playV1Tone(c, masterGain, 1760, t + 0.045, 0.095, 0.16, 'square'); }
-function playV1Cancel(): void { const c = getAudioContext(); if (!c || !masterGain || !enabled) return; playV1Tone(c, masterGain, 659, c.currentTime, 0.11, 0.13, 'square', 330); }
-function playV1TabSwitch(): void { const c = getAudioContext(); if (!c || !masterGain || !enabled) return; const t = c.currentTime; playV1Tone(c, masterGain, 950, t, 0.055, 0.15, 'square', 1600); playV1Hiss(c, masterGain, t, 0.05, 0.07, 'bandpass', 3200); }
-function playV1Modal(): void { const c = getAudioContext(); if (!c || !masterGain || !enabled) return; playV1Tone(c, masterGain, 480, c.currentTime, 0.12, 0.22, 'sine', 110); }
-function playV1Warning(): void { const c = getAudioContext(); if (!c || !masterGain || !enabled) return; const t = c.currentTime; playV1Tone(c, masterGain, 116, t, 0.28, 0.18, 'sawtooth'); playV1Tone(c, masterGain, 123, t, 0.28, 0.14, 'square'); playV1Tone(c, masterGain, 65, t, 0.16, 0.2, 'triangle', 50); playV1Hiss(c, masterGain, t, 0.28, 0.05, 'lowpass', 1200); }
-function playV1Tone(c: AudioContext, destination: AudioNode, frequency: number, time: number, duration: number, volume: number, type: OscillatorType, endFrequency?: number): void { const oscillator = c.createOscillator(); const gain = c.createGain(); oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, time); if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, time + duration); gain.gain.setValueAtTime(0.0001, time); gain.gain.linearRampToValueAtTime(volume, time + 0.004); gain.gain.exponentialRampToValueAtTime(0.0001, time + duration); oscillator.connect(gain); gain.connect(destination); oscillator.start(time); oscillator.stop(time + duration + 0.01); }
-function playV1Hiss(c: AudioContext, destination: AudioNode, time: number, duration: number, volume: number, type: BiquadFilterType, frequency: number): void { const buffer = c.createBuffer(1, Math.floor(c.sampleRate * duration), c.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1; const source = c.createBufferSource(); const filter = c.createBiquadFilter(); const gain = c.createGain(); source.buffer = buffer; filter.type = type; filter.frequency.value = frequency; gain.gain.setValueAtTime(volume, time); gain.gain.exponentialRampToValueAtTime(0.0001, time + duration); source.connect(filter); filter.connect(gain); gain.connect(destination); source.start(time); source.stop(time + duration); }
+
+// V2 existing 12 sounds kept as public helpers where the app already uses them.
+export const playConfirmSound = () => playSound('confirm');
+export const playCancelSound = () => playSound('cancel');
+export const playHoverSound = () => playSound('hover');
+export const playTapSound = () => playSound('hover');
+export const playTabSwitchSound = () => playSound('tabSwitch');
+export const playFootstepSound = () => playSound('footstep');
+export const playCardOpenSound = () => playSound('cardOpen');
+export const playCardCloseSound = () => playSound('cardClose');
+export const playCloseSound = () => playSound('cancel');
+export const playModalOpenSound = () => playSound('modalOpen');
+export const playModalCloseSound = () => playSound('modalClose');
+export const playAddSound = () => playSound('add');
+export const playSaveSound = () => playSound('save');
+export const playDeleteSound = () => playSound('delete');
+export const playToggleSound = () => playSound('toggle');
+export const playErrorSound = () => playSound('error');
+export const playInputFocusSound = () => playSound('inputFocus');
+export const playDangerConfirmSound = () => playSound('dangerConfirm');
+export const playRecordSelectSound = () => playSound('recordSelect');
+export const playAiGenerateStartSound = () => playSound('aiGenerateStart');
+export const playAiGenerateCompleteSound = () => playSound('aiGenerateComplete');
+export const playChestCloseSound = () => playSound('chestClose');
+export const playScreenTransitionSound = () => playSound('screenTransition');
+
+// These are direct V2 implementations for the remaining existing sounds.
+export const playNewRecordSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  [1318.51, 1760, 2637.02].forEach((frequency, i) =>
+    tone(c, frequency, t + i * 0.03, i === 2 ? 0.45 : 0.12, 0.18, 'square')
+  );
+};
+
+export const playChestOpenSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  tone(c, 120, t, 0.07, 0.18, 'triangle', 80);
+  tone(c, 260, t + 0.04, 0.16, 0.12, 'triangle', 210);
+  tone(c, 523.25, t + 0.08, 0.16, 0.11, 'triangle', 1046.5);
+  hiss(c, t, 0.07, 0.06, 'lowpass', 900);
+};
+
+export const playCursorMoveSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  tone(c, 1320, t, 0.045, 0.16, 'square', 1980);
+  hiss(c, t, 0.045, 0.04, 'highshelf', 3000);
+};
+
+export const playDialogueCharSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  [880, 920, 860, 900, 875].forEach((frequency, i) => tone(c, frequency, t + i * 0.07, 0.035, 0.09, 'triangle'));
+};
+
+export const playAchievementSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  [523.25, 659.25, 783.99, 987.77, 1046.5, 1318.51].forEach((frequency, i) =>
+    tone(c, frequency, t + i * 0.09, 0.22, 0.13, 'square')
+  );
+};
+
+export const playWikiGeneratingNoiseSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  hiss(c, t, 1.2, 0.06, 'bandpass', 1450);
+  tone(c, 60, t, 1.2, 0.015, 'sine');
+};
+
+export const playWikiCompleteSound = () => {
+  const c = getAudioContext();
+  if (!c || !masterGain || !enabled) return;
+  const t = c.currentTime;
+  [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51].forEach((frequency, i) =>
+    tone(c, frequency, t + i * 0.1, 0.3, 0.11, 'triangle')
+  );
+  tone(c, 2093, t + 0.82, 0.35, 0.12, 'sine');
+};
+
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
-  if (sound === 'confirm') { playV1Confirm(); return; } if (sound === 'cancel') { playV1Cancel(); return; } if (sound === 'tabSwitch') { playV1TabSwitch(); return; } if (sound === 'modalOpen' || sound === 'modalClose') { playV1Modal(); return; } if (sound === 'delete') { playV1Warning(); return; }
-  if (sound === 'error' || sound === 'hover' || sound === 'footstep' || sound === 'cardOpen' || sound === 'cardClose' || sound === 'add' || sound === 'save' || sound === 'toggle' || sound === 'inputFocus' || sound === 'dangerConfirm' || sound === 'recordSelect' || sound === 'chestClose') { if (playV2AdditionalSound(sound)) return; }
-  playTone(SOUND_PROFILES[sound]);
+  playV2Sound(sound);
 }
-export function toggleSound(state?: boolean): boolean { enabled = state === undefined ? !enabled : state; if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_ENABLED_KEY, String(enabled)); return enabled; }
+
+export function toggleSound(state?: boolean): boolean {
+  enabled = state === undefined ? !enabled : state;
+  if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_ENABLED_KEY, String(enabled));
+  return enabled;
+}
+
 export function isSoundEnabled(): boolean { return enabled; }
 export function getSoundVolume(): number { return soundVolume; }
-export function setSoundVolume(value: number): number { soundVolume = Math.min(100, Math.max(0, Math.round(value))); if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_VOLUME_KEY, String(soundVolume)); if (masterGain && audioContext) masterGain.gain.setTargetAtTime(getMasterGainValue(), audioContext.currentTime, 0.01); return soundVolume; }
-export const playConfirmSound = () => playSound('confirm'); export const playCancelSound = () => playSound('cancel'); export const playHoverSound = () => playSound('hover'); export const playTapSound = () => playSound('hover'); export const playTabSwitchSound = () => playSound('tabSwitch'); export const playFootstepSound = () => playSound('footstep'); export const playCardOpenSound = () => playSound('cardOpen'); export const playCardCloseSound = () => playSound('cardClose'); export const playCloseSound = () => playSound('cancel'); export const playModalOpenSound = () => playSound('modalOpen'); export const playModalCloseSound = () => playSound('modalClose'); export const playAddSound = () => playSound('add'); export const playSaveSound = () => playSound('save'); export const playDeleteSound = () => playSound('delete'); export const playToggleSound = () => playSound('toggle'); export const playErrorSound = () => playSound('error'); export const playInputFocusSound = () => playSound('inputFocus'); export const playDangerConfirmSound = () => playSound('dangerConfirm'); export const playRecordSelectSound = () => playSound('recordSelect'); export const playChestCloseSound = () => playSound('chestClose');
-export const playNewRecordSound = () => { const context = getAudioContext(); if (!context || !masterGain || !enabled) return; if (context.state === 'suspended') void context.resume(); const now = context.currentTime; [1318.51, 1760.0, 2637.02].forEach((freq, idx) => { const noteTime = now + idx * 0.03; const osc = context.createOscillator(); const gain = context.createGain(); const filter = context.createBiquadFilter(); osc.type = 'square'; osc.frequency.setValueAtTime(freq, noteTime); filter.type = 'bandpass'; filter.frequency.setValueAtTime(freq * 1.2, noteTime); filter.Q.setValueAtTime(3.5, noteTime); gain.gain.setValueAtTime(0.001, noteTime); gain.gain.linearRampToValueAtTime(0.24, noteTime + 0.005); gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + (idx === 2 ? 0.45 : 0.12)); osc.connect(filter); filter.connect(gain); gain.connect(masterGain!); osc.start(noteTime); osc.stop(noteTime + (idx === 2 ? 0.48 : 0.15)); }); const sparkleOsc = context.createOscillator(); const sparkleGain = context.createGain(); sparkleOsc.type = 'triangle'; sparkleOsc.frequency.setValueAtTime(3520, now + 0.06); sparkleGain.gain.setValueAtTime(0.12, now + 0.06); sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4); sparkleOsc.connect(sparkleGain); sparkleGain.connect(masterGain!); sparkleOsc.start(now + 0.06); sparkleOsc.stop(now + 0.42); };
-export const playChestOpenSound = () => { const context = getAudioContext(); if (!context || !masterGain || !enabled) return; if (context.state === 'suspended') void context.resume(); const now = context.currentTime; const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.04), context.sampleRate); const noiseData = noiseBuffer.getChannelData(0); for (let i = 0; i < noiseBuffer.length; i += 1) noiseData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (context.sampleRate * 0.008)); const noiseNode = context.createBufferSource(); noiseNode.buffer = noiseBuffer; const noiseFilter = context.createBiquadFilter(); noiseFilter.type = 'bandpass'; noiseFilter.frequency.setValueAtTime(650, now); noiseFilter.Q.setValueAtTime(3, now); const noiseGain = context.createGain(); noiseGain.gain.setValueAtTime(0.3, now); noiseNode.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(masterGain!); noiseNode.start(now); const bodyOsc = context.createOscillator(); const bodyGain = context.createGain(); bodyOsc.type = 'triangle'; bodyOsc.frequency.setValueAtTime(260, now); bodyOsc.frequency.exponentialRampToValueAtTime(130, now + 0.06); bodyGain.gain.setValueAtTime(0.32, now); bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07); bodyOsc.connect(bodyGain); bodyGain.connect(masterGain!); bodyOsc.start(now); bodyOsc.stop(now + 0.08); const chimeOsc = context.createOscillator(); const chimeGain = context.createGain(); chimeOsc.type = 'square'; chimeOsc.frequency.setValueAtTime(523.25, now + 0.025); chimeOsc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.07); chimeGain.gain.setValueAtTime(0.001, now + 0.025); chimeGain.gain.linearRampToValueAtTime(0.25, now + 0.035); chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18); chimeOsc.connect(chimeGain); chimeGain.connect(masterGain!); chimeOsc.start(now + 0.025); chimeOsc.stop(now + 0.2); };
-export const playCursorMoveSound = () => playCursorMoveSoundDirect();
-function playCursorMoveSoundDirect(): void { const context = getAudioContext(); if (!context || !masterGain || !enabled) return; if (context.state === 'suspended') void context.resume(); const now = context.currentTime; const osc = context.createOscillator(); const gain = context.createGain(); const airFilter = context.createBiquadFilter(); const airGain = context.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(1320, now); osc.frequency.exponentialRampToValueAtTime(1980, now + 0.045); gain.gain.setValueAtTime(0.0001, now); gain.gain.linearRampToValueAtTime(0.16, now + 0.004); gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045); osc.connect(gain); gain.connect(masterGain); const airBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.045), context.sampleRate); const airData = airBuffer.getChannelData(0); for (let i = 0; i < airBuffer.length; i += 1) airData[i] = Math.random() * 2 - 1; const airSource = context.createBufferSource(); airSource.buffer = airBuffer; airFilter.type = 'highshelf'; airFilter.frequency.setValueAtTime(3000, now); airFilter.gain.setValueAtTime(5, now); airGain.gain.setValueAtTime(0.045, now); airGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045); airSource.connect(airFilter); airFilter.connect(airGain); airGain.connect(masterGain); osc.start(now); osc.stop(now + 0.055); airSource.start(now); airSource.stop(now + 0.045); };
+export function setSoundVolume(value: number): number {
+  soundVolume = Math.min(100, Math.max(0, Math.round(value)));
+  if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_VOLUME_KEY, String(soundVolume));
+  if (masterGain && audioContext) masterGain.gain.setTargetAtTime(getMasterGainValue(), audioContext.currentTime, 0.01);
+  return soundVolume;
+}
