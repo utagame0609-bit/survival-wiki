@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, MapPin, Trash2, Search, ArrowUpDown, AlertTriangle } from 'lucide-react';
+import { Plus, MapPin, Search, ArrowUpDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
 import { LocationForm } from '@/components/LocationForm';
@@ -7,6 +7,7 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
 import { LocationCard } from '@/components/LocationCard';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
+import { DeleteLocationConfirmModal } from '@/components/DeleteLocationConfirmModal';
 import { playConfirmSound, playRecordSelectSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playErrorSound, playChestOpenSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 type Mode =
