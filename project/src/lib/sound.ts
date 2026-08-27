@@ -107,7 +107,7 @@ function playV2Sound(sound: SoundType): void {
     case 'save': tone(c, 1046.5, t, 0.24, 0.1, 'sine'); tone(c, 1568, t + 0.025, 0.21, 0.08, 'square'); return;
     case 'toggle': tone(c, 1800, t, 0.04, 0.1, 'square', 850); hiss(c, t, 0.035, 0.02, 'highpass', 3000); return;
     case 'error': tone(c, 185, t, 0.22, 0.14, 'sawtooth'); tone(c, 196, t, 0.22, 0.1, 'sawtooth'); return;
-    case 'dangerConfirm': tone(c, 90, t, 0.38, 0.2, 'sine', 45); tone(c, 293.66, t, 0.38, 0.08, 'square', 311.13); return;
+    case 'dangerConfirm': tone(c, 90, t, 0.35, 0.24, 'triangle', 45); tone(c, 293.66, t + 0.03, 0.25, 0.12, 'square'); tone(c, 311.13, t + 0.03, 0.25, 0.1, 'sawtooth'); tone(c, 1174.66, t + 0.06, 0.15, 0.06, 'sine'); hiss(c, t, 0.25, 0.04, 'lowpass', 600); return;
     case 'recordSelect': tone(c, 680, t, 0.05, 0.14, 'triangle', 340); hiss(c, t, 0.05, 0.025, 'bandpass', 1800); return;
     case 'aiGenerateStart': tone(c, 320, t, 0.32, 0.16, 'sawtooth', 2400); tone(c, 320, t, 0.32, 0.05, 'square', 2400); return;
     case 'aiGenerateComplete': [659.25, 830.61, 987.77, 1318.51].forEach((frequency, i) => tone(c, frequency, t + i * 0.12, 0.75 - i * 0.1, 0.12, 'square')); hiss(c, t + 0.2, 0.6, 0.02, 'highpass', 3200); return;
