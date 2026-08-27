@@ -2,24 +2,152 @@ import { getStoredReverbAmount, subscribeToReverbAmount } from './soundReverb';
 import { MASTER_OUTPUT_GAIN } from './audioMaster';
 
 export type SoundEngineConfig = { masterVolume?: number; reverbWet?: number };
+
 export class SoundEngine {
-  private ctx: AudioContext | null = null; private masterGain: GainNode | null = null; private compressor: DynamicsCompressorNode | null = null; private reverbNode: ConvolverNode | null = null; private reverbGain: GainNode | null = null; private dryGain: GainNode | null = null; private delayNode: DelayNode | null = null; private delayGain: GainNode | null = null; private analyser: AnalyserNode | null = null; private masterVolume = 0.8; private reverbWet = getStoredReverbAmount(); private reverbUnsubscribe: (() => void) | null = null;
-  constructor(config: SoundEngineConfig = {}) { if(config.masterVolume!==undefined)this.masterVolume=Math.max(0,Math.min(1,config.masterVolume)); if(config.reverbWet!==undefined)this.reverbWet=Math.max(0,Math.min(1,config.reverbWet)); }
-  public init(): AudioContext { if(!this.ctx){const C=window.AudioContext??(window as typeof window & {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!C)throw new Error('Web Audio API is not supported in this browser.');this.ctx=new C();this.setupMasterGraph();this.reverbUnsubscribe=subscribeToReverbAmount((value)=>this.setReverbWet(value));}if(this.ctx.state==='suspended')void this.ctx.resume();return this.ctx; }
-  public getContext():AudioContext{return this.init();} public getAnalyser():AnalyserNode|null{if(!this.ctx)return null;if(!this.analyser)this.setupMasterGraph();return this.analyser;}
-  private setupMasterGraph():void{if(!this.ctx||this.masterGain)return;const c=this.ctx;this.compressor=c.createDynamicsCompressor();this.compressor.threshold.setValueAtTime(-4,c.currentTime);this.compressor.knee.setValueAtTime(10,c.currentTime);this.compressor.ratio.setValueAtTime(12,c.currentTime);this.compressor.attack.setValueAtTime(.003,c.currentTime);this.compressor.release.setValueAtTime(.15,c.currentTime);this.masterGain=c.createGain();this.masterGain.gain.setValueAtTime(this.masterVolume * MASTER_OUTPUT_GAIN,c.currentTime);this.analyser=c.createAnalyser();this.analyser.fftSize=512;this.analyser.smoothingTimeConstant=.8;this.reverbNode=c.createConvolver();this.reverbNode.buffer=this.createImpulseResponse(1.8,2.5);this.reverbGain=c.createGain();this.reverbGain.gain.setValueAtTime(this.reverbWet,c.currentTime);this.dryGain=c.createGain();this.dryGain.gain.setValueAtTime(1,c.currentTime);this.delayNode=c.createDelay();this.delayNode.delayTime.setValueAtTime(.18,c.currentTime);this.delayGain=c.createGain();this.delayGain.gain.setValueAtTime(.2,c.currentTime);const fb=c.createGain();fb.gain.setValueAtTime(.35,c.currentTime);this.delayNode.connect(fb);fb.connect(this.delayNode);this.reverbNode.connect(this.reverbGain);this.reverbGain.connect(this.masterGain);this.delayNode.connect(this.delayGain);this.delayGain.connect(this.masterGain);this.dryGain.connect(this.masterGain);this.masterGain.connect(this.compressor);this.compressor.connect(this.analyser);this.analyser.connect(c.destination);}
-  private createImpulseResponse(duration:number,decay:number):AudioBuffer{const c=this.ctx??this.init(),len=Math.floor(c.sampleRate*duration),b=c.createBuffer(2,len,c.sampleRate),l=b.getChannelData(0),r=b.getChannelData(1);for(let i=0;i<len;i++){const f=Math.pow(1-i/len,decay);l[i]=(Math.random()*2-1)*f;r[i]=(Math.random()*2-1)*f;}return b;}
-  public routeSound(sourceNode:AudioNode,reverbSend=.25,delaySend=0):void{this.init();if(!this.dryGain||!this.reverbNode||!this.delayNode||!this.ctx)return;sourceNode.connect(this.dryGain);if(reverbSend>0){const s=this.ctx.createGain();s.gain.setValueAtTime(reverbSend,this.ctx.currentTime);sourceNode.connect(s);s.connect(this.reverbNode);}if(delaySend>0){const s=this.ctx.createGain();s.gain.setValueAtTime(delaySend,this.ctx.currentTime);sourceNode.connect(s);s.connect(this.delayNode);}}
-  private tone(type:OscillatorType,freq:number,start:number,end:number,peak:number,filterHz?:number):void{const c=this.init(),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,start);if(filterHz){const f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(filterHz,start);o.connect(f);f.connect(g);}else o.connect(g);g.gain.setValueAtTime(.0001,start);g.gain.linearRampToValueAtTime(peak,start+.005);g.gain.exponentialRampToValueAtTime(.0001,end);this.routeSound(g,.12,0);o.start(start);o.stop(end+.01);}
-  public playCursorMove():void{const c=this.init(),n=c.currentTime,o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type='square';o.frequency.setValueAtTime(1320,n);o.frequency.exponentialRampToValueAtTime(1980,n+.02);f.type='lowpass';f.frequency.setValueAtTime(4500,n);g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(.18,n+.005);g.gain.exponentialRampToValueAtTime(.0001,n+.045);o.connect(f);f.connect(g);this.routeSound(g,.15);o.start(n);o.stop(n+.05);}
-  public playConfirm():void{const c=this.init(),n=c.currentTime;const p=(f:number,s:number,e:number,pk:number,r:number,d:number)=>{const o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(.001,s);g.gain.linearRampToValueAtTime(pk,s+.004);g.gain.exponentialRampToValueAtTime(.001,e);o.connect(g);this.routeSound(g,r,d);o.start(s);o.stop(e+.01);};p(880,n,n+.055,.22,.25,.1);p(1760,n+.045,n+.14,.25,.35,.15);}
-  public playCancel():void{const c=this.init(),n=c.currentTime;this.tone('square',659.25,n,n+.05,.18,1200);this.tone('triangle',329.63,n+.045,n+.11,.16,1200);}
-  public playWarning():void{const c=this.init(),n=c.currentTime,o=c.createOscillator(),s=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type='sawtooth';s.type='square';o.frequency.setValueAtTime(116.54,n);s.frequency.setValueAtTime(65,n);f.type='lowpass';f.frequency.setValueAtTime(1800,n);g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(.32,n+.008);g.gain.exponentialRampToValueAtTime(.0001,n+.28);o.connect(f);s.connect(f);f.connect(g);this.routeSound(g,.18);o.start(n);s.start(n);o.stop(n+.3);s.stop(n+.3);}
-  public playTabSwitch():void{const c=this.init(),n=c.currentTime,o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type='square';o.frequency.setValueAtTime(950,n);o.frequency.exponentialRampToValueAtTime(1600,n+.035);f.type='bandpass';f.frequency.setValueAtTime(1800,n);f.Q.setValueAtTime(.7,n);g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(.16,n+.004);g.gain.exponentialRampToValueAtTime(.0001,n+.055);o.connect(f);f.connect(g);this.routeSound(g,.1);o.start(n);o.stop(n+.06);}
-  public playModalOpenClose():void{const c=this.init(),n=c.currentTime,o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type='sine';o.frequency.setValueAtTime(480,n);o.frequency.exponentialRampToValueAtTime(110,n+.08);f.type='lowpass';f.frequency.setValueAtTime(1200,n);f.frequency.exponentialRampToValueAtTime(300,n+.08);g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(.35,n+.004);g.gain.exponentialRampToValueAtTime(.0001,n+.12);o.connect(f);f.connect(g);this.routeSound(g,.2);o.start(n);o.stop(n+.13);}
-  public playDialogueCharacter():void{const c=this.init(),n=c.currentTime,freq=880+(Math.random()-.5)*28,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(freq,n);g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(.12,n+.003);g.gain.exponentialRampToValueAtTime(.0001,n+.035);o.connect(g);this.routeSound(g,.06);o.start(n);o.stop(n+.04);}
-  public playNewRecord():void{const c=this.init(),n=c.currentTime;[1318.51,1760,2637.02].forEach((freq,i)=>{const o=c.createOscillator(),g=c.createGain(),start=n+i*.09,end=start+.42;o.type='square';o.frequency.setValueAtTime(freq,start);g.gain.setValueAtTime(.0001,start);g.gain.linearRampToValueAtTime(.22,start+.005);g.gain.exponentialRampToValueAtTime(.0001,end);o.connect(g);this.routeSound(g,.3,.05);o.start(start);o.stop(end+.01);});}
-  /** 音源候補v1: チェスト開閉音 */ public playChestOpen():void{const c=this.init(),n=c.currentTime;const click=c.createOscillator(),body=c.createOscillator(),chime=c.createOscillator(),g1=c.createGain(),g2=c.createGain(),g3=c.createGain();click.type='square';click.frequency.setValueAtTime(180,n);body.type='triangle';body.frequency.setValueAtTime(260,n+.015);chime.type='triangle';chime.frequency.setValueAtTime(523.25,n+.05);g1.gain.setValueAtTime(.0001,n);g1.gain.linearRampToValueAtTime(.22,n+.004);g1.gain.exponentialRampToValueAtTime(.0001,n+.07);g2.gain.setValueAtTime(.0001,n+.01);g2.gain.linearRampToValueAtTime(.18,n+.02);g2.gain.exponentialRampToValueAtTime(.0001,n+.16);g3.gain.setValueAtTime(.0001,n+.05);g3.gain.linearRampToValueAtTime(.2,n+.06);g3.gain.exponentialRampToValueAtTime(.0001,n+.2);click.connect(g1);body.connect(g2);chime.connect(g3);this.routeSound(g1,.08);this.routeSound(g2,.12);this.routeSound(g3,.25);click.start(n);body.start(n+.015);chime.start(n+.05);click.stop(n+.08);body.stop(n+.18);chime.stop(n+.22);}
-  public setMasterVolume(v:number):void{this.masterVolume=Math.max(0,Math.min(1,v));if(this.masterGain&&this.ctx)this.masterGain.gain.setTargetAtTime(this.masterVolume * MASTER_OUTPUT_GAIN,this.ctx.currentTime,.02);} public setReverbWet(v:number):void{this.reverbWet=Math.max(0,Math.min(1,v));if(this.reverbGain&&this.ctx){this.reverbGain.gain.setTargetAtTime(this.reverbWet,this.ctx.currentTime,.02);}} public getMasterVolume():number{return this.masterVolume;}public getReverbWet():number{return this.reverbWet;}
+  private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
+  private compressor: DynamicsCompressorNode | null = null;
+  private reverbNode: ConvolverNode | null = null;
+  private reverbGain: GainNode | null = null;
+  private dryGain: GainNode | null = null;
+  private delayNode: DelayNode | null = null;
+  private delayGain: GainNode | null = null;
+  private analyser: AnalyserNode | null = null;
+  private masterVolume = 0.8;
+  private reverbWet = getStoredReverbAmount();
+  private reverbUnsubscribe: (() => void) | null = null;
+
+  constructor(config: SoundEngineConfig = {}) {
+    if (config.masterVolume !== undefined) this.masterVolume = Math.max(0, Math.min(1, config.masterVolume));
+    if (config.reverbWet !== undefined) this.reverbWet = Math.max(0, Math.min(1, config.reverbWet));
+  }
+
+  public init(): AudioContext {
+    if (!this.ctx) {
+      const C = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!C) throw new Error('Web Audio API is not supported in this browser.');
+      this.ctx = new C();
+      this.setupMasterGraph();
+      this.reverbUnsubscribe = subscribeToReverbAmount((value) => this.setReverbWet(value));
+    }
+    if (this.ctx.state === 'suspended') void this.ctx.resume();
+    return this.ctx;
+  }
+
+  public getContext(): AudioContext {
+    return this.init();
+  }
+
+  public getAnalyser(): AnalyserNode | null {
+    if (!this.ctx) return null;
+    if (!this.analyser) this.setupMasterGraph();
+    return this.analyser;
+  }
+
+  private setupMasterGraph(): void {
+    if (!this.ctx || this.masterGain) return;
+    const c = this.ctx;
+
+    this.compressor = c.createDynamicsCompressor();
+    this.compressor.threshold.setValueAtTime(-4, c.currentTime);
+    this.compressor.knee.setValueAtTime(10, c.currentTime);
+    this.compressor.ratio.setValueAtTime(12, c.currentTime);
+    this.compressor.attack.setValueAtTime(0.003, c.currentTime);
+    this.compressor.release.setValueAtTime(0.15, c.currentTime);
+
+    this.masterGain = c.createGain();
+    this.masterGain.gain.setValueAtTime(this.masterVolume * MASTER_OUTPUT_GAIN, c.currentTime);
+
+    this.analyser = c.createAnalyser();
+    this.analyser.fftSize = 512;
+    this.analyser.smoothingTimeConstant = 0.8;
+
+    this.reverbNode = c.createConvolver();
+    this.reverbNode.buffer = this.createImpulseResponse(1.8, 2.5);
+    this.reverbGain = c.createGain();
+    this.reverbGain.gain.setValueAtTime(this.reverbWet, c.currentTime);
+
+    this.dryGain = c.createGain();
+    this.dryGain.gain.setValueAtTime(1, c.currentTime);
+
+    this.delayNode = c.createDelay();
+    this.delayNode.delayTime.setValueAtTime(0.18, c.currentTime);
+    this.delayGain = c.createGain();
+    this.delayGain.gain.setValueAtTime(0.2, c.currentTime);
+
+    const feedback = c.createGain();
+    feedback.gain.setValueAtTime(0.35, c.currentTime);
+    this.delayNode.connect(feedback);
+    feedback.connect(this.delayNode);
+
+    this.reverbNode.connect(this.reverbGain);
+    this.reverbGain.connect(this.masterGain);
+    this.delayNode.connect(this.delayGain);
+    this.delayGain.connect(this.masterGain);
+    this.dryGain.connect(this.masterGain);
+    this.masterGain.connect(this.compressor);
+    this.compressor.connect(this.analyser);
+    this.analyser.connect(c.destination);
+  }
+
+  private createImpulseResponse(duration: number, decay: number): AudioBuffer {
+    const c = this.ctx ?? this.init();
+    const length = Math.floor(c.sampleRate * duration);
+    const buffer = c.createBuffer(2, length, c.sampleRate);
+    const left = buffer.getChannelData(0);
+    const right = buffer.getChannelData(1);
+
+    for (let i = 0; i < length; i += 1) {
+      const envelope = Math.pow(1 - i / length, decay);
+      left[i] = (Math.random() * 2 - 1) * envelope;
+      right[i] = (Math.random() * 2 - 1) * envelope;
+    }
+
+    return buffer;
+  }
+
+  public routeSound(sourceNode: AudioNode, reverbSend = 0.25, delaySend = 0): void {
+    this.init();
+    if (!this.dryGain || !this.reverbNode || !this.delayNode || !this.ctx) return;
+
+    sourceNode.connect(this.dryGain);
+
+    if (reverbSend > 0) {
+      const send = this.ctx.createGain();
+      send.gain.setValueAtTime(reverbSend, this.ctx.currentTime);
+      sourceNode.connect(send);
+      send.connect(this.reverbNode);
+    }
+
+    if (delaySend > 0) {
+      const send = this.ctx.createGain();
+      send.gain.setValueAtTime(delaySend, this.ctx.currentTime);
+      sourceNode.connect(send);
+      send.connect(this.delayNode);
+    }
+  }
+
+  public setMasterVolume(value: number): void {
+    this.masterVolume = Math.max(0, Math.min(1, value));
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setTargetAtTime(this.masterVolume * MASTER_OUTPUT_GAIN, this.ctx.currentTime, 0.02);
+    }
+  }
+
+  public setReverbWet(value: number): void {
+    this.reverbWet = Math.max(0, Math.min(1, value));
+    if (this.reverbGain && this.ctx) {
+      this.reverbGain.gain.setTargetAtTime(this.reverbWet, this.ctx.currentTime, 0.02);
+    }
+  }
+
+  public getMasterVolume(): number {
+    return this.masterVolume;
+  }
+
+  public getReverbWet(): number {
+    return this.reverbWet;
+  }
 }
-export const soundEngine=new SoundEngine();
+
+export const soundEngine = new SoundEngine();
