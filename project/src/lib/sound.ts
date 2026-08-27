@@ -27,7 +27,10 @@ function readStoredSettings(): void {
 }
 readStoredSettings();
 
-function getMasterGainValue(): number { return soundVolume / DEFAULT_SOUND_VOLUME; }
+function getMasterGainValue(): number {
+  if (soundVolume <= DEFAULT_SOUND_VOLUME) return soundVolume / DEFAULT_SOUND_VOLUME;
+  return 1 + ((soundVolume - DEFAULT_SOUND_VOLUME) / DEFAULT_SOUND_VOLUME) * 2;
+}
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -221,41 +224,35 @@ function createWikipediaBgm(c: AudioContext): ActiveNpcBgm {
     const m = melodyNotes[step % 16];
     const b = bassNotes[step % 16];
     tone(c, m, t, 0.12, 0.08, 'square');
-    tone(c, m * 0.5, t, 0.09, 0.04, 'triangle');
-    if (b) tone(c, b, t, 0.22, 0.1, 'triangle');
-    if (step % 4 === 0) hiss(c, t, 0.03, 0.015, 'highshelf', 4000);
+    if (b) tone(c, b, t, 0.18, 0.05, 'triangle');
     step = (step + 1) % 16;
   }, stepTime * 1000);
   return { id: 'npc_bgm_wikipedia', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
 }
 
 function createScpBgm(c: AudioContext): ActiveNpcBgm {
-  let step = 0;
   const bpm = 96;
   const stepTime = 60 / bpm / 2;
-  const leadNotes = [440, 0, 440, 0, 466.16, 0, 0, 0, 440, 0, 554.37, 0, 523.25, 493.88, 466.16, 0];
-  const dest = masterGain ?? c.destination;
   const droneOsc = c.createOscillator();
   const droneGain = c.createGain();
   const droneFilter = c.createBiquadFilter();
   droneOsc.type = 'sawtooth';
-  droneOsc.frequency.setValueAtTime(55, c.currentTime);
+  droneOsc.frequency.value = 55;
   droneFilter.type = 'lowpass';
-  droneFilter.frequency.setValueAtTime(220, c.currentTime);
-  droneGain.gain.setValueAtTime(0.0001, c.currentTime);
-  droneGain.gain.linearRampToValueAtTime(0.12, c.currentTime + 0.5);
+  droneFilter.frequency.value = 420;
+  droneGain.gain.value = 0.04;
   droneOsc.connect(droneFilter);
   droneFilter.connect(droneGain);
-  droneGain.connect(dest);
+  droneGain.connect(masterGain!);
   droneOsc.start();
+  let step = 0;
+  const pulseNotes = [110, 110, 123.47, 110, 146.83, 123.47, 110, 98];
   const interval = window.setInterval(() => {
     if (!audioContext || audioContext.state === 'suspended') return;
     const t = audioContext.currentTime;
-    const note = leadNotes[step % 16];
-    if (note) { tone(c, note, t, 0.16, 0.07, 'sawtooth'); tone(c, note * 2, t, 0.06, 0.03, 'square'); }
-    if (Math.random() > 0.4) hiss(c, t, 0.015, 0.025, 'bandpass', 3800 + Math.random() * 800);
-    if (step % 4 === 0) tone(c, 110, t, 0.14, 0.12, 'triangle', 40);
-    step = (step + 1) % 16;
+    tone(c, pulseNotes[step % pulseNotes.length], t, 0.16, 0.05, 'square');
+    if (step % 4 === 0) hiss(c, t, 0.09, 0.02, 'bandpass', 2400);
+    step += 1;
   }, stepTime * 1000);
   return {
     id: 'npc_bgm_scp', intervalId: interval, nodes: [droneOsc, droneGain, droneFilter],
