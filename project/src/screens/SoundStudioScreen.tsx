@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Volume2, Waves, Radio, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Navigation';
-import { BgmCandidateCard } from '@/components/sound/BgmCandidateCard';
+import { BgmCandidateCard, type BgmCandidate } from '@/components/sound/BgmCandidateCard';
 import { SoundCandidateCard } from '@/components/sound/SoundCandidateCard';
 import { BGM_CANDIDATES } from '@/components/sound/BgmCandidates';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
@@ -51,7 +51,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     }, 500);
   };
 
-  const handleBgmPlay = (candidate: BGM_CANDIDATES[number]) => {
+  const handleBgmPlay = (candidate: BgmCandidate) => {
     if (candidate.id === 'bgm_world_select') {
       if (isWorldBgmPlaying()) {
         stopWorldBgm(0);
