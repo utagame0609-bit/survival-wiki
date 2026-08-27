@@ -5,8 +5,6 @@ let ctx: AudioContext | null = null;
 
 interface ActiveLoopTrack {
   id: string;
-  intervalId: number | null;
-  nodes: (AudioNode | { stop: () => void })[];
   stop: () => void;
 }
 
@@ -35,7 +33,6 @@ function getCtx(): AudioContext | null {
 
 const PREVIEW_SOUNDS = createPreviewSounds(getCtx);
 const NPC_BGM_IDS = new Set(['npc_bgm_wikipedia', 'npc_bgm_scp', 'npc_bgm_ancient']);
-
 type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
 
 function isNpcBgmId(id: string): id is NpcBgmId {
@@ -66,12 +63,7 @@ export function playSoundCandidatePreview(id: string): void {
 
   if (isNpcBgmId(id)) {
     playNpcBgm(id);
-    activeLoop = {
-      id,
-      intervalId: null,
-      nodes: [],
-      stop: stopNpcBgm,
-    };
+    activeLoop = { id, stop: stopNpcBgm };
   } else {
     PREVIEW_SOUNDS[id]?.();
   }
