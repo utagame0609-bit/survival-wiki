@@ -1,3 +1,5 @@
+import { playNpcBgm, stopNpcBgm } from './bgm';
+
 let ctx: AudioContext | null = null;
 
 interface ActiveLoopTrack {
@@ -76,10 +78,45 @@ export const PREVIEW_SOUNDS: Record<string, () => void> = {
   input_focus: () => { const c=getCtx(); if(!c)return; tone(c,1600,c.currentTime,.028,.08,'sine',800); },
 };
 
-function createWikipediaBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/112/2; const melodyNotes=[880,1046.5,1318.51,1046.5,830.61,987.77,1244.51,987.77,880,1174.66,1396.91,1174.66,1046.5,987.77,880,830.61]; const bassNotes=[220,null,220,null,207.65,null,207.65,null,293.66,null,293.66,null,220,null,164.81,207.65]; const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime;const m=melodyNotes[step%16],b=bassNotes[step%16];if(m){tone(ctx,m,t,.12,.08,'square');tone(ctx,m*.5,t,.09,.04,'triangle');}if(b)tone(ctx,b,t,.22,.1,'triangle');if(step%4===0)hiss(ctx,t,.03,.015,'highshelf',4000);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_wikipedia',intervalId:interval,nodes:[],stop:()=>window.clearInterval(interval)}; }
-function createScpBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/96/2; const notes=[440,null,440,null,466.16,null,null,null,440,null,554.37,null,523.25,493.88,466.16,null]; const o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter(); o.type='sawtooth';o.frequency.setValueAtTime(55,c.currentTime);f.type='lowpass';f.frequency.setValueAtTime(220,c.currentTime);g.gain.setValueAtTime(.0001,c.currentTime);g.gain.linearRampToValueAtTime(.12,c.currentTime+.5);o.connect(f);f.connect(g);g.connect(c.destination);o.start();const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime,n=notes[step%16];if(n){tone(ctx,n,t,.16,.07,'sawtooth');tone(ctx,n*2,t,.06,.03,'square');}if(Math.random()>.4)hiss(ctx,t,.015,.025,'bandpass',3800+Math.random()*800);if(step%4===0)tone(ctx,110,t,.14,.12,'triangle',40);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_scp',intervalId:interval,nodes:[o,g,f],stop:()=>{window.clearInterval(interval);if(ctx){g.gain.linearRampToValueAtTime(.0001,ctx.currentTime+.3);setTimeout(()=>{try{o.stop();o.disconnect();}catch{}},350);}}}; }
-function createAncientBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/78/2; const notes=[329.63,null,392,493.88,587.33,null,523.25,493.88,392,null,329.63,null,293.66,311.13,329.63,null];const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime,n=notes[step%16];if(n){tone(ctx,n,t,.28,.1,'triangle');tone(ctx,n*.5,t,.32,.06,'sine');}if(step%16===0||step%16===8){tone(ctx,1046.5,t,.8,.05,'sine');tone(ctx,1567.98,t,.6,.03,'triangle');tone(ctx,1661.22,t,.5,.02,'sine');}if(step%8===0)hiss(ctx,t,.6,.02,'bandpass',850);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_ancient',intervalId:interval,nodes:[],stop:()=>window.clearInterval(interval)}; }
+const NPC_BGM_IDS = new Set(['npc_bgm_wikipedia', 'npc_bgm_scp', 'npc_bgm_ancient']);
 
-export function stopActiveAudio(): void { if (activeLoop) { const id=activeLoop.id; activeLoop.stop(); activeLoop=null; notifySoundState(id,false); } }
-export function isAudioPlaying(id?: string): boolean { if(!id)return activeLoop!==null; return activeLoop?.id===id; }
-export function playSoundCandidatePreview(id: string): void { const c=getCtx();if(!c)return;if(activeLoop){const same=activeLoop.id===id;stopActiveAudio();if(same)return;}if(id==='npc_bgm_wikipedia')activeLoop=createWikipediaBgmEngine(c);else if(id==='npc_bgm_scp')activeLoop=createScpBgmEngine(c);else if(id==='npc_bgm_ancient')activeLoop=createAncientBgmEngine(c);else PREVIEW_SOUNDS[id]?.();notifySoundState(id,true); }
+function isNpcBgmId(id: string): id is 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient' {
+  return NPC_BGM_IDS.has(id);
+}
+
+export function stopActiveAudio(): void {
+  if (!activeLoop) return;
+  const id = activeLoop.id;
+  activeLoop.stop();
+  activeLoop = null;
+  notifySoundState(id, false);
+}
+
+export function isAudioPlaying(id?: string): boolean {
+  if (!id) return activeLoop !== null;
+  return activeLoop?.id === id;
+}
+
+export function playSoundCandidatePreview(id: string): void {
+  const c = getCtx();
+  if (!c) return;
+  if (activeLoop) {
+    const same = activeLoop.id === id;
+    stopActiveAudio();
+    if (same) return;
+  }
+
+  if (isNpcBgmId(id)) {
+    playNpcBgm(id);
+    activeLoop = {
+      id,
+      intervalId: null,
+      nodes: [],
+      stop: stopNpcBgm,
+    };
+  } else {
+    PREVIEW_SOUNDS[id]?.();
+  }
+
+  notifySoundState(id, true);
+}
