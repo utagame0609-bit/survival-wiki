@@ -1,4 +1,3 @@
-import { getSoundVolume, isSoundEnabled } from './sound';
 import { bgmSequencer } from './bgmSequencer';
 import { getBgmChannelSettings, subscribeToBgmChannelSettings } from './bgmSettings';
 import { soundEngine } from './soundEngine';
@@ -13,9 +12,7 @@ function syncChannels(): void {
 }
 
 function syncVolume(): void {
-  soundEngine.setMasterVolume(
-    isSoundEnabled() ? (getSoundVolume() / 50) * MASTER_BGM_VOLUME * masterBgmVolume : 0,
-  );
+  soundEngine.setMasterVolume(MASTER_BGM_VOLUME * masterBgmVolume);
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -37,7 +34,6 @@ function ensureSettingsSubscription(): void {
 }
 
 export function playWorldBgm(): void {
-  if (!isSoundEnabled()) return;
   ensureSettingsSubscription();
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
@@ -49,7 +45,7 @@ export function playWorldBgm(): void {
 
 export function stopWorldBgm(fadeMs = 300): void {
   if (fadeTimerId !== null) window.clearTimeout(fadeTimerId);
-  const currentVolume = (getSoundVolume() / 50) * MASTER_BGM_VOLUME * masterBgmVolume;
+  const currentVolume = MASTER_BGM_VOLUME * masterBgmVolume;
   const ctx = soundEngine.getContext();
   const steps = Math.max(1, Math.ceil(fadeMs / 30));
   const stepMs = fadeMs / steps;
