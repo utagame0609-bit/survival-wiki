@@ -1,13 +1,12 @@
-import type { ReactNode } from 'react';
 import { Clock, MapPin } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
+import { TimelinePhoto } from './TimelinePhoto';
 
 type TimelineEntryProps = {
   loc: LocationWithPhotos;
-  renderPhoto: (props: { storagePath: string; alt: string; className: string }) => ReactNode;
 };
 
-export function TimelineEntry({ loc, renderPhoto }: TimelineEntryProps) {
+export function TimelineEntry({ loc }: TimelineEntryProps) {
   const time = new Date(loc.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
   const mainPhoto = loc.photos.find((photo) => photo.is_main);
   const hasMemo = Boolean(loc.detail_memo?.trim());
@@ -17,7 +16,7 @@ export function TimelineEntry({ loc, renderPhoto }: TimelineEntryProps) {
       <div className="flex flex-col sm:flex-row">
         {mainPhoto ? (
           <div className="w-full sm:w-32 h-36 sm:h-auto sm:min-h-32 shrink-0 overflow-hidden bg-[#0b0f17] border-b sm:border-b-0 sm:border-r border-[#2d3548]">
-            {renderPhoto({ storagePath: mainPhoto.storage_path, alt: loc.name, className: 'w-full h-full object-cover pixelated' })}
+            <TimelinePhoto storagePath={mainPhoto.storage_path} alt={loc.name} className="w-full h-full object-cover pixelated" />
           </div>
         ) : (
           <div className="w-full sm:w-20 h-14 sm:h-auto sm:min-h-20 shrink-0 bg-[#0b0f17] border-b sm:border-b-0 sm:border-r border-[#2d3548] flex items-center justify-center text-slate-600">
