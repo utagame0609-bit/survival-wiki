@@ -5,7 +5,7 @@ import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhot
 import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
-import { playConfirmSound, playRecordSelectSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playDangerConfirmSound, playChestOpenSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
+import { playConfirmSound, playRecordSelectSound, playToggleSound, playModalOpenSound, playModalCloseSound, playDeleteSound, playCancelSound, playErrorSound, playChestOpenSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -76,7 +76,7 @@ export function LocationsTab({ world, reloadKey, onReload, openLocationId, onOpe
     catch (e) { setError((e as Error).message); }
   };
 
-  const handleDelete = (loc: LocationWithPhotos) => { playDangerConfirmSound(); setDeleteTarget(loc); };
+  const handleDelete = (loc: LocationWithPhotos) => { playErrorSound(); setDeleteTarget(loc); };
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
