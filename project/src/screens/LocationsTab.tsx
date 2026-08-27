@@ -389,7 +389,7 @@ export function LocationsTab({
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\.8\\.35\\,1)\\] {
+          .motion-safe\\:animate-\\[modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1)\\] {
             animation: none !important;
           }
         }
