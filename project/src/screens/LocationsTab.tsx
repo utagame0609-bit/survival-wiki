@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Plus, MapPin, Search, ArrowUpDown } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation, getPhotoUrl } from '@/lib/db';
-import { LocationForm } from '@/components/LocationForm';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
 import { LocationCard } from '@/components/LocationCard';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
 import { DeleteLocationConfirmModal } from '@/components/DeleteLocationConfirmModal';
+import { LocationFormModal } from '@/components/LocationFormModal';
 import {
   playConfirmSound,
   playRecordSelectSound,
@@ -29,10 +29,7 @@ type Mode =
 
 type SortOrder = 'asc' | 'desc';
 
-type CollectionItem = {
-  location: LocationWithPhotos;
-  storagePath: string;
-};
+type CollectionItem = { location: LocationWithPhotos; storagePath: string };
 
 type LocationFormInput = {
   name: string;
@@ -336,51 +333,15 @@ export function LocationsTab({
       )}
 
       {mode.type !== 'list' && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/85 backdrop-blur-sm font-sans"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              playCancelSound();
-              closeModal();
-            }
-          }}
-        >
-          <div className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto bg-[#1e2330] border-2 border-amber-500/70 shadow-[0_0_40px_rgba(0,0,0,0.6)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-            <div className="px-4 sm:px-5 py-3 bg-[#161a24] border-b-2 border-[#2d3548] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="text-xs px-2.5 py-0.5 border border-amber-500/50 bg-amber-500/15 text-amber-300 font-bold font-mono">
-                  {mode.type === 'edit' ? 'EDIT' : 'NEW'}
-                </span>
-                <h2 className="text-sm sm:text-base font-bold text-white">
-                  {mode.type === 'edit' ? 'ロケーション編集' : '新規拠点記録'}
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  playCancelSound();
-                  closeModal();
-                }}
-                onMouseEnter={playHoverSound}
-                disabled={saving}
-                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white text-lg cursor-pointer"
-                aria-label="閉じる"
-              >
-                ×
-              </button>
-            </div>
-
-            <LocationForm
-              worldId={world.id}
-              members={world.members}
-              editing={mode.type === 'edit' ? mode.location : null}
-              onSave={handleSave}
-              onComplete={handleComplete}
-              onCancel={closeModal}
-              saving={saving}
-            />
-          </div>
-        </div>
+        <LocationFormModal
+          world={world}
+          mode={mode.type}
+          editingLocation={mode.type === 'edit' ? mode.location : null}
+          saving={saving}
+          onSave={handleSave}
+          onComplete={handleComplete}
+          onCancel={closeModal}
+        />
       )}
 
       <style>{`
