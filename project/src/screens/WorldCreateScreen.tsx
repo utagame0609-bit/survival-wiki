@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Camera, X, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playAddSound, playDeleteSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
-
-type MemberPhotoState = {
-  name: string;
-  file: File | null;
-  previewUrl: string;
-  existingPath: string | null;
-};
+import { WorldMemberFields, type MemberPhotoState } from '@/components/WorldMemberFields';
 
 export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack }: { gameId: string; gameName: string; worldId?: string; navigate: NavigateFn; goBack: () => void }) {
   const isEdit = Boolean(worldId);
@@ -45,8 +39,8 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
   const setPlayerPhoto = (file: File | null) => { if (!file) return; setPlayerPhotoFile(file); setPlayerPhotoPreview(URL.createObjectURL(file)); };
   const setMemberPhoto = (index: number, file: File | null) => { if (!file) return; const url = URL.createObjectURL(file); setMembers((current) => current.map((member, i) => i === index ? { ...member, file, previewUrl: url } : member)); };
   const updateMemberName = (index: number, value: string) => setMembers((current) => current.map((member, i) => i === index ? { ...member, name: value } : member));
-  const addMember = () => { playAddSound(); setMembers((current) => [...current, { name: '', file: null, previewUrl: '', existingPath: null }]); };
-  const removeMember = (index: number) => { playDeleteSound(); setMembers((current) => current.filter((_, i) => i !== index)); };
+  const addMember = () => setMembers((current) => [...current, { name: '', file: null, previewUrl: '', existingPath: null }]);
+  const removeMember = (index: number) => setMembers((current) => current.filter((_, i) => i !== index));
 
   const handleSave = async () => {
     setError('');
@@ -101,30 +95,19 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
         </div>
         <div className="p-4 sm:p-5 space-y-4">
           {error && <ErrorBanner message={error} />}
-          <Field label="ワールド名"><input type="text" value={name} onChange={(event) => setName(event.target.value)} onFocus={playInputFocusSound} placeholder="例: サバイバル第1ワールド" required className="modal-input" /></Field>
-          <Field label="プレイヤー"><div className="flex items-center gap-3"><PhotoPicker previewUrl={playerPhotoPreview} onChange={setPlayerPhoto} label="プレイヤー写真" /><input type="text" value={player} onChange={(event) => setPlayer(event.target.value)} onFocus={playInputFocusSound} placeholder="あなたの名前" className="modal-input flex-1" /></div></Field>
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs sm:text-sm font-bold text-slate-200">関連メンバー</label>
-              <button type="button" onClick={addMember} onMouseEnter={playHoverSound} className="min-h-[36px] px-2.5 flex items-center gap-1 text-xs sm:text-sm font-bold text-amber-400 hover:text-amber-300 cursor-pointer">
-                <Plus className="w-4 h-4" />追加
-              </button>
-            </div>
-            <div className="space-y-2.5">
-              {members.map((member, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <PhotoPicker previewUrl={member.previewUrl} onChange={(file) => setMemberPhoto(index, file)} label={`メンバー${index + 1}写真`} />
-                  <input type="text" value={member.name} onChange={(event) => updateMemberName(index, event.target.value)} onFocus={playInputFocusSound} placeholder={`メンバー${index + 1}`} className="modal-input flex-1" />
-                  {members.length > 1 && (
-                    <button type="button" onClick={() => removeMember(index)} onMouseEnter={playHoverSound} className="min-h-[44px] min-w-[44px] border-2 border-slate-700 bg-[#141824] text-slate-400 hover:border-rose-500 hover:text-rose-300 flex items-center justify-center transition-colors cursor-pointer" aria-label="メンバーを削除">
-                      <X className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          <Field label="メモ"><textarea value={memo} onChange={(event) => setMemo(event.target.value)} onFocus={playInputFocusSound} placeholder="ワールドの概要や目標など" rows={3} className="modal-input resize-none" /></Field>
+          <Field label="ワールド名"><input type="text" value={name} onChange={(event) => setName(event.target.value)} placeholder="例: サバイバル第1ワールド" required className="modal-input" /></Field>
+          <WorldMemberFields
+            player={player}
+            playerPhotoPreview={playerPhotoPreview}
+            members={members}
+            onPlayerChange={setPlayer}
+            onPlayerPhotoChange={setPlayerPhoto}
+            onMemberPhotoChange={setMemberPhoto}
+            onMemberNameChange={updateMemberName}
+            onAddMember={addMember}
+            onRemoveMember={removeMember}
+          />
+          <Field label="メモ"><textarea value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="ワールドの概要や目標など" rows={3} className="modal-input resize-none" /></Field>
         </div>
         <div className="flex gap-3 px-4 sm:px-5 py-4 border-t-2 border-[#2d3548] bg-[#161a24]">
           <button type="button" onClick={() => { playCloseSound(); goBack(); }} onMouseEnter={playHoverSound} disabled={saving} className="flex-1 min-h-[44px] border-2 border-slate-700 bg-[#141824] text-slate-200 font-bold hover:border-slate-500 hover:text-white disabled:opacity-50 transition-all text-xs sm:text-sm cursor-pointer">キャンセル</button>
@@ -136,6 +119,15 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) { return <div><label className="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">{label}{required && <span className="text-amber-400 ml-1">*</span>}</label>{children}</div>; }
-function PhotoPicker({ previewUrl, onChange, label }: { previewUrl: string; onChange: (file: File | null) => void; label: string }) { return <label className="relative min-h-[44px] w-14 shrink-0 cursor-pointer overflow-hidden border-2 border-slate-700 bg-[#141824] flex items-center justify-center text-amber-400 hover:border-amber-400 hover:text-amber-300 transition-colors" title={label} onMouseEnter={playHoverSound}>{previewUrl ? <img src={previewUrl} alt="" className="h-full w-full object-cover pixelated" /> : <Camera className="h-5 w-5" />}<input type="file" accept="image/*" className="sr-only" onChange={(event) => onChange(event.target.files?.[0] ?? null)} /></label>; }
-async function fetchPhotoBlob(storagePath: string): Promise<Blob> { const url = await getPhotoUrl(storagePath); const response = await fetch(url); if (!response.ok) throw new Error('既存写真を読み込めませんでした'); const blob = await response.blob(); if (url.startsWith('blob:')) URL.revokeObjectURL(url); return blob; }
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return <div><label className="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5">{label}{required && <span className="text-amber-400 ml-1">*</span>}</label>{children}</div>;
+}
+
+async function fetchPhotoBlob(storagePath: string): Promise<Blob> {
+  const url = await getPhotoUrl(storagePath);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('既存写真を読み込めませんでした');
+  const blob = await response.blob();
+  if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+  return blob;
+}
