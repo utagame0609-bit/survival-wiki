@@ -3,7 +3,7 @@ import { ChevronDown, Camera, X, Compass, Users, Check } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
-import { playAddSound, playSaveSound, playCancelSound, playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
+import { playAddSound, playSaveSound, playCancelSound, playConfirmSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 
 type SaveInput = {
   name: string; x: number; y: number; z: number; detail_memo: string; created_at: string; member_ids: string[];
@@ -65,7 +65,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       } else if (editing && !mainPreview && existingMainPhoto) {
         await deletePhoto(existingMainPhoto.id, existingMainPhoto.storage_path);
       }
-      if (editing) playSaveSound(); else playAddSound();
+      if (editing) playSaveSound(); else playNewRecordSound();
       onComplete();
     } catch (e) { setError((e as Error).message); }
   };
