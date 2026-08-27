@@ -8,7 +8,7 @@ type NarratorStyle = {
   text: string;
 };
 
-const NARRATORS: Record<string, NarratorStyle> = {
+export const NARRATORS: Record<string, NarratorStyle> = {
   wikipedia: {
     name: '民俗学者 エルナン',
     role: '百科事典編纂官',
