@@ -6,7 +6,7 @@ import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound, playModalCloseSound } from '@/lib/sound';
+import { playConfirmSound, playDeleteSound, playCancelSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
 type WorldMeta = {
@@ -136,6 +136,7 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
               playConfirmSound();
               setShowCreateModal(true);
             }}
+            onMouseEnter={playHoverSound}
             className="w-full mt-5 bg-amber-500 text-black px-5 py-3.5 sm:py-4 font-bold text-sm sm:text-base hover:bg-amber-400 border-b-4 border-amber-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(245,158,11,0.25)] cursor-pointer min-h-[48px]"
           >
             <Plus className="w-5 h-5 stroke-[3]" />
@@ -171,8 +172,8 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
               <p className="mt-3 text-xs leading-relaxed text-slate-300">※この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3 border-t border-[#2a3142] pt-4">
-              <button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} className="min-h-[44px] py-2.5 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-bold flex items-center justify-center border border-slate-600 cursor-pointer"><X className="mr-1 inline h-4 w-4" />CANCEL</button>
-              <button type="button" onClick={confirmDelete} className="min-h-[44px] py-2.5 bg-red-600 text-white hover:bg-red-500 text-xs font-bold flex items-center justify-center border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] cursor-pointer"><Trash2 className="mr-1 inline h-4 w-4" />DELETE</button>
+              <button type="button" onClick={() => { playCancelSound(); setDeleteTarget(null); }} onMouseEnter={playHoverSound} className="min-h-[44px] py-2.5 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-bold flex items-center justify-center border border-slate-600 cursor-pointer"><X className="mr-1 inline h-4 w-4" />CANCEL</button>
+              <button type="button" onClick={confirmDelete} onMouseEnter={playHoverSound} className="min-h-[44px] py-2.5 bg-red-600 text-white hover:bg-red-500 text-xs font-bold flex items-center justify-center border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] cursor-pointer"><Trash2 className="mr-1 inline h-4 w-4" />DELETE</button>
             </div>
           </div>
         </div>
@@ -208,6 +209,7 @@ function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }: { slot
   return (
     <article
       onClick={onOpen}
+      onMouseEnter={playHoverSound}
       className="group relative overflow-hidden bg-[#1e2330] border-2 border-[#2d3548] hover:border-amber-500/80 transition-all duration-150 hover:shadow-[0_4px_24px_rgba(0,0,0,0.5)] cursor-pointer"
     >
       {photoUrl && <img src={photoUrl} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10" />}
@@ -223,74 +225,26 @@ function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }: { slot
             </h2>
           </div>
           <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={onEdit}
-              title="編集"
-              aria-label={`${world.name}を編集`}
-              className="min-h-[36px] min-w-[36px] border border-slate-600 hover:border-amber-400 hover:text-amber-400 flex items-center justify-center text-slate-300 bg-[#141824] transition-colors cursor-pointer"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              title="削除"
-              aria-label={`${world.name}を削除`}
-              className="min-h-[36px] min-w-[36px] border border-slate-600 hover:border-red-500 hover:text-red-400 flex items-center justify-center text-red-400 bg-[#141824] transition-colors cursor-pointer"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <button type="button" onClick={onEdit} onMouseEnter={playHoverSound} title="編集" aria-label={`${world.name}を編集`} className="min-h-[36px] min-w-[36px] border border-slate-600 hover:border-amber-400 hover:text-amber-400 flex items-center justify-center text-slate-300 bg-[#141824] transition-colors cursor-pointer"><Pencil className="h-4 w-4" /></button>
+            <button type="button" onClick={onDelete} onMouseEnter={playHoverSound} title="削除" aria-label={`${world.name}を削除`} className="min-h-[36px] min-w-[36px] border border-slate-600 hover:border-red-500 hover:text-red-400 flex items-center justify-center text-red-400 bg-[#141824] transition-colors cursor-pointer"><Trash2 className="h-4 w-4" /></button>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center my-2">
           <div className="md:col-span-5 flex gap-2.5 overflow-x-auto pb-1 md:pb-0">
             <MemberBadge name={world.player ?? '---'} photoUrl={playerPhotoUrl} player />
-            {world.members.slice(0, 4).map((member) => (
-              <MemberBadge key={member.id} name={member.name} photoUrl={memberPhotoUrls[member.id] ?? ''} />
-            ))}
-            {Array.from({ length: Math.max(0, 4 - (1 + Math.min(world.members.length, 3))) }).map((_, idx) => (
-              <div key={`empty-${idx}`} className="flex flex-col items-center shrink-0">
-                <div className="w-11 h-11 flex items-center justify-center border border-dashed border-slate-700 bg-slate-900/50">
-                  <span className="text-[10px] text-slate-500 font-mono">--</span>
-                </div>
-                <span className="text-[10px] text-slate-500 mt-1 font-mono">EMPTY</span>
-              </div>
-            ))}
+            {world.members.slice(0, 4).map((member) => <MemberBadge key={member.id} name={member.name} photoUrl={memberPhotoUrls[member.id] ?? ''} />)}
+            {Array.from({ length: Math.max(0, 4 - (1 + Math.min(world.members.length, 3))) }).map((_, idx) => <div key={`empty-${idx}`} className="flex flex-col items-center shrink-0"><div className="w-11 h-11 flex items-center justify-center border border-dashed border-slate-700 bg-slate-900/50"><span className="text-[10px] text-slate-500 font-mono">--</span></div><span className="text-[10px] text-slate-500 mt-1 font-mono">EMPTY</span></div>)}
           </div>
-
           <div className="md:col-span-4 grid grid-cols-2 gap-x-4 gap-y-1.5 md:border-x border-[#2d3548] px-0 md:px-4 py-2 md:py-0 border-y md:border-y-0 text-xs">
-            <div>
-              <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">DAYS</div>
-              <div className="text-base sm:text-lg font-black text-emerald-400 font-mono">{String(meta?.dayCount ?? 0).padStart(3, '0')} 日</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">RECORDS</div>
-              <div className="text-base sm:text-lg font-black text-amber-400 font-mono">{String(meta?.recordCount ?? 0).padStart(3, '0')} 件</div>
-            </div>
-            <div className="col-span-2 mt-1">
-              <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">LAST_CHECKPOINT</div>
-              <div className="text-xs truncate text-slate-200 font-medium">{meta?.lastLocationName ?? '--- (未記録)'}</div>
-            </div>
+            <div><div className="text-[10px] text-slate-400 uppercase font-mono font-bold">DAYS</div><div className="text-base sm:text-lg font-black text-emerald-400 font-mono">{String(meta?.dayCount ?? 0).padStart(3, '0')} 日</div></div>
+            <div><div className="text-[10px] text-slate-400 uppercase font-mono font-bold">RECORDS</div><div className="text-base sm:text-lg font-black text-amber-400 font-mono">{String(meta?.recordCount ?? 0).padStart(3, '0')} 件</div></div>
+            <div className="col-span-2 mt-1"><div className="text-[10px] text-slate-400 uppercase font-mono font-bold">LAST_CHECKPOINT</div><div className="text-xs truncate text-slate-200 font-medium">{meta?.lastLocationName ?? '--- (未記録)'}</div></div>
           </div>
-
           <div className="md:col-span-3 flex justify-end mt-1 md:mt-0" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={onOpen}
-              className="w-full md:w-auto px-6 py-3 text-xs sm:text-sm font-black tracking-wider flex items-center justify-center gap-2 bg-amber-500 text-black hover:bg-amber-400 border-b-3 border-amber-700 active:border-b-0 active:translate-y-0.5 transition-all shadow-[0_2px_12px_rgba(245,158,11,0.25)] cursor-pointer min-h-[44px]"
-            >
-              <span>▶ 冒険を再開 (LOAD)</span>
-              <ChevronRight className="h-4 w-4 stroke-[3]" />
-            </button>
+            <button type="button" onClick={onOpen} onMouseEnter={playHoverSound} className="w-full md:w-auto px-6 py-3 text-xs sm:text-sm font-black tracking-wider flex items-center justify-center gap-2 bg-amber-500 text-black hover:bg-amber-400 border-b-3 border-amber-700 active:border-b-0 active:translate-y-0.5 transition-all shadow-[0_2px_12px_rgba(245,158,11,0.25)] cursor-pointer min-h-[44px]"><span>▶ 冒険を再開 (LOAD)</span><ChevronRight className="h-4 w-4 stroke-[3]" /></button>
           </div>
         </div>
-
-        <div className="mt-3 flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 font-mono border-t border-[#2a3142] pt-2">
-          <span className="text-emerald-400 font-bold">● READY</span>
-          <span>最終記録: {formattedLastRecordDate || 'NO_DATA'}</span>
-        </div>
+        <div className="mt-3 flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 font-mono border-t border-[#2a3142] pt-2"><span className="text-emerald-400 font-bold">● READY</span><span>最終記録: {formattedLastRecordDate || 'NO_DATA'}</span></div>
       </div>
     </article>
   );
@@ -300,13 +254,7 @@ function MemberBadge({ name, photoUrl, player = false }: { name: string; photoUr
   return (
     <div className="flex flex-col items-center shrink-0 min-w-[50px]">
       <div className="w-11 h-11 overflow-hidden mb-1 flex items-center justify-center relative border border-slate-600 bg-[#141824] shadow-sm">
-        {photoUrl ? (
-          <img src={photoUrl} alt="" className="w-full h-full object-cover pixelated" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-xs font-black text-emerald-400 bg-slate-900 font-mono">
-            {name.slice(0, 1)}
-          </div>
-        )}
+        {photoUrl ? <img src={photoUrl} alt="" className="w-full h-full object-cover pixelated" /> : <div className="w-full h-full flex items-center justify-center text-xs font-black text-emerald-400 bg-slate-900 font-mono">{name.slice(0, 1)}</div>}
       </div>
       <span className="text-[10px] text-slate-300 truncate max-w-[56px] text-center font-medium">{name}</span>
       {player && <span className="text-[8px] text-amber-400 font-black font-mono">CMD</span>}
