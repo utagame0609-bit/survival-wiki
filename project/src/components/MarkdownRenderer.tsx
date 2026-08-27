@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { playHoverSound } from '@/lib/sound';
 
 type LocationLink = {
   name: string;
@@ -49,6 +50,8 @@ function renderBoldText(text: string, locationLinks: LocationLink[], keyPrefix: 
         key={`${keyPrefix}-location-${index}`}
         type="button"
         onClick={match.location.onClick}
+        onMouseEnter={playHoverSound}
+        onFocus={playHoverSound}
         className="font-semibold text-[#36c] hover:underline"
       >
         {text.slice(match.index, match.index + match.length)}
@@ -94,6 +97,8 @@ function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): React
           key={index}
           type="button"
           onClick={location.onClick}
+          onMouseEnter={playHoverSound}
+          onFocus={playHoverSound}
           className="text-[#36c] hover:underline"
         >
           {part}
@@ -336,6 +341,8 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
                   .getElementById(heading.id)
                   ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }
+              onMouseEnter={playHoverSound}
+              onFocus={playHoverSound}
               title={heading.text}
               className="block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-left text-[#36c] hover:underline"
             >
