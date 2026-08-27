@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Compass } from 'lucide-react';
+import { ChevronDown, Compass } from 'lucide-react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
 import { playSaveSound, playCancelSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
 import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
+import { LocationFormActions } from '@/components/LocationFormActions';
 
 type SaveInput = {
   name: string; x: number; y: number; z: number; detail_memo: string; created_at: string; member_ids: string[];
@@ -112,10 +113,13 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         onCreatedAtChange={setCreatedAt}
       />
 
-      <div className="flex gap-3 pt-4 pb-1 border-t border-slate-800">
-        <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} className="flex-1 min-h-[44px] py-2.5 rounded-sm bg-[#141824] border-2 border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 active:scale-[0.98] transition-all text-xs uppercase tracking-wider cursor-pointer">キャンセル</button>
-        <button type="button" onClick={handleSubmit} onMouseEnter={playHoverSound} disabled={saving} className="flex-1 min-h-[44px] py-2.5 rounded-sm bg-amber-500 text-slate-950 font-black border-b-2 border-amber-700 shadow-[0_0_16px_rgba(245,158,11,0.22)] hover:bg-amber-400 active:scale-[0.98] transition-all disabled:opacity-50 text-xs uppercase tracking-wider cursor-pointer">{saving ? 'SAVING // 保存中...' : editing ? '▶ 更新を記録' : '▶ 冒険の書に刻む'}</button>
-      </div>
+      <LocationFormActions
+        saving={saving}
+        editing={Boolean(editing)}
+        onCancel={onCancel}
+        onSubmit={handleSubmit}
+      />
+
       <style>{`.location-input{width:100%;padding:.7rem .8rem;border-radius:.25rem;border:1px solid #334155;background:#090d16;color:#f1f5f9;outline:none;transition:border-color 160ms ease,box-shadow 160ms ease,background 160ms ease}.location-input::placeholder{color:#64748b}.location-input:focus{border-color:#38bdf8;background:#0d1627;box-shadow:0 0 0 1px #38bdf8,0 0 14px rgba(56,189,248,.15)}`}</style>
     </div>
   );
