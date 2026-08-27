@@ -30,8 +30,7 @@ readStoredSettings();
 
 function getMasterGainValue(): number {
   if (soundVolume <= 0) return 0;
-  const normalized = soundVolume / 100;
-  return Math.pow(normalized, 2.17);
+  return soundVolume / 100;
 }
 
 function getAudioContext(): AudioContext | null {
@@ -92,6 +91,7 @@ function playV2Sound(sound: SoundType): void {
   const c = getAudioContext();
   if (!c || !masterGain || !enabled) return;
   const t = c.currentTime;
+
   switch (sound) {
     case 'confirm': tone(c, 880, t, 0.08, 0.18, 'square'); tone(c, 1760, t + 0.045, 0.095, 0.16, 'square'); return;
     case 'cancel': tone(c, 659, t, 0.11, 0.13, 'square', 330); return;
