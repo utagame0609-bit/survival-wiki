@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpDown, Crown, Footprints, Clock } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
-import { fetchLocations, getPhotoUrl } from '@/lib/db';
+import { fetchLocations } from '@/lib/db';
 import { playToggleSound, playHoverSound, playCardOpenSound } from '@/lib/sound';
 import { Spinner, ErrorBanner, EmptyState } from '@/components/Feedback';
 import { DayChapter } from '@/components/timeline/DayChapter';
@@ -19,28 +19,6 @@ const MILESTONES: Milestone[] = [
 
 function getMilestone(dayNumber: number) {
   return MILESTONES.find((milestone) => milestone.day === dayNumber);
-}
-
-function TimelinePhoto({ storagePath, alt, className }: { storagePath: string; alt: string; className: string }) {
-  const [src, setSrc] = useState('');
-  useEffect(() => {
-    let active = true;
-    let objectUrl = '';
-    getPhotoUrl(storagePath).then((url) => {
-      if (active) {
-        objectUrl = url.startsWith('blob:') ? url : '';
-        setSrc(url);
-      } else if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    }).catch(() => { if (active) setSrc(''); });
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [storagePath]);
-  if (!src) return null;
-  return <img src={src} alt={alt} className={className} />;
 }
 
 export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; reloadKey: number }) {
@@ -172,11 +150,7 @@ export function TimelineTab({ world, reloadKey }: { world: WorldWithMembers; rel
                 }}
                 onSelect={() => handleDaySelect(group.dayNumber)}
                 renderLocation={(location) => (
-                  <TimelineEntry
-                    key={location.id}
-                    loc={location}
-                    renderPhoto={TimelinePhoto}
-                  />
+                  <TimelineEntry key={location.id} loc={location} />
                 )}
               />
             ))}
