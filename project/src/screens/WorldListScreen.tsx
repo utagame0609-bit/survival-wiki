@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Gamepad2 } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
-import { deleteWorld, fetchWorlds, fetchLocations } from '@/lib/db';
+import { deleteWorld, fetchWorlds } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
@@ -9,6 +9,7 @@ import { WorldCard } from '@/components/WorldCard';
 import type { WorldMeta } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
 import type { NavigateFn } from '@/components/Navigation';
+import { buildWorldMeta } from '@/components/world/worldListData';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
@@ -31,25 +32,9 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
           if (b.id === lastOpenedWorldId) return 1;
           return 0;
         });
-        const metaEntries = await Promise.all(data.map(async (world) => {
-          const locations = await fetchLocations(world.id);
-          const sortedLocations = [...locations].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          const dayKeys = new Set(locations.map((location) => {
-            const date = new Date(location.created_at);
-            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-          }));
-          const latestLocation = sortedLocations[0];
-          const latestPhoto = latestLocation ? latestLocation.photos.find((photo) => photo.is_main) ?? latestLocation.photos[0] ?? null : null;
-          return [world.id, {
-            recordCount: locations.length,
-            dayCount: dayKeys.size,
-            lastLocationName: latestLocation?.name ?? null,
-            lastLocationDate: latestLocation?.created_at ?? null,
-            lastPhotoPath: latestPhoto?.storage_path ?? null,
-          }] as const;
-        }));
+        const meta = await buildWorldMeta(data);
         setWorlds(sortedWorlds);
-        setWorldMeta(Object.fromEntries(metaEntries));
+        setWorldMeta(meta);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
