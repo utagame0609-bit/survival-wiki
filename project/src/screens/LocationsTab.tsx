@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapPin, ArrowUpDown } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, createLocation, updateLocation, deleteLocation } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
@@ -10,6 +10,7 @@ import { DeleteLocationConfirmModal } from '@/components/DeleteLocationConfirmMo
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { LocationsToolbar } from '@/components/LocationsToolbar';
+import { LocationsListHeader } from '@/components/LocationsListHeader';
 import {
   playRecordSelectSound,
   playToggleSound,
@@ -17,7 +18,6 @@ import {
   playModalCloseSound,
   playDeleteSound,
   playErrorSound,
-  playHoverSound,
 } from '@/lib/sound';
 
 type Mode =
@@ -212,26 +212,13 @@ export function LocationsTab({
 
       {!loading && locations.length > 0 && (
         <>
-          <div className="flex items-center justify-between gap-3 text-xs text-slate-400 font-mono px-1">
-            <span className="truncate">
-              {normalizedQuery
-                ? `「${searchQuery.trim()}」検索結果: ${sortedLocations.length}件`
-                : `登録ロケーション: ${locations.length}件`}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                playToggleSound();
-                setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'));
-              }}
-              onMouseEnter={playHoverSound}
-              className="min-h-[38px] shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-[#12151f] border border-slate-700 text-slate-300 hover:text-amber-400 hover:border-amber-500 text-[11px] transition-colors"
-              aria-label="ロケーションの並び順を変更"
-            >
-              <ArrowUpDown className="w-3.5 h-3.5 text-amber-400" />
-              <span>{sortOrder === 'asc' ? '古い順' : '新しい順'}</span>
-            </button>
-          </div>
+          <LocationsListHeader
+            searchQuery={searchQuery}
+            locationCount={locations.length}
+            resultCount={sortedLocations.length}
+            sortOrder={sortOrder}
+            onSortOrderChange={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}
+          />
 
           {sortedLocations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
