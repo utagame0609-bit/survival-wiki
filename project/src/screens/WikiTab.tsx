@@ -9,6 +9,7 @@ import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import { supabase } from '@/lib/supabase';
 import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
 import { playAddSound, playConfirmSound, playSaveSound, playCancelSound, playDeleteSound, playErrorSound } from '@/lib/sound';
+import { playNpcBgm, stopNpcBgm } from '@/lib/bgm';
 
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 type WikiStyleId = string;
@@ -80,6 +81,25 @@ export function WikiTab({ world, reloadKey, onOpenLocation, onArticleStateChange
     load(style);
     return () => { if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current); };
   }, [world.id, style, reloadKey]);
+
+  useEffect(() => {
+    const npcBgmByStyle: Record<string, 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient'> = {
+      wikipedia: 'npc_bgm_wikipedia',
+      scp: 'npc_bgm_scp',
+      ancient: 'npc_bgm_ancient',
+    };
+    if (style === null) {
+      stopNpcBgm();
+      return;
+    }
+    const bgmId = npcBgmByStyle[style];
+    if (!bgmId) {
+      stopNpcBgm();
+      return;
+    }
+    playNpcBgm(bgmId);
+    return () => { stopNpcBgm(); };
+  }, [style]);
 
   const handleStyleSelect = (nextStyle: WikiStyleId) => {
     if (generating || resetting || nextStyle === style) return;
