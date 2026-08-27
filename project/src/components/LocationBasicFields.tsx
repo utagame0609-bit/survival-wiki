@@ -1,5 +1,3 @@
-import type { ComponentType } from 'react';
-import type { LocationWithPhotos } from '@/lib/types';
 import { playInputFocusSound } from '@/lib/sound';
 import { LocationCoordinatesField } from '@/components/LocationCoordinatesField';
 
@@ -7,7 +5,6 @@ type LocationBasicFieldsProps = {
   coordsText: string;
   coordsError: string;
   name: string;
-  editing: LocationWithPhotos | null | undefined;
   onCoordsChange: (value: string) => void;
   onNameChange: (value: string) => void;
 };
