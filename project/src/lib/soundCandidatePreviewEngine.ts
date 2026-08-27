@@ -66,6 +66,14 @@ export const PREVIEW_SOUNDS: Record<string, () => void> = {
   save: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,1046.5,t,.24,.1,'sine'); tone(c,1568,t+.025,.21,.08,'square'); },
   toggle: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,1800,t,.04,.1,'square',850); hiss(c,t,.035,.02,'highpass',3000); },
   error: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,185,t,.22,.14,'sawtooth'); tone(c,196,t,.22,.1,'sawtooth'); },
+  danger_confirm: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,90,t,.38,.2,'sine',45); tone(c,293.66,t,.38,.08,'square',311.13); },
+  record_select: () => { const c=getCtx(); if(!c)return; tone(c,680,c.currentTime,.05,.14,'triangle',340); hiss(c,c.currentTime,.05,.025,'bandpass',1800); },
+  ai_generate_start: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,320,t,.32,.16,'sawtooth',2400); tone(c,320,t,.32,.05,'square',2400); },
+  ai_generate_complete: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; [659.25,830.61,987.77,1318.51].forEach((f,i)=>tone(c,f,t+i*.12,.75-i*.1,.12,'square')); hiss(c,t+.2,.6,.02,'highpass',3200); },
+  chest_close: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,1400,t,.14,.16,'square',700); tone(c,180,t,.14,.09,'triangle',120); hiss(c,t,.08,.03,'lowpass',900); },
+  screen_transition: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; hiss(c,t,.36,.1,'bandpass',4500); tone(c,85,t,.36,.14,'sine',55); },
+  notification: () => { const c=getCtx(); if(!c)return; const t=c.currentTime; tone(c,1046.5,t,.16,.1,'sine'); tone(c,1318.5,t+.06,.1,.08,'square'); },
+  input_focus: () => { const c=getCtx(); if(!c)return; tone(c,1600,c.currentTime,.028,.08,'sine',800); },
 };
 
 function createWikipediaBgmEngine(c: AudioContext): ActiveLoopTrack { let step=0; const stepTime=60/112/2; const melodyNotes=[880,1046.5,1318.51,1046.5,830.61,987.77,1244.51,987.77,880,1174.66,1396.91,1174.66,1046.5,987.77,880,830.61]; const bassNotes=[220,null,220,null,207.65,null,207.65,null,293.66,null,293.66,null,220,null,164.81,207.65]; const interval=window.setInterval(()=>{if(!ctx||ctx.state==='suspended')return;const t=ctx.currentTime;const m=melodyNotes[step%16],b=bassNotes[step%16];if(m){tone(ctx,m,t,.12,.08,'square');tone(ctx,m*.5,t,.09,.04,'triangle');}if(b)tone(ctx,b,t,.22,.1,'triangle');if(step%4===0)hiss(ctx,t,.03,.015,'highshelf',4000);step=(step+1)%16;},stepTime*1000);return{id:'npc_bgm_wikipedia',intervalId:interval,nodes:[],stop:()=>window.clearInterval(interval)}; }
