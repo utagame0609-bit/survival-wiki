@@ -1,48 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Volume2, Waves, Radio, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Navigation';
-import { BgmCandidateCard, type BgmCandidate } from '@/components/sound/BgmCandidateCard';
+import { BgmCandidateCard } from '@/components/sound/BgmCandidateCard';
 import { SoundCandidateCard } from '@/components/sound/SoundCandidateCard';
+import { BGM_CANDIDATES } from '@/components/sound/BgmCandidates';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { isWorldBgmPlaying, playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 import { playCancelSound, playConfirmSound } from '@/lib/sound';
-
-const BGM_CANDIDATES: BgmCandidate[] = [
-  {
-    id: 'bgm_world_select',
-    name: 'WORLD SELECT / SAVE',
-    nameJa: 'セーブ／ワールド選択画面BGM',
-    description: 'セーブやワールド選択画面に使用している、16-bitレトロゲーム風のシームレスループBGM。',
-    toneInfo: 'BPM 96 / 30秒ループ / Pulse Lead + Triangle Bass + Chiptune Arp + Noise Drums',
-    keyCharacteristic: '現在のワールド選択画面で使用しているBGMを、そのまま試聴できます。',
-  },
-  {
-    id: 'npc_bgm_wikipedia',
-    name: 'WUTAPEDIA',
-    nameJa: 'ウタペディア',
-    description: '百科事典・民俗学者をイメージした、クラシカル × レトロサイバーの知的なBGM。',
-    toneInfo: 'A Minor / 112 BPM / Square Arpeggio + Triangle Bass',
-    keyCharacteristic: '整然としたアルペジオに半音階の不穏さを混ぜた、洗練された学術系サウンド。',
-  },
-  {
-    id: 'npc_bgm_scp',
-    name: 'SCP FOUNDATION',
-    nameJa: 'SCP FOUNDATION',
-    description: '機密報告・特異点研究員をイメージした、ミリタリー × サイバー × インダストリアルBGM。',
-    toneInfo: 'A / 96 BPM / Saw Drone + Industrial Pulse',
-    keyCharacteristic: '55Hzの重低音ドローンと金属的パルス、ランダムなノイズで無機質な緊張感を演出。',
-  },
-  {
-    id: 'npc_bgm_ancient',
-    name: 'LOST CHRONICLE',
-    nameJa: 'LOST CHRONICLE',
-    description: '絶望古文書・老吟遊詩人をイメージした、レトロファンタジー × 16bitアンビエントBGM。',
-    toneInfo: 'E Minor / 78 BPM / Triangle Lute + Ruin Bell',
-    keyCharacteristic: '哀愁の古楽器旋律、遠くの鐘、風のノイズで「失われた世界」の空気を表現。',
-  },
-];
 
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [reverb, setReverb] = useState<number>(() => Math.round(getStoredReverbAmount() * 100));
@@ -85,7 +51,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     }, 500);
   };
 
-  const handleBgmPlay = (candidate: BgmCandidate) => {
+  const handleBgmPlay = (candidate: BGM_CANDIDATES[number]) => {
     if (candidate.id === 'bgm_world_select') {
       if (isWorldBgmPlaying()) {
         stopWorldBgm(0);
