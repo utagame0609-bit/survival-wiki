@@ -6,7 +6,8 @@ import { soundEngine } from './soundEngine';
 type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
 interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
 
-let masterBgmVolume = 1;
+const DEFAULT_BGM_VOLUME = 0.3;
+let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let fadeTimerId: number | null = null;
 let settingsUnsubscribe: (() => void) | null = null;
 let activeNpcBgm: ActiveNpcBgm | null = null;
