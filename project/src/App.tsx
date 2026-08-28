@@ -127,12 +127,10 @@ function App() {
       break;
   }
 
-  const showSettings = screen.name !== 'world';
-
   return (
     <>
       {screenContent}
-      {showSettings && <SettingsButton />}
+      <SettingsButton showButton={false} />
     </>
   );
 }
