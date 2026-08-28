@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, ExternalLink, Share2, Sparkles, X } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playConfirmSound, playHoverSound, playModalCloseSound, playSuccessSound } from '@/lib/sound';
+import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 
 type SnsShareModalProps = {
@@ -45,7 +45,7 @@ export function SnsShareModal({ world, location, onClose }: SnsShareModalProps) 
     try {
       await navigator.clipboard.writeText(postText);
       setCopied(true);
-      playSuccessSound();
+      playConfirmSound();
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
       // Clipboard may be unavailable in some browser contexts.
