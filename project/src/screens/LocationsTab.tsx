@@ -163,7 +163,10 @@ export function LocationsTab({
         <TimelineRecordsView
           world={world}
           locations={locations}
-          onSelectLocation={setSelectedLocation}
+          onSelectLocation={(location) => {
+            playRecordSelectSound();
+            setSelectedLocation(location);
+          }}
           onOpenChest={() => {
             playModalOpenSound();
             setCollectionOpen(true);
@@ -182,6 +185,7 @@ export function LocationsTab({
 
       {selectedLocation && (
         <LocationDetailModal
+          world={world}
           location={selectedLocation}
           onClose={closeLocationDetail}
           onEdit={handleDetailEdit}
