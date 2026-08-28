@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, Home, Shield } from 'lucide-react';
+import { ChevronLeft, Gamepad2, Home } from 'lucide-react';
 import { playCancelSound, playHoverSound } from '../lib/sound';
 
 type Screen =
@@ -35,10 +35,10 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b-2 border-amber-500/60 bg-[#1a1e29]/95 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
-      <div className="mx-auto flex min-h-[52px] max-w-4xl items-center justify-between gap-2 px-3 sm:min-h-[56px] sm:px-6">
-        <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
-          {onBack && (
+    <header className="sticky top-0 z-40 border-b-2 border-amber-500/70 bg-[#0e1629]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.65)]">
+      <div className="mx-auto flex min-h-[52px] sm:min-h-[58px] w-full max-w-5xl items-center justify-between gap-2 px-3 sm:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          {onBack ? (
             <button
               type="button"
               onClick={() => {
@@ -46,21 +46,26 @@ export function Header({
                 onBack();
               }}
               onMouseEnter={playHoverSound}
-              className="flex min-h-[40px] shrink-0 items-center gap-1.5 border border-amber-500/50 bg-[#12151d] px-3 py-2 font-mono text-xs font-bold text-amber-400 transition-all hover:border-amber-400 hover:bg-amber-500/10 active:scale-95 cursor-pointer"
+              className="flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1.5 border-2 border-amber-500/80 bg-[#0a101d] px-2.5 sm:min-w-0 sm:px-3 py-1.5 font-mono text-xs font-black text-amber-300 transition-all hover:border-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
               aria-label="戻る"
+              title="戻る"
             >
-              <ChevronLeft className="h-4 w-4 stroke-[2.5]" />
-              <span>戻る</span>
+              <ChevronLeft className="h-4 w-4 stroke-[3]" />
+              <span className="hidden sm:inline">戻る</span>
             </button>
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]">
+              <Gamepad2 className="h-4 w-4" />
+            </div>
           )}
 
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-500 bg-amber-500/20 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.25)] sm:h-9 sm:w-9">
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)] sm:h-9 sm:w-9">
+              <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-xs font-bold tracking-wide text-white sm:text-sm">{title}</h1>
-              <p className="hidden truncate font-mono text-[10px] font-bold text-emerald-400 opacity-90 sm:block">ADVENTURE LOG SYSTEM // SYSTEM STATUS: NOMINAL</p>
+              <h1 className="truncate text-xs font-black tracking-wide text-white sm:text-sm">{title}</h1>
+              <p className="hidden truncate font-mono text-[9px] font-bold text-emerald-400/90 sm:block">ADVENTURE LOG SYSTEM // NOMINAL</p>
             </div>
           </div>
         </div>
@@ -71,9 +76,10 @@ export function Header({
             onClick={handleHome}
             onMouseEnter={playHoverSound}
             aria-label="ホームへ"
-            className="flex min-h-[40px] shrink-0 items-center gap-1.5 border border-slate-700 bg-[#12151d] px-2.5 py-2 font-mono text-xs font-bold text-slate-300 transition-all hover:border-amber-500 hover:text-amber-400 active:scale-95 cursor-pointer"
+            title="冒険の書一覧へ戻る"
+            className="flex min-h-[40px] shrink-0 items-center gap-1.5 border-2 border-slate-700 bg-[#121622] px-2.5 py-2 font-mono text-xs font-black text-amber-300 transition-all hover:border-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
           >
-            <Home className="h-4 w-4 text-amber-500" />
+            <Home className="h-4 w-4 text-amber-400" />
             <span className="hidden sm:inline">HOME</span>
           </button>
         )}
@@ -94,17 +100,17 @@ export function useScreenHistory() {
     window.history.pushState({}, '');
   };
 
-  const setStartupWorld = useCallback((
-    world: Screen & { name: 'world' },
-    game: { gameId: string; gameName: string },
-  ) => {
-    setScreenState(world);
-    setHistory([
-      { name: 'top' },
-      { name: 'worldList', gameId: game.gameId, gameName: game.gameName },
-    ]);
-    window.history.replaceState({}, '');
-  }, []);
+  const setStartupWorld = useCallback(
+    (world: Screen & { name: 'world' }, game: { gameId: string; gameName: string }) => {
+      setScreenState(world);
+      setHistory([
+        { name: 'top' },
+        { name: 'worldList', gameId: game.gameId, gameName: game.gameName },
+      ]);
+      window.history.replaceState({}, '');
+    },
+    [],
+  );
 
   const goBack = () => {
     setHistory((h) => {
