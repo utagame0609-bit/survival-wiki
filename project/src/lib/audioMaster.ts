@@ -1,10 +1,9 @@
 /**
- * Shared internal output levels.
+ * Shared internal output level.
  *
- * Keep the common BGM/SE master output as the baseline. Category-specific gains
- * are applied only at their own source paths so BGM, SE, and NPC BGM can be
- * tuned independently without changing the user-facing sliders or reverb.
+ * Keep the common BGM/SE master output as the current baseline. Category-specific
+ * gains remain explicit here so they can be tuned independently later.
  */
 export const MASTER_OUTPUT_GAIN = 1.8;
-export const SE_OUTPUT_GAIN = 1.5;
-export const NPC_BGM_OUTPUT_GAIN = 1.5;
+export const SE_OUTPUT_GAIN = 1.0;
+export const NPC_BGM_OUTPUT_GAIN = 1.0;
