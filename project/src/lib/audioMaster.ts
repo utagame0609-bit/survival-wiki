@@ -11,11 +11,13 @@ export const NPC_BGM_OUTPUT_GAIN = 2.0;
 /**
  * Smooth user-facing volume curve.
  *
- * The curve is designed to keep 0% and 100% unchanged while making the
- * middle-to-high range feel more gradual than a linear amplitude slider.
- * Input and output are normalized to 0..1.
+ * Input and output are normalized to 0..1. A power curve keeps the slider
+ * behavior consistent across the full range while giving finer control at
+ * lower settings. The exponent is intentionally centralized for easy tuning.
  */
+const VOLUME_CURVE_EXPONENT = 2;
+
 export function applyVolumeCurve(value: number): number {
   const normalized = Math.min(1, Math.max(0, value));
-  return normalized * normalized * (3 - 2 * normalized);
+  return Math.pow(normalized, VOLUME_CURVE_EXPONENT);
 }
