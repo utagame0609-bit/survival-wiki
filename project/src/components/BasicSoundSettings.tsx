@@ -1,7 +1,7 @@
 import { Music2, Volume2, VolumeX, Waves } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
-import { saveUserSoundSettings } from '@/lib/userSoundSettings';
+import { loadUserBgmVolume, saveUserBgmVolume, saveUserSoundSettings } from '@/lib/userSoundSettings';
 import { getMasterBgmVolume, setMasterBgmVolume } from '@/lib/bgm';
 import { getSoundVolume, isSoundEnabled, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
 
@@ -10,6 +10,21 @@ export function BasicSoundSettings() {
   const [soundVolume, setSoundVolumeState] = useState(getSoundVolume());
   const [masterBgmVolume, setMasterBgmVolumeState] = useState(Math.round(getMasterBgmVolume() * 100));
   const [reverbAmount, setReverbAmount] = useState(Math.round(getStoredReverbAmount() * 100));
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadUserBgmVolume()
+      .then((value) => {
+        if (cancelled) return;
+        const normalized = setMasterBgmVolume(value / 100);
+        setMasterBgmVolumeState(Math.round(normalized * 100));
+      })
+      .catch((error) => console.error('Failed to load BGM volume:', error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => subscribeToReverbAmount((value) => setReverbAmount(Math.round(value * 100))), []);
 
@@ -30,7 +45,9 @@ export function BasicSoundSettings() {
 
   const handleMasterBgmVolumeChange = (value: number) => {
     const normalized = setMasterBgmVolume(value / 100);
-    setMasterBgmVolumeState(Math.round(normalized * 100));
+    const nextValue = Math.round(normalized * 100);
+    setMasterBgmVolumeState(nextValue);
+    void saveUserBgmVolume(nextValue).catch((error) => console.error('Failed to save BGM volume:', error));
   };
 
   const handleReverbChange = (value: number) => {
