@@ -9,6 +9,7 @@ import { LocationFormModal } from '@/components/LocationFormModal';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { buildCollectionItems, type CollectionItem } from '@/components/locations/locationData';
 import { TimelineRecordsView } from '@/components/TimelineRecordsView';
+import { SnsShareModal } from '@/components/SnsShareModal';
 import {
   playRecordSelectSound,
   playModalCloseSound,
@@ -53,6 +54,7 @@ export function LocationsTab({
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<LocationWithPhotos | null>(null);
   const [collectionOpen, setCollectionOpen] = useState(false);
+  const [snsLocation, setSnsLocation] = useState<LocationWithPhotos | null>(null);
   const loadRequestRef = useRef(0);
 
   const load = async () => {
@@ -123,6 +125,7 @@ export function LocationsTab({
     try {
       await deleteLocation(locationId);
       setSelectedLocation((prev) => (prev?.id === locationId ? null : prev));
+      setSnsLocation((prev) => (prev?.id === locationId ? null : prev));
       onReload();
     } catch (e) {
       setError((e as Error).message);
@@ -167,6 +170,10 @@ export function LocationsTab({
             playRecordSelectSound();
             setSelectedLocation(location);
           }}
+          onOpenSns={(location) => {
+            playModalOpenSound();
+            setSnsLocation(location);
+          }}
           onOpenChest={() => {
             playModalOpenSound();
             setCollectionOpen(true);
@@ -191,6 +198,14 @@ export function LocationsTab({
           onEdit={handleDetailEdit}
           onDelete={() => handleDelete(selectedLocation)}
           PhotoImage={LocationPhotoImage}
+        />
+      )}
+
+      {snsLocation && (
+        <SnsShareModal
+          world={world}
+          location={snsLocation}
+          onClose={() => setSnsLocation(null)}
         />
       )}
 
