@@ -1,4 +1,4 @@
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { playCancelSound, playHoverSound } from '@/lib/sound';
 
@@ -20,35 +20,44 @@ export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDel
         }
       }}
     >
-      <div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="w-full max-w-md overflow-hidden border-2 border-rose-500 bg-[#0a1120] text-white shadow-[0_0_36px_rgba(244,63,94,0.28)]">
-        <div className="flex items-center gap-2 border-b border-rose-500/40 bg-[#0d1627] px-4 py-3.5">
-          <div className="flex h-8 w-8 items-center justify-center border border-rose-400/80 bg-rose-950/40 text-rose-300">
-            <AlertTriangle className="h-4 w-4" />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-world-title"
+        className="w-full max-w-md border-2 border-rose-500 bg-[#141b2d] text-white shadow-[0_0_34px_rgba(244,63,94,0.24)]"
+      >
+        <div className="flex items-center gap-2.5 border-b border-rose-500/50 bg-[#111827] px-4 sm:px-5 py-3.5">
+          <Trash2 className="h-4.5 w-4.5 shrink-0 text-rose-400" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-black tracking-widest text-slate-200 font-mono">WARNING // セーブデータの消去</p>
+            <h2 id="delete-world-title" className="text-sm sm:text-base font-black text-white">「{world.name}」を消去しますか？</h2>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[10px] font-black tracking-widest text-rose-300 font-mono">SYSTEM WARNING // DATA DELETION</p>
-            <h2 id="delete-world-title" className="truncate text-sm sm:text-base font-bold text-white">ワールドを削除しますか？</h2>
-          </div>
-          <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} className="flex h-8 w-8 shrink-0 items-center justify-center text-slate-400 hover:text-white cursor-pointer" aria-label="閉じる">
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
-        <div className="p-4 sm:p-5">
-          <div className="border border-rose-500/50 bg-rose-950/20 p-3">
-            <p className="text-[10px] font-bold text-rose-300 font-mono">TARGET // 対象ワールド</p>
-            <p className="mt-1 break-words text-sm sm:text-base font-black text-amber-300">「{world.name}」</p>
-          </div>
-          <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-300">この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p>
+        <div className="px-4 sm:px-5 py-4">
+          <p className="text-xs sm:text-sm leading-relaxed text-slate-300">
+            「<span className="font-black text-amber-300">{world.name}</span>」を消去しますか？ 記録されたすべてのロケーションや写真が削除されます。
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 border-t border-slate-800 bg-[#0d1627] px-4 sm:px-5 py-4">
-          <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1 border border-slate-700 bg-[#141c2b] px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:border-slate-500 hover:bg-slate-800 transition-all cursor-pointer">
-            <X className="h-4 w-4" />
+        <div className="grid grid-cols-2 gap-2.5 border-t border-slate-800 bg-[#111827] px-4 sm:px-5 py-3.5">
+          <button
+            type="button"
+            onClick={() => {
+              playCancelSound();
+              onCancel();
+            }}
+            onMouseEnter={playHoverSound}
+            className="min-h-[42px] border border-slate-700 bg-[#141c2b] px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:border-slate-500 hover:bg-slate-800 transition-all cursor-pointer"
+          >
             キャンセル
           </button>
-          <button type="button" onClick={onConfirm} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1 border border-rose-500 bg-rose-600 px-3 py-2.5 text-xs sm:text-sm font-black text-white shadow-[0_0_14px_rgba(244,63,94,0.25)] hover:bg-rose-500 transition-all cursor-pointer">
-            <Trash2 className="h-4 w-4" />
+          <button
+            type="button"
+            onClick={onConfirm}
+            onMouseEnter={playHoverSound}
+            className="min-h-[42px] bg-rose-600 px-3 py-2.5 text-xs sm:text-sm font-black text-white shadow-[0_0_14px_rgba(244,63,94,0.2)] hover:bg-rose-500 transition-all cursor-pointer"
+          >
             削除する
           </button>
         </div>
