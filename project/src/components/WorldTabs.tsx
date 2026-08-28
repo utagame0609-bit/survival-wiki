@@ -1,16 +1,15 @@
-import { BookOpen, Clock3, MapPin } from 'lucide-react';
+import { BookOpen, ScrollText } from 'lucide-react';
 import { playHoverSound, playTabSwitchSound } from '@/lib/sound';
 
-type Tab = 'locations' | 'timeline' | 'wiki';
+type Tab = 'records' | 'wiki';
 
 type WorldTabsProps = {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
 };
 
-const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
-  { id: 'locations', label: 'ロケーション', icon: MapPin },
-  { id: 'timeline', label: 'タイムライン', icon: Clock3 },
+const tabs: { id: Tab; label: string; icon: typeof ScrollText }[] = [
+  { id: 'records', label: '冒険の記録', icon: ScrollText },
   { id: 'wiki', label: '旅の書 (Wiki)', icon: BookOpen },
 ];
 
@@ -22,15 +21,10 @@ export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2 mb-3 sm:mb-5 bg-[#0f1424] p-1.5 border-2 border-slate-700/80 rounded-xs shadow-inner">
+    <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-5 bg-[#0f1424] p-1.5 border-2 border-slate-700/80 rounded-xs shadow-inner">
       {tabs.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
-        const count = item.id === 'locations' ? (
-          <span className="text-[10px] sm:text-xs font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/40 px-1.5 py-0.2 rounded-xs">
-            —
-          </span>
-        ) : null;
 
         return (
           <button
@@ -46,7 +40,6 @@ export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
           >
             <Icon className="w-4 h-4 shrink-0" />
             <span className="truncate">{item.label}</span>
-            {count}
           </button>
         );
       })}
