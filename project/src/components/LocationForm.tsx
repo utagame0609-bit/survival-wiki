@@ -188,10 +188,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       <LocationFormActions
         saving={saving}
         editing={Boolean(editing)}
-        onCancel={() => {
-          playCancelSound();
-          onCancel();
-        }}
+        onCancel={onCancel}
         onSubmit={handleSubmit}
       />
 
