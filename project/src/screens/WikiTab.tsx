@@ -1,1 +1,1 @@
-export { WikiTab } from './WikiTabCore';
+export { WikiTabRedesigned as WikiTab } from './WikiTabRedesigned';
