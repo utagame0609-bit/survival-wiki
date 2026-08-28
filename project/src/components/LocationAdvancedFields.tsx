@@ -1,27 +1,32 @@
-import { Check, ChevronDown, Users } from 'lucide-react';
+import { Check, ChevronDown, Compass, Users } from 'lucide-react';
 import type { WorldMember } from '@/lib/types';
+import { parseCoords, formatCoords } from '@/lib/coords';
 import { playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 type LocationAdvancedFieldsProps = {
   open: boolean;
-  detailMemo: string;
+  coordsText: string;
+  coordsError: string;
   members: WorldMember[];
   selectedMembers: Set<string>;
   createdAt: string;
   onToggleOpen: () => void;
-  onDetailMemoChange: (value: string) => void;
+  onCoordsChange: (value: string) => void;
+  onCoordsError: (value: string) => void;
   onToggleMember: (id: string) => void;
   onCreatedAtChange: (value: string) => void;
 };
 
 export function LocationAdvancedFields({
   open,
-  detailMemo,
+  coordsText,
+  coordsError,
   members,
   selectedMembers,
   createdAt,
   onToggleOpen,
-  onDetailMemoChange,
+  onCoordsChange,
+  onCoordsError,
   onToggleMember,
   onCreatedAtChange,
 }: LocationAdvancedFieldsProps) {
@@ -34,29 +39,39 @@ export function LocationAdvancedFields({
           playConfirmSound();
         }}
         onMouseEnter={playHoverSound}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 rounded-sm border border-sky-500/30 bg-sky-950/10 text-xs font-bold text-sky-400 hover:text-sky-300 hover:border-sky-400/60 transition-colors pt-2 cursor-pointer"
+        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 border border-amber-500/30 bg-amber-950/10 text-xs font-bold text-amber-400 hover:text-amber-300 hover:border-amber-400/60 transition-colors cursor-pointer"
       >
         <span className="flex items-center gap-1.5">
           <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-          EXPAND PARAMETERS // 詳細メモ・仲間
+          {open ? '▼ 詳細オプションを折りたたむ' : '▶ 座標・仲間・記録日時を追加する (任意)'}
         </span>
         <span className="text-[10px] text-slate-500">{open ? 'OPEN' : 'CLOSED'}</span>
       </button>
 
       {open && (
-        <div className="space-y-4 p-4 rounded-sm bg-[#090d16] border border-slate-800">
+        <div className="space-y-4 p-4 border border-slate-800 bg-[#090d16]">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-              FIELD NOTES // 詳細メモ
+            <label className="flex items-center justify-between text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <Compass className="w-4 h-4" />
+                <span>COORDINATES // 空間座標</span>
+              </span>
+              <span className="text-[10px] text-slate-500 font-normal">FORMAT: X Y Z</span>
             </label>
-            <textarea
-              value={detailMemo}
-              onChange={(event) => onDetailMemoChange(event.target.value)}
+            <input
+              type="text"
+              inputMode="numeric"
+              value={coordsText}
+              onChange={(event) => {
+                const value = event.target.value;
+                onCoordsChange(value);
+                if (value.trim()) onCoordsError(parseCoords(value) ? '' : '');
+              }}
               onFocus={playInputFocusSound}
-              placeholder="この場所についての地形・資源・魔物などのメモ"
-              rows={3}
-              className="location-input resize-none text-xs leading-relaxed text-slate-200"
+              placeholder="100 64 -20"
+              className="location-input text-base font-mono tabular-nums text-emerald-300 placeholder-slate-600"
             />
+            {coordsError && <p className="mt-1 text-xs text-rose-400">{coordsError}</p>}
           </div>
 
           {members.length > 0 && (
