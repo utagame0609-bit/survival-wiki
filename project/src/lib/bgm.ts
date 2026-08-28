@@ -1,5 +1,6 @@
 import { bgmSequencer } from './bgmSequencer';
 import { getBgmChannelSettings, subscribeToBgmChannelSettings } from './bgmSettings';
+import { NPC_BGM_OUTPUT_GAIN } from './audioMaster';
 import { soundEngine } from './soundEngine';
 
 type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
@@ -43,7 +44,7 @@ function playNpcTone(freq: number, time: number, duration: number, peak: number,
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(freq, time);
   gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.linearRampToValueAtTime(peak, time + 0.004);
+  gain.gain.linearRampToValueAtTime(peak * NPC_BGM_OUTPUT_GAIN, time + 0.004);
   gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
   oscillator.connect(gain);
   soundEngine.routeSound(gain, reverbSend, 0);
@@ -63,7 +64,7 @@ function playNpcHiss(time: number, duration: number, peak: number, filterType: B
   source.buffer = buffer;
   filter.type = filterType;
   filter.frequency.value = frequency;
-  gain.gain.setValueAtTime(peak, time);
+  gain.gain.setValueAtTime(peak * NPC_BGM_OUTPUT_GAIN, time);
   gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
   source.connect(filter);
   filter.connect(gain);
@@ -101,7 +102,7 @@ function createScpBgm(): ActiveNpcBgm {
   droneOsc.frequency.value = 55;
   droneFilter.type = 'lowpass';
   droneFilter.frequency.value = 420;
-  droneGain.gain.value = 0.04;
+  droneGain.gain.value = 0.04 * NPC_BGM_OUTPUT_GAIN;
   droneOsc.connect(droneFilter);
   droneFilter.connect(droneGain);
   soundEngine.routeSound(droneGain, 0.25, 0);
