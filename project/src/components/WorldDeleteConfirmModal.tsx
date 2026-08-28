@@ -11,7 +11,7 @@ type WorldDeleteConfirmModalProps = {
 export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDeleteConfirmModalProps) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 sm:p-4 backdrop-blur-sm font-sans"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
@@ -20,21 +20,60 @@ export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDel
         }
       }}
     >
-      <div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="border-2 border-red-500 bg-[#1a1e29] w-full max-w-md p-6 text-white shadow-[0_0_40px_rgba(239,68,68,0.35)]">
-        <div className="text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center border-2 border-red-500/50 bg-red-950/50 text-red-400 shadow-md">
-            <AlertTriangle className="h-7 w-7 animate-pulse" />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-world-title"
+        className="w-full max-w-sm overflow-hidden border-2 border-rose-500/90 bg-[#0a1120] text-white shadow-[0_0_35px_rgba(244,63,94,0.22)]"
+      >
+        <div className="flex items-center justify-between border-b border-slate-800 bg-[#0d1627] px-4 sm:px-5 py-3.5">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center border border-rose-500/70 bg-rose-950/40 text-rose-300">
+              <AlertTriangle className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-rose-300">SYSTEM WARNING // DATA DELETION</p>
+              <h2 id="delete-world-title" className="text-sm sm:text-base font-bold text-white">ワールドを削除しますか？</h2>
+            </div>
           </div>
-          <div className="text-xs tracking-widest text-red-400 font-bold font-mono">SYSTEM WARNING // DATA DELETION</div>
-          <h2 id="delete-world-title" className="mt-1.5 text-lg font-bold text-white">ワールドを削除しますか？</h2>
-          <div className="mt-3 border border-red-500/40 bg-red-950/40 p-3">
-            <p className="break-words text-sm font-bold text-amber-300">「{world.name}」</p>
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-slate-300">※この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p>
+          <button
+            type="button"
+            onClick={() => { playCancelSound(); onCancel(); }}
+            onMouseEnter={playHoverSound}
+            className="flex h-8 w-8 items-center justify-center text-slate-400 transition-colors hover:text-white cursor-pointer"
+            aria-label="閉じる"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-3 border-t border-[#2a3142] pt-4">
-          <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} className="min-h-[44px] py-2.5 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-bold flex items-center justify-center border border-slate-600 cursor-pointer"><X className="mr-1 inline h-4 w-4" />CANCEL</button>
-          <button type="button" onClick={onConfirm} onMouseEnter={playHoverSound} className="min-h-[44px] py-2.5 bg-red-600 text-white hover:bg-red-500 text-xs font-bold flex items-center justify-center border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] cursor-pointer"><Trash2 className="mr-1 inline h-4 w-4" />DELETE</button>
+
+        <div className="p-4 sm:p-5 space-y-3">
+          <div className="border border-rose-500/40 bg-rose-950/25 p-3">
+            <p className="text-[10px] font-mono font-bold text-rose-300">TARGET // 対象ワールド</p>
+            <p className="mt-1.5 break-words text-sm font-black text-amber-300">「{world.name}」</p>
+          </div>
+          <p className="text-xs leading-relaxed text-slate-300">この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p>
+        </div>
+
+        <div className="flex gap-3 border-t border-slate-800 bg-[#0d1627] px-4 sm:px-5 py-4">
+          <button
+            type="button"
+            onClick={() => { playCancelSound(); onCancel(); }}
+            onMouseEnter={playHoverSound}
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-1 border-2 border-slate-700 bg-[#141b2a] px-3 py-2.5 text-xs font-bold text-slate-300 transition-all hover:border-slate-500 hover:text-white cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+            キャンセル
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            onMouseEnter={playHoverSound}
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-1 border-b-2 border-rose-800 bg-rose-600 px-3 py-2.5 text-xs font-black text-white transition-all hover:bg-rose-500 active:border-b-0 cursor-pointer"
+          >
+            <Trash2 className="h-4 w-4" />
+            削除する
+          </button>
         </div>
       </div>
     </div>
