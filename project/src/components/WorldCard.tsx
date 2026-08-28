@@ -185,7 +185,7 @@ function MemberChip({ name, photoUrl, player = false }: { name: string; photoUrl
       }`}
     >
       <div
-        className={`flex h-7 w-7 items-center justify-center overflow-hidden border bg-[#080d15] ${
+        className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden border bg-[#080d15] ${
           player ? 'border-amber-400/80' : 'border-cyan-400/60'
         }`}
       >
