@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, Gamepad2, Home } from 'lucide-react';
-import { playCancelSound, playHoverSound } from '../lib/sound';
+import { ChevronLeft, Gamepad2, Home, Sliders, Volume2, VolumeX } from 'lucide-react';
+import { playCancelSound, playHoverSound, isSoundEnabled, toggleSound } from '../lib/sound';
 
 type Screen =
   | { name: 'top' }
@@ -29,9 +29,21 @@ export function Header({
   title: string;
   onBack?: () => void;
 }) {
+  const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
+
   const handleHome = () => {
     playCancelSound();
     window.dispatchEvent(new CustomEvent('survival-wiki:home'));
+  };
+
+  const handleSettings = () => {
+    playHoverSound();
+    window.dispatchEvent(new CustomEvent('survival-wiki:settings'));
+  };
+
+  const handleSoundToggle = () => {
+    const next = toggleSound();
+    setSoundEnabled(next);
   };
 
   return (
@@ -64,25 +76,52 @@ export function Header({
               <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-xs font-black tracking-wide text-white sm:text-sm">{title}</h1>
+              <h1 className="truncate text-xs font-black tracking-wide text-white sm:text-sm">
+                <span className="hidden sm:inline text-amber-400 font-mono">UTAPEDIA // </span>
+                {title.replace(/^UTAPEDIA \/\/\s*/, '')}
+              </h1>
               <p className="hidden truncate font-mono text-[9px] font-bold text-emerald-400/90 sm:block">ADVENTURE LOG SYSTEM // NOMINAL</p>
             </div>
           </div>
         </div>
 
-        {onBack && (
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <button
             type="button"
-            onClick={handleHome}
+            onClick={handleSoundToggle}
             onMouseEnter={playHoverSound}
-            aria-label="ホームへ"
-            title="冒険の書一覧へ戻る"
-            className="flex min-h-[40px] shrink-0 items-center gap-1.5 border-2 border-slate-700 bg-[#121622] px-2.5 py-2 font-mono text-xs font-black text-amber-300 transition-all hover:border-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+            aria-label="サウンド切替"
+            title={soundEnabled ? 'サウンドON (クリックでミュート)' : 'ミュート中 (クリックでサウンドON)'}
+            className={`flex min-h-[40px] min-w-[40px] sm:min-h-[42px] sm:min-w-[42px] items-center justify-center border-2 px-2 font-mono text-xs font-bold transition-all active:scale-95 cursor-pointer ${soundEnabled ? 'border-emerald-500/60 bg-emerald-950/30 text-emerald-400 hover:border-emerald-400' : 'border-slate-700 bg-[#121622] text-slate-500 hover:text-slate-300'}`}
           >
-            <Home className="h-4 w-4 text-amber-400" />
-            <span className="hidden sm:inline">HOME</span>
+            {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </button>
-        )}
+
+          <button
+            type="button"
+            onClick={handleSettings}
+            onMouseEnter={playHoverSound}
+            aria-label="設定"
+            title="システム設定"
+            className="flex min-h-[40px] min-w-[40px] sm:min-h-[42px] sm:min-w-[42px] items-center justify-center border-2 border-slate-700 bg-[#121622] px-2 text-slate-300 hover:border-amber-400 hover:text-amber-300 active:scale-95 cursor-pointer"
+          >
+            <Sliders className="h-4 w-4" />
+          </button>
+
+          {onBack && (
+            <button
+              type="button"
+              onClick={handleHome}
+              onMouseEnter={playHoverSound}
+              aria-label="ホームへ"
+              title="冒険の書一覧へ戻る"
+              className="flex min-h-[40px] shrink-0 items-center gap-1.5 border-2 border-amber-500/80 bg-[#121622] px-2.5 py-2 font-mono text-xs font-black text-amber-300 transition-all hover:border-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+            >
+              <Home className="h-4 w-4 text-amber-400" />
+              <span className="hidden sm:inline">HOME</span>
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );
