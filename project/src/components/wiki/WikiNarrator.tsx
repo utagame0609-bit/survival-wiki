@@ -32,7 +32,7 @@ export const NARRATORS: Record<string, NarratorStyle> = {
   },
 };
 
-function PixelNarrator({ style }: { style: string }) {
+export function PixelNarrator({ style, compact = false }: { style: string; compact?: boolean }) {
   const isWikipedia = style === 'wikipedia';
   const isScp = style === 'scp';
   const skin = isScp ? '#d8e7ef' : isWikipedia ? '#d8ad7b' : '#c9b08a';
@@ -40,7 +40,7 @@ function PixelNarrator({ style }: { style: string }) {
   const coat = isScp ? '#d7e1e6' : isWikipedia ? '#27364b' : '#5b3b27';
 
   return (
-    <div className="relative h-24 w-20 sm:h-28 sm:w-24 shrink-0 rounded-sm border-2 border-double border-white/70 bg-[#07101c] shadow-[inset_0_0_0_1px_rgba(255,176,0,.35),0_0_16px_rgba(0,0,0,.45)] overflow-hidden">
+    <div className={`relative shrink-0 rounded-sm border-2 border-double border-white/70 bg-[#07101c] overflow-hidden ${compact ? 'h-14 w-14 shadow-[inset_0_0_0_1px_rgba(255,176,0,.25)]' : 'h-24 w-20 sm:h-28 sm:w-24 shadow-[inset_0_0_0_1px_rgba(255,176,0,.35),0_0_16px_rgba(0,0,0,.45)]'}`}>
       <svg viewBox="0 0 64 72" className="h-full w-full [image-rendering:pixelated]" shapeRendering="crispEdges" aria-hidden="true">
         <rect x="8" y="58" width="48" height="8" fill={coat}/>
         <rect x="14" y="35" width="36" height="27" fill={coat}/>
@@ -69,7 +69,7 @@ function PixelNarrator({ style }: { style: string }) {
           <rect x="26" y="49" width="12" height="8" fill="#b89462"/>
         </>}
       </svg>
-      <span className="absolute left-1 top-1 text-[7px] font-mono text-white/50">16BIT</span>
+      <span className="absolute left-1 top-1 text-[6px] font-mono text-white/50">16BIT</span>
     </div>
   );
 }
