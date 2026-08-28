@@ -9,16 +9,13 @@ export const SE_OUTPUT_GAIN = 1.6;
 export const NPC_BGM_OUTPUT_GAIN = 2.0;
 
 /**
- * User-facing volume curve.
- * Input/output are both normalized 0..1 values.
+ * Smooth user-facing volume curve.
  *
- * The 0% and 50% positions keep the current linear gain,
- * while the upper half gains a little more operating range.
- * 100% remains full gain.
+ * The curve is designed to keep 0% and 100% unchanged while making the
+ * middle-to-high range feel more gradual than a linear amplitude slider.
+ * Input and output are normalized to 0..1.
  */
-export function applyVolumeCurve(normalized: number): number {
-  const x = Math.min(1, Math.max(0, normalized));
-  if (x <= 0.5) return x;
-  const upper = x * (1 - x) * (2 * x - 1);
-  return Math.min(1, x + upper * 0.75);
+export function applyVolumeCurve(value: number): number {
+  const normalized = Math.min(1, Math.max(0, value));
+  return normalized * normalized * (3 - 2 * normalized);
 }
