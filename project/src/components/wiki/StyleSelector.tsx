@@ -48,19 +48,19 @@ type StyleSelectorProps = {
 
 export function StyleSelector({ style, generating, resetting, onSelect }: StyleSelectorProps) {
   return (
-    <div className="rounded-sm border-2 border-[#2d3548] bg-[#1e2330] p-4 sm:p-5 shadow-lg">
-      <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-[#2d3548]">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-amber-400 font-mono text-xs">▶</span>
-          <div>
-            <p className="text-xs sm:text-sm font-bold text-amber-400 tracking-wide font-mono uppercase">CHRONICLE FORMAT // 旅の書・編纂流派</p>
-            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5">記録を、どんな世界の物語として残す？</p>
+    <section className="w-full border-2 border-[#2d3548] bg-[#1e2330] p-3.5 sm:p-5 shadow-lg" aria-label="Wikiスタイル選択">
+      <div className="mb-3.5 flex items-center justify-between gap-3 border-b border-[#2d3548] pb-3">
+        <div className="flex min-w-0 items-start gap-2">
+          <span className="mt-0.5 text-xs font-mono text-amber-400">▶</span>
+          <div className="min-w-0">
+            <p className="text-xs sm:text-sm font-bold tracking-wide text-amber-400 font-mono">CHRONICLE FORMAT // 旅の書・編纂流派</p>
+            <p className="mt-0.5 text-[10px] sm:text-xs text-slate-400">記録を、どんな世界の物語として残す？</p>
           </div>
         </div>
-        <span className="hidden sm:inline text-[10px] text-slate-500 font-mono">SELECT YOUR CHRONICLE</span>
+        <span className="hidden sm:inline shrink-0 text-[10px] text-slate-500 font-mono">SELECT YOUR CHRONICLE</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {WIKI_STYLES.map((s) => {
           const preview = STYLE_PREVIEWS[s.id];
           const Icon = preview?.icon ?? BookOpen;
@@ -73,49 +73,49 @@ export function StyleSelector({ style, generating, resetting, onSelect }: StyleS
               onClick={() => onSelect(s.id)}
               onMouseEnter={playHoverSound}
               disabled={generating || resetting}
-              className={`group relative overflow-hidden rounded-sm border-2 p-3.5 text-left transition-all duration-200 min-h-[180px] ${
+              className={`group relative min-h-[150px] overflow-hidden border-2 p-3 text-left transition-all duration-200 sm:min-h-[175px] sm:p-3.5 ${
                 selected
                   ? 'border-amber-500 bg-[#161a24] shadow-[0_0_18px_rgba(245,158,11,0.2)]'
                   : 'border-[#2d3548] bg-[#141824] hover:border-slate-500 hover:bg-[#181d2c]'
-              }`}
+              } disabled:cursor-not-allowed disabled:opacity-60`}
             >
-              <div className="absolute right-[-12px] top-[-18px] text-amber-400/[0.035] transition-transform duration-300 group-hover:scale-110">
-                <Icon size={100} strokeWidth={1} />
+              <div className="pointer-events-none absolute right-[-14px] top-[-18px] text-amber-400/[0.035] transition-transform duration-300 group-hover:scale-110">
+                <Icon size={96} strokeWidth={1} />
               </div>
 
-              <div className="relative z-10">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 border border-slate-700 bg-[#12151f] text-emerald-400">
+              <div className="relative z-10 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="min-w-0 truncate border border-slate-700 bg-[#12151f] px-1.5 py-0.5 text-[8px] font-mono font-bold text-emerald-400 sm:text-[9px]">
                     {preview?.eyebrow ?? s.name}
                   </span>
-                  {selected && <span className="text-[9px] font-mono font-bold text-amber-400">▶ SELECTED</span>}
+                  {selected && <span className="shrink-0 text-[8px] font-mono font-bold text-amber-400 sm:text-[9px]">▶ SELECTED</span>}
                 </div>
 
-                <div className="mt-3 flex items-center gap-2">
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border ${
+                <div className="mt-2.5 flex items-center gap-2">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center border sm:h-9 sm:w-9 ${
                     selected
                       ? 'border-amber-500 bg-amber-500/10 text-amber-400'
                       : 'border-slate-700 bg-[#0f131d] text-slate-500'
                   }`}>
-                    <Icon className="w-5 h-5" />
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className={`text-sm font-bold truncate ${selected ? 'text-amber-400' : 'text-white'}`}>
+                    <h3 className={`truncate text-xs font-bold sm:text-sm ${selected ? 'text-amber-400' : 'text-white'}`}>
                       {preview?.title ?? s.name}
                     </h3>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{preview?.tone ?? s.description}</p>
+                    <p className="mt-0.5 line-clamp-2 text-[9px] leading-relaxed text-slate-400 sm:text-[10px]">{preview?.tone ?? s.description}</p>
                   </div>
                 </div>
 
-                <div className="mt-3 rounded-sm border border-[#2d3548] bg-[#12151f] p-2.5">
-                  <p className="text-[10px] sm:text-[11px] leading-relaxed text-slate-200 font-serif">
+                <div className="mt-2.5 border border-[#2d3548] bg-[#12151f] p-2 sm:mt-3 sm:p-2.5">
+                  <p className="line-clamp-3 text-[9px] leading-relaxed text-slate-200 font-serif sm:text-[11px]">
                     {preview?.sample ?? s.description}
                   </p>
                 </div>
 
-                <div className="mt-2 flex flex-wrap gap-1.5">
+                <div className="mt-2 flex flex-wrap gap-1">
                   {(preview?.badges ?? [s.description]).map((badge) => (
-                    <span key={badge} className="rounded-sm border border-slate-700 bg-[#181d2c] px-1.5 py-0.5 text-[9px] font-mono text-slate-400">
+                    <span key={badge} className="border border-slate-700 bg-[#181d2c] px-1.5 py-0.5 text-[8px] font-mono text-slate-400 sm:text-[9px]">
                       {badge}
                     </span>
                   ))}
@@ -125,6 +125,6 @@ export function StyleSelector({ style, generating, resetting, onSelect }: StyleS
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
