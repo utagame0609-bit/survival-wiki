@@ -1,6 +1,5 @@
 import { Check, ChevronDown, Compass, Users } from 'lucide-react';
 import type { WorldMember } from '@/lib/types';
-import { parseCoords, formatCoords } from '@/lib/coords';
 import { playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 type LocationAdvancedFieldsProps = {
@@ -63,9 +62,8 @@ export function LocationAdvancedFields({
               inputMode="numeric"
               value={coordsText}
               onChange={(event) => {
-                const value = event.target.value;
-                onCoordsChange(value);
-                if (value.trim()) onCoordsError(parseCoords(value) ? '' : '');
+                onCoordsChange(event.target.value);
+                if (coordsError) onCoordsError('');
               }}
               onFocus={playInputFocusSound}
               placeholder="100 64 -20"
