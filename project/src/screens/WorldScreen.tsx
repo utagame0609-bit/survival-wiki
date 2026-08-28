@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
+import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, fetchWorld, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { LocationsTab } from '@/screens/LocationsTab';
@@ -9,6 +9,7 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
 import { SettingsButton } from '@/components/SettingsModal';
 import { playHoverSound, playModalCloseSound, playModalOpenSound } from '@/lib/sound';
+import { stopNpcBgm } from '@/lib/bgm';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
 import { WorldHeader } from '@/components/WorldHeader';
 import { WorldTabs } from '@/components/WorldTabs';
@@ -56,8 +57,13 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
       });
     return () => {
       active = false;
+      stopNpcBgm();
     };
   }, [worldId, reloadKey]);
+
+  useEffect(() => {
+    if (tab !== 'wiki') stopNpcBgm();
+  }, [tab]);
 
   const handleOpenLocation = async (locationId: string) => {
     try {
