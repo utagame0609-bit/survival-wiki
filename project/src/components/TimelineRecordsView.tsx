@@ -299,7 +299,7 @@ export function TimelineRecordsView({
         onClick={onCreate}
         onMouseEnter={playHoverSound}
         aria-label="新規記録を追加"
-        className="fixed right-4 bottom-4 sm:right-8 sm:bottom-6 z-30 min-h-[48px] px-4 sm:px-5 rounded-full border-2 border-amber-400 bg-[#111624] text-amber-300 font-black font-mono text-xs sm:text-sm shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-amber-500 hover:text-black hover:border-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+        className="fixed right-4 bottom-16 sm:right-8 sm:bottom-6 z-30 min-h-[48px] px-4 sm:px-5 rounded-full border-2 border-amber-400 bg-[#111624] text-amber-300 font-black font-mono text-xs sm:text-sm shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-amber-500 hover:text-black hover:border-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
       >
         <Plus className="w-4 h-4 stroke-[3]" />
         <span>記録を追加</span>
