@@ -21,7 +21,7 @@ export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-5 bg-[#0f1424] p-1.5 border-2 border-slate-700/80 rounded-xs shadow-inner">
+    <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-5 bg-[#0f1424] p-1.5 border-2 border-slate-700/80 shadow-inner">
       {tabs.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
@@ -32,13 +32,15 @@ export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
             type="button"
             onClick={() => handleTabChange(item.id)}
             onMouseEnter={playHoverSound}
-            className={`min-h-[44px] px-3 sm:px-4 font-mono text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer rounded-xs border-2 ${
-              isActive
-                ? 'border-amber-400 bg-amber-500/20 text-amber-300 font-black shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                : 'border-slate-800 bg-[#121828] text-slate-400 hover:text-slate-200 hover:border-slate-700'
+            className={`min-h-[44px] px-3 sm:px-4 font-mono text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer border-2 ${
+              isActive && item.id === 'wiki'
+                ? 'border-cyan-400 bg-cyan-500/15 text-cyan-300 font-black shadow-[0_0_10px_rgba(6,182,212,0.18)]'
+                : isActive
+                  ? 'border-amber-400 bg-amber-500/20 text-amber-300 font-black shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                  : 'border-slate-800 bg-[#121828] text-slate-400 hover:text-slate-200 hover:border-slate-700'
             }`}
           >
-            <Icon className="w-4 h-4 shrink-0" />
+            <Icon className={`w-4 h-4 shrink-0 ${item.id === 'wiki' ? 'text-cyan-400' : 'text-amber-400'}`} />
             <span className="truncate">{item.label}</span>
           </button>
         );
