@@ -1,5 +1,4 @@
 import { getStoredReverbAmount, subscribeToReverbAmount } from './soundReverb';
-import { MASTER_OUTPUT_GAIN } from './audioMaster';
 
 export type SoundEngineConfig = { masterVolume?: number; reverbWet?: number };
 
@@ -56,7 +55,7 @@ export class SoundEngine {
     this.compressor.release.setValueAtTime(0.15, c.currentTime);
 
     this.masterGain = c.createGain();
-    this.masterGain.gain.setValueAtTime(this.masterVolume * MASTER_OUTPUT_GAIN, c.currentTime);
+    this.masterGain.gain.setValueAtTime(this.masterVolume, c.currentTime);
 
     this.analyser = c.createAnalyser();
     this.analyser.fftSize = 512;
@@ -130,7 +129,7 @@ export class SoundEngine {
   public setMasterVolume(value: number): void {
     this.masterVolume = Math.max(0, Math.min(1, value));
     if (this.masterGain && this.ctx) {
-      this.masterGain.gain.setTargetAtTime(this.masterVolume * MASTER_OUTPUT_GAIN, this.ctx.currentTime, 0.02);
+      this.masterGain.gain.setTargetAtTime(this.masterVolume, this.ctx.currentTime, 0.02);
     }
   }
 
