@@ -30,8 +30,10 @@ export function LocationDetailModal({
   onDelete,
   PhotoImage,
 }: LocationDetailModalProps) {
+  const photos = location.photos ?? [];
+  const tags = location.tags ?? [];
   const [activePhotoIdx, setActivePhotoIdx] = useState(
-    Math.max(0, location.photos.findIndex((photo) => photo.is_main)),
+    Math.max(0, photos.findIndex((photo) => photo.is_main)),
   );
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showSns, setShowSns] = useState(false);
@@ -86,14 +88,11 @@ export function LocationDetailModal({
         </div>
 
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
-          {location.photos.length > 0 && (
+          {photos.length > 0 && (
             <div className="space-y-2">
               <div className="relative w-full aspect-video bg-black border-2 border-slate-700 overflow-hidden shadow-inner flex items-center justify-center">
                 <PhotoImage
-                  storagePath={
-                    location.photos[activePhotoIdx]?.storage_path ??
-                    location.photos[0].storage_path
-                  }
+                  storagePath={photos[activePhotoIdx]?.storage_path ?? photos[0].storage_path}
                   alt={location.name}
                   className="w-full h-full object-contain pixelated"
                 />
@@ -106,9 +105,9 @@ export function LocationDetailModal({
                 )}
               </div>
 
-              {location.photos.length > 1 && (
+              {photos.length > 1 && (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                  {location.photos.map((photo, index) => (
+                  {photos.map((photo, index) => (
                     <button
                       key={photo.id}
                       type="button"
@@ -153,9 +152,7 @@ export function LocationDetailModal({
           </div>
 
           <div className="bg-[#121622] border-2 border-slate-800 p-4 space-y-1.5">
-            <div className="text-xs font-bold text-amber-400 font-mono">
-              MEMO // 探検記録・物語
-            </div>
+            <div className="text-xs font-bold text-amber-400 font-mono">MEMO // 探検記録・物語</div>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
               {location.detail_memo || '（詳細メモは記録されていません）'}
             </p>
@@ -178,9 +175,9 @@ export function LocationDetailModal({
             </div>
           )}
 
-          {location.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              {location.tags.map((tag, index) => (
+              {tags.map((tag, index) => (
                 <span
                   key={`${tag}-${index}`}
                   className="px-2 py-1 bg-slate-800 text-amber-300 border border-slate-700 text-xs font-mono"
