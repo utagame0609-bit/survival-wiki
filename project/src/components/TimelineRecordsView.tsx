@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Plus, Share2, Shield, Users, Youtube } from 'lucide-react';
+import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Plus, Search, Share2, Shield, Users, Youtube } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playHoverSound, playRecordSelectSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
@@ -94,12 +94,13 @@ export function TimelineRecordsView({
     <div className="space-y-3.5 sm:space-y-4">
       <div className="bg-[#141824] border-2 border-slate-800 p-2.5 sm:p-3 space-y-2.5 shadow-md">
         <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="拠点名・タグ・メモで検索..."
-            className="w-full min-h-[42px] px-3.5 py-2 bg-[#0f121b] border-2 border-slate-700 text-white text-xs sm:text-sm placeholder-slate-500 focus:border-amber-400 outline-none transition-colors"
+            className="w-full min-h-[42px] pl-10 pr-3.5 py-2 bg-[#0f121b] border-2 border-slate-700 text-white text-xs sm:text-sm placeholder-slate-500 focus:border-amber-400 outline-none transition-colors"
           />
         </div>
 
@@ -117,27 +118,15 @@ export function TimelineRecordsView({
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onOpenChest}
-              onMouseEnter={playHoverSound}
-              className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer"
-            >
-              <Package className="w-4 h-4 text-amber-400" />
-              <span>CHEST ({totalPhotos})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onCreate}
-              onMouseEnter={playHoverSound}
-              className="min-h-[38px] px-3.5 sm:px-4 py-1.5 bg-amber-500 text-black font-black text-xs font-mono border-b-2 border-amber-700 hover:bg-amber-400 active:translate-y-0.5 shadow-md flex items-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>新規記録</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onOpenChest}
+            onMouseEnter={playHoverSound}
+            className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer"
+          >
+            <Package className="w-4 h-4 text-amber-400" />
+            <span>CHEST ({totalPhotos})</span>
+          </button>
         </div>
 
         {allTags.length > 0 && (
@@ -304,6 +293,17 @@ export function TimelineRecordsView({
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={onCreate}
+        onMouseEnter={playHoverSound}
+        aria-label="新規記録を追加"
+        className="fixed right-4 bottom-4 sm:right-8 sm:bottom-6 z-30 min-h-[48px] px-4 sm:px-5 rounded-full border-2 border-amber-400 bg-[#111624] text-amber-300 font-black font-mono text-xs sm:text-sm shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-amber-500 hover:text-black hover:border-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+      >
+        <Plus className="w-4 h-4 stroke-[3]" />
+        <span>記録を追加</span>
+      </button>
     </div>
   );
 }
