@@ -1,6 +1,6 @@
 import { bgmSequencer } from './bgmSequencer';
 import { getBgmChannelSettings, subscribeToBgmChannelSettings } from './bgmSettings';
-import { BGM_OUTPUT_GAIN, NPC_BGM_OUTPUT_GAIN } from './audioMaster';
+import { applyVolumeCurve, BGM_OUTPUT_GAIN, NPC_BGM_OUTPUT_GAIN } from './audioMaster';
 import { soundEngine } from './soundEngine';
 
 type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
@@ -16,7 +16,7 @@ function syncChannels(): void {
 }
 
 function syncVolume(): void {
-  soundEngine.setMasterVolume(masterBgmVolume * BGM_OUTPUT_GAIN);
+  soundEngine.setMasterVolume(applyVolumeCurve(masterBgmVolume) * BGM_OUTPUT_GAIN);
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -193,12 +193,12 @@ export function stopWorldBgm(fadeMs = 300): void {
   let step = 0;
 
   if (ctx.state === 'suspended') void ctx.resume();
-  soundEngine.setMasterVolume(currentVolume * BGM_OUTPUT_GAIN);
+  soundEngine.setMasterVolume(applyVolumeCurve(currentVolume) * BGM_OUTPUT_GAIN);
 
   const fade = () => {
     step += 1;
     const ratio = Math.max(0, 1 - step / steps);
-    soundEngine.setMasterVolume(currentVolume * ratio * BGM_OUTPUT_GAIN);
+    soundEngine.setMasterVolume(applyVolumeCurve(currentVolume * ratio) * BGM_OUTPUT_GAIN);
     if (step >= steps) {
       bgmSequencer.stop();
       soundEngine.setMasterVolume(0);
