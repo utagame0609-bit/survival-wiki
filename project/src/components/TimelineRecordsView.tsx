@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Share2, Shield, Users, Youtube } from 'lucide-react';
+import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Plus, Share2, Shield, Users, Youtube } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playHoverSound, playRecordSelectSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
@@ -9,7 +9,8 @@ type TimelineRecordsViewProps = {
   locations: LocationWithPhotos[];
   onSelectLocation: (location: LocationWithPhotos) => void;
   onOpenChest: () => void;
-  onOpenSns: (location: LocationWithPhotos) => void;
+  onCreate: () => void;
+  onOpenSns?: (location: LocationWithPhotos) => void;
 };
 
 type SortOrder = 'newest' | 'oldest' | 'checkpoint';
@@ -25,6 +26,7 @@ export function TimelineRecordsView({
   locations,
   onSelectLocation,
   onOpenChest,
+  onCreate,
   onOpenSns,
 }: TimelineRecordsViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,15 +117,27 @@ export function TimelineRecordsView({
             </select>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onOpenChest()}
-            onMouseEnter={playHoverSound}
-            className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer"
-          >
-            <Package className="w-4 h-4 text-amber-400" />
-            <span>CHEST ({totalPhotos})</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenChest}
+              onMouseEnter={playHoverSound}
+              className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            >
+              <Package className="w-4 h-4 text-amber-400" />
+              <span>CHEST ({totalPhotos})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onCreate}
+              onMouseEnter={playHoverSound}
+              className="min-h-[38px] px-3.5 sm:px-4 py-1.5 bg-amber-500 text-black font-black text-xs font-mono border-b-2 border-amber-700 hover:bg-amber-400 active:translate-y-0.5 shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>新規記録</span>
+            </button>
+          </div>
         </div>
 
         {allTags.length > 0 && (
@@ -168,7 +182,6 @@ export function TimelineRecordsView({
           {groupedByDay.map((group) => (
             <div key={group.date} className="relative pl-4 sm:pl-6 border-l-2 border-amber-500/60 space-y-2.5">
               <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-amber-500 border-2 border-black shadow-[0_0_10px_#f59e0b]" />
-
               <div className="inline-flex items-center gap-2 bg-[#10141f] border-2 border-amber-500/50 px-3 py-1 font-mono text-xs font-bold text-amber-300 shadow-sm">
                 <span>{group.displayDate}</span>
                 <span className="text-[10px] text-amber-400/80 bg-amber-500/20 px-1.5">{group.items.length}件</span>
@@ -238,19 +251,21 @@ export function TimelineRecordsView({
                             )}
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onOpenSns(location);
-                            }}
-                            onMouseEnter={playHoverSound}
-                            className="p-1 text-cyan-400 hover:text-white bg-cyan-950/40 hover:bg-cyan-600 border border-cyan-500/40 shrink-0"
-                            title="X共有"
-                            aria-label="X共有"
-                          >
-                            <Share2 className="w-3 h-3" />
-                          </button>
+                          {onOpenSns && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onOpenSns(location);
+                              }}
+                              onMouseEnter={playHoverSound}
+                              className="p-1 text-cyan-400 hover:text-white bg-cyan-950/40 hover:bg-cyan-600 border border-cyan-500/40 shrink-0"
+                              title="X共有"
+                              aria-label="X共有"
+                            >
+                              <Share2 className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
 
                         <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-400 truncate">
