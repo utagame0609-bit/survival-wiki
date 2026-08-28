@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playHoverSound } from '@/lib/sound';
+import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 import { WorldMemberFields, type MemberPhotoState } from '@/components/WorldMemberFields';
 
@@ -104,7 +104,7 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
         <div className="p-4 sm:p-5 space-y-4">
           {error && <ErrorBanner message={error} />}
           <Field label="WORLD NAME // ワールド名" required>
-            <input autoFocus={!isEdit} type="text" value={name} onChange={(event) => setName(event.target.value)} onFocus={() => {}} placeholder="例: サバイバル開拓記 第1世界" className="modal-input text-sm" />
+            <input autoFocus={!isEdit} type="text" value={name} onChange={(event) => setName(event.target.value)} onFocus={playInputFocusSound} placeholder="例: サバイバル開拓記 第1世界" className="modal-input text-sm" />
           </Field>
           <WorldMemberFields
             player={player}
@@ -118,7 +118,7 @@ export function WorldCreateScreen({ gameId, gameName, worldId, navigate, goBack 
             onRemoveMember={removeMember}
           />
           <Field label="WORLD MEMO // 探検概要・目標">
-            <textarea value={memo} onChange={(event) => setMemo(event.target.value)} onFocus={() => {}} placeholder="ワールドの概要、難易度、攻略目標など" rows={3} className="modal-input resize-none text-xs sm:text-sm" />
+            <textarea value={memo} onChange={(event) => setMemo(event.target.value)} onFocus={playInputFocusSound} placeholder="ワールドの概要、難易度、攻略目標など" rows={3} className="modal-input resize-none text-xs sm:text-sm" />
           </Field>
         </div>
 
