@@ -9,7 +9,11 @@ import { SettingsAppActions } from '@/components/SettingsAppActions';
 type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
 type SettingsModalProps = { onClose: () => void; installPrompt: BeforeInstallPromptEvent | null; onInstallPromptUsed: () => void };
 
-export function SettingsButton() {
+type SettingsButtonProps = {
+  showButton?: boolean;
+};
+
+export function SettingsButton({ showButton = true }: SettingsButtonProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
@@ -18,19 +22,32 @@ export function SettingsButton() {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
     };
+    const handleOpenSettings = () => {
+      playConfirmSound();
+      setSettingsOpen(true);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('survival-wiki:settings', handleOpenSettings);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('survival-wiki:settings', handleOpenSettings);
+    };
   }, []);
 
   return (
     <>
-      <button
-        onClick={() => { playConfirmSound(); setSettingsOpen(true); }}
-        aria-label="設定"
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-sm border-2 border-amber-500/80 bg-[#0d1627] text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all hover:bg-amber-500 hover:text-slate-950 active:scale-95 cursor-pointer"
-      >
-        <Settings className="h-5 w-5" />
-      </button>
+      {showButton && (
+        <button
+          type="button"
+          onClick={() => { playConfirmSound(); setSettingsOpen(true); }}
+          aria-label="設定"
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center border-2 border-amber-500/80 bg-[#0d1627] text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all hover:bg-amber-500 hover:text-slate-950 active:scale-95 cursor-pointer"
+        >
+          <Settings className="h-5 w-5" />
+        </button>
+      )}
+
       {settingsOpen && (
         <SettingsModal
           onClose={() => setSettingsOpen(false)}
