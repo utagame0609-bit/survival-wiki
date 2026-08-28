@@ -13,7 +13,6 @@ const DEFAULT_SOUND_VOLUME = 50;
 const SOURCE_LEVEL = 1.0;
 let audioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
-let bgmGain: GainNode | null = null;
 let soundReverb: SoundReverb | null = null;
 let enabled = true;
 let soundVolume = DEFAULT_SOUND_VOLUME;
@@ -43,12 +42,9 @@ function getAudioContext(): AudioContext | null {
     if (!AudioContextClass) return null;
     audioContext = new AudioContextClass();
     masterGain = audioContext.createGain();
-    bgmGain = audioContext.createGain();
     masterGain.gain.setValueAtTime(getMasterGainValue(), audioContext.currentTime);
-    bgmGain.gain.setValueAtTime(1, audioContext.currentTime);
     soundReverb = createSwitchStyleReverb(audioContext);
     masterGain.connect(soundReverb.input);
-    bgmGain.connect(soundReverb.input);
     soundReverb.output.connect(audioContext.destination);
   }
   if (audioContext.state === 'suspended') void audioContext.resume();
@@ -111,7 +107,7 @@ function playV2Sound(sound: SoundType): void {
     case 'save': tone(c, 1046.5, t, 0.24, 0.1, 'sine'); tone(c, 1568, t + 0.025, 0.21, 0.08, 'square'); return;
     case 'toggle': tone(c, 1800, t, 0.04, 0.1, 'square', 850); hiss(c, t, 0.035, 0.02, 'highpass', 3000); return;
     case 'error': tone(c, 185, t, 0.22, 0.14, 'sawtooth'); tone(c, 196, t, 0.22, 0.1, 'sawtooth'); return;
-    case 'dangerConfirm': tone(c, 90, t, 0.38, 0.2, 'sine', 45); tone(c, 293.66, t, 0.38, 0.08, 'square', 311.13); return;
+    case 'dangerConfirm': tone(c, 90, t, 0.35, 0.24, 'triangle', 45); tone(c, 293.66, t + 0.03, 0.25, 0.12, 'square'); tone(c, 311.13, t + 0.03, 0.25, 0.1, 'sawtooth'); tone(c, 1174.66, t + 0.06, 0.15, 0.06, 'sine'); hiss(c, t, 0.25, 0.04, 'lowpass', 600); return;
     case 'recordSelect': tone(c, 680, t, 0.05, 0.14, 'triangle', 340); hiss(c, t, 0.05, 0.025, 'bandpass', 1800); return;
     case 'aiGenerateStart': tone(c, 320, t, 0.32, 0.16, 'sawtooth', 2400); tone(c, 320, t, 0.32, 0.05, 'square', 2400); return;
     case 'aiGenerateComplete': [659.25, 830.61, 987.77, 1318.51].forEach((frequency, i) => tone(c, frequency, t + i * 0.12, 0.75 - i * 0.1, 0.12, 'square')); hiss(c, t + 0.2, 0.6, 0.02, 'highpass', 3200); return;
@@ -202,118 +198,6 @@ export const playWikiCompleteSound = () => {
   tone(c, 2093, t + 0.82, 0.35, 0.12, 'sine');
 };
 
-interface ActiveNpcBgm {
-  id: 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
-  intervalId: number;
-  nodes: AudioNode[];
-  stop: () => void;
-}
-
-let activeNpcBgm: ActiveNpcBgm | null = null;
-
-function stopNpcBgmInternal(): void {
-  if (!activeNpcBgm) return;
-  activeNpcBgm.stop();
-  activeNpcBgm = null;
-}
-
-function createWikipediaBgm(c: AudioContext): ActiveNpcBgm {
-  let step = 0;
-  const bpm = 112;
-  const stepTime = 60 / bpm / 2;
-  const melodyNotes = [880, 1046.5, 1318.51, 1046.5, 830.61, 987.77, 1244.51, 987.77, 880, 1174.66, 1396.91, 1174.66, 1046.5, 987.77, 880, 830.61];
-  const bassNotes = [220, 0, 220, 0, 207.65, 0, 207.65, 0, 293.66, 0, 293.66, 0, 220, 0, 164.81, 207.65];
-  const interval = window.setInterval(() => {
-    if (!audioContext || audioContext.state === 'suspended') return;
-    const t = audioContext.currentTime;
-    const m = melodyNotes[step % 16];
-    const b = bassNotes[step % 16];
-    tone(c, m, t, 0.12, 0.08, 'square', undefined, bgmGain);
-    if (b) tone(c, b, t, 0.18, 0.05, 'triangle', undefined, bgmGain);
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_wikipedia', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
-}
-
-function createScpBgm(c: AudioContext): ActiveNpcBgm {
-  const bpm = 96;
-  const stepTime = 60 / bpm / 2;
-  const droneOsc = c.createOscillator();
-  const droneGain = c.createGain();
-  const droneFilter = c.createBiquadFilter();
-  droneOsc.type = 'sawtooth';
-  droneOsc.frequency.value = 55;
-  droneFilter.type = 'lowpass';
-  droneFilter.frequency.value = 420;
-  droneGain.gain.value = 0.04;
-  droneOsc.connect(droneFilter);
-  droneFilter.connect(droneGain);
-  droneGain.connect(bgmGain!);
-  droneOsc.start();
-  let step = 0;
-  const pulseNotes = [110, 110, 123.47, 110, 146.83, 123.47, 110, 98];
-  const interval = window.setInterval(() => {
-    if (!audioContext || audioContext.state === 'suspended') return;
-    const t = audioContext.currentTime;
-    tone(c, pulseNotes[step % pulseNotes.length], t, 0.16, 0.05, 'square', undefined, bgmGain);
-    if (step % 4 === 0) hiss(c, t, 0.09, 0.02, 'bandpass', 2400, bgmGain);
-    step += 1;
-  }, stepTime * 1000);
-  return {
-    id: 'npc_bgm_scp', intervalId: interval, nodes: [droneOsc, droneGain, droneFilter],
-    stop: () => {
-      window.clearInterval(interval);
-      if (audioContext) {
-        droneGain.gain.linearRampToValueAtTime(0.0001, audioContext.currentTime + 0.3);
-        window.setTimeout(() => { try { droneOsc.stop(); droneOsc.disconnect(); } catch {} }, 350);
-      }
-    },
-  };
-}
-
-function createAncientBgm(c: AudioContext): ActiveNpcBgm {
-  let step = 0;
-  const bpm = 78;
-  const stepTime = 60 / bpm / 2;
-  const luteNotes = [329.63, 0, 392, 493.88, 587.33, 0, 523.25, 493.88, 392, 0, 329.63, 0, 293.66, 311.13, 329.63, 0];
-  const interval = window.setInterval(() => {
-    if (!audioContext || audioContext.state === 'suspended') return;
-    const t = audioContext.currentTime;
-    const note = luteNotes[step % 16];
-    if (note) {
-      tone(c, note, t, 0.28, 0.1, 'triangle', undefined, bgmGain);
-      tone(c, note * 0.5, t, 0.32, 0.06, 'sine', undefined, bgmGain);
-    }
-    if (step % 8 === 0) {
-      tone(c, 1046.5, t, 0.8, 0.05, 'sine', undefined, bgmGain);
-      tone(c, 1567.98, t, 0.6, 0.03, 'triangle', undefined, bgmGain);
-      tone(c, 1661.22, t, 0.5, 0.02, 'sine', undefined, bgmGain);
-    }
-    if (step % 8 === 0) hiss(c, t, 0.6, 0.02, 'bandpass', 850, bgmGain);
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_ancient', intervalId: interval, nodes: [], stop: () => window.clearInterval(interval) };
-}
-
-export function playNpcBgm(id: 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient'): void {
-  const c = getAudioContext();
-  if (!c || !enabled) return;
-  if (activeNpcBgm?.id === id) { stopNpcBgmInternal(); return; }
-  stopNpcBgmInternal();
-  if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm(c);
-  if (id === 'npc_bgm_scp') activeNpcBgm = createScpBgm(c);
-  if (id === 'npc_bgm_ancient') activeNpcBgm = createAncientBgm(c);
-}
-
-export function stopNpcBgm(): void {
-  stopNpcBgmInternal();
-}
-
-export function isNpcBgmPlaying(id?: 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient'): boolean {
-  if (!id) return activeNpcBgm !== null;
-  return activeNpcBgm?.id === id;
-}
-
 export function playSound(sound: SoundType): void {
   if (!enabled) return;
   playV2Sound(sound);
@@ -322,7 +206,6 @@ export function playSound(sound: SoundType): void {
 export function toggleSound(state?: boolean): boolean {
   enabled = state === undefined ? !enabled : state;
   if (typeof window !== 'undefined') window.localStorage.setItem(SOUND_ENABLED_KEY, String(enabled));
-  if (!enabled) stopNpcBgmInternal();
   return enabled;
 }
 
