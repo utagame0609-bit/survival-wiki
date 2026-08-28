@@ -1,4 +1,4 @@
-const DEFAULT_REVERB = 0.18;
+const DEFAULT_REVERB = 0.3;
 const REVERB_AMOUNT_KEY = 'survival-wiki-se-reverb';
 const REVERB_CHANGE_EVENT = 'survival-wiki-reverb-change';
 
