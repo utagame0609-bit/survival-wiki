@@ -1,5 +1,5 @@
 import { createSwitchStyleReverb, type SoundReverb } from './soundReverb';
-import { SE_OUTPUT_GAIN, applyVolumeCurve } from './audioMaster';
+import { SE_OUTPUT_GAIN } from './audioMaster';
 
 export type SoundType =
   | 'confirm' | 'cancel' | 'hover' | 'tabSwitch' | 'footstep' | 'cardOpen' | 'cardClose'
@@ -31,7 +31,7 @@ readStoredSettings();
 
 function getMasterGainValue(): number {
   if (soundVolume <= 0) return 0;
-  return applyVolumeCurve(soundVolume / 100) * SE_OUTPUT_GAIN;
+  return (soundVolume / 100) * SE_OUTPUT_GAIN;
 }
 
 function getAudioContext(): AudioContext | null {
