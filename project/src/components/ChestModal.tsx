@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { X, Sparkles, Camera } from 'lucide-react';
+import { Camera, X, Sparkles, MapPin, ExternalLink } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { playConfirmSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { ChestPhotoCard } from '@/components/ChestPhotoCard';
-import { ChestPhotoDetailModal } from '@/components/ChestPhotoDetailModal';
+import { ChestFullImage } from '@/components/ChestFullImage';
 import type { CollectionItem } from '@/components/locations/locationData';
 
 type ChestModalProps = {
@@ -20,54 +20,90 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
     onClose();
   };
 
+  const handleOpenLocation = () => {
+    if (!selectedPhoto) return;
+    playConfirmSound();
+    onOpenLocation(selectedPhoto.location);
+    onClose();
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-sm font-mono"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#1e2330] border-2 border-amber-500/70 shadow-[0_0_40px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-        <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 bg-[#161a24] border-b-2 border-[#2d3548]">
-          <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="relative block w-6 h-5 border-2 border-amber-400 bg-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
-              <span className="absolute left-0 right-0 top-[4px] h-[2px] bg-[#141824]" />
-              <span className="absolute left-1/2 top-[4px] -translate-x-1/2 w-[4px] h-[4px] bg-amber-300" />
-            </span>
-            <div>
-              <h2 className="text-sm sm:text-base font-bold text-white tracking-wide">宝箱コレクション</h2>
-              <p className="text-xs text-slate-300 font-mono">旅の中で記録された全 {collectionItems.length} 枚の探検写真</p>
+      <div className="w-full max-w-3xl max-h-[90vh] bg-[#1e2330] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.28)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-[#161a24] border-b-2 border-amber-500/60 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span aria-hidden="true" className="relative flex h-7 w-7 shrink-0 items-center justify-center border border-amber-400 bg-amber-500/20 text-amber-300 font-bold text-xs">📦</span>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-bold text-white tracking-wide truncate">
+                CHEST // 宝箱ギャラリー <span className="font-mono text-amber-400">({collectionItems.length}枚)</span>
+              </h2>
+              <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate">各拠点・探索記録に紐づいたスクリーンショット一覧</p>
             </div>
           </div>
-          <button type="button" onClick={handleClose} onMouseEnter={playHoverSound} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white text-lg cursor-pointer" aria-label="閉じる">
+          <button type="button" onClick={handleClose} onMouseEnter={playHoverSound} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white cursor-pointer" aria-label="閉じる">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1">
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1">
           {collectionItems.length === 0 ? (
-            <div className="py-16 text-center text-slate-400">
-              <Camera className="w-12 h-12 mx-auto text-slate-500 mb-2" />
-              <p className="text-sm font-bold text-white">まだ宝箱に写真がありません。</p>
-              <p className="text-xs text-slate-400 mt-1">ロケーション作成時に写真を添付するとここに保管されます。</p>
+            <div className="py-14 text-center">
+              <Camera className="w-12 h-12 mx-auto text-slate-500 mb-3" />
+              <p className="text-sm font-bold text-white">まだ写真が保存されていません。</p>
+              <p className="text-xs text-slate-400 mt-1">記録に写真を添付するとここに保管されます。</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-              {collectionItems.map((item, idx) => (
-                <ChestPhotoCard
-                  key={`${item.storagePath}-${idx}`}
-                  item={item}
-                  onClick={() => {
-                    playConfirmSound();
-                    setSelectedPhoto(item);
-                  }}
-                />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+              <div className="md:col-span-2 space-y-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {collectionItems.map((item, index) => {
+                    const selected = selectedPhoto?.storagePath === item.storagePath && selectedPhoto?.location.id === item.location.id;
+                    return (
+                      <div key={`${item.storagePath}-${index}`} className={selected ? 'ring-2 ring-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.35)]' : ''}>
+                        <ChestPhotoCard item={item} onClick={() => setSelectedPhoto(item)} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <aside className="border-2 border-slate-700 bg-[#11141e] p-3.5 flex flex-col gap-3 md:sticky md:top-0">
+                {selectedPhoto ? (
+                  <>
+                    <div className="aspect-video bg-black border border-slate-800 overflow-hidden">
+                      <ChestFullImage storagePath={selectedPhoto.storagePath} alt={selectedPhoto.location.name} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] font-mono text-emerald-400 font-bold">
+                        POS X:{selectedPhoto.location.x} Y:{selectedPhoto.location.y} Z:{selectedPhoto.location.z}
+                      </div>
+                      <h3 className="text-sm font-bold text-white line-clamp-2">{selectedPhoto.location.name}</h3>
+                      <p className="text-xs text-slate-300 line-clamp-4 leading-relaxed">
+                        {selectedPhoto.location.detail_memo || '（メモなし）'}
+                      </p>
+                    </div>
+                    <button type="button" onClick={handleOpenLocation} onMouseEnter={playHoverSound} className="w-full min-h-[44px] py-2.5 bg-amber-500 text-black font-black text-xs font-mono border-b-2 border-amber-700 hover:bg-amber-400 flex items-center justify-center gap-1.5 cursor-pointer">
+                      <ExternalLink className="w-4 h-4" />
+                      <span>このロケーション詳細を開く</span>
+                    </button>
+                  </>
+                ) : (
+                  <div className="min-h-[220px] flex flex-col items-center justify-center text-center text-slate-500 font-mono text-xs gap-2">
+                    <MapPin className="w-8 h-8 text-slate-600" />
+                    <span>写真を選択してください</span>
+                  </div>
+                )}
+              </aside>
             </div>
           )}
         </div>
 
-        <div className="px-4 sm:px-5 py-3 bg-[#161a24] border-t-2 border-[#2d3548] flex justify-between items-center text-xs text-slate-400 font-mono">
+        <div className="px-4 sm:px-5 py-3 bg-[#161a24] border-t-2 border-[#2d3548] flex justify-between items-center text-[10px] sm:text-xs text-slate-400 font-mono shrink-0">
           <div className="flex items-center gap-1.5 text-emerald-400">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>CAPACITY: UNLIMITED</span>
@@ -77,17 +113,6 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
           </button>
         </div>
       </div>
-
-      {selectedPhoto && (
-        <ChestPhotoDetailModal
-          item={selectedPhoto}
-          onClose={() => setSelectedPhoto(null)}
-          onOpenLocation={(location) => {
-            onClose();
-            onOpenLocation(location);
-          }}
-        />
-      )}
     </div>
   );
 }
