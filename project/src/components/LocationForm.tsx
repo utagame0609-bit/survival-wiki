@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
 import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
-import { playSaveSound, playCancelSound, playHoverSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
+import { playSaveSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 import { LocationBasicFields } from '@/components/LocationBasicFields';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
 import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
