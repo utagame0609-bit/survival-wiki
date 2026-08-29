@@ -17,7 +17,11 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
 
   useEffect(() => subscribeToReverbAmount((value) => setReverb(Math.round(value * 100))), []);
   useEffect(() => subscribeSoundState((id, isPlaying) => setActivePlayingId(isPlaying ? id : null)), []);
-  useEffect(() => () => { stopActiveAudio(); stopWorldBgm(0); }, []);
+  useEffect(() => () => {
+    stopActiveAudio();
+    stopWorldBgm(0);
+    window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed'));
+  }, []);
 
   const handleReverbChange = (value: number) => {
     setReverb(value);
