@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Copy, ExternalLink, Share2, Sparkles, X } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
+import { playConfirmSound, playHoverSound, playInputFocusSound, playModalCloseSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 
 type SnsShareModalProps = {
@@ -89,7 +89,7 @@ export function SnsShareModal({ world, location, onClose }: SnsShareModalProps) 
           </div>
 
           <div className="space-y-1.5">
-            <textarea value={postText} onChange={(event) => setPostText(event.target.value)} rows={7} className="w-full p-3.5 bg-[#0b0f19] border-2 border-slate-700 text-white text-xs sm:text-sm focus:border-cyan-400 outline-none leading-relaxed resize-none" placeholder="投稿内容を入力..." />
+            <textarea value={postText} onChange={(event) => setPostText(event.target.value)} onFocus={playInputFocusSound} rows={7} className="w-full p-3.5 bg-[#0b0f19] border-2 border-slate-700 text-white text-xs sm:text-sm focus:border-cyan-400 outline-none leading-relaxed resize-none" placeholder="投稿内容を入力..." />
             <div className="flex justify-end text-[10px] font-mono text-slate-400">{postText.length} 文字</div>
           </div>
 
