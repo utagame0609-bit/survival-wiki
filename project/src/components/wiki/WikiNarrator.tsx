@@ -74,28 +74,28 @@ export function PixelNarrator({ style, compact = false }: { style: string; compa
   );
 }
 
-export function NarratorDialogue({ style }: { style: string }) {
+export function NarratorDialogue({ style, quote }: { style: string; quote?: string }) {
   const narrator = NARRATORS[style] ?? NARRATORS.ancient;
+  const dialogue = quote?.trim() || narrator.quote;
 
   return (
     <div className={`mx-3 mt-4 min-w-0 rounded-sm border-2 p-3 sm:mx-4 sm:p-4 ${narrator.panel} shadow-[0_0_20px_rgba(0,0,0,.25)]`}>
-      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-        <PixelNarrator style={style} />
-        <div className="min-w-0 flex-1">
+      <div className="grid min-w-0 grid-cols-[52px_minmax(0,1fr)] items-start gap-2.5 sm:grid-cols-[58px_minmax(0,1fr)] sm:gap-3">
+        <PixelNarrator style={style} compact />
+        <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <div className={`flex min-w-0 items-center gap-2 text-xs sm:text-sm font-bold font-mono ${narrator.text}`}>
-              <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
+            <div className={`flex min-w-0 items-center gap-1.5 text-[11px] sm:text-sm font-bold font-mono ${narrator.text}`}>
+              <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
               <span className="break-words">【{narrator.name}】</span>
             </div>
-            <span className={`shrink-0 border border-current px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold font-mono ${narrator.text}`}>
+            <span className={`shrink-0 border border-current px-1.5 py-0.5 text-[7px] sm:text-[9px] font-bold font-mono ${narrator.text}`}>
               {narrator.role}
             </span>
           </div>
 
-          <div className="relative mt-2 min-w-0 rounded-sm border border-[#2d3548] bg-[#050a14] px-3 py-3 text-xs sm:px-4 sm:text-sm leading-6 text-slate-100 font-serif shadow-inner break-words [overflow-wrap:anywhere]">
-            <MessageSquareQuote className={`absolute -left-2 -top-2 h-5 w-5 ${narrator.text} bg-[#07101c]`} />
-            <span className="text-slate-500 mr-1">「</span>{narrator.quote}<span className="text-slate-500 ml-1">」</span>
-            <span className={`absolute right-2 bottom-0.5 text-[10px] ${narrator.text}`}>▼</span>
+          <div className="relative mt-1.5 min-w-0 rounded-sm border border-[#2d3548] bg-[#050a14] px-3 py-2.5 text-[11px] sm:px-4 sm:py-3 sm:text-sm leading-6 text-slate-100 font-serif shadow-inner break-words [overflow-wrap:anywhere]">
+            <MessageSquareQuote className={`absolute -left-2 -top-2 h-4 w-4 ${narrator.text} bg-[#07101c]`} />
+            <span className="text-slate-500 mr-1">「</span>{dialogue}<span className="text-slate-500 ml-1">」</span>
           </div>
         </div>
       </div>
