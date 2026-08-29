@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Calendar, Edit3, Share2, Shield, Trash2, Users, X } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playDeleteSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
+import { playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { LocationCoordinates } from '@/components/LocationCoordinates';
 import { LocationDetailInfo } from '@/components/LocationDetailInfo';
 import { SnsShareModal } from '@/components/SnsShareModal';
@@ -36,7 +36,6 @@ export function LocationDetailModal({
   const [activePhotoIdx, setActivePhotoIdx] = useState(
     Math.max(0, photos.findIndex((photo) => photo.is_main)),
   );
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showSns, setShowSns] = useState(false);
 
   const formattedDate = new Date(location.created_at).toLocaleString('ja-JP', {
@@ -50,11 +49,6 @@ export function LocationDetailModal({
   const memberNames = (location.member_ids ?? [])
     .map((id) => world.members.find((member) => member.id === id)?.name)
     .filter(Boolean) as string[];
-
-  const handleDelete = () => {
-    playDeleteSound();
-    onDelete();
-  };
 
   const handleClose = () => {
     playModalCloseSound();
@@ -207,7 +201,7 @@ export function LocationDetailModal({
 
             <button
               type="button"
-              onClick={() => setShowConfirmDelete(true)}
+              onClick={onDelete}
               onMouseEnter={playHoverSound}
               className="min-h-[42px] px-3 py-2 border border-slate-700 bg-[#151926] text-slate-400 hover:text-rose-400 hover:border-rose-500 text-xs font-bold font-mono flex items-center gap-1.5 cursor-pointer"
             >
@@ -227,40 +221,6 @@ export function LocationDetailModal({
           </button>
         </div>
 
-        {showConfirmDelete && (
-          <div className="absolute inset-0 bg-black/90 flex items-center justify-center p-4 z-10 font-sans">
-            <div className="bg-[#161a25] border-2 border-rose-500 p-5 max-w-sm w-full space-y-3 shadow-[0_0_24px_rgba(244,63,94,0.18)]">
-              <div className="text-[10px] font-black font-mono text-rose-400 tracking-wider">
-                SYSTEM WARNING // DATA DELETION
-              </div>
-              <h3 className="text-sm font-bold text-white font-mono">
-                このロケーションを削除しますか？
-              </h3>
-              <p className="text-xs text-slate-300 font-mono leading-relaxed">
-                「{location.name}」の記録と添付写真を削除します。
-              </p>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmDelete(false)}
-                  onMouseEnter={playHoverSound}
-                  className="flex-1 min-h-[42px] border border-slate-700 bg-[#12151e] text-slate-300 text-xs font-mono hover:border-slate-500 cursor-pointer"
-                >
-                  キャンセル
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  onMouseEnter={playHoverSound}
-                  className="flex-1 min-h-[42px] bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold font-mono cursor-pointer"
-                >
-                  削除する
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {showSns && (
