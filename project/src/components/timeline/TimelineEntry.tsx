@@ -28,9 +28,6 @@ export function TimelineEntry({ loc }: TimelineEntryProps) {
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h4 className="text-sm sm:text-base font-bold text-white break-words">{loc.name}</h4>
-              <div className="inline-flex items-center gap-1.5 mt-1.5 px-2 py-1 bg-[#0b0f17] border border-slate-700 text-[10px] sm:text-xs text-emerald-400 font-bold font-mono">
-                POS: X:{loc.x} Y:{loc.y} Z:{loc.z}
-              </div>
             </div>
             <span className="shrink-0 text-[10px] sm:text-xs text-slate-400 font-mono flex items-center gap-1">
               <Clock className="w-3 h-3" />{time}
@@ -41,15 +38,6 @@ export function TimelineEntry({ loc }: TimelineEntryProps) {
             <p className="mt-2.5 text-xs sm:text-sm text-slate-100 leading-relaxed bg-[#161a24] p-3 border border-[#2d3548] whitespace-pre-wrap break-words">
               {loc.detail_memo}
             </p>
-          )}
-
-          {loc.members.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px] sm:text-xs text-cyan-300">
-              <span className="text-slate-400">同行:</span>
-              {loc.members.map((member) => (
-                <span key={member.id} className="px-2 py-0.5 bg-[#0b0f17] border border-cyan-500/40">@{member.name}</span>
-              ))}
-            </div>
           )}
         </div>
       </div>
