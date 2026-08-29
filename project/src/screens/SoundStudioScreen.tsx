@@ -64,6 +64,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
         return;
       }
       stopActiveAudio();
+      playWorldBgm();
       setActivePlayingId(candidate.id);
       return;
     }
