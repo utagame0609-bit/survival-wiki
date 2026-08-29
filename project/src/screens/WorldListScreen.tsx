@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Gamepad2 } from 'lucide-react';
+import { Database, Gamepad2, Plus } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld, fetchWorlds } from '@/lib/db';
 import { Header } from '@/components/Navigation';
@@ -13,7 +13,7 @@ import { buildWorldMeta } from '@/components/world/worldListData';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
-export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
+export function WorldListScreen({ gameId, gameName, navigate }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
   const [worlds, setWorlds] = useState<WorldWithMembers[]>([]);
   const [worldMeta, setWorldMeta] = useState<Record<string, WorldMeta>>({});
   const [loading, setLoading] = useState(true);
@@ -73,49 +73,62 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
     }
   };
 
-  return (
-    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans overflow-x-hidden flex flex-col select-none world-select-screen">
-      <div className="scanline-overlay" />
-      <Header title={gameName} />
+  const openWorld = (world: WorldWithMembers) => {
+    playConfirmSound();
+    localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id);
+    navigate({ name: 'world', worldId: world.id, worldName: world.name });
+  };
 
-      <div className="relative z-10 mx-auto w-full max-w-4xl px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
-        <header className="relative z-10 flex flex-col items-center mb-4 sm:mb-6 text-center">
-          <div className="border-2 border-amber-500/70 bg-[#1b2130] px-5 sm:px-10 py-2.5 sm:py-3 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
-            <h1 className="text-amber-400 font-black tracking-widest text-sm sm:text-lg font-mono crt-glow">
-              UTAPEDIA // WORLD SELECT
+  return (
+    <div className="relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
+      <div className="pointer-events-none fixed inset-0 opacity-30 [background-image:radial-gradient(rgba(51,65,85,0.25)_1px,transparent_1px)] [background-size:16px_16px]" />
+      <Header title="WORLD SELECT" />
+
+      <main className="relative z-10 mx-auto w-full max-w-4xl px-4 py-6 sm:py-8">
+        <div className="mb-6 flex flex-col gap-3 border-b border-[#1E293B] pb-4 text-center sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:text-left">
+          <div>
+            <div className="flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-[#06B6D4] sm:justify-start">
+              <Database className="h-3.5 w-3.5" />
+              <span>SAVE SLOTS // 冒険の書一覧</span>
+            </div>
+            <h1 className="mt-1 text-xl font-black tracking-wider text-[#F8FAFC] sm:text-2xl">
+              WORLD ARCHIVES
             </h1>
           </div>
-          <p className="mt-1.5 text-[10px] sm:text-xs text-emerald-400 font-bold tracking-wider opacity-90 font-mono">
-            冒険の書を選択してください // SELECT SAVE SLOT
-          </p>
-        </header>
+
+          <button
+            type="button"
+            onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
+            onMouseEnter={playHoverSound}
+            className="inline-flex items-center justify-center gap-2 rounded bg-[#F59E0B] px-4 py-2.5 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all hover:bg-[#D97706] active:translate-y-0.5"
+          >
+            <Plus className="h-4 w-4" />
+            <span>＋ 新しいワールドを作成</span>
+          </button>
+        </div>
 
         {loading && <Spinner label="セーブデータをよみこみ中..." />}
         {error && <ErrorBanner message={error} />}
 
         {!loading && !error && worlds.length === 0 && (
-          <div className="border-2 border-[#2d3446] relative mb-6 bg-[#1e222f] p-6 sm:p-8 text-center shadow-lg">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center border-2 border-amber-500/50 bg-[#141824] text-amber-400 shadow-md">
-              <Gamepad2 className="h-7 w-7" />
+          <div className="mb-4 rounded-lg border border-dashed border-[#1E293B] bg-[#0F172A]/50 px-4 py-10 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] text-[#F59E0B]">
+              <Gamepad2 className="h-6 w-6" />
             </div>
-            <p className="text-sm sm:text-base font-bold text-white">セーブデータがありません</p>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300">「+ 新しいワールドを作成」から最初の冒険の書を作成してください。</p>
+            <p className="text-sm font-bold text-[#F8FAFC]">セーブデータがありません</p>
+            <p className="mt-1 text-xs text-[#64748B]">最初の冒険の書を作成してください。</p>
           </div>
         )}
 
-        {!loading && !error && worlds.length > 0 && (
-          <main className="relative z-10 grid grid-cols-1 gap-3 sm:gap-4">
+        {!loading && !error && (
+          <div className="space-y-4">
             {worlds.map((world, index) => (
               <WorldCard
                 key={world.id}
                 slotNumber={index + 1}
                 world={world}
                 meta={worldMeta[world.id]}
-                onOpen={() => {
-                  playConfirmSound();
-                  localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id);
-                  navigate({ name: 'world', worldId: world.id, worldName: world.name });
-                }}
+                onOpen={() => openWorld(world)}
                 onEdit={() => {
                   playConfirmSound();
                   navigate({ name: 'worldCreate', gameId, gameName, worldId: world.id });
@@ -123,32 +136,32 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
                 onDelete={() => handleDelete(world)}
               />
             ))}
-          </main>
-        )}
 
-        {!loading && !error && (
-          <button
-            type="button"
-            onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
-            onMouseEnter={playHoverSound}
-            className="w-full mt-4 sm:mt-5 bg-amber-500 text-black px-4 py-3 sm:py-3.5 font-bold text-xs sm:text-sm hover:bg-amber-400 border-b-3 border-amber-700 active:border-b-0 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(245,158,11,0.22)] cursor-pointer min-h-[46px] font-mono"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span className="font-black tracking-wide">+ NEW_WORLD // 新しいワールドを作成</span>
-          </button>
-        )}
-
-        <footer className="relative z-10 hidden sm:flex mt-auto pt-6 pb-2 border-t border-[#2a3142] flex-wrap gap-4 justify-between items-center text-[10px] text-slate-400 font-mono">
-          <div className="flex gap-4 items-center">
-            <span className="text-emerald-400 font-bold animate-pulse">● ONLINE</span>
-            <span>STORAGE: LOCAL</span>
-            <span>SYSTEM: READY</span>
+            <button
+              type="button"
+              onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
+              onMouseEnter={playHoverSound}
+              className="group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#1E293B] bg-[#0B1018]/50 py-6 text-[#64748B] transition-all hover:border-[#F59E0B]/60 hover:bg-[#0F172A]/80 hover:text-[#F59E0B]"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] group-hover:bg-[#1E293B]">
+                <Plus className="h-5 w-5 text-[#F59E0B]" />
+              </div>
+              <div className="font-mono text-xs tracking-wider">
+                ＋ SLOT {String(worlds.length + 1).padStart(2, '0')} // 新規冒険の書を作成
+              </div>
+            </button>
           </div>
-          <div className="tracking-wider text-slate-400">UTAPEDIA SURVIVAL LOG</div>
-        </footer>
-      </div>
+        )}
+      </main>
 
-      {showCreateModal && <WorldCreateModal gameId={gameId} onClose={() => setShowCreateModal(false)} onCreated={load} />}
+      {showCreateModal && (
+        <WorldCreateModal
+          gameId={gameId}
+          onClose={() => setShowCreateModal(false)}
+          onCreated={load}
+        />
+      )}
+
       {deleteTarget && (
         <WorldDeleteConfirmModal
           world={deleteTarget}
