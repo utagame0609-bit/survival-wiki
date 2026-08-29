@@ -1,6 +1,6 @@
 import { Download, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { playCancelSound, playToggleSound } from '@/lib/sound';
+import { playCancelSound, playHoverSound, playToggleSound } from '@/lib/sound';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -36,6 +36,7 @@ export function SettingsAppActions({ installPrompt, onInstallPromptUsed }: Setti
         <button
           type="button"
           onClick={handleInstall}
+          onMouseEnter={playHoverSound}
           className="flex w-full items-center justify-center gap-2 border border-sky-500/70 bg-sky-950/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-sky-300 transition-all hover:border-sky-400 hover:bg-sky-900/50 active:scale-[0.98] cursor-pointer"
         >
           <Download className="h-4 w-4 text-sky-400" />
@@ -48,6 +49,7 @@ export function SettingsAppActions({ installPrompt, onInstallPromptUsed }: Setti
         <button
           type="button"
           onClick={() => void handleLogout()}
+          onMouseEnter={playHoverSound}
           className="flex w-full items-center justify-center gap-2 border border-rose-500/60 bg-rose-950/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-rose-300 transition-all hover:border-rose-400 hover:bg-rose-950/40 hover:text-rose-200 active:scale-[0.98] cursor-pointer"
         >
           <LogOut className="h-4 w-4 text-rose-400" />

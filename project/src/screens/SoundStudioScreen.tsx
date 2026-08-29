@@ -8,7 +8,7 @@ import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { isWorldBgmPlaying, playWorldBgm, stopWorldBgm } from '@/lib/bgm';
-import { playCancelSound, playConfirmSound } from '@/lib/sound';
+import { playCancelSound, playConfirmSound, playHoverSound } from '@/lib/sound';
 
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [reverb, setReverb] = useState<number>(() => Math.round(getStoredReverbAmount() * 100));
@@ -118,7 +118,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
         <div className="flex flex-wrap gap-2 border-b-2 border-[#2d3548] pb-3">
           {categories.map((category) => {
             const isSelected = selectedCategory === category.id;
-            return <button key={category.id} type="button" onClick={() => { playConfirmSound(); setSelectedCategory(category.id); }} className={`min-h-[40px] px-3.5 py-2 text-xs sm:text-sm font-bold transition-all border-2 cursor-pointer ${isSelected ? 'border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]' : 'border-slate-700 bg-[#1e2330] text-slate-300 hover:text-white hover:border-slate-500'}`}>{category.label}</button>;
+            return <button key={category.id} type="button" onClick={() => { playConfirmSound(); setSelectedCategory(category.id); }} onMouseEnter={playHoverSound} className={`min-h-[40px] px-3.5 py-2 text-xs sm:text-sm font-bold transition-all border-2 cursor-pointer ${isSelected ? 'border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]' : 'border-slate-700 bg-[#1e2330] text-slate-300 hover:text-white hover:border-slate-500'}`}>{category.label}</button>;
           })}
         </div>
 

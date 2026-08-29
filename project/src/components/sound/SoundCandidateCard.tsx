@@ -1,4 +1,5 @@
 import { Play } from 'lucide-react';
+import { playHoverSound } from '@/lib/sound';
 import type { SoundCandidate } from '@/lib/soundCandidates';
 
 type SoundCandidateCardProps = {
@@ -28,6 +29,7 @@ export function SoundCandidateCard({ candidate, isPlaying, onPlay }: SoundCandid
           <button
             type="button"
             onClick={() => onPlay(candidate)}
+            onMouseEnter={playHoverSound}
             className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
               isPlaying
                 ? 'border-emerald-400 bg-emerald-400 text-black scale-105 shadow-[0_0_12px_#34d399]'

@@ -1,7 +1,7 @@
 import { Settings, Disc, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
-import { playConfirmSound, playModalCloseSound } from '@/lib/sound';
+import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { BasicSoundSettings } from '@/components/BasicSoundSettings';
 import { WorldBgmChannelSettings } from '@/components/WorldBgmChannelSettings';
 import { SettingsAppActions } from '@/components/SettingsAppActions';
@@ -85,6 +85,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           <button
             type="button"
             onClick={handleClose}
+            onMouseEnter={playHoverSound}
             aria-label="設定を閉じる"
             className="flex h-8 w-8 items-center justify-center text-amber-400 transition-colors hover:text-amber-300 active:scale-95 cursor-pointer"
           >
@@ -98,6 +99,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           <button
             type="button"
             onClick={() => { setSoundStudioOpen(true); playConfirmSound(); }}
+            onMouseEnter={playHoverSound}
             className="flex w-full items-center justify-center gap-2 border border-cyan-500/60 bg-[#070c18] py-2.5 font-bold text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)] transition-all hover:border-cyan-400 hover:bg-cyan-950/40 cursor-pointer"
           >
             <Disc className="h-4 w-4 text-cyan-400" />
@@ -110,6 +112,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           <button
             type="button"
             onClick={handleClose}
+            onMouseEnter={playHoverSound}
             className="border-b-2 border-amber-700 bg-amber-500 px-4 py-1.5 text-xs font-bold text-black transition-all hover:bg-amber-400 active:scale-95 cursor-pointer"
           >
             完了 (OK)

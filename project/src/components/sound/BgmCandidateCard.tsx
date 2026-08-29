@@ -1,4 +1,5 @@
 import { Play } from 'lucide-react';
+import { playHoverSound } from '@/lib/sound';
 
 export type BgmCandidate = {
   id: 'bgm_world_select' | 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
@@ -36,6 +37,7 @@ export function BgmCandidateCard({ candidate, isPlaying, onPlay }: BgmCandidateC
           <button
             type="button"
             onClick={() => onPlay(candidate)}
+            onMouseEnter={playHoverSound}
             className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
               isPlaying
                 ? 'border-cyan-400 bg-cyan-400 text-black scale-105 shadow-[0_0_12px_#22d3ee]'

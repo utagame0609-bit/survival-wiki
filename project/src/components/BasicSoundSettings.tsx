@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { loadUserBgmVolume, saveUserBgmVolume, saveUserSoundSettings } from '@/lib/userSoundSettings';
 import { getMasterBgmVolume, setMasterBgmVolume } from '@/lib/bgm';
-import { getSoundVolume, isSoundEnabled, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
+import { getSoundVolume, isSoundEnabled, playHoverSound, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
 
 export function BasicSoundSettings() {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
@@ -118,6 +118,7 @@ export function BasicSoundSettings() {
               aria-checked={soundEnabled}
               aria-label="SEのオンオフ"
               onClick={handleSoundToggle}
+              onMouseEnter={playHoverSound}
               className={`border px-2 py-0.5 text-[10px] font-bold ${soundEnabled ? 'border-slate-700 bg-[#0d1627] text-slate-300' : 'border-red-500 bg-red-950/40 text-red-400'}`}
             >
               {soundEnabled ? 'ACTIVE' : 'MUTED'}

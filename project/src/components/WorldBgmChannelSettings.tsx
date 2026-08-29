@@ -1,7 +1,7 @@
 import { Music2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getBgmChannelSettings, setBgmChannelEnabled, subscribeToBgmChannelSettings, type BgmChannelSettings } from '@/lib/bgmSettings';
-import { playToggleSound } from '@/lib/sound';
+import { playHoverSound, playToggleSound } from '@/lib/sound';
 
 const CHANNEL_ROWS: Array<{ key: keyof BgmChannelSettings; label: string; detail: string }> = [
   { key: 'lead', label: 'メロディ', detail: 'CH1 // PULSE LEAD' },
@@ -42,6 +42,7 @@ export function WorldBgmChannelSettings() {
               aria-checked={bgmChannels[key]}
               aria-label={`${label}のオンオフ`}
               onClick={() => handleToggle(key)}
+              onMouseEnter={playHoverSound}
               className={`relative flex h-6 w-11 shrink-0 items-center border p-0.5 transition-colors cursor-pointer ${bgmChannels[key] ? 'border-cyan-500 bg-cyan-950 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'border-slate-700 bg-slate-900'}`}
             >
               <span className={`block h-4 w-4 transition-transform ${bgmChannels[key] ? 'translate-x-5 bg-cyan-400 shadow-[0_0_6px_#22d3ee]' : 'translate-x-0 bg-slate-600'}`} />
