@@ -106,7 +106,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
       <div className="scanline-overlay" />
       <Header title={world?.name || worldName} onBack={handleWorldBack} />
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
+      <div className="relative w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
         {loading && <Spinner label="ワールドデータを読み込み中..." />}
         {error && <ErrorBanner message={error} />}
 

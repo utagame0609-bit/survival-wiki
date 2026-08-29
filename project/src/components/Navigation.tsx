@@ -65,11 +65,9 @@ export function Header({
               <ChevronLeft className="h-4 w-4 stroke-[3]" />
               <span className="hidden sm:inline">戻る</span>
             </button>
-          ) : (
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]">
-              <Gamepad2 className="h-4 w-4" />
-            </div>
-          )}
+
+          ) : null}
+
 
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)] sm:h-9 sm:w-9">

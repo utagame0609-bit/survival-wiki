@@ -98,8 +98,7 @@ export function BasicSoundSettings() {
           step="1"
           value={reverbAmount}
           onChange={(event) => handleReverbChange(Number(event.target.value))}
-          disabled={!soundEnabled}
-          className="w-full cursor-pointer accent-violet-400 disabled:opacity-40"
+          className="w-full cursor-pointer accent-violet-400"
         />
         <p className="text-[10px] leading-4 text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
       </section>
@@ -133,8 +132,7 @@ export function BasicSoundSettings() {
           step="1"
           value={soundVolume}
           onChange={(event) => handleVolumeChange(Number(event.target.value))}
-          disabled={!soundEnabled}
-          className="w-full cursor-pointer accent-amber-500 disabled:opacity-40"
+          className="w-full cursor-pointer accent-amber-500"
         />
       </section>
     </>
