@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Plus, Search, Share2, Shield, Users, Youtube } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playHoverSound, playInputFocusSound, playRecordSelectSound } from '@/lib/sound';
+import { playConfirmSound, playHoverSound, playInputFocusSound, playRecordSelectSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 
 type TimelineRecordsViewProps = {
@@ -94,14 +94,14 @@ export function TimelineRecordsView({
     <div className="space-y-3.5 sm:space-y-4">
       <div className="bg-[#141824] border-2 border-slate-800 p-2.5 sm:p-3 space-y-2.5 shadow-md">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             onFocus={playInputFocusSound}
             placeholder="拠点名・タグ・メモで検索..."
-            className="w-full min-h-[42px] pl-10 pr-3.5 py-2 bg-[#0f121b] border-2 border-slate-700 text-white text-xs sm:text-sm placeholder-slate-500 focus:border-amber-400 outline-none transition-colors"
+            className="w-full min-h-[42px] pl-9 pr-4 py-2 bg-[#0f121b] border-2 border-slate-700 text-white text-xs sm:text-sm placeholder-slate-500 focus:border-amber-400 outline-none transition-colors rounded-xs"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function TimelineRecordsView({
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value as SortOrder)}
               onMouseEnter={playHoverSound}
-              className="min-h-[38px] bg-[#0f121b] border-2 border-slate-700 text-slate-200 text-xs px-2.5 py-1 outline-none font-mono cursor-pointer"
+              className="min-h-[38px] bg-[#0f121b] border-2 border-slate-700 text-slate-200 text-xs px-2.5 py-1 outline-none font-mono cursor-pointer rounded-xs"
             >
               <option value="newest">新しい順 (NEWEST)</option>
               <option value="oldest">古い順 (OLDEST)</option>
@@ -122,9 +122,12 @@ export function TimelineRecordsView({
 
           <button
             type="button"
-            onClick={onOpenChest}
+            onClick={() => {
+              playConfirmSound();
+              onOpenChest();
+            }}
             onMouseEnter={playHoverSound}
-            className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer rounded-xs shadow-sm"
           >
             <Package className="w-4 h-4 text-amber-400" />
             <span>CHEST ({totalPhotos})</span>
@@ -137,10 +140,10 @@ export function TimelineRecordsView({
               type="button"
               onClick={() => setSelectedTag(null)}
               onMouseEnter={playHoverSound}
-              className={`min-h-[28px] px-2.5 text-[10px] sm:text-xs font-mono font-bold shrink-0 border ${
+              className={`min-h-[28px] px-2.5 text-[10px] sm:text-xs font-mono font-bold shrink-0 transition-colors rounded-xs cursor-pointer border ${
                 selectedTag === null
                   ? 'bg-amber-500 text-black border-amber-400'
-                  : 'bg-[#0f121b] text-slate-400 border-slate-800'
+                  : 'bg-[#0f121b] text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
               ALL ({locations.length})
@@ -151,10 +154,10 @@ export function TimelineRecordsView({
                 type="button"
                 onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                 onMouseEnter={playHoverSound}
-                className={`min-h-[28px] px-2.5 text-[10px] sm:text-xs font-mono shrink-0 border ${
+                className={`min-h-[28px] px-2.5 text-[10px] sm:text-xs font-mono shrink-0 transition-colors rounded-xs cursor-pointer border ${
                   selectedTag === tag
                     ? 'bg-amber-500 text-black border-amber-400 font-bold'
-                    : 'bg-[#0f121b] text-slate-300 border-slate-700'
+                    : 'bg-[#0f121b] text-slate-300 border-slate-700 hover:border-amber-500'
                 }`}
               >
                 #{tag}
@@ -175,9 +178,9 @@ export function TimelineRecordsView({
           {groupedByDay.map((group) => (
             <div key={group.date} className="relative pl-4 sm:pl-6 border-l-2 border-amber-500/60 space-y-2.5">
               <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-amber-500 border-2 border-black shadow-[0_0_10px_#f59e0b]" />
-              <div className="inline-flex items-center gap-2 bg-[#10141f] border-2 border-amber-500/50 px-3 py-1 font-mono text-xs font-bold text-amber-300 shadow-sm">
+              <div className="inline-flex items-center gap-2 bg-[#10141f] border-2 border-amber-500/50 px-3 py-1 font-mono text-xs font-bold text-amber-300 rounded-xs shadow-sm">
                 <span>{group.displayDate}</span>
-                <span className="text-[10px] text-amber-400/80 bg-amber-500/20 px-1.5">{group.items.length}件</span>
+                <span className="text-[10px] text-amber-400/80 bg-amber-500/20 px-1.5 rounded-xs">{group.items.length}件の記録</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 pt-1">
@@ -208,7 +211,7 @@ export function TimelineRecordsView({
                         }
                       }}
                       onMouseEnter={playHoverSound}
-                      className="group border-2 border-slate-700/90 bg-[#161a25] hover:border-amber-400 transition-all p-2.5 sm:p-3 flex items-start gap-3 cursor-pointer shadow-[0_3px_12px_rgba(0,0,0,0.3)] relative overflow-hidden outline-none focus-visible:border-amber-400"
+                      className="group border-2 border-slate-700/90 bg-[#161a25] hover:border-amber-400 transition-all p-2.5 sm:p-3 flex items-start gap-3 cursor-pointer rounded-xs shadow-[0_3px_12px_rgba(0,0,0,0.3)] relative overflow-hidden outline-none focus-visible:border-amber-400"
                     >
                       <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 bg-black border-2 border-slate-800 group-hover:border-amber-500/60 overflow-hidden relative">
                         {primaryPhoto ? (
