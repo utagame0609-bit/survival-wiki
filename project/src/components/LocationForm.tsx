@@ -101,10 +101,11 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
       return;
     }
 
-    const coords = parseCoords(coordsText);
+    const trimmedCoords = coordsText.trim();
+    const coords = trimmedCoords ? parseCoords(coordsText) : { x: 0, y: 0, z: 0 };
     if (!coords) {
       if (!detailOpen) setDetailOpen(true);
-      setCoordsError('座標を「X Y Z」の形式で入力してください（例: 100 64 -20）');
+      setCoordsError('座標を入力する場合は「X Y Z」の3値で入力してください（例: 100 64 -20）');
       return;
     }
 
