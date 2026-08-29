@@ -93,7 +93,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
     <article
       onClick={onOpen}
       onMouseEnter={playHoverSound}
-      className="group relative overflow-hidden bg-[#1a2030] border-2 border-[#2d3548] hover:border-amber-500/80 transition-all duration-150 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
+      className="group relative overflow-hidden bg-[#1a2030] border-2 border-[#2d3548] hover:border-amber-500/80 hover:-translate-y-[3px] transition-all duration-150 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
     >
       <div className="relative z-10 p-3.5 sm:p-4">
         <div className="flex items-center justify-between gap-2 border-b border-[#2d3548] pb-2.5">
