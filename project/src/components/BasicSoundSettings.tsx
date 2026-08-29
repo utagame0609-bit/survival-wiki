@@ -78,6 +78,7 @@ export function BasicSoundSettings() {
           value={masterBgmVolume}
           onChange={(event) => handleMasterBgmVolumeChange(Number(event.target.value))}
           onFocus={playInputFocusSound}
+          onMouseEnter={playHoverSound}
           className="w-full cursor-pointer accent-cyan-400"
         />
         <p className="text-[10px] leading-4 text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
@@ -100,6 +101,7 @@ export function BasicSoundSettings() {
           value={reverbAmount}
           onChange={(event) => handleReverbChange(Number(event.target.value))}
           onFocus={playInputFocusSound}
+          onMouseEnter={playHoverSound}
           className="w-full cursor-pointer accent-violet-400"
         />
         <p className="text-[10px] leading-4 text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
@@ -135,6 +137,7 @@ export function BasicSoundSettings() {
           value={soundVolume}
           onChange={(event) => handleVolumeChange(Number(event.target.value))}
           onFocus={playInputFocusSound}
+          onMouseEnter={playHoverSound}
           className="w-full cursor-pointer accent-amber-500"
         />
       </section>
