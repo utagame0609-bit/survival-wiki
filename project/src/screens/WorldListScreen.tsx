@@ -13,12 +13,13 @@ import { buildWorldMeta } from '@/components/world/worldListData';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
-export function WorldListScreen({ gameId, gameName, navigate }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
+export function WorldListScreen({ gameId, gameName: _gameName, navigate }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
   const [worlds, setWorlds] = useState<WorldWithMembers[]>([]);
   const [worldMeta, setWorldMeta] = useState<Record<string, WorldMeta>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editTarget, setEditTarget] = useState<WorldWithMembers | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WorldWithMembers | null>(null);
 
   const load = () => {
@@ -131,7 +132,7 @@ export function WorldListScreen({ gameId, gameName, navigate }: { gameId: string
                 onOpen={() => openWorld(world)}
                 onEdit={() => {
                   playConfirmSound();
-                  navigate({ name: 'worldCreate', gameId, gameName, worldId: world.id });
+                  setEditTarget(world);
                 }}
                 onDelete={() => handleDelete(world)}
               />
@@ -158,6 +159,15 @@ export function WorldListScreen({ gameId, gameName, navigate }: { gameId: string
         <WorldCreateModal
           gameId={gameId}
           onClose={() => setShowCreateModal(false)}
+          onCreated={load}
+        />
+      )}
+
+      {editTarget && (
+        <WorldCreateModal
+          gameId={gameId}
+          worldId={editTarget.id}
+          onClose={() => setEditTarget(null)}
           onCreated={load}
         />
       )}
