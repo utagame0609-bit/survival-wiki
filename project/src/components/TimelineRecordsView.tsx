@@ -113,7 +113,7 @@ export function TimelineRecordsView({
               onChange={(event) => setSortOrder(event.target.value as SortOrder)}
               onFocus={playInputFocusSound}
               onMouseEnter={playHoverSound}
-              className="min-h-[38px] bg-[#0f121b] border-2 border-slate-700 text-slate-200 text-xs px-2.5 py-1 outline-none font-mono cursor-pointer rounded-xs"
+              className="min-h-[38px] bg-[#0f121b] border-2 border-slate-700 text-slate-200 text-xs px-2.5 py-1 outline-none font-mono cursor-pointer rounded-xs transition-all hover:border-amber-400 hover:bg-[#1a1f2d] hover:text-amber-300 hover:shadow-[0_0_10px_rgba(245,158,11,0.18)]"
             >
               <option value="newest">新しい順 (NEWEST)</option>
               <option value="oldest">古い順 (OLDEST)</option>
@@ -212,7 +212,7 @@ export function TimelineRecordsView({
                         }
                       }}
                       onMouseEnter={playHoverSound}
-                      className="group border-2 border-slate-700/90 bg-[#161a25] hover:border-amber-400 transition-all p-2.5 sm:p-3 flex items-start gap-3 cursor-pointer rounded-xs shadow-[0_3px_12px_rgba(0,0,0,0.3)] relative overflow-hidden outline-none focus-visible:border-amber-400"
+                      className="group border-2 border-slate-700/90 bg-[#161a25] hover:border-amber-400 hover:bg-[#1b2030] hover:shadow-[0_0_16px_rgba(245,158,11,0.18)] hover:brightness-110 transition-all p-2.5 sm:p-3 flex items-start gap-3 cursor-pointer rounded-xs shadow-[0_3px_12px_rgba(0,0,0,0.3)] relative overflow-hidden outline-none focus-visible:border-amber-400"
                     >
                       <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 bg-black border-2 border-slate-800 group-hover:border-amber-500/60 overflow-hidden relative">
                         {primaryPhoto ? (
