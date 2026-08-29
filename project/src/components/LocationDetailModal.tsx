@@ -4,7 +4,6 @@ import { Calendar, Edit3, Share2, Shield, Trash2, Users, X } from 'lucide-react'
 import type { ComponentType } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
-import { LocationCoordinates } from '@/components/LocationCoordinates';
 import { LocationDetailInfo } from '@/components/LocationDetailInfo';
 import { SnsShareModal } from '@/components/SnsShareModal';
 
@@ -37,7 +36,6 @@ export function LocationDetailModal({
     Math.max(0, photos.findIndex((photo) => photo.is_main)),
   );
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-
   const [showSns, setShowSns] = useState(false);
 
   const formattedDate = new Date(location.created_at).toLocaleString('ja-JP', {
@@ -195,7 +193,6 @@ export function LocationDetailModal({
             </div>
           )}
 
-          <LocationCoordinates location={location} />
           <LocationDetailInfo location={location} />
         </div>
 
