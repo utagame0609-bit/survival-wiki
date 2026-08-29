@@ -63,7 +63,7 @@ export function WorldMemberFields({
             placeholder="あなたの名前 (例: 探索者アルト)"
             className="modal-input flex-1"
           />
-          <label onMouseEnter={playHoverSound} className="hidden sm:flex min-h-[42px] shrink-0 items-center gap-1.5 border border-slate-600 bg-slate-800 px-2.5 text-[11px] font-mono font-bold text-amber-300 cursor-pointer hover:border-amber-400 transition-colors">
+          <label onMouseEnter={playHoverSound} className="hidden sm:flex min-h-[42px] shrink-0 items-center gap-1.5 border border-slate-600 bg-slate-800 px-2.5 text-[11px] font-mono font-bold text-amber-300 cursor-pointer hover:border-amber-400 hover:-translate-y-[3px] transition-all">
             <Camera className="h-3.5 w-3.5" />
             写真変更
             <input
@@ -247,13 +247,14 @@ function PhotoPicker({
 }) {
   const accentClass =
     accent === 'amber'
-      ? 'border-amber-400 text-amber-400 hover:border-amber-300 hover:bg-amber-500/10 hover:shadow-[0_0_14px_rgba(245,158,11,0.35)] hover:brightness-110'
-      : 'border-cyan-400 text-cyan-300 hover:border-cyan-300 hover:bg-cyan-500/10 hover:shadow-[0_0_14px_rgba(34,211,238,0.32)] hover:brightness-110';
+      ? 'border-amber-400 text-amber-400 hover:border-amber-300 hover:bg-amber-500/10 hover:shadow-[0_0_14px_rgba(245,158,11,0.35)] hover:brightness-110 hover:-translate-y-[3px]'
+      : 'border-cyan-400 text-cyan-300 hover:border-cyan-300 hover:bg-cyan-500/10 hover:shadow-[0_0_14px_rgba(34,211,238,0.32)] hover:brightness-110 hover:-translate-y-[3px]';
   const sizeClass = size === 'large' ? 'h-14 w-14' : 'h-10 w-12';
 
   return (
-    <label onMouseEnter={playHoverSound}
-      className={`relative ${sizeClass} shrink-0 cursor-pointer overflow-hidden border-2 bg-[#050a14] flex items-center justify-center transition-colors ${accentClass}`}
+    <label
+      onMouseEnter={playHoverSound}
+      className={`relative ${sizeClass} shrink-0 cursor-pointer overflow-hidden border-2 bg-[#050a14] flex items-center justify-center transition-all ${accentClass}`}
       title={label}
     >
       {previewUrl ? (
