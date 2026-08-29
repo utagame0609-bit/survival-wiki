@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronRight, Pencil, Trash2, User, Users } from 'lucide-react';
+import { Calendar, Clock, Edit3, Play, Shield, Trash2, User, Users } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { getPhotoUrl } from '@/lib/db';
 import { playHoverSound } from '@/lib/sound';
@@ -76,6 +76,8 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
     };
   }, [world.player_photo_path, world.members]);
 
+  const slotLabel = String(slotNumber).padStart(2, '0');
+  const createdDate = new Date(world.created_at).toLocaleDateString('ja-JP');
   const formattedLastRecordDate = meta?.lastLocationDate
     ? new Date(meta.lastLocationDate).toLocaleString('ja-JP', {
         year: 'numeric',
@@ -84,137 +86,134 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
         hour: '2-digit',
         minute: '2-digit',
       })
-    : null;
-
-  const slotLabel = String(slotNumber).padStart(2, '0');
+    : 'NO DATA';
   const companions = world.members.filter((member) => member.name !== world.player).slice(0, 5);
 
   return (
     <article
-      onClick={onOpen}
+      className="group relative rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-md transition-all duration-200 hover:border-[#F59E0B]/60 hover:bg-[#131E35]"
       onMouseEnter={playHoverSound}
-      className="group relative overflow-hidden bg-[#1a2030] border-2 border-[#2d3548] hover:border-amber-500/80 hover:-translate-y-[3px] transition-all duration-150 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
     >
-      <div className="relative z-10 p-3.5 sm:p-4">
-        <div className="flex items-center justify-between gap-2 border-b border-[#2d3548] pb-2.5">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="shrink-0 border border-amber-500/60 bg-amber-500/15 px-2 py-1 text-[10px] sm:text-[11px] font-black font-mono tracking-wide text-amber-300">
-              SLOT_{slotLabel}
+      <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
+      <span className="pointer-events-none absolute -bottom-px -right-px h-2 w-2 border-b-2 border-r-2 border-[#F2A100]" />
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 items-start gap-3.5">
+          <div className="relative shrink-0">
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B]">
+              {playerPhotoUrl ? (
+                <img src={playerPhotoUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-6 w-6 text-[#F59E0B]" />
+              )}
+            </div>
+            <span className="absolute -left-2 -top-2 rounded border border-[#F59E0B] bg-[#0B1018] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#F59E0B]">
+              SLOT {slotLabel}
             </span>
-            <h2 className="min-w-0 truncate text-sm sm:text-base font-black tracking-wide text-white group-hover:text-amber-300 transition-colors">
-              {world.name}
-            </h2>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex items-center gap-1 font-mono text-xs font-semibold text-[#F59E0B]">
+                <Shield className="h-3 w-3" />
+                {world.player?.trim() || '開拓者'}
+              </span>
+              <span className="flex items-center gap-1 font-mono text-[10px] text-[#64748B]">
+                <Calendar className="h-2.5 w-2.5" />
+                {createdDate}
+              </span>
+            </div>
+
+            <h2 className="mt-0.5 truncate text-base font-black tracking-wide text-[#F1F5F9] transition-colors group-hover:text-[#FDE68A] sm:text-lg">
+              {world.name}
+            </h2>
+
+            {world.memo && (
+              <p className="mt-0.5 line-clamp-1 text-xs leading-relaxed text-[#94A3B8]">
+                {world.memo}
+              </p>
+            )}
+
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center -space-x-1.5">
+                {companions.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full border border-[#0B1018] bg-[#161F30]"
+                    title={member.name}
+                  >
+                    {memberPhotoUrls[member.id] ? (
+                      <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <Users className="h-3 w-3 text-[#06B6D4]" />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <span className="font-mono text-[10px] text-[#64748B]">
+                {companions.length > 0 ? `+${companions.length} 名の同行者` : '単独探索'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-col items-stretch justify-between gap-3 border-t border-[#1E293B]/70 pt-3 sm:flex-row sm:items-center sm:justify-end sm:border-t-0 sm:pt-0">
+          <div className="flex items-center justify-around gap-2 sm:justify-start">
+            <Stat label="DAYS" value={meta?.dayCount ?? 0} tone="amber" />
+            <Stat label="RECORDS" value={meta?.recordCount ?? 0} tone="cyan" />
+          </div>
+
+          <div className="flex w-full items-center gap-1.5 sm:w-auto" onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               onClick={onEdit}
               onMouseEnter={playHoverSound}
-              title="ワールド設定を編集"
+              className="shrink-0 rounded border border-[#334155]/60 bg-[#161F30] p-2.5 text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:bg-[#1E293B] hover:text-[#F8FAFC] sm:p-2"
               aria-label={`${world.name}を編集`}
-              className="flex h-9 w-9 items-center justify-center border border-slate-700 bg-[#101522] text-slate-300 transition-all hover:border-amber-400 hover:text-amber-300 active:scale-95 cursor-pointer"
+              title="ワールド設定を編集"
             >
-              <Pencil className="h-4 w-4" />
+              <Edit3 className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={onDelete}
               onMouseEnter={playHoverSound}
-              title="ワールドを削除"
+              className="shrink-0 rounded border border-[#334155]/60 bg-[#161F30] p-2.5 text-[#64748B] transition-colors hover:border-[#EF4444]/50 hover:bg-[#2A161C] hover:text-[#EF4444] sm:p-2"
               aria-label={`${world.name}を削除`}
-              className="flex h-9 w-9 items-center justify-center border border-slate-700 bg-[#101522] text-slate-400 transition-all hover:border-rose-500 hover:text-rose-300 active:scale-95 cursor-pointer"
+              title="ワールドを削除"
             >
               <Trash2 className="h-4 w-4" />
             </button>
-          </div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12 md:items-center md:gap-4">
-          <div className="md:col-span-5 flex min-w-0 items-center gap-1.5 overflow-x-auto pb-0.5">
-            <MemberAvatar photoUrl={playerPhotoUrl} player />
-            {companions.map((member) => (
-              <MemberAvatar key={member.id} photoUrl={memberPhotoUrls[member.id] ?? ''} />
-            ))}
-            {companions.length === 0 && (
-              <span className="ml-1 shrink-0 text-[9px] font-mono italic text-slate-500">SOLO</span>
-            )}
-          </div>
-
-          <div className="md:col-span-4 grid grid-cols-3 gap-0 border border-slate-700/80 bg-[#0e141f] px-2.5 py-2.5 md:border-y md:border-x md:px-3">
-            <Stat label="DAYS" value={String(meta?.dayCount ?? 0).padStart(3, '0')} suffix="日" tone="emerald" />
-            <Stat label="RECORDS" value={String(meta?.recordCount ?? 0).padStart(3, '0')} suffix="件" tone="amber" divider />
-            <Stat label="LAST_CHECKPOINT" value={meta?.lastLocationName ?? '------'} tone="slate" truncate divider />
-          </div>
-
-          <div className="md:col-span-3" onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               onClick={onOpen}
               onMouseEnter={playHoverSound}
-              className="flex min-h-[46px] w-full items-center justify-center gap-1.5 border-b-3 border-amber-700 bg-amber-500 px-4 py-2.5 text-xs sm:text-sm font-black font-mono text-black shadow-[0_2px_12px_rgba(245,158,11,0.22)] transition-all hover:bg-amber-400 active:translate-y-0.5 active:border-b-0 cursor-pointer"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded bg-[#F59E0B] px-4 py-2 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_10px_rgba(245,158,11,0.25)] transition-all hover:bg-[#D97706] active:scale-95 sm:flex-initial"
             >
-              <span>▶ 冒険を再開 (LOAD)</span>
-              <ChevronRight className="h-4 w-4 stroke-[3]" />
+              <Play className="h-3.5 w-3.5 fill-current" />
+              <span>LOAD</span>
             </button>
           </div>
         </div>
+      </div>
 
-        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 pt-2 text-[9px] sm:text-[10px] font-mono">
-          <span className="flex items-center gap-1.5 font-black text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> READY
-          </span>
-          <span className="text-slate-400">最終記録: {formattedLastRecordDate || 'NO_DATA'}</span>
-        </div>
+      <div className="mt-2.5 flex flex-col gap-1 border-t border-[#1E293B]/50 pt-2 font-mono text-[10px] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
+        <span className="flex items-center gap-1 whitespace-nowrap">
+          <Clock className="h-2.5 w-2.5" />
+          LAST RECORD: {formattedLastRecordDate}
+        </span>
+        <span className="whitespace-nowrap text-[#06B6D4]/70">READY TO RESUME</span>
       </div>
     </article>
   );
 }
 
-function MemberAvatar({ photoUrl, player = false }: { photoUrl: string; player?: boolean }) {
+function Stat({ label, value, tone }: { label: string; value: number; tone: 'amber' | 'cyan' }) {
   return (
-    <div
-      title={player ? 'プレイヤー' : '同行メンバー'}
-      aria-label={player ? 'プレイヤー' : '同行メンバー'}
-      className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border-2 bg-[#080d15] ${
-        player ? 'border-amber-400/90 shadow-[0_0_8px_rgba(245,158,11,0.18)]' : 'border-cyan-400/60'
-      }`}
-    >
-      {photoUrl ? (
-        <img src={photoUrl} alt="" className="h-full w-full object-cover pixelated" />
-      ) : player ? (
-        <User className="h-5 w-5 text-amber-400" />
-      ) : (
-        <Users className="h-5 w-5 text-cyan-400" />
-      )}
-      {player && <span className="absolute bottom-0 right-0 bg-amber-500 px-1 text-[6px] font-black leading-3 text-black">CMD</span>}
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  suffix,
-  tone,
-  truncate = false,
-  divider = false,
-}: {
-  label: string;
-  value: string;
-  suffix?: string;
-  tone: 'emerald' | 'amber' | 'slate';
-  truncate?: boolean;
-  divider?: boolean;
-}) {
-  const valueClass = tone === 'emerald' ? 'text-emerald-400' : tone === 'amber' ? 'text-amber-400' : 'text-slate-200';
-
-  return (
-    <div className={`${divider ? 'border-l border-slate-700 pl-2.5' : 'pr-2.5'}`}>
-      <div className="text-[7px] sm:text-[8px] font-black tracking-wide text-slate-500 font-mono">{label}</div>
-      <div className={`mt-0.5 text-[11px] sm:text-xs font-black font-mono ${valueClass} ${truncate ? 'truncate' : ''}`}>
+    <div className="flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial">
+      <div className="font-mono text-[9px] text-[#64748B]">{label}</div>
+      <div className={`font-mono text-sm font-bold ${tone === 'amber' ? 'text-[#F59E0B]' : 'text-[#06B6D4]'}`}>
         {value}
-        {suffix && <span className="ml-0.5 text-[8px] font-normal text-slate-400">{suffix}</span>}
       </div>
     </div>
   );
