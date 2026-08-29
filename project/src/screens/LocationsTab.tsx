@@ -4,7 +4,6 @@ import { fetchLocations, createLocation, updateLocation, deleteLocation } from '
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
-import { DeleteLocationConfirmModal } from '@/components/DeleteLocationConfirmModal';
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { buildCollectionItems, type CollectionItem } from '@/components/locations/locationData';
@@ -15,7 +14,7 @@ import {
   playModalCloseSound,
   playModalOpenSound,
   playDeleteSound,
-  playErrorSound,
+
 } from '@/lib/sound';
 
 type Mode =
@@ -52,7 +51,6 @@ export function LocationsTab({
   const [mode, setMode] = useState<Mode>({ type: 'list' });
   const [saving, setSaving] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<LocationWithPhotos | null>(null);
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [snsLocation, setSnsLocation] = useState<LocationWithPhotos | null>(null);
   const loadRequestRef = useRef(0);
@@ -112,25 +110,16 @@ export function LocationsTab({
     }
   };
 
-  const handleDelete = (loc: LocationWithPhotos) => {
-    playErrorSound();
-    setDeleteTarget(loc);
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteTarget) return;
-    const locationId = deleteTarget.id;
-    setDeleteTarget(null);
-    playDeleteSound();
+  const handleDelete = async (loc: LocationWithPhotos) => {
     try {
-      await deleteLocation(locationId);
-      setSelectedLocation((prev) => (prev?.id === locationId ? null : prev));
-      setSnsLocation((prev) => (prev?.id === locationId ? null : prev));
+      await deleteLocation(loc.id);
+      setSelectedLocation((prev) => (prev?.id === loc.id ? null : prev));
+      setSnsLocation((prev) => (prev?.id === loc.id ? null : prev));
       onReload();
     } catch (e) {
       setError((e as Error).message);
     }
-  };
+  }
 
   const openCreateModal = () => {
     setMode({ type: 'create' });
@@ -196,7 +185,7 @@ export function LocationsTab({
           location={selectedLocation}
           onClose={closeLocationDetail}
           onEdit={handleDetailEdit}
-          onDelete={() => handleDelete(selectedLocation)}
+          onDelete={() => void handleDelete(selectedLocation)}
           PhotoImage={LocationPhotoImage}
         />
       )}
@@ -209,13 +198,6 @@ export function LocationsTab({
         />
       )}
 
-      {deleteTarget && (
-        <DeleteLocationConfirmModal
-          location={deleteTarget}
-          onCancel={() => setDeleteTarget(null)}
-          onConfirm={confirmDelete}
-        />
-      )}
 
       {mode.type !== 'list' && (
         <LocationFormModal
