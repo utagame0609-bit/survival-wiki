@@ -62,12 +62,12 @@ export function LocationDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="my-1 sm:my-2 w-full max-w-2xl max-h-[90vh] bg-[#161a25] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="w-full max-w-2xl max-h-[90vh] bg-[#161a25] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 bg-[#11141e] border-b-2 border-amber-500/60 shrink-0">
           <div className="min-w-0 flex items-center gap-2">
             <span className="font-mono text-[10px] sm:text-xs px-2 py-1 border border-amber-400 bg-amber-500/20 text-amber-300 font-bold shrink-0 truncate max-w-[55vw]">

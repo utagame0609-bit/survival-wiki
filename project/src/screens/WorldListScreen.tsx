@@ -44,7 +44,12 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
 
   useEffect(() => {
     playWorldBgm();
-    return () => stopWorldBgm(300);
+    const resumeBgm = () => playWorldBgm();
+    window.addEventListener('survival-wiki:settings-closed', resumeBgm);
+    return () => {
+      window.removeEventListener('survival-wiki:settings-closed', resumeBgm);
+      stopWorldBgm(300);
+    };
   }, []);
 
   const handleDelete = (world: WorldWithMembers) => {

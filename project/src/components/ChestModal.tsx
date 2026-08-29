@@ -21,10 +21,10 @@ function isCheckpointLocation(location: LocationWithPhotos): boolean {
 }
 
 export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestModalProps) {
-  const [selectedPhoto, setSelectedPhoto] = useState<CollectionItem | null>(collectionItems[0] ?? null);
+  const [selectedPhoto, setSelectedPhoto] = useState<CollectionItem | null>(null);
   const checkpointItems = collectionItems.filter((item) => isCheckpointLocation(item.location));
-  const hasCheckpoint = true;
-  const selectedIsCheckpoint = true;
+  const hasCheckpoint = checkpointItems.length > 0;
+  const selectedIsCheckpoint = selectedPhoto ? isCheckpointLocation(selectedPhoto.location) : false;
 
   const handleClose = () => {
     playModalCloseSound();

@@ -20,7 +20,6 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => () => {
     stopActiveAudio();
     stopWorldBgm(0);
-    window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed'));
   }, []);
 
   const handleReverbChange = (value: number) => {

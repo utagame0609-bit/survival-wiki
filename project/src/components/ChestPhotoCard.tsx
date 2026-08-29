@@ -45,7 +45,7 @@ export function ChestPhotoCard({ item, onClick }: ChestPhotoCardProps) {
       onMouseEnter={playHoverSound}
       className="group relative w-full overflow-hidden text-left bg-[#141824] border-2 border-[#2d3548] hover:border-amber-400 transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.5)] cursor-pointer"
     >
-      <div className="w-full aspect-[4/3] bg-[#12151f] overflow-hidden">
+      <div className="w-full aspect-video bg-[#12151f] overflow-hidden">
         {src ? (
           <img
             src={src}
