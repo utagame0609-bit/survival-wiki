@@ -239,7 +239,7 @@ export function WikiTabRedesigned({ world, reloadKey, onOpenLocation, onArticleS
           </button>
           {locations.length === 0 && <p className="mt-2 text-[9px] text-amber-400 text-center font-mono">※ まずロケーションを1件以上記録してください。</p>}
           {locations.length > 0 && <p className="mt-2 text-[9px] sm:text-[10px] text-slate-500 leading-relaxed">記録された座標・メモ・写真を元に、選択した流派の「旅の書」を編纂します。</p>}
-          {style === null && locations.length > 0 && <button type="button" onClick={handleAiTest} className="mt-2 text-[9px] text-emerald-400 font-mono underline">AI接続テスト</button>}
+          {style === null && locations.length > 0 && <button type="button" onClick={handleAiTest} onMouseEnter={playHoverSound} className="mt-2 text-[9px] text-emerald-400 font-mono underline">AI接続テスト</button>}
         </section>
       )}
 
@@ -286,7 +286,7 @@ export function WikiTabRedesigned({ world, reloadKey, onOpenLocation, onArticleS
           <div className="w-full max-w-md bg-[#0d1627] border-2 border-red-700 shadow-[0_0_35px_rgba(0,0,0,.7)] p-5">
             <div className="flex items-center gap-2 text-red-300 font-bold"><AlertTriangle className="w-5 h-5" />旅の書をリセットしますか？</div>
             <p className="mt-2 text-xs text-slate-400">生成済みのWiki記事と流派選択を初期化します。</p>
-            <div className="grid grid-cols-2 gap-2 mt-5"><button type="button" onClick={() => { playCancelSound(); setResetTarget(false); }} className="min-h-[42px] border border-slate-700 text-slate-300">キャンセル</button><button type="button" onClick={confirmReset} className="min-h-[42px] bg-red-700 text-white font-bold">リセットする</button></div>
+            <div className="grid grid-cols-2 gap-2 mt-5"><button type="button" onClick={() => { playCancelSound(); setResetTarget(false); }} onMouseEnter={playHoverSound} className="min-h-[42px] border border-slate-700 text-slate-300">キャンセル</button><button type="button" onClick={confirmReset} onMouseEnter={playHoverSound} className="min-h-[42px] bg-red-700 text-white font-bold">リセットする</button></div>
           </div>
         </div>
       )}
