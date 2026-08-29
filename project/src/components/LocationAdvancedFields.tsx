@@ -49,21 +49,25 @@ export function LocationAdvancedFields({
 
   return (
     <>
-      <button type="button" onClick={() => { onToggleOpen(); playConfirmSound(); }} onMouseEnter={playHoverSound}
-        className="flex w-full items-center justify-between gap-2 border border-amber-500/30 bg-amber-950/10 px-3 py-2.5 text-xs font-bold text-amber-400 hover:border-amber-400/60 hover:text-amber-300 transition-colors cursor-pointer">
-        <span className="flex items-center gap-1.5">
-          <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-          {open ? '▼ 詳細オプションを折りたたむ' : '▶ 座標・仲間・記録日時を追加する (任意)'}
+      <button
+        type="button"
+        onClick={() => { onToggleOpen(); playConfirmSound(); }}
+        onMouseEnter={playHoverSound}
+        className="flex w-full items-center justify-between gap-2 border border-amber-500/30 bg-amber-950/10 px-3 py-2.5 text-xs font-bold text-amber-400 transition-all hover:-translate-y-[2px] hover:border-amber-400/60 hover:text-amber-300 cursor-pointer"
+      >
+        <span className="flex min-w-0 items-center gap-1.5">
+          <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <span className="truncate">{open ? '詳細オプションを閉じる' : '詳細オプションを開く'}</span>
         </span>
-        <span className="text-[10px] text-slate-500">{open ? 'OPEN' : 'CLOSED'}</span>
+        <span className="shrink-0 text-[9px] font-normal text-slate-500">座標・仲間・日時</span>
       </button>
 
       {open && (
         <div className="space-y-4 border border-slate-800 bg-[#090d16] p-3.5 sm:p-4">
           <div>
-            <label className="mb-1.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-300">
-              <span className="flex items-center gap-1.5 text-emerald-400"><Compass className="h-4 w-4" /><span>COORDINATES // 空間座標</span></span>
-              <span className="text-[10px] font-normal text-slate-500">FORMAT: X Y Z</span>
+            <label className="mb-1.5 flex flex-col gap-0.5 text-xs font-bold uppercase tracking-wider text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+              <span className="flex items-center gap-1.5 text-emerald-400"><Compass className="h-4 w-4" /><span>COORDINATES // 座標</span></span>
+              <span className="text-[9px] font-normal text-slate-500">X / Y / Z を入力（任意）</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {(['X', 'Y', 'Z'] as const).map((axis, index) => (
@@ -93,8 +97,13 @@ export function LocationAdvancedFields({
                 {members.map((member) => {
                   const checked = selectedMembers.has(member.id);
                   return (
-                    <button type="button" key={member.id} onClick={() => { playConfirmSound(); onToggleMember(member.id); }} onMouseEnter={playHoverSound}
-                      className={`flex min-h-[40px] items-center gap-1.5 rounded-sm border-2 px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${checked ? 'border-cyan-400 bg-cyan-950/50 font-bold text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,0.18)]' : 'border-slate-800 bg-[#0d1627] text-slate-400 hover:border-slate-600 hover:text-slate-200'}`}>
+                    <button
+                      type="button"
+                      key={member.id}
+                      onClick={() => { playConfirmSound(); onToggleMember(member.id); }}
+                      onMouseEnter={playHoverSound}
+                      className={`flex min-h-[40px] items-center gap-1.5 rounded-sm border-2 px-3 py-1.5 text-xs font-mono transition-all hover:-translate-y-[2px] cursor-pointer ${checked ? 'border-cyan-400 bg-cyan-950/50 font-bold text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,0.18)]' : 'border-slate-800 bg-[#0d1627] text-slate-400 hover:border-slate-600 hover:text-slate-200'}`}
+                    >
                       {checked && <Check className="h-3.5 w-3.5 text-cyan-400 stroke-[3]" />}{member.name}
                     </button>
                   );
