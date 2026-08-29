@@ -94,6 +94,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
               playCancelSound();
               onBack();
             }}
+            onMouseEnter={playHoverSound}
             className="min-h-[42px] px-4 py-2 bg-[#141824] border-2 border-slate-700 text-slate-200 hover:text-amber-400 hover:border-amber-500 text-xs sm:text-sm font-bold flex items-center gap-1.5 self-start md:self-auto cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />

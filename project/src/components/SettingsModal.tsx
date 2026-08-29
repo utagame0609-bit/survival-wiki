@@ -42,6 +42,7 @@ export function SettingsButton({ showButton = true }: SettingsButtonProps) {
           type="button"
           onClick={() => { playConfirmSound(); setSettingsOpen(true); }}
           aria-label="設定"
+          onMouseEnter={playHoverSound}
           className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center border-2 border-amber-500/80 bg-[#0d1627] text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all hover:bg-amber-500 hover:text-slate-950 active:scale-95 cursor-pointer"
         >
           <Settings className="h-5 w-5" />
