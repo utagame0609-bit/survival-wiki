@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Camera, ChevronDown, ChevronUp, Plus, Shield, Sparkles, Trash2, User, Users, X } from 'lucide-react';
 import { createWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, updateWorld } from '@/lib/db';
 import { playAchievementSound, playAddSound, playCloseSound, playDeleteSound, playHoverSound, playInputFocusSound, playModalCloseSound, playSaveSound } from '@/lib/sound';
@@ -36,6 +36,25 @@ export function WorldCreateModal({
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
   const [showOptionalSection, setShowOptionalSection] = useState(isEdit);
+  const objectUrlsRef = useRef<Set<string>>(new Set());
+
+  const rememberObjectUrl = (url: string) => {
+    if (url.startsWith('blob:')) objectUrlsRef.current.add(url);
+    return url;
+  };
+
+  const revokeObjectUrl = (url: string) => {
+    if (!url.startsWith('blob:')) return;
+    URL.revokeObjectURL(url);
+    objectUrlsRef.current.delete(url);
+  };
+
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (!worldId) return;
@@ -57,7 +76,12 @@ export function WorldCreateModal({
         setShowOptionalSection(true);
 
         if (world.player_photo_path) {
-          setPlayerPreview(await getPhotoUrl(world.player_photo_path).catch(() => ''));
+          const playerUrl = await getPhotoUrl(world.player_photo_path).catch(() => '');
+          if (!active) {
+            if (playerUrl.startsWith('blob:')) URL.revokeObjectURL(playerUrl);
+            return;
+          }
+          setPlayerPreview(rememberObjectUrl(playerUrl));
         }
 
         const loadedMembers = await Promise.all(
@@ -69,7 +93,14 @@ export function WorldCreateModal({
           })),
         );
 
-        if (!active) return;
+        if (!active) {
+          loadedMembers.forEach((member) => {
+            if (member.previewUrl.startsWith('blob:')) URL.revokeObjectURL(member.previewUrl);
+          });
+          return;
+        }
+
+        loadedMembers.forEach((member) => rememberObjectUrl(member.previewUrl));
         setMembers(loadedMembers.length > 0 ? loadedMembers : [{ ...EMPTY_MEMBER }]);
       })
       .catch((e) => {
@@ -84,18 +115,11 @@ export function WorldCreateModal({
     };
   }, [worldId]);
 
-  useEffect(() => () => {
-    if (playerPreview.startsWith('blob:')) URL.revokeObjectURL(playerPreview);
-    members.forEach((member) => {
-      if (member.previewUrl.startsWith('blob:')) URL.revokeObjectURL(member.previewUrl);
-    });
-  }, [playerPreview, members]);
-
   const setPlayerPhotoFile = (file: File | null) => {
     if (!file) return;
-    if (playerPreview.startsWith('blob:')) URL.revokeObjectURL(playerPreview);
+    revokeObjectUrl(playerPreview);
     setPlayerPhoto(file);
-    setPlayerPreview(URL.createObjectURL(file));
+    setPlayerPreview(rememberObjectUrl(URL.createObjectURL(file)));
   };
 
   const handlePlayerPreset = (src: string) => {
@@ -110,8 +134,8 @@ export function WorldCreateModal({
     if (!file) return;
     setMembers((current) => current.map((member, i) => {
       if (i !== index) return member;
-      if (member.previewUrl.startsWith('blob:')) URL.revokeObjectURL(member.previewUrl);
-      return { ...member, photo: file, previewUrl: URL.createObjectURL(file) };
+      revokeObjectUrl(member.previewUrl);
+      return { ...member, photo: file, previewUrl: rememberObjectUrl(URL.createObjectURL(file)) };
     }));
   };
 
@@ -124,7 +148,7 @@ export function WorldCreateModal({
     playDeleteSound();
     setMembers((current) => {
       const target = current[index];
-      if (target?.previewUrl.startsWith('blob:')) URL.revokeObjectURL(target.previewUrl);
+      if (target) revokeObjectUrl(target.previewUrl);
       const next = current.filter((_, i) => i !== index);
       return next.length > 0 ? next : [{ ...EMPTY_MEMBER }];
     });
