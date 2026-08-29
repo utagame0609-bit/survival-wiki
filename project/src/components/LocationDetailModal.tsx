@@ -62,7 +62,7 @@ export function LocationDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
