@@ -24,7 +24,7 @@ export function LocationPhotoField({ preview, inputRef, onSelect, onClear }: Loc
             type="button"
             onClick={onClear}
             onMouseEnter={playHoverSound}
-            className="absolute top-2 right-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-sm bg-[#0a1120]/90 border border-slate-700 text-slate-300 hover:text-rose-400 hover:border-rose-500 transition-colors shadow-md cursor-pointer"
+            className="absolute top-2 right-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-sm bg-[#0a1120]/90 border border-slate-700 text-slate-300 hover:text-rose-400 hover:border-rose-500 transition-all hover:-translate-y-[2px] shadow-md cursor-pointer"
             aria-label="写真を削除"
           >
             <X className="w-4 h-4" />
@@ -35,10 +35,10 @@ export function LocationPhotoField({ preview, inputRef, onSelect, onClear }: Loc
           type="button"
           onClick={() => inputRef.current?.click()}
           onMouseEnter={playHoverSound}
-          className="group w-full min-h-[120px] rounded-sm border-2 border-dashed border-slate-700 bg-[#090d16] flex flex-col items-center justify-center text-slate-400 hover:border-amber-500 hover:text-amber-400 hover:bg-[#0d1627] transition-all cursor-pointer"
+          className="group w-full min-h-[120px] rounded-sm border-2 border-dashed border-slate-700 bg-[#090d16] flex flex-col items-center justify-center text-slate-400 hover:border-amber-500 hover:text-amber-400 hover:bg-[#0d1627] hover:-translate-y-[3px] transition-all cursor-pointer"
         >
           <Camera className="w-8 h-8 mb-2 text-amber-500/80 group-hover:scale-110 transition-transform" />
-          <span className="text-xs font-bold tracking-wide">撮影 / 探検画像を選択</span>
+          <span className="text-xs font-bold tracking-wide">カメラ / 写真ライブラリから選択</span>
           <span className="text-[10px] text-slate-600 mt-1">TAP TO SELECT</span>
         </button>
       )}
@@ -46,7 +46,6 @@ export function LocationPhotoField({ preview, inputRef, onSelect, onClear }: Loc
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={(event) => onSelect(event.target.files?.[0] ?? null)}
       />
