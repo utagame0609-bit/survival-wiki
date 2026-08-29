@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, BookOpen, ChevronDown, ChevronUp, Copy, RotateCcw, Share2, Sparkles } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
@@ -536,8 +537,8 @@ export function WikiTabModern({
         </button>
       )}
 
-      {generationReveal && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/95 p-5 backdrop-blur-sm">
+      {generationReveal && createPortal((
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-5 backdrop-blur-sm">
           <div className="w-full max-w-lg text-center">
             <div className="mx-auto mb-4 w-fit"><PixelNarrator style={generationReveal.style} /></div>
             <div className={`font-mono text-xs font-black sm:text-sm ${NARRATORS[generationReveal.style]?.text ?? 'text-amber-300'}`}>
@@ -566,7 +567,7 @@ export function WikiTabModern({
             )}
           </div>
         </div>
-      )}
+      ), document.body)}
 
       {resetTarget && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setResetTarget(false); } }}>
