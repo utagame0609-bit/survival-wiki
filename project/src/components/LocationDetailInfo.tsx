@@ -7,12 +7,10 @@ type LocationDetailInfoProps = {
 export function LocationDetailInfo({ location }: LocationDetailInfoProps) {
   return (
     <>
-      {location.detail_memo && (
-        <div className="p-4 bg-[#141824] border border-[#2d3548]">
-          <h4 className="text-xs text-amber-400 font-bold uppercase mb-2">探索・観測メモ</h4>
-          <p className="text-slate-100 text-sm leading-relaxed whitespace-pre-wrap">{location.detail_memo}</p>
-        </div>
-      )}
+      <div className="p-4 bg-[#141824] border border-[#2d3548]">
+        <h4 className="text-xs text-amber-400 font-bold uppercase mb-2">共有URL // SHARE URL</h4>
+        <p className="text-slate-500 text-sm leading-relaxed">共有URL機能は現在準備中です。</p>
+      </div>
 
       {location.members.length > 0 && (
         <div>

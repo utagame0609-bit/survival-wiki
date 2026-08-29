@@ -37,7 +37,12 @@ export function WorldCreateScreen({
 
   useEffect(() => {
     playWorldBgm();
-    return () => stopWorldBgm(300);
+    const resumeBgm = () => playWorldBgm();
+    window.addEventListener('survival-wiki:settings-closed', resumeBgm);
+    return () => {
+      window.removeEventListener('survival-wiki:settings-closed', resumeBgm);
+      stopWorldBgm(300);
+    };
   }, []);
 
   useEffect(() => {

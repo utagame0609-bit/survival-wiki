@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, Gamepad2, Home, Sliders, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, Gamepad2, Home, Settings, Volume2, VolumeX } from 'lucide-react';
 import { playCancelSound, playHoverSound, isSoundEnabled, toggleSound } from '../lib/sound';
 
 type Screen =
@@ -103,7 +103,7 @@ export function Header({
             title="システム設定"
             className="flex min-h-[40px] min-w-[40px] sm:min-h-[42px] sm:min-w-[42px] items-center justify-center border-2 border-slate-700 bg-[#121622] px-2 text-slate-300 hover:border-amber-400 hover:text-amber-300 active:scale-95 cursor-pointer"
           >
-            <Sliders className="h-4 w-4" />
+            <Settings className="h-4 w-4" />
           </button>
 
           {onBack && (

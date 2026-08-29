@@ -66,6 +66,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   const handleClose = () => {
     playModalCloseSound();
     onClose();
+    window.dispatchEvent(new CustomEvent('survival-wiki:settings-closed'));
   };
 
   if (soundStudioOpen) return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;

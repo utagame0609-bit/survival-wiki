@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
 
+let bgmSaveQueue: Promise<void> = Promise.resolve();
+
 export type UserSoundSettings = {
   seVolume: number;
   seReverb: number;
@@ -69,6 +71,7 @@ export async function saveUserSoundSettings(settings: UserSoundSettings): Promis
 }
 
 export async function loadUserBgmVolume(): Promise<number> {
+  await bgmSaveQueue;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -97,23 +100,27 @@ export async function loadUserBgmVolume(): Promise<number> {
   return Math.min(100, Math.max(0, Math.round(data.bgm_volume ?? 30)));
 }
 
-export async function saveUserBgmVolume(value: number): Promise<void> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export function saveUserBgmVolume(value: number): Promise<void> {
+  const normalized = Math.min(100, Math.max(0, Math.round(value)));
+  bgmSaveQueue = bgmSaveQueue.catch(() => undefined).then(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) return;
+    if (!user) return;
 
-  const { error } = await supabase
-    .from('user_settings')
-    .upsert(
-      {
-        user_id: user.id,
-        bgm_volume: Math.min(100, Math.max(0, Math.round(value))),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' },
-    );
+    const { error } = await supabase
+      .from('user_settings')
+      .upsert(
+        {
+          user_id: user.id,
+          bgm_volume: normalized,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      );
 
-  if (error) throw error;
+    if (error) throw error;
+  });
+  return bgmSaveQueue;
 }
