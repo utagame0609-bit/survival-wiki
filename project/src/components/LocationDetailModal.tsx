@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, Edit3, Share2, Shield, Trash2, Users, X } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
@@ -60,7 +61,7 @@ export function LocationDetailModal({
     onClose();
   };
 
-  return (
+  return createPortal((
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
       onMouseDown={(event) => {
@@ -270,5 +271,5 @@ export function LocationDetailModal({
         />
       )}
     </div>
-  );
+  ), document.body);
 }

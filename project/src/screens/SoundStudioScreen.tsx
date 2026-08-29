@@ -20,6 +20,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     stopWorldBgm(0);
     return () => {
+      playWorldBgm();
       stopActiveAudio();
     };
   }, []);
