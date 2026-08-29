@@ -52,7 +52,7 @@ function renderBoldText(text: string, locationLinks: LocationLink[], keyPrefix: 
         onClick={match.location.onClick}
         onMouseEnter={playHoverSound}
         onFocus={playHoverSound}
-        className="font-semibold text-[#36c] hover:underline"
+        className="font-semibold text-[#36c] hover:underline break-words [overflow-wrap:anywhere]"
       >
         {text.slice(match.index, match.index + match.length)}
       </button>,
@@ -81,11 +81,11 @@ function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): React
     if (!part) return null;
     if (part.startsWith('**') && part.endsWith('**')) {
       const boldText = part.slice(2, -2);
-      return <span key={index} className="font-semibold">{renderBoldText(boldText, locationLinks, `bold-${index}`)}</span>;
+      return <span key={index} className="font-semibold break-words [overflow-wrap:anywhere]">{renderBoldText(boldText, locationLinks, `bold-${index}`)}</span>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
       return (
-        <code key={index} className="rounded bg-stone-100 px-1 py-0.5 text-[0.9em]">
+        <code key={index} className="rounded bg-stone-100 px-1 py-0.5 text-[0.9em] break-all">
           {part.slice(1, -1)}
         </code>
       );
@@ -99,13 +99,13 @@ function inlineMarkdown(text: string, locationLinks: LocationLink[] = []): React
           onClick={location.onClick}
           onMouseEnter={playHoverSound}
           onFocus={playHoverSound}
-          className="text-[#36c] hover:underline"
+          className="text-[#36c] hover:underline break-words [overflow-wrap:anywhere]"
         >
           {part}
         </button>
       );
     }
-    return <span key={index}>{part}</span>;
+    return <span key={index} className="break-words [overflow-wrap:anywhere]">{part}</span>;
   });
 }
 
@@ -132,7 +132,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
     const text = paragraph.join(' ').trim();
     if (text) {
       blocks.push(
-        <p key={`p-${blocks.length}`} className="my-3">
+        <p key={`p-${blocks.length}`} className="my-3 min-w-0 max-w-full break-words [overflow-wrap:anywhere]">
           {inlineMarkdown(text, locationLinks)}
         </p>,
       );
@@ -143,7 +143,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   const flushList = () => {
     if (listItems.length === 0) return;
     blocks.push(
-      <ul key={`ul-${blocks.length}`} className="my-4 list-disc space-y-1 pl-6">
+      <ul key={`ul-${blocks.length}`} className="my-4 min-w-0 max-w-full list-disc space-y-1 pl-6 break-words [overflow-wrap:anywhere]">
         {listItems.map((item, index) => (
           <li key={index}>{inlineMarkdown(item, locationLinks)}</li>
         ))}
@@ -165,15 +165,15 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
     blocks.push(
       <div
         key={`table-${blocks.length}`}
-        className="my-5 overflow-x-auto border border-[#a2a9b1]"
+        className="my-5 max-w-full overflow-x-auto border border-[#a2a9b1]"
       >
-        <table className="w-full border-collapse text-left text-sm">
+        <table className="w-full min-w-[420px] border-collapse text-left text-sm">
           <thead className="bg-[#eaecf0]">
             <tr>
               {header.map((cell, index) => (
                 <th
                   key={index}
-                  className="border border-[#c8ccd1] px-3 py-2 font-semibold"
+                  className="border border-[#c8ccd1] px-3 py-2 font-semibold break-words [overflow-wrap:anywhere]"
                 >
                   {inlineMarkdown(cell, locationLinks)}
                 </th>
@@ -188,7 +188,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
                   {header.map((_, cellIndex) => (
                     <td
                       key={cellIndex}
-                      className="border border-[#c8ccd1] px-3 py-2 align-top"
+                      className="border border-[#c8ccd1] px-3 py-2 align-top break-words [overflow-wrap:anywhere]"
                     >
                       {inlineMarkdown(cells[cellIndex] ?? '', locationLinks)}
                     </td>
@@ -225,14 +225,14 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
       flushAll();
       const layout = photoCount % 4;
       const figureClass = layout === 0
-        ? 'my-6 sm:float-left sm:mr-5 sm:mb-3 w-full sm:w-80'
+        ? 'my-6 sm:float-left sm:mr-5 sm:mb-3 w-full sm:w-80 max-w-full'
         : layout === 1
-          ? 'my-6 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-64'
+          ? 'my-6 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-64 max-w-full'
           : layout === 2
-            ? 'my-6 sm:float-left sm:mr-5 sm:mb-3 w-full sm:w-72'
-            : 'my-6 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-56';
+            ? 'my-6 sm:float-left sm:mr-5 sm:mb-3 w-full sm:w-72 max-w-full'
+            : 'my-6 sm:float-right sm:ml-5 sm:mb-3 w-full sm:w-56 max-w-full';
 
-      const imageClass = 'w-full h-auto border border-[#c8ccd1] object-contain';
+      const imageClass = 'w-full max-w-full h-auto border border-[#c8ccd1] object-contain';
 
       blocks.push(
         <figure key={`photo-${index}`} className={figureClass}>
@@ -257,7 +257,7 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
       const match = trimmed.match(/^(#{1,6})\s+(.+)$/)!;
       const level = match[1].length;
       const text = match[2].replace(/^#+\s*/, '');
-      const common = 'scroll-mt-4 font-normal text-[#202122]';
+      const common = 'scroll-mt-4 min-w-0 max-w-full break-words [overflow-wrap:anywhere] font-normal text-[#202122]';
       const id = `wiki-heading-${headingCount++}`;
 
       if (level === 1) {
@@ -328,12 +328,12 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   const tableOfContents = headings.length >= 2 ? (
     <nav
       aria-label="目次"
-      className="md:pt-8 text-sm"
+      className="min-w-0 max-w-full text-sm md:pt-8"
     >
       <div className="mb-0 pb-2 font-semibold text-[#202122]">目次</div>
       <ol className="border-t border-[#eaecf0] pt-2 space-y-1">
         {headings.map((heading) => (
-          <li key={heading.id} className="min-w-0">
+          <li key={heading.id} className="min-w-0 max-w-full">
             <button
               type="button"
               onClick={() =>
@@ -355,14 +355,14 @@ export function MarkdownRenderer({ content, className = '', locationLinks = [] }
   ) : null;
 
   return (
-    <div className={`wiki-markdown h-full min-h-0 text-[15px] leading-7 ${className}`}>
+    <div className={`wiki-markdown min-w-0 max-w-full overflow-x-hidden text-[15px] leading-7 ${className}`}>
       {tableOfContents ? (
-        <div className="grid h-full min-h-0 grid-cols-1 gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-10">
-          <div className="min-h-0 md:overflow-hidden">{tableOfContents}</div>
-          <div className="min-h-0 overflow-y-auto pr-2 md:pr-4">{blocks}</div>
+        <div className="grid min-w-0 max-w-full grid-cols-1 gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-10">
+          <div className="min-w-0 max-w-full">{tableOfContents}</div>
+          <div className="min-w-0 max-w-full overflow-x-hidden">{blocks}</div>
         </div>
       ) : (
-        <div className="h-full min-h-0 overflow-y-auto pr-2 md:pr-4">{blocks}</div>
+        <div className="min-w-0 max-w-full overflow-x-hidden">{blocks}</div>
       )}
     </div>
   );
