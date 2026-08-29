@@ -29,11 +29,11 @@ export function LocationFormModal({ world, mode, editingLocation, saving, onSave
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-sm" onMouseDown={(event) => {
       if (event.target === event.currentTarget) { playCancelSound(); onCancel(); }
     }}>
-      <div className="relative w-full max-w-xl max-h-[94vh] overflow-hidden bg-[#161b27] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.16)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="relative w-full max-w-2xl max-h-[94vh] overflow-hidden bg-[#161b27] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.14)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 bg-[#111624] border-b-2 border-amber-500">
           <div className="min-w-0 flex items-center gap-2.5">
-            <span className="shrink-0 px-2 py-1 border border-amber-500/70 bg-amber-500/10 text-amber-300 text-[10px] sm:text-xs font-black font-mono tracking-wide">WORLD CONFIG</span>
-            <h2 className="min-w-0 text-sm sm:text-base font-black text-white truncate">{isEdit ? 'ワールド冒険の書を編集' : '新しいワールド冒険の書を作成'}</h2>
+            <span className="shrink-0 px-2 py-1 border border-amber-500/70 bg-amber-500/10 text-amber-300 text-[10px] sm:text-xs font-black font-mono tracking-wide">{isEdit ? 'EDIT' : 'QUICK LOG // 冒険記録'}</span>
+            <h2 className="min-w-0 text-sm sm:text-base font-black text-white truncate">{isEdit ? 'ロケーション編集' : '新しい場所・体験を記録する'}</h2>
           </div>
           <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} disabled={saving} className="shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center text-slate-400 border border-transparent hover:text-white hover:border-slate-600 hover:bg-slate-900/50 transition-colors cursor-pointer disabled:opacity-50" aria-label="閉じる"><X className="w-5 h-5" /></button>
         </div>
