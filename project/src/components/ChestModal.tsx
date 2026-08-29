@@ -45,7 +45,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-3xl max-h-[90vh] bg-[#1e2330] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.28)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="w-full max-w-4xl max-h-[88vh] bg-[#1e2330] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.28)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-[#161a24] border-b-2 border-amber-500/60 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span aria-hidden="true" className="relative flex h-7 w-7 shrink-0 items-center justify-center border border-amber-400 bg-amber-500/20 text-amber-300 font-bold text-xs">📦</span>
