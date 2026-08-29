@@ -167,6 +167,11 @@ export function WikiTabModern({
       return;
     }
 
+    if (!generationReveal.article || !generationReveal.line) {
+      setTypedReveal('');
+      return;
+    }
+
     let index = 0;
     setTypedReveal('');
     const line = generationReveal.line;
@@ -243,20 +248,26 @@ export function WikiTabModern({
   const handleGenerate = async () => {
     const now = Date.now();
     if (generating || resetting || article !== null || !style || locations.length === 0 || now < cooldownUntil) return;
+
+    const selectedStyle = style;
     setGenerating(true);
     setError('');
+    setTypedReveal('');
+    setGenerationReveal({ style: selectedStyle, article: '', line: '' });
     playWikiGeneratingNoiseSound();
+
     try {
-      const result = await openRouterTestProvider.generate({ world, locations, style });
-      await saveWikiArticle(world.id, style, result.content);
-      setSaved((current) => ({ ...current, [style]: true }));
+      const result = await openRouterTestProvider.generate({ world, locations, style: selectedStyle });
+      await saveWikiArticle(world.id, selectedStyle, result.content);
+      setSaved((current) => ({ ...current, [selectedStyle]: true }));
       const parsed = splitWikiNarrator(result.content);
       setGenerationReveal({
-        style,
+        style: selectedStyle,
         article: result.content,
-        line: parsed.line || NARRATORS[style]?.quote || '……記録の編纂が完了した。',
+        line: parsed.line || NARRATORS[selectedStyle]?.quote || '……記録の編纂が完了した。',
       });
     } catch (e) {
+      setGenerationReveal(null);
       setError((e as Error).message);
     } finally {
       const until = Date.now() + WIKI_GENERATE_COOLDOWN_MS;
@@ -532,10 +543,20 @@ export function WikiTabModern({
             <div className={`font-mono text-xs font-black sm:text-sm ${NARRATORS[generationReveal.style]?.text ?? 'text-amber-300'}`}>
               【{NARRATORS[generationReveal.style]?.name}】
             </div>
-            <div className="mx-auto mt-3 min-h-[112px] max-w-md border border-slate-700 bg-[#050a14] px-5 py-5 text-left font-serif text-sm leading-7 text-slate-100 shadow-[0_0_30px_rgba(0,0,0,.65)] sm:text-base">
-              「{typedReveal}<span className="animate-pulse text-slate-500">▌</span>」
+            <div className="mt-2 flex items-center justify-center gap-2 text-[9px] font-mono tracking-[0.14em] text-slate-500 sm:text-[10px]">
+              {!generationReveal.line && <span className="h-2.5 w-2.5 rounded-full border border-slate-500 border-t-transparent animate-spin" />}
+              {generationReveal.line ? '編纂完了・所見を受信' : 'AI が冒険譚を編纂中...'}
             </div>
-            <div className="mt-3 text-[9px] font-mono tracking-[0.22em] text-slate-600">ARCHIVE COMPILED</div>
+            <div className="mx-auto mt-3 min-h-[112px] max-w-md border border-slate-700 bg-[#050a14] px-5 py-5 text-left font-serif text-sm leading-7 text-slate-100 shadow-[0_0_30px_rgba(0,0,0,.65)] sm:text-base">
+              {generationReveal.line ? (
+                <>「{typedReveal}<span className="animate-pulse text-slate-500">▌</span>」</>
+              ) : (
+                <span className="block text-center text-xl tracking-[0.35em] text-slate-500 animate-pulse">……</span>
+              )}
+            </div>
+            <div className="mt-3 text-[9px] font-mono tracking-[0.22em] text-slate-600">
+              {generationReveal.line ? 'ARCHIVE COMPILED' : 'ANALYZING ARCHIVE...'}
+            </div>
           </div>
         </div>
       )}
