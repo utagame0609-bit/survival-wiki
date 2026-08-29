@@ -8,7 +8,7 @@ import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { isWorldBgmPlaying, playWorldBgm, stopWorldBgm } from '@/lib/bgm';
-import { playCancelSound, playConfirmSound, playHoverSound } from '@/lib/sound';
+import { playCancelSound, playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   const [reverb, setReverb] = useState<number>(() => Math.round(getStoredReverbAmount() * 100));
@@ -116,7 +116,8 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
             </div>
             <span className="text-sm font-bold text-amber-400 font-mono">{reverb}%</span>
           </div>
-          <input aria-label="サウンドスタジオの残響量" type="range" min="0" max="100" value={reverb} onChange={(event) => handleReverbChange(Number(event.target.value))} className="w-full h-2 bg-[#12151f] rounded-lg appearance-none cursor-pointer accent-amber-500" />
+          <input aria-label="サウンドスタジオの残響量" type="range" min="0" max="100" value={reverb} onChange={(event) => handleReverbChange(Number(event.target.value))}
+          onFocus={playInputFocusSound} className="w-full h-2 bg-[#12151f] rounded-lg appearance-none cursor-pointer accent-amber-500" />
           <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 font-mono">
             <span>DRY (0% - クリスプ・直接音)</span><span>DUNGEON (50% - 地下洞窟)</span><span>CATHEDRAL (100% - 深宇宙)</span>
           </div>

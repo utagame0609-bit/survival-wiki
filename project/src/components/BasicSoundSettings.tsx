@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
 import { loadUserBgmVolume, saveUserBgmVolume, saveUserSoundSettings } from '@/lib/userSoundSettings';
 import { getMasterBgmVolume, setMasterBgmVolume } from '@/lib/bgm';
-import { getSoundVolume, isSoundEnabled, playHoverSound, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
+import { getSoundVolume, isSoundEnabled, playHoverSound, playInputFocusSound, playToggleSound, setSoundVolume, toggleSound } from '@/lib/sound';
 
 export function BasicSoundSettings() {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
@@ -77,6 +77,7 @@ export function BasicSoundSettings() {
           step="1"
           value={masterBgmVolume}
           onChange={(event) => handleMasterBgmVolumeChange(Number(event.target.value))}
+          onFocus={playInputFocusSound}
           className="w-full cursor-pointer accent-cyan-400"
         />
         <p className="text-[10px] leading-4 text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
@@ -98,6 +99,7 @@ export function BasicSoundSettings() {
           step="1"
           value={reverbAmount}
           onChange={(event) => handleReverbChange(Number(event.target.value))}
+          onFocus={playInputFocusSound}
           className="w-full cursor-pointer accent-violet-400"
         />
         <p className="text-[10px] leading-4 text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
@@ -132,6 +134,7 @@ export function BasicSoundSettings() {
           step="1"
           value={soundVolume}
           onChange={(event) => handleVolumeChange(Number(event.target.value))}
+          onFocus={playInputFocusSound}
           className="w-full cursor-pointer accent-amber-500"
         />
       </section>
