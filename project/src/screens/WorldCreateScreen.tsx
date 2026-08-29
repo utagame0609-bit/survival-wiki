@@ -1,18 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Camera,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Shield,
+  Sparkles,
+  Trash2,
+  User,
+  Users,
+  X,
+} from 'lucide-react';
+import { createWorld, updateWorld, fetchWorld, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playAchievementSound, playCloseSound, playModalCloseSound, playSaveSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
+import {
+  playAchievementSound,
+  playAddSound,
+  playCloseSound,
+  playDeleteSound,
+  playHoverSound,
+  playInputFocusSound,
+  playModalCloseSound,
+  playSaveSound,
+} from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
-import { WorldMemberFields, type MemberPhotoState } from '@/components/WorldMemberFields';
 import { WORLD_PRESET_AVATAR_LIST } from '@/assets/worldPresetAvatars';
+
+type MemberPhotoState = {
+  name: string;
+  file: File | null;
+  previewUrl: string;
+  existingPath: string | null;
+};
 
 export function WorldCreateScreen({
   gameId,
-  gameName,
+  gameName: _gameName,
   worldId,
-  navigate,
+  navigate: _navigate,
   goBack,
 }: {
   gameId: string;
@@ -26,14 +53,17 @@ export function WorldCreateScreen({
   const [player, setPlayer] = useState('');
   const [playerPhotoFile, setPlayerPhotoFile] = useState<File | null>(null);
   const [playerPhotoPreview, setPlayerPhotoPreview] = useState('');
-  const [playerExistingPath, setPlayerExistingPath] = useState<string | null>(null);
   const [memo, setMemo] = useState('');
   const [members, setMembers] = useState<MemberPhotoState[]>([
     { name: '', file: null, previewUrl: '', existingPath: null },
   ]);
+  const [showOptionalSection, setShowOptionalSection] = useState(isEdit);
+  const [selectedPresetKey, setSelectedPresetKey] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
+
+  const configuredMembers = useMemo(() => members.filter((member) => member.name.trim()), [members]);
 
   useEffect(() => {
     playWorldBgm();
@@ -50,54 +80,64 @@ export function WorldCreateScreen({
   useEffect(() => {
     if (!worldId) return;
 
+    let active = true;
+    setLoading(true);
+    setError('');
+
     fetchWorld(worldId)
-      .then(async (w) => {
-        if (!w) return;
+      .then(async (world) => {
+        if (!world || !active) return;
 
-        setName(w.name);
-        setPlayer(w.player ?? '');
-        setMemo(w.memo ?? '');
-        setPlayerExistingPath(w.player_photo_path ?? null);
+        setName(world.name);
+        setPlayer(world.player ?? '');
+        setMemo(world.memo ?? '');
+        setShowOptionalSection(true);
 
-        if (w.player_photo_path) {
-          try {
-            setPlayerPhotoPreview(await getPhotoUrl(w.player_photo_path));
-          } catch {
-            setPlayerPhotoPreview('');
-          }
+        if (world.player_photo_path) {
+          setPlayerPhotoPreview(await getPhotoUrl(world.player_photo_path).catch(() => ''));
+        } else {
+          setPlayerPhotoPreview('');
         }
 
         const loadedMembers = await Promise.all(
-          w.members.map(async (m) => ({
-            name: m.name,
+          world.members.map(async (member) => ({
+            name: member.name,
             file: null,
-            previewUrl: m.photo_path ? await getPhotoUrl(m.photo_path).catch(() => '') : '',
-            existingPath: m.photo_path ?? null,
+            previewUrl: member.photo_path ? await getPhotoUrl(member.photo_path).catch(() => '') : '',
+            existingPath: member.photo_path ?? null,
           })),
         );
 
-        setMembers([
-          ...loadedMembers,
-          { name: '', file: null, previewUrl: '', existingPath: null },
-        ]);
+        if (!active) return;
+        setMembers(
+          loadedMembers.length > 0
+            ? loadedMembers
+            : [{ name: '', file: null, previewUrl: '', existingPath: null }],
+        );
       })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      .catch((e) => {
+        if (active) setError(e instanceof Error ? e.message : 'ワールド情報の読み込みに失敗しました');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [worldId]);
 
-  const setPlayerPhoto = (file: File | null) => {
+  const setPlayerPhoto = (file: File | null, presetKey: string | null = null) => {
     if (!file) return;
-    if (playerPhotoPreview.startsWith('blob:')) {
-      URL.revokeObjectURL(playerPhotoPreview);
-    }
+    if (playerPhotoPreview.startsWith('blob:')) URL.revokeObjectURL(playerPhotoPreview);
     setPlayerPhotoFile(file);
     setPlayerPhotoPreview(URL.createObjectURL(file));
+    setSelectedPresetKey(presetKey);
   };
 
-  const setPlayerPreset = async (src: string) => {
+  const setPlayerPreset = (src: string, key: string) => {
     try {
-      const file = dataUrlToFile(src, 'player-preset.svg');
-      setPlayerPhoto(file);
+      setPlayerPhoto(dataUrlToFile(src, 'player-preset.svg'), key);
     } catch {
       setError('プリセット画像を読み込めませんでした');
     }
@@ -105,35 +145,72 @@ export function WorldCreateScreen({
 
   const setMemberPhoto = (index: number, file: File | null) => {
     if (!file) return;
-
     setMembers((current) =>
-      current.map((member, i) => {
-        if (i !== index) return member;
-        if (member.previewUrl.startsWith('blob:')) {
-          URL.revokeObjectURL(member.previewUrl);
-        }
-        return {
-          ...member,
-          file,
-          previewUrl: URL.createObjectURL(file),
-        };
+      current.map((member, memberIndex) => {
+        if (memberIndex !== index) return member;
+        if (member.previewUrl.startsWith('blob:')) URL.revokeObjectURL(member.previewUrl);
+        return { ...member, file, previewUrl: URL.createObjectURL(file) };
       }),
     );
   };
 
-  const updateMemberName = (index: number, value: string) =>
+  const updateMemberName = (index: number, value: string) => {
     setMembers((current) =>
-      current.map((member, i) => (i === index ? { ...member, name: value } : member)),
+      current.map((member, memberIndex) =>
+        memberIndex === index ? { ...member, name: value } : member,
+      ),
     );
+  };
 
-  const addMember = () =>
+  const addMember = () => {
+    playAddSound();
     setMembers((current) => [
       ...current,
       { name: '', file: null, previewUrl: '', existingPath: null },
     ]);
+  };
 
-  const removeMember = (index: number) =>
-    setMembers((current) => current.filter((_, i) => i !== index));
+  const removeMember = (index: number) => {
+    playDeleteSound();
+    setMembers((current) => {
+      const target = current[index];
+      if (target?.previewUrl.startsWith('blob:')) URL.revokeObjectURL(target.previewUrl);
+      const next = current.filter((_, memberIndex) => memberIndex !== index);
+      return next.length > 0
+        ? next
+        : [{ name: '', file: null, previewUrl: '', existingPath: null }];
+    });
+  };
+
+  const closeModal = (modalSound = false) => {
+    if (modalSound) playModalCloseSound();
+    else playCloseSound();
+    goBack();
+  };
+
+  const buildMemberInputs = async () => {
+    const namedMembers = members.filter((member) => member.name.trim());
+
+    return Promise.all(
+      namedMembers.map(async (member, index) => {
+        if (member.file) {
+          return { name: member.name.trim(), photoFile: member.file };
+        }
+
+        if (member.existingPath) {
+          const blob = await fetchPhotoBlob(member.existingPath);
+          return {
+            name: member.name.trim(),
+            photoFile: new File([blob], `member-${index + 1}.webp`, {
+              type: blob.type || 'image/webp',
+            }),
+          };
+        }
+
+        return { name: member.name.trim(), photoFile: null };
+      }),
+    );
+  };
 
   const handleSave = async () => {
     setError('');
@@ -145,89 +222,26 @@ export function WorldCreateScreen({
     setSaving(true);
 
     try {
-      const memberNames = members.map((m) => m.name.trim()).filter(Boolean);
-      const oldPlayerPath = playerExistingPath;
-      const existingMemberBlobs = new Map<string, Blob>();
-
-      if (isEdit) {
-        for (const member of members.filter((m) => m.name.trim() && m.existingPath && !m.file)) {
-          if (member.existingPath) {
-            existingMemberBlobs.set(member.existingPath, await fetchPhotoBlob(member.existingPath));
-          }
-        }
-      }
-
-      let savedWorldId = worldId;
+      const memberInputs = await buildMemberInputs();
+      const payload = {
+        name: name.trim(),
+        player: player.trim(),
+        memo: memo.trim(),
+        members: memberInputs,
+        playerPhotoFile,
+      };
 
       if (isEdit && worldId) {
-        await updateWorld(worldId, {
-          name,
-          player,
-          memo,
-          members: memberNames,
-        });
-        savedWorldId = worldId;
+        await updateWorld(worldId, payload);
+        playSaveSound();
       } else {
-        const created = await createWorld(gameId, {
-          name,
-          player,
-          memo,
-          members: memberNames,
-        });
-        savedWorldId = created.id;
+        await createWorld(gameId, payload);
+        playAchievementSound();
       }
-
-      const refreshed = savedWorldId ? await fetchWorld(savedWorldId) : null;
-      if (!refreshed) {
-        throw new Error('保存したワールドを確認できませんでした');
-      }
-
-      if (playerPhotoFile) {
-        await saveWorldPlayerPhoto(savedWorldId as string, playerPhotoFile);
-      } else if (oldPlayerPath) {
-        const blob = await fetchPhotoBlob(oldPlayerPath);
-        await saveWorldPlayerPhoto(
-          savedWorldId as string,
-          new File([blob], 'player.webp', { type: 'image/webp' }),
-        );
-        if (oldPlayerPath !== refreshed.player_photo_path) {
-          await deleteWorldMemberPhoto(oldPlayerPath).catch(() => undefined);
-        }
-      }
-
-      const savedMembers = refreshed.members;
-      const oldPathsToDelete: string[] = [];
-
-      for (let index = 0; index < memberNames.length; index += 1) {
-        const memberState = members.filter((m) => m.name.trim())[index];
-        const savedMember = savedMembers[index];
-        if (!memberState || !savedMember) continue;
-
-        if (memberState.file) {
-          await saveWorldMemberPhoto(savedMember.id, memberState.file);
-        } else if (memberState.existingPath) {
-          const blob = existingMemberBlobs.get(memberState.existingPath);
-          if (!blob) {
-            throw new Error('既存メンバー写真を保持できませんでした');
-          }
-          await saveWorldMemberPhoto(
-            savedMember.id,
-            new File([blob], 'member.webp', { type: 'image/webp' }),
-          );
-          oldPathsToDelete.push(memberState.existingPath);
-        }
-      }
-
-      for (const path of oldPathsToDelete) {
-        await deleteWorldMemberPhoto(path).catch(() => undefined);
-      }
-
-      if (isEdit) playSaveSound();
-      else playAchievementSound();
 
       goBack();
     } catch (e) {
-      setError((e as Error).message);
+      setError(e instanceof Error ? e.message : 'ワールドの保存に失敗しました');
     } finally {
       setSaving(false);
     }
@@ -235,7 +249,7 @@ export function WorldCreateScreen({
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05080E]/80 p-3 backdrop-blur-sm sm:p-4">
         <Spinner label="読み込み中" />
       </div>
     );
@@ -243,89 +257,213 @@ export function WorldCreateScreen({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4 font-sans"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/80 p-3 backdrop-blur-sm sm:p-4 font-sans"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          playModalCloseSound();
-          navigate({ name: 'worldList', gameId, gameName });
-        }
+        if (event.target === event.currentTarget) closeModal(true);
       }}
     >
-      <div className="world-edit-modal-panel flex w-full max-w-lg max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2rem)] flex-col overflow-hidden bg-[#141b2d] border-2 border-amber-500/80 shadow-[0_0_35px_rgba(245,158,11,0.22)] text-slate-100">
-        <div className="flex shrink-0 items-center justify-between px-4 sm:px-5 py-3.5 border-b-2 border-amber-500/60 bg-[#0d1627]">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] sm:text-xs px-2 py-0.5 border border-amber-400 bg-amber-500/20 text-amber-300 font-bold">
-              WORLD CONFIG
-            </span>
-            <h2 className="text-sm sm:text-base font-bold text-white">
-              {isEdit ? 'ワールド冒険の書を編集' : '新しいワールド冒険の書を作成'}
+      <div className="world-edit-modal-panel hud-bracket relative my-auto flex w-full max-w-lg flex-col overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A] text-[#F8FAFC] shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3.5">
+          <div className="flex min-w-0 items-center gap-2">
+            <Shield className="h-4 w-4 shrink-0 text-[#F59E0B]" />
+            <h2 className="truncate text-sm font-black tracking-wider text-[#F8FAFC]">
+              {isEdit ? 'ワールド設定の編集' : '新規冒険の書の作成'}
             </h2>
           </div>
-
           <button
             type="button"
-            onClick={() => {
-              playCloseSound();
-              goBack();
-            }}
+            onClick={() => closeModal()}
             onMouseEnter={playHoverSound}
-            className="flex h-8 w-8 items-center justify-center text-slate-300 hover:text-white cursor-pointer"
+            className="rounded p-1 text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC] cursor-pointer"
             aria-label="閉じる"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4">
+        <div className="max-h-[80vh] flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           {error && <ErrorBanner message={error} />}
 
-          <Field label="WORLD NAME // ワールド名" required>
-            <input
-              autoFocus={!isEdit}
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              onFocus={playInputFocusSound}
-              placeholder="例: サバイバル開拓記 第1世界"
-              className="modal-input text-sm"
-            />
-          </Field>
+          <div className="space-y-3.5">
+            <div>
+              <label className="mb-1.5 flex items-center justify-between gap-2 text-xs font-bold text-[#F8FAFC]">
+                <span>ワールド名（冒険の書タイトル）</span>
+                <span className="shrink-0 rounded border border-[#F59E0B]/30 bg-[#F59E0B]/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#F59E0B]">
+                  必須
+                </span>
+              </label>
+              <input
+                autoFocus={!isEdit}
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                onFocus={playInputFocusSound}
+                placeholder="例: エメラルド諸島開拓記、天空古城の探索"
+                className="world-modal-input text-sm"
+              />
+            </div>
 
-          <WorldMemberFields
-            player={player}
-            playerPhotoPreview={playerPhotoPreview}
-            members={members}
-            onPlayerChange={setPlayer}
-            onPlayerPhotoChange={setPlayerPhoto}
-            onPlayerPresetChange={setPlayerPreset}
-            onMemberPhotoChange={setMemberPhoto}
-            onMemberNameChange={updateMemberName}
-            onAddMember={addMember}
-            onRemoveMember={removeMember}
-          />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-[#94A3B8]">
+                  主開拓者 / プレイヤー名
+                </label>
+                <input
+                  type="text"
+                  value={player}
+                  onChange={(event) => setPlayer(event.target.value)}
+                  onFocus={playInputFocusSound}
+                  placeholder="例: Uta_Adventurer"
+                  className="world-modal-input text-sm"
+                />
+              </div>
 
-          <Field label="WORLD MEMO // 探検概要・目標">
-            <textarea
-              value={memo}
-              onChange={(event) => setMemo(event.target.value)}
-              onFocus={playInputFocusSound}
-              placeholder="ワールドの概要、難易度、攻略目標など"
-              rows={3}
-              className="modal-input resize-none text-xs sm:text-sm"
-            />
-          </Field>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-[#94A3B8]">
+                  プレイヤーアバター / 写真
+                </label>
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                  <PhotoPicker
+                    previewUrl={playerPhotoPreview}
+                    onChange={(file) => setPlayerPhoto(file)}
+                    label="プレイヤー写真"
+                    accent="amber"
+                    size="preset"
+                  />
+                  {WORLD_PRESET_AVATAR_LIST.map((preset) => {
+                    const selected = selectedPresetKey === preset.key;
+                    return (
+                      <button
+                        key={preset.key}
+                        type="button"
+                        onClick={() => setPlayerPreset(preset.src, preset.key)}
+                        onMouseEnter={playHoverSound}
+                        className={`relative h-9 w-9 shrink-0 overflow-hidden rounded border-2 transition-all cursor-pointer ${
+                          selected
+                            ? 'scale-105 border-[#F59E0B] ring-2 ring-[#F59E0B]/30'
+                            : 'border-[#334155] opacity-60 hover:opacity-100'
+                        }`}
+                        aria-label={`${preset.alt}プリセット`}
+                        title={`${preset.alt}プリセット`}
+                      >
+                        <img src={preset.src} alt={preset.alt} className="h-full w-full object-cover pixelated" />
+                        {selected && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#F59E0B]/20">
+                            <Check className="h-3 w-3 text-[#F59E0B] stroke-[3]" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#1E293B] pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                playHoverSound();
+                setShowOptionalSection((current) => !current);
+              }}
+              onMouseEnter={playHoverSound}
+              className="flex w-full items-center justify-between gap-2 py-2 text-left text-xs font-bold text-[#94A3B8] transition-colors hover:text-[#06B6D4] cursor-pointer"
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 shrink-0 text-[#06B6D4]" />
+                <span className="min-w-0">任意設定（同行メンバー・探検メモ）</span>
+                <span className="hidden shrink-0 font-mono text-[10px] text-[#64748B] min-[390px]:inline">
+                  ({configuredMembers.length} 名設定中)
+                </span>
+              </div>
+              {showOptionalSection ? (
+                <ChevronUp className="h-4 w-4 shrink-0" />
+              ) : (
+                <ChevronDown className="h-4 w-4 shrink-0" />
+              )}
+            </button>
+
+            {showOptionalSection && (
+              <div className="mt-3 space-y-3.5 rounded-lg border border-[#1E293B] bg-[#0B1018]/60 p-3">
+                <div>
+                  <label className="mb-2 flex items-center justify-between gap-2 text-xs font-bold text-[#94A3B8]">
+                    <span>同行メンバー（パーティ）</span>
+                    <span className="whitespace-nowrap font-mono text-[10px] text-[#64748B]">
+                      同行 {configuredMembers.length}名
+                    </span>
+                  </label>
+
+                  <div className="space-y-2">
+                    {members.map((member, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <PhotoPicker
+                          previewUrl={member.previewUrl}
+                          onChange={(file) => setMemberPhoto(index, file)}
+                          label={`メンバー${index + 1}写真`}
+                          accent="cyan"
+                        />
+                        <input
+                          type="text"
+                          value={member.name}
+                          onChange={(event) => updateMemberName(index, event.target.value)}
+                          onFocus={playInputFocusSound}
+                          placeholder={`メンバー${index + 1} (例: Alisa)`}
+                          className="world-modal-input min-w-0 flex-1 text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeMember(index)}
+                          onMouseEnter={playHoverSound}
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[#334155] bg-[#161F30] text-[#64748B] transition-colors hover:border-[#EF4444]/60 hover:bg-[#2A161C] hover:text-[#EF4444] cursor-pointer"
+                          aria-label={`メンバー${index + 1}を削除`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={addMember}
+                      onMouseEnter={playHoverSound}
+                      className="flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded border border-[#06B6D4]/50 bg-[#06B6D4]/10 px-3 text-xs font-bold text-[#06B6D4] transition-colors hover:bg-[#06B6D4]/20 cursor-pointer"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>同行メンバーを追加</span>
+                    </button>
+                  </div>
+
+                  {configuredMembers.length === 0 && (
+                    <p className="mt-2 text-[11px] text-[#64748B]">同行メンバーなし（単独開拓モード）</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-[#94A3B8]">
+                    探検概要・目標メモ
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={memo}
+                    onChange={(event) => setMemo(event.target.value)}
+                    onFocus={playInputFocusSound}
+                    placeholder="例: 東部沿岸の拠点設営と古代水没神殿の解明を目指す探検プロジェクト。"
+                    className="world-modal-input resize-none text-xs"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex shrink-0 gap-3 px-4 sm:px-5 py-4 border-t-2 border-amber-500/20 bg-[#0d1627]">
+        <div className="flex shrink-0 items-center justify-end gap-2.5 border-t border-[#1E293B] bg-[#0B1018] px-4 py-3 sm:px-5">
           <button
             type="button"
-            onClick={() => {
-              playCloseSound();
-              goBack();
-            }}
+            onClick={() => closeModal()}
             onMouseEnter={playHoverSound}
             disabled={saving}
-            className="flex-1 min-h-[44px] py-2.5 bg-[#1a2333] border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-all text-xs sm:text-sm cursor-pointer"
+            className="whitespace-nowrap rounded px-3.5 py-2 text-xs font-bold text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC] disabled:opacity-50 cursor-pointer"
           >
             キャンセル
           </button>
@@ -334,29 +472,30 @@ export function WorldCreateScreen({
             onClick={handleSave}
             onMouseEnter={playHoverSound}
             disabled={saving}
-            className="flex-1 min-h-[44px] py-2.5 bg-amber-500 text-slate-950 font-black border-b-2 border-amber-700 shadow-[0_0_16px_rgba(245,158,11,0.2)] hover:bg-amber-400 disabled:opacity-50 transition-all text-xs sm:text-sm cursor-pointer"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded bg-[#F59E0B] px-4 sm:px-5 py-2 text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all hover:bg-[#D97706] active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            ▶ {saving ? '保存中...' : isEdit ? '更新する' : '作成して開始'}
+            <Sparkles className="h-3.5 w-3.5 shrink-0 fill-current" />
+            <span>{saving ? '保存中...' : isEdit ? 'ワールドを更新' : '作成して冒険を開始'}</span>
           </button>
         </div>
       </div>
 
       <style>{`
-        .modal-input {
+        .world-modal-input {
           width: 100%;
-          min-height: 42px;
-          padding: 0.65rem 0.75rem;
+          min-height: 40px;
+          padding: 0.55rem 0.75rem;
           border: 1px solid #334155;
-          background: #090d16;
-          color: #f1f5f9;
+          border-radius: 0.375rem;
+          background: #0B1018;
+          color: #F8FAFC;
           outline: none;
           transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
         }
-        .modal-input::placeholder { color: #64748b; }
-        .modal-input:focus {
-          border-color: #38bdf8;
-          background: #0d1627;
-          box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56,189,248,0.15);
+        .world-modal-input::placeholder { color: #64748B; }
+        .world-modal-input:focus {
+          border-color: #F59E0B;
+          box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.28);
         }
         .world-edit-modal-panel {
           animation: world-edit-modal-in 180ms cubic-bezier(.22,.8,.35,1) both;
@@ -374,23 +513,45 @@ export function WorldCreateScreen({
   );
 }
 
-function Field({
+function PhotoPicker({
+  previewUrl,
+  onChange,
   label,
-  required,
-  children,
+  accent,
+  size = 'normal',
 }: {
+  previewUrl: string;
+  onChange: (file: File | null) => void;
   label: string;
-  required?: boolean;
-  children: React.ReactNode;
+  accent: 'amber' | 'cyan';
+  size?: 'normal' | 'preset';
 }) {
+  const accentClass =
+    accent === 'amber'
+      ? 'border-[#F59E0B] text-[#F59E0B] hover:border-[#FBBF24]'
+      : 'border-[#06B6D4] text-[#06B6D4] hover:border-[#67E8F9]';
+  const sizeClass = size === 'preset' ? 'h-9 w-9 rounded' : 'h-9 w-10 rounded';
+
   return (
-    <div>
-      <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
-        {label}
-        {required && <span className="text-amber-400 ml-1">*</span>}
-      </label>
-      {children}
-    </div>
+    <label
+      onMouseEnter={playHoverSound}
+      className={`relative ${sizeClass} flex shrink-0 cursor-pointer items-center justify-center overflow-hidden border-2 bg-[#05080E] transition-all ${accentClass}`}
+      title={label}
+    >
+      {previewUrl ? (
+        <img src={previewUrl} alt="" className="h-full w-full object-cover pixelated" />
+      ) : accent === 'amber' ? (
+        <User className="h-4 w-4" />
+      ) : (
+        <Camera className="h-4 w-4" />
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+      />
+    </label>
   );
 }
 
