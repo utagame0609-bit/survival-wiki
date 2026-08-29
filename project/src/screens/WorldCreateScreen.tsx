@@ -37,10 +37,10 @@ type MemberPhotoState = {
 
 export function WorldCreateScreen({
   gameId,
-  gameName: _gameName,
+  gameName,
   worldId,
-  navigate: _navigate,
-  goBack,
+  navigate,
+  goBack: _goBack,
 }: {
   gameId: string;
   gameName: string;
@@ -182,10 +182,14 @@ export function WorldCreateScreen({
     });
   };
 
+  const returnToWorldList = () => {
+    navigate({ name: 'worldList', gameId, gameName });
+  };
+
   const closeModal = (modalSound = false) => {
     if (modalSound) playModalCloseSound();
     else playCloseSound();
-    goBack();
+    returnToWorldList();
   };
 
   const buildMemberInputs = async () => {
@@ -197,8 +201,8 @@ export function WorldCreateScreen({
           return { name: member.name.trim(), photoFile: member.file };
         }
 
-        if (member.existingPath) {
-          const blob = await fetchPhotoBlob(member.existingPath);
+        if (member.existingPath && member.previewUrl) {
+          const blob = await fetchPreviewBlob(member.previewUrl);
           return {
             name: member.name.trim(),
             photoFile: new File([blob], `member-${index + 1}.webp`, {
@@ -239,7 +243,7 @@ export function WorldCreateScreen({
         playAchievementSound();
       }
 
-      goBack();
+      returnToWorldList();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'ワールドの保存に失敗しました');
     } finally {
@@ -572,9 +576,8 @@ function dataUrlToFile(dataUrl: string, filename: string): File {
   return new File([bytes], filename, { type: mime });
 }
 
-async function fetchPhotoBlob(storagePath: string): Promise<Blob> {
-  const url = await getPhotoUrl(storagePath);
-  const response = await fetch(url);
+async function fetchPreviewBlob(previewUrl: string): Promise<Blob> {
+  const response = await fetch(previewUrl);
   if (!response.ok) throw new Error('既存写真を読み込めませんでした');
   return response.blob();
 }
