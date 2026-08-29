@@ -6,7 +6,6 @@ import { LocationsTab } from '@/screens/LocationsTab';
 import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { SettingsButton } from '@/components/SettingsModal';
 import { playModalOpenSound } from '@/lib/sound';
 import { stopNpcBgm } from '@/lib/bgm';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
@@ -103,7 +102,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
   };
 
   return (
-    <div className="relative min-h-screen bg-[#161922] text-white font-sans flex flex-col select-none overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden">
       <div className="scanline-overlay" />
       <Header title={world?.name || worldName} onBack={handleWorldBack} />
 
@@ -140,8 +139,6 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
           </>
         )}
       </div>
-
-      {!wikiArticleBack && <SettingsButton />}
 
       {wikiLocation && <WikiLocationDetailModal location={wikiLocation} onClose={handleCloseWikiLocation} />}
     </div>
