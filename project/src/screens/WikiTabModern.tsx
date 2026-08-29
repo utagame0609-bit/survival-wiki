@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ChevronDown, ChevronUp, Copy, RotateCcw, Share2, Sparkles } from 'lucide-react';
+import { AlertTriangle, BookOpen, ChevronDown, ChevronUp, Copy, RotateCcw, Share2, Sparkles } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
@@ -20,16 +20,28 @@ import { playNpcBgm, stopNpcBgm } from '@/lib/bgm';
 
 type WikiStyleId = 'wikipedia' | 'scp' | 'ancient';
 type SavedState = Record<WikiStyleId, boolean>;
-type GenerationReveal = { style: WikiStyleId; article: string; line: string };
+type RevealPhase = 'waiting' | 'result' | 'ready';
+type GenerationReveal = {
+  style: WikiStyleId;
+  phase: RevealPhase;
+  article: string;
+  line: string;
+};
 
 const EMPTY_SAVED: SavedState = { wikipedia: false, scp: false, ancient: false };
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 const NARRATOR_MARKER = /<!--WIKI_NARRATOR:([\s\S]*?)-->/;
 
-const styleMeta: Record<WikiStyleId, { title: string; shortTitle: string; subtitle: string; accent: string }> = {
-  wikipedia: { title: '百科事典 Wiki風', shortTitle: '百科事典', subtitle: '体系的・客観的解説', accent: 'text-amber-400' },
-  scp: { title: '特異事象報告 (SCP風)', shortTitle: 'SCP報告', subtitle: '調査員ログ・異常観測', accent: 'text-cyan-300' },
-  ancient: { title: '古代伝承の詩', shortTitle: '古代伝承', subtitle: '語り継がれる叙事詩・神話', accent: 'text-orange-400' },
+const WAITING_LINES: Record<WikiStyleId, string> = {
+  wikipedia: '少し待ちたまえ。君の散らかった足跡を、せめて学術資料として読める形に整えているところだ。',
+  scp: 'そのまま待機しろ。君の行動記録を機密資料として成立させるため、現在照合処理を行っている。',
+  ancient: 'しばし待つがよい。愚かなる旅人よ……そなたの足跡を、後世に残す言葉へと編み直しておる。',
+};
+
+const styleMeta: Record<WikiStyleId, { title: string; shortTitle: string; subtitle: string }> = {
+  wikipedia: { title: '百科事典 Wiki風', shortTitle: '百科事典', subtitle: '体系的・客観的解説' },
+  scp: { title: '特異事象報告 (SCP風)', shortTitle: 'SCP報告', subtitle: '調査員ログ・異常観測' },
+  ancient: { title: '古代伝承の詩', shortTitle: '古代伝承', subtitle: '語り継がれる叙事詩・神話' },
 };
 
 function uniquePhotos(locations: LocationWithPhotos[]) {
@@ -103,8 +115,8 @@ export function WikiTabModern({
   const [footerVisible, setFooterVisible] = useState(false);
   const [generationReveal, setGenerationReveal] = useState<GenerationReveal | null>(null);
   const [typedReveal, setTypedReveal] = useState('');
+  const [waitingComplete, setWaitingComplete] = useState(false);
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const revealFinishTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
 
   const load = async (nextStyle: WikiStyleId | null = style) => {
@@ -139,7 +151,6 @@ export function WikiTabModern({
     void load(style);
     return () => {
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-      if (revealFinishTimerRef.current) clearTimeout(revealFinishTimerRef.current);
     };
   }, [world.id, reloadKey, style]);
 
@@ -164,34 +175,43 @@ export function WikiTabModern({
   useEffect(() => {
     if (!generationReveal) {
       setTypedReveal('');
+      setWaitingComplete(false);
       return;
     }
 
-    if (!generationReveal.article || !generationReveal.line) {
-      setTypedReveal('');
-      return;
-    }
+    const text = generationReveal.phase === 'waiting'
+      ? WAITING_LINES[generationReveal.style]
+      : generationReveal.line;
+
+    if (!text || generationReveal.phase === 'ready') return;
 
     let index = 0;
     setTypedReveal('');
-    const line = generationReveal.line;
     const timer = window.setInterval(() => {
-      index = Math.min(line.length, index + 2);
-      setTypedReveal(line.slice(0, index));
+      index = Math.min(text.length, index + 2);
+      setTypedReveal(text.slice(0, index));
       if (index === 2 || index % 8 === 0) playDialogueCharSound();
-      if (index >= line.length) {
+
+      if (index >= text.length) {
         window.clearInterval(timer);
-        revealFinishTimerRef.current = setTimeout(() => {
-          setArticle(generationReveal.article);
-          setGenerationReveal(null);
-          playWikiCompleteSound();
-          window.scrollTo({ top: 0, behavior: 'auto' });
-        }, 850);
+        if (generationReveal.phase === 'waiting') {
+          setWaitingComplete(true);
+        } else {
+          setGenerationReveal((current) => current ? { ...current, phase: 'ready' } : current);
+        }
       }
     }, 62);
 
     return () => window.clearInterval(timer);
-  }, [generationReveal]);
+  }, [generationReveal?.style, generationReveal?.phase, generationReveal?.line]);
+
+  useEffect(() => {
+    if (!generationReveal || generationReveal.phase !== 'waiting' || !waitingComplete || !generationReveal.article) return;
+    const timer = window.setTimeout(() => {
+      setGenerationReveal((current) => current ? { ...current, phase: 'result' } : current);
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [generationReveal?.phase, generationReveal?.article, waitingComplete]);
 
   useEffect(() => {
     if (!article) return;
@@ -253,7 +273,8 @@ export function WikiTabModern({
     setGenerating(true);
     setError('');
     setTypedReveal('');
-    setGenerationReveal({ style: selectedStyle, article: '', line: '' });
+    setWaitingComplete(false);
+    setGenerationReveal({ style: selectedStyle, phase: 'waiting', article: '', line: '' });
     playWikiGeneratingNoiseSound();
 
     try {
@@ -261,11 +282,11 @@ export function WikiTabModern({
       await saveWikiArticle(world.id, selectedStyle, result.content);
       setSaved((current) => ({ ...current, [selectedStyle]: true }));
       const parsed = splitWikiNarrator(result.content);
-      setGenerationReveal({
-        style: selectedStyle,
+      setGenerationReveal((current) => current ? {
+        ...current,
         article: result.content,
         line: parsed.line || NARRATORS[selectedStyle]?.quote || '……記録の編纂が完了した。',
-      });
+      } : current);
     } catch (e) {
       setGenerationReveal(null);
       setError((e as Error).message);
@@ -276,6 +297,14 @@ export function WikiTabModern({
       cooldownTimerRef.current = setTimeout(() => setCooldownUntil(0), WIKI_GENERATE_COOLDOWN_MS);
       setGenerating(false);
     }
+  };
+
+  const openGeneratedArticle = () => {
+    if (!generationReveal?.article || generationReveal.phase !== 'ready') return;
+    setArticle(generationReveal.article);
+    setGenerationReveal(null);
+    playWikiCompleteSound();
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   const confirmReset = async () => {
@@ -360,15 +389,15 @@ export function WikiTabModern({
 
       {!hasArticle && (
         <section className="w-full min-w-0 border-2 border-cyan-500/70 bg-[#0f1424] p-3 sm:p-4 shadow-[0_4px_16px_rgba(0,0,0,.5)]">
-          <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5 mb-2.5">
-            <div className="flex items-center gap-2 min-w-0">
-              <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="mb-2.5 flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <Sparkles className="h-4 w-4 shrink-0 text-cyan-400" />
               <div className="min-w-0">
-                <h2 className="text-xs sm:text-sm font-bold text-cyan-300 font-mono truncate">冒険譚・年代記自動編纂</h2>
-                <p className="text-[9px] sm:text-[10px] text-slate-400 truncate">記録を、どんな世界の物語として残す？</p>
+                <h2 className="truncate font-mono text-xs font-bold text-cyan-300 sm:text-sm">冒険譚・年代記自動編纂</h2>
+                <p className="truncate text-[9px] text-slate-400 sm:text-[10px]">記録を、どんな世界の物語として残す？</p>
               </div>
             </div>
-            <span className="shrink-0 text-[9px] font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/40 px-1.5 py-0.5">
+            <span className="shrink-0 border border-cyan-500/40 bg-cyan-950/60 px-1.5 py-0.5 font-mono text-[9px] text-cyan-300">
               保存: {Object.values(saved).filter(Boolean).length}/3
             </span>
           </div>
@@ -395,10 +424,10 @@ export function WikiTabModern({
                   <div className="flex min-w-0 items-center gap-1.5">
                     <PixelNarrator style={id} compact />
                     <div className="min-w-0 flex-1">
-                      <div className={`truncate text-[9px] sm:text-[11px] leading-tight font-black ${selected ? 'text-amber-300' : 'text-slate-100'}`}>
+                      <div className={`truncate text-[9px] font-black leading-tight sm:text-[11px] ${selected ? 'text-amber-300' : 'text-slate-100'}`}>
                         {meta.shortTitle}
                       </div>
-                      <div className="mt-0.5 truncate text-[7px] sm:text-[8px] text-slate-500">{meta.subtitle}</div>
+                      <div className="mt-0.5 truncate text-[7px] text-slate-500 sm:text-[8px]">{meta.subtitle}</div>
                     </div>
                   </div>
                   {saved[id] && <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.8)]" aria-label="保存済み" />}
@@ -412,18 +441,12 @@ export function WikiTabModern({
             onClick={handleGenerate}
             onMouseEnter={playHoverSound}
             disabled={!style || saved[style] || locations.length === 0 || generating || resetting || cooldownUntil > Date.now()}
-            className="w-full mt-2.5 min-h-[44px] py-2.5 bg-cyan-500 text-black font-black font-mono text-xs sm:text-sm border-b-2 border-cyan-700 hover:bg-cyan-400 disabled:opacity-40 flex items-center justify-center gap-2 hover:-translate-y-[2px] transition-all"
+            className="mt-2.5 flex min-h-[44px] w-full items-center justify-center gap-2 border-b-2 border-cyan-700 bg-cyan-500 py-2.5 font-mono text-xs font-black text-black transition-all hover:-translate-y-[2px] hover:bg-cyan-400 disabled:opacity-40 sm:text-sm"
           >
-            {generating ? (
-              <>
-                <span className="h-4 w-4 rounded-full border-2 border-black border-t-transparent animate-spin" />AI が冒険譚を編纂中...
-              </>
-            ) : (
-              <><Sparkles className="w-4 h-4" />このワールドの Wiki 冒険譚を生成する</>
-            )}
+            <Sparkles className="h-4 w-4" />このワールドの Wiki 冒険譚を生成する
           </button>
-          {locations.length === 0 && <p className="mt-2 text-[9px] text-amber-400 text-center font-mono">※ まずロケーションを1件以上記録してください。</p>}
-          {locations.length > 0 && <p className="mt-2 text-[9px] sm:text-[10px] text-slate-500 leading-relaxed">記録されたメモ・写真・冒険ログを元に「旅の書」を編纂します。保存済みの人物はカードから直接開けます。</p>}
+          {locations.length === 0 && <p className="mt-2 text-center font-mono text-[9px] text-amber-400">※ まずロケーションを1件以上記録してください。</p>}
+          {locations.length > 0 && <p className="mt-2 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">記録されたメモ・写真・冒険ログを元に「旅の書」を編纂します。保存済みの人物はカードから直接開けます。</p>}
         </section>
       )}
 
@@ -442,16 +465,10 @@ export function WikiTabModern({
                     onMouseEnter={!active ? playHoverSound : undefined}
                     disabled={active}
                     title={active ? `${styleMeta[id].title}・表示中` : available ? `${styleMeta[id].title}を開く` : `${styleMeta[id].title}を生成する`}
-                    className={`flex min-w-0 items-center justify-center gap-1 border px-1.5 py-1 transition-all ${
-                      active
-                        ? 'border-amber-400 bg-amber-500/15 text-amber-300'
-                        : available
-                          ? 'border-slate-700 bg-[#0b101b] text-slate-300 hover:border-cyan-400 hover:text-cyan-300 hover:-translate-y-[2px]'
-                          : 'border-slate-800 bg-[#090d15] text-slate-500 opacity-60 hover:opacity-100 hover:border-slate-600 hover:-translate-y-[2px]'
-                    }`}
+                    className={`flex min-w-0 items-center justify-center gap-1 border px-1.5 py-1 transition-all ${active ? 'border-amber-400 bg-amber-500/15 text-amber-300' : available ? 'border-slate-700 bg-[#0b101b] text-slate-300 hover:-translate-y-[2px] hover:border-cyan-400 hover:text-cyan-300' : 'border-slate-800 bg-[#090d15] text-slate-500 opacity-60 hover:-translate-y-[2px] hover:border-slate-600 hover:opacity-100'}`}
                   >
                     <PixelNarrator style={id} compact />
-                    <span className="hidden min-w-0 truncate text-[8px] font-mono font-bold sm:inline">{styleMeta[id].shortTitle}</span>
+                    <span className="hidden min-w-0 truncate font-mono text-[8px] font-bold sm:inline">{styleMeta[id].shortTitle}</span>
                   </button>
                 );
               })}
@@ -463,7 +480,7 @@ export function WikiTabModern({
           {isWikipedia ? (
             <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border border-[#a2a9b1] bg-white text-[#202122] sm:mx-4">
               <div className="flex min-w-0 items-center gap-3 border-b border-[#c8ccd1] px-4 py-3 sm:px-6">
-                {mainPhotoUrl && <img src={mainPhotoUrl} alt="代表写真" className="h-10 w-10 shrink-0 object-cover border border-[#c8ccd1]" />}
+                {mainPhotoUrl && <img src={mainPhotoUrl} alt="代表写真" className="h-10 w-10 shrink-0 border border-[#c8ccd1] object-cover" />}
                 <div className="min-w-0">
                   <div className="truncate font-serif text-lg sm:text-2xl">ウタペディア</div>
                   <div className="truncate text-[10px] text-[#54595d]">Survival Wiki // {world.name}</div>
@@ -473,8 +490,8 @@ export function WikiTabModern({
                 <div className="min-w-0 max-w-full overflow-x-hidden">
                   <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} />
                 </div>
-                <aside className="min-w-0 h-fit border border-[#c8ccd1] bg-[#f8f9fa] p-3 text-sm">
-                  <div className="font-semibold border-b border-[#c8ccd1] pb-2">基本情報</div>
+                <aside className="h-fit min-w-0 border border-[#c8ccd1] bg-[#f8f9fa] p-3 text-sm">
+                  <div className="border-b border-[#c8ccd1] pb-2 font-semibold">基本情報</div>
                   <div className="mt-2 space-y-2">
                     <div><b>名称</b><div className="break-words">{world.name}</div></div>
                     <div><b>プレイヤー</b><div className="break-words">{world.player ?? '不明'}</div></div>
@@ -485,36 +502,21 @@ export function WikiTabModern({
               </div>
             </article>
           ) : (
-            <article className={`mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 p-4 sm:mx-4 sm:p-6 ${style === 'scp' ? 'bg-[#07141b] border-cyan-400/60 text-zinc-200' : 'bg-[#160e09] border-orange-500/60 text-[#ead8bf]'}`}>
+            <article className={`mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 p-4 sm:mx-4 sm:p-6 ${style === 'scp' ? 'border-cyan-400/60 bg-[#07141b] text-zinc-200' : 'border-orange-500/60 bg-[#160e09] text-[#ead8bf]'}`}>
               <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} className={style === 'ancient' ? 'font-serif' : 'font-sans'} />
             </article>
           )}
 
           <div ref={footerRef} className="border-t border-slate-800 bg-[#0f1424] px-3 py-3 sm:px-4">
             <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={handleShare}
-                onMouseEnter={playHoverSound}
-                className="min-h-[44px] border-2 border-cyan-500/60 bg-[#0d1624] text-cyan-300 font-bold hover:border-cyan-300 hover:bg-cyan-500/10 hover:-translate-y-[2px] transition-all flex items-center justify-center gap-1.5 text-[10px] sm:text-xs"
-              >
-                <Share2 className="w-4 h-4" />{shared ? '共有完了' : '共有'}
+              <button type="button" onClick={handleShare} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-cyan-500/60 bg-[#0d1624] text-[10px] font-bold text-cyan-300 transition-all hover:-translate-y-[2px] hover:border-cyan-300 hover:bg-cyan-500/10 sm:text-xs">
+                <Share2 className="h-4 w-4" />{shared ? '共有完了' : '共有'}
               </button>
-              <button
-                type="button"
-                onClick={handleCopy}
-                onMouseEnter={playHoverSound}
-                className="min-h-[44px] border-2 border-slate-700 bg-[#121724] text-slate-200 font-bold hover:border-cyan-400 hover:-translate-y-[2px] transition-all flex items-center justify-center gap-1.5 text-[10px] sm:text-xs"
-              >
-                <Copy className="w-4 h-4" />{copied ? 'コピー完了' : '本文コピー'}
+              <button type="button" onClick={handleCopy} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-200 transition-all hover:-translate-y-[2px] hover:border-cyan-400 sm:text-xs">
+                <Copy className="h-4 w-4" />{copied ? 'コピー完了' : '本文コピー'}
               </button>
-              <button
-                type="button"
-                onClick={() => setResetTarget(true)}
-                onMouseEnter={playHoverSound}
-                className="min-h-[44px] border-2 border-slate-700 bg-[#121724] text-slate-300 font-bold hover:border-amber-400 hover:text-amber-300 hover:-translate-y-[2px] transition-all flex items-center justify-center gap-1.5 text-[10px] sm:text-xs"
-              >
-                <RotateCcw className="w-4 h-4" />リセット
+              <button type="button" onClick={() => setResetTarget(true)} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-300 transition-all hover:-translate-y-[2px] hover:border-amber-400 hover:text-amber-300 sm:text-xs">
+                <RotateCcw className="h-4 w-4" />リセット
               </button>
             </div>
           </div>
@@ -528,47 +530,52 @@ export function WikiTabModern({
           onMouseEnter={playHoverSound}
           title={scrollTarget === 'top' ? 'ページ上部へ' : 'ページ最下部へ'}
           aria-label={scrollTarget === 'top' ? 'ページ上部へ移動' : 'ページ最下部へ移動'}
-          className="fixed right-2.5 bottom-20 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-slate-600/70 bg-[#111624]/75 text-slate-300 opacity-30 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-[2px] hover:border-amber-400 hover:bg-[#111624] hover:text-amber-300 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
+          className="fixed bottom-20 right-2.5 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-slate-600/70 bg-[#111624]/75 text-slate-300 opacity-30 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-[2px] hover:border-amber-400 hover:bg-[#111624] hover:text-amber-300 hover:opacity-100 focus-visible:opacity-100 active:opacity-100"
         >
-          {scrollTarget === 'top' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {scrollTarget === 'top' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
       )}
 
       {generationReveal && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/95 p-5 backdrop-blur-sm">
           <div className="w-full max-w-lg text-center">
-            <div className="mx-auto mb-4 w-fit">
-              <PixelNarrator style={generationReveal.style} />
-            </div>
+            <div className="mx-auto mb-4 w-fit"><PixelNarrator style={generationReveal.style} /></div>
             <div className={`font-mono text-xs font-black sm:text-sm ${NARRATORS[generationReveal.style]?.text ?? 'text-amber-300'}`}>
               【{NARRATORS[generationReveal.style]?.name}】
             </div>
-            <div className="mt-2 flex items-center justify-center gap-2 text-[9px] font-mono tracking-[0.14em] text-slate-500 sm:text-[10px]">
-              {!generationReveal.line && <span className="h-2.5 w-2.5 rounded-full border border-slate-500 border-t-transparent animate-spin" />}
-              {generationReveal.line ? '編纂完了・所見を受信' : 'AI が冒険譚を編纂中...'}
+            <div className="mt-2 font-mono text-[9px] tracking-[0.14em] text-slate-500 sm:text-[10px]">
+              {generationReveal.phase === 'waiting' ? `${NARRATORS[generationReveal.style]?.name} // ARCHIVE ANALYSIS` : generationReveal.phase === 'result' ? '所見を受信' : '編纂完了'}
             </div>
             <div className="mx-auto mt-3 min-h-[112px] max-w-md border border-slate-700 bg-[#050a14] px-5 py-5 text-left font-serif text-sm leading-7 text-slate-100 shadow-[0_0_30px_rgba(0,0,0,.65)] sm:text-base">
-              {generationReveal.line ? (
-                <>「{typedReveal}<span className="animate-pulse text-slate-500">▌</span>」</>
-              ) : (
-                <span className="block text-center text-xl tracking-[0.35em] text-slate-500 animate-pulse">……</span>
-              )}
+              「{typedReveal || '……'}{generationReveal.phase !== 'ready' && <span className="animate-pulse text-slate-500">▌</span>}」
             </div>
-            <div className="mt-3 text-[9px] font-mono tracking-[0.22em] text-slate-600">
-              {generationReveal.line ? 'ARCHIVE COMPILED' : 'ANALYZING ARCHIVE...'}
-            </div>
+            {generationReveal.phase === 'waiting' && waitingComplete && !generationReveal.article && (
+              <div className="mt-3 flex items-center justify-center gap-2 font-mono text-[9px] tracking-[0.16em] text-slate-600">
+                <span className="h-2.5 w-2.5 animate-spin rounded-full border border-slate-500 border-t-transparent" />記録照合中...
+              </div>
+            )}
+            {generationReveal.phase === 'ready' && (
+              <button
+                type="button"
+                onClick={openGeneratedArticle}
+                onMouseEnter={playHoverSound}
+                className="mx-auto mt-5 flex min-h-[46px] min-w-[190px] items-center justify-center gap-2 border-2 border-amber-500 bg-amber-500/15 px-5 font-mono text-sm font-black text-amber-300 transition-all hover:-translate-y-[3px] hover:bg-amber-500/25"
+              >
+                <BookOpen className="h-4 w-4" />記事を読む
+              </button>
+            )}
           </div>
         </div>
       )}
 
       {resetTarget && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setResetTarget(false); } }}>
-          <div className="w-full max-w-md bg-[#0d1627] border-2 border-red-700 shadow-[0_0_35px_rgba(0,0,0,.7)] p-5">
-            <div className="flex items-center gap-2 text-red-300 font-bold"><AlertTriangle className="w-5 h-5" />旅の書をリセットしますか？</div>
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setResetTarget(false); } }}>
+          <div className="w-full max-w-md border-2 border-red-700 bg-[#0d1627] p-5 shadow-[0_0_35px_rgba(0,0,0,.7)]">
+            <div className="flex items-center gap-2 font-bold text-red-300"><AlertTriangle className="h-5 w-5" />旅の書をリセットしますか？</div>
             <p className="mt-2 text-xs text-slate-400">この人物の保存済みWiki記事だけを削除します。他の記事は残ります。</p>
-            <div className="grid grid-cols-2 gap-2 mt-5">
-              <button type="button" onClick={() => { playCancelSound(); setResetTarget(false); }} onMouseEnter={playHoverSound} className="min-h-[42px] border border-slate-700 text-slate-300 hover:-translate-y-[2px] transition-all">キャンセル</button>
-              <button type="button" onClick={confirmReset} onMouseEnter={playHoverSound} className="min-h-[42px] bg-red-700 text-white font-bold hover:bg-red-600 hover:-translate-y-[2px] transition-all">リセットする</button>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => { playCancelSound(); setResetTarget(false); }} onMouseEnter={playHoverSound} className="min-h-[42px] border border-slate-700 text-slate-300 transition-all hover:-translate-y-[2px]">キャンセル</button>
+              <button type="button" onClick={confirmReset} onMouseEnter={playHoverSound} className="min-h-[42px] bg-red-700 font-bold text-white transition-all hover:-translate-y-[2px] hover:bg-red-600">リセットする</button>
             </div>
           </div>
         </div>
