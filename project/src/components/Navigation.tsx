@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, Gamepad2, Home, Settings, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, Compass, Home, Settings, Volume2, VolumeX } from 'lucide-react';
 import { playCancelSound, playHoverSound, isSoundEnabled, toggleSound } from '../lib/sound';
 
 type Screen =
@@ -46,11 +46,13 @@ export function Header({
     setSoundEnabled(next);
   };
 
+  const displayTitle = title.replace(/^UTAPEDIA \/\/\s*/, '');
+
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-amber-500/70 bg-[#0e1629]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.65)]">
-      <div className="mx-auto flex min-h-[52px] sm:min-h-[58px] w-full max-w-5xl items-center justify-between gap-2 px-3 sm:px-6">
+    <header className="sticky top-0 z-40 w-full border-b border-[#1E293B] bg-[#0B1018]/95 backdrop-blur-md select-none">
+      <div className="mx-auto flex h-[52px] sm:h-14 w-full max-w-6xl items-center justify-between px-3 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-          {onBack ? (
+          {onBack && (
             <button
               type="button"
               onClick={() => {
@@ -58,25 +60,26 @@ export function Header({
                 onBack();
               }}
               onMouseEnter={playHoverSound}
-              className="flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1.5 border-2 border-amber-500/80 bg-[#0a101d] px-2.5 sm:min-w-0 sm:px-3 py-1.5 font-mono text-xs font-black text-amber-300 transition-all hover:border-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-1 rounded border border-[#334155]/60 px-2 py-1.5 font-mono text-xs text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:bg-[#1E293B]/70 hover:text-[#F59E0B] active:scale-95 cursor-pointer"
               aria-label="戻る"
               title="戻る"
             >
-              <ChevronLeft className="h-4 w-4 stroke-[3]" />
-              <span className="hidden sm:inline">戻る</span>
+              <ChevronLeft className="h-4 w-4 text-[#F59E0B]" />
+              <span className="hidden sm:inline">BACK</span>
             </button>
-          ) : null}
+          )}
 
-          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)] sm:h-9 sm:w-9">
-              <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[#06B6D4]/40 bg-[#161F30]">
+              <Compass className="h-3.5 w-3.5 text-[#06B6D4]" />
             </div>
             <div className="min-w-0">
-              <h1 className="truncate text-xs font-black tracking-wide text-white sm:text-sm">
-                <span className="hidden sm:inline text-amber-400 font-mono">UTAPEDIA // </span>
-                {title.replace(/^UTAPEDIA \/\/\s*/, '')}
+              <div className="hidden sm:block truncate font-mono text-[10px] leading-none tracking-wider text-[#06B6D4]">
+                UTAPEDIA // SURVIVAL WIKI
+              </div>
+              <h1 className="truncate text-xs sm:text-sm font-black tracking-wide text-[#F1F5F9]">
+                {displayTitle}
               </h1>
-              <p className="hidden truncate font-mono text-[9px] font-bold text-emerald-400/90 sm:block">ADVENTURE LOG SYSTEM // NOMINAL</p>
             </div>
           </div>
         </div>
@@ -88,9 +91,14 @@ export function Header({
             onMouseEnter={playHoverSound}
             aria-label="サウンド切替"
             title={soundEnabled ? 'サウンドON (クリックでミュート)' : 'ミュート中 (クリックでサウンドON)'}
-            className={`flex min-h-[40px] min-w-[40px] sm:min-h-[42px] sm:min-w-[42px] items-center justify-center border-2 px-2 font-mono text-xs font-bold transition-all active:scale-95 cursor-pointer ${soundEnabled ? 'border-emerald-500/60 bg-emerald-950/30 text-emerald-400 hover:border-emerald-400' : 'border-slate-700 bg-[#121622] text-slate-500 hover:text-slate-300'}`}
+            className={`flex items-center gap-1 rounded border p-2 font-mono text-xs transition-colors active:scale-95 cursor-pointer ${
+              soundEnabled
+                ? 'border-[#06B6D4]/50 bg-[#0E2030] text-[#06B6D4] shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                : 'border-[#334155]/40 bg-[#0F172A] text-[#64748B] hover:border-[#64748B]'
+            }`}
           >
             {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            <span className="hidden md:inline text-[11px]">{soundEnabled ? 'SOUND' : 'MUTE'}</span>
           </button>
 
           <button
@@ -99,9 +107,10 @@ export function Header({
             onMouseEnter={playHoverSound}
             aria-label="設定"
             title="システム設定"
-            className="flex min-h-[40px] min-w-[40px] sm:min-h-[42px] sm:min-w-[42px] items-center justify-center border-2 border-slate-700 bg-[#121622] px-2 text-slate-300 hover:border-amber-400 hover:text-amber-300 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1 rounded border border-[#334155]/60 bg-[#161F30] p-2 font-mono text-xs text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:bg-[#1E293B] hover:text-[#F8FAFC] active:scale-95 cursor-pointer"
           >
             <Settings className="h-4 w-4" />
+            <span className="hidden md:inline text-[11px]">CONFIG</span>
           </button>
 
           {onBack && (
@@ -111,10 +120,10 @@ export function Header({
               onMouseEnter={playHoverSound}
               aria-label="ホームへ"
               title="冒険の書一覧へ戻る"
-              className="flex min-h-[40px] shrink-0 items-center gap-1.5 border-2 border-amber-500/80 bg-[#121622] px-2.5 py-2 font-mono text-xs font-black text-amber-300 transition-all hover:border-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-1 rounded border border-[#334155]/60 bg-[#161F30] p-2 font-mono text-xs text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:bg-[#1E293B] hover:text-[#F59E0B] active:scale-95 cursor-pointer"
             >
-              <Home className="h-4 w-4 text-amber-400" />
-              <span className="hidden sm:inline">HOME</span>
+              <Home className="h-4 w-4 text-[#F59E0B]" />
+              <span className="hidden md:inline text-[11px]">SLOTS</span>
             </button>
           )}
         </div>
