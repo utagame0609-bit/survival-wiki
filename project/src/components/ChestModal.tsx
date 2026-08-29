@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, X, Sparkles, MapPin, ExternalLink, Shield } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { playConfirmSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
@@ -38,7 +39,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
     onClose();
   };
 
-  return (
+  return createPortal((
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
       onMouseDown={(event) => {
@@ -139,5 +140,5 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 }

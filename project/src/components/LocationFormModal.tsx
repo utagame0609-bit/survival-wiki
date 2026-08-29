@@ -25,11 +25,11 @@ type LocationFormModalProps = {
 
 export function LocationFormModal({ world, mode, editingLocation, saving, onSave, onComplete, onCancel }: LocationFormModalProps) {
   const isEdit = mode === 'edit';
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-2 sm:p-4 bg-black/85 backdrop-blur-sm" onMouseDown={(event) => {
+  return createPortal((
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-2 sm:p-4 bg-black/85 backdrop-blur-sm" onMouseDown={(event) => {
       if (event.target === event.currentTarget) { playCancelSound(); onCancel(); }
     }}>
-      <div className="relative my-1 sm:my-2 w-full max-w-lg overflow-hidden bg-[#161b27] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.14)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="relative w-full max-w-lg overflow-hidden bg-[#161b27] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.14)] motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 bg-[#111624] border-b-2 border-amber-500">
           <div className="min-w-0 flex items-center gap-2.5">
             <span className="shrink-0 px-2 py-1 border border-amber-500/70 bg-amber-500/10 text-amber-300 text-[10px] sm:text-xs font-black font-mono tracking-wide">{isEdit ? 'EDIT' : 'QUICK LOG // 冒険記録'}</span>
@@ -42,5 +42,5 @@ export function LocationFormModal({ world, mode, editingLocation, saving, onSave
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 }
