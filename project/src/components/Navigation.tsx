@@ -157,9 +157,6 @@ export function useScreenHistory() {
   );
 
   const goBack = () => {
-    // Temporary capture mode: keep the world-create screen open for design review.
-    if (screen.name === 'worldCreate') return;
-
     setHistory((h) => {
       if (h.length === 0) return h;
       const prev = h[h.length - 1];
