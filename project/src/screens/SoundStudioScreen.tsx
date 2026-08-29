@@ -20,7 +20,6 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     stopWorldBgm(0);
     return () => {
-      playWorldBgm();
       stopActiveAudio();
     };
   }, []);
@@ -65,7 +64,6 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
         return;
       }
       stopActiveAudio();
-      playWorldBgm();
       setActivePlayingId(candidate.id);
       return;
     }

@@ -69,7 +69,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
     window.dispatchEvent(new CustomEvent('survival-wiki:settings-closed'));
   };
 
-  if (soundStudioOpen) return <SoundStudioScreen onBack={() => setSoundStudioOpen(false)} />;
+  if (soundStudioOpen) return <SoundStudioScreen onBack={() => { setSoundStudioOpen(false); window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed')); }} />;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 font-mono backdrop-blur-sm">

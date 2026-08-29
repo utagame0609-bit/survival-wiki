@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Calendar, Edit3, Share2, Shield, Trash2, Users, X } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playErrorSound, playHoverSound, playModalCloseSound, playDeleteSound } from '@/lib/sound';
+import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { LocationCoordinates } from '@/components/LocationCoordinates';
 import { LocationDetailInfo } from '@/components/LocationDetailInfo';
 import { SnsShareModal } from '@/components/SnsShareModal';
@@ -224,7 +224,7 @@ export function LocationDetailModal({
 
           <button
             type="button"
-            onClick={() => setShowSns(true)}
+            onClick={() => { playConfirmSound(); setShowSns(true); }}
             onMouseEnter={playHoverSound}
             className="min-h-[42px] px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-black text-xs sm:text-sm font-mono flex items-center gap-1.5 border-b-2 border-cyan-800 cursor-pointer shadow-[0_2px_10px_rgba(6,182,212,0.3)]"
           >
