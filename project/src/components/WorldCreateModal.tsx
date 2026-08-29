@@ -281,7 +281,7 @@ export function WorldCreateModal({
             onClick={() => { playCloseSound(); onClose(); }}
             onMouseEnter={playHoverSound}
             disabled={saving}
-            className="flex-1 min-h-[44px] border border-slate-700 bg-[#1a2333] py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-all cursor-pointer"
+            className="flex-1 min-h-[44px] border border-slate-700 bg-[#1a2333] py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-800 hover:border-slate-600 disabled:opacity-50 transition-colors cursor-pointer"
           >
             キャンセル
           </button>
@@ -290,7 +290,7 @@ export function WorldCreateModal({
             onClick={handleSave}
             onMouseEnter={playHoverSound}
             disabled={saving}
-            className="flex-1 min-h-[44px] border-b-2 border-amber-700 bg-amber-500 py-2.5 text-xs sm:text-sm font-black text-slate-950 shadow-[0_0_16px_rgba(245,158,11,0.2)] hover:bg-amber-400 disabled:opacity-50 transition-all cursor-pointer"
+            className="flex-1 min-h-[44px] border-b-2 border-amber-700 bg-amber-500 py-2.5 text-xs sm:text-sm font-black text-slate-950 shadow-[0_0_16px_rgba(245,158,11,0.2)] hover:bg-amber-400 disabled:opacity-50 transition-colors cursor-pointer"
           >
             ▶ {saving ? '作成中...' : '作成して開始 (START)'}
           </button>
@@ -300,7 +300,7 @@ export function WorldCreateModal({
       <style>{`
         .modal-input { width: 100%; min-height: 42px; padding: 0.65rem 0.75rem; border: 1px solid #334155; background: #090d16; color: #f1f5f9; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
         .modal-input::placeholder { color: #64748b; }
-        .modal-input:focus { border-color: #38bdf8; background: #0d1627; box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56,189,248,0.15); }
+        .modal-input:focus { border-color: #38bdf8; background: #0d1627; box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56,189,242,0.15); }
         .world-create-modal-panel { animation: world-create-modal-in 180ms cubic-bezier(.22,.8,.35,1) both; transform-origin: center; }
         @keyframes world-create-modal-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @media (prefers-reduced-motion: reduce) { .world-create-modal-panel { animation: none; } }
@@ -321,10 +321,10 @@ function PartyChip({ name, photoUrl, player = false }: { name: string; photoUrl:
 }
 
 function PhotoPicker({ previewUrl, onChange, label, accent, size = 'normal' }: { previewUrl: string; onChange: (file: File | null) => void; label: string; accent: 'amber' | 'cyan'; size?: 'normal' | 'large' }) {
-  const accentClass = accent === 'amber' ? 'border-amber-400 text-amber-400 hover:border-amber-300' : 'border-cyan-400 text-cyan-300 hover:border-cyan-300';
+  const accentClass = accent === 'amber' ? 'border-amber-400 text-amber-400 hover:border-amber-300 hover:-translate-y-[3px]' : 'border-cyan-400 text-cyan-300 hover:border-cyan-300 hover:-translate-y-[3px]';
   const sizeClass = size === 'large' ? 'h-14 w-14' : 'h-10 w-12';
   return (
-    <label onMouseEnter={playHoverSound} className={`relative ${sizeClass} shrink-0 cursor-pointer overflow-hidden border-2 bg-[#050a14] flex items-center justify-center transition-colors ${accentClass}`} title={label}>
+    <label onMouseEnter={playHoverSound} className={`relative ${sizeClass} shrink-0 cursor-pointer overflow-hidden border-2 bg-[#050a14] flex items-center justify-center transition-all ${accentClass}`} title={label}>
       {previewUrl ? <img src={previewUrl} alt="" className="h-full w-full object-cover pixelated" /> : <Camera className="h-5 w-5" />}
       <input type="file" accept="image/*" className="sr-only" onChange={(event) => onChange(event.target.files?.[0] ?? null)} />
     </label>
