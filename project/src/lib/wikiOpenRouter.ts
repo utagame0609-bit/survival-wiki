@@ -2,6 +2,8 @@ import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './
 import { getWikiSystemPrompt } from './wiki';
 import { supabase } from './supabase';
 
+const NARRATOR_MARKER = '<!--NARRATOR_LINE:';
+
 export const openRouterTestProvider: WikiProvider = {
   async generate(input: WikiGenerationInput): Promise<WikiGenerationResult> {
     const { world, locations, style } = input;
@@ -32,7 +34,7 @@ export const openRouterTestProvider: WikiProvider = {
       ].join('\n')),
     ].join('\n');
 
-    const systemPrompt = getWikiSystemPrompt(style);
+    const systemPrompt = `${getWikiSystemPrompt(style)}\n\n【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、今回の記録を読んだあなた自身がプレイヤーへ向けて言う短い一言を40〜70文字程度で追加してください。記事と同じ人格・口調を守り、記事本文の要約ではなく、その人物らしい皮肉・評価・感想にしてください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`;
     const mainPhoto = locations[0]?.photos.find((photo) => photo.is_main) ?? null;
     const imageStoragePath = mainPhoto?.storage_path;
 
@@ -48,6 +50,16 @@ export const openRouterTestProvider: WikiProvider = {
 
     if (error) throw error;
     if (!data?.ok) throw new Error(data?.error || 'AIから正常な応答がありません。');
-    return { content: data.message || '' };
+
+    const raw = String(data.message || '').trim();
+    const markerIndex = raw.lastIndexOf(NARRATOR_MARKER);
+    if (markerIndex < 0) return { content: raw };
+
+    const markerEnd = raw.indexOf('-->', markerIndex);
+    if (markerEnd < 0) return { content: raw };
+
+    const narratorLine = raw.slice(markerIndex + NARRATOR_MARKER.length, markerEnd).trim();
+    const content = `${raw.slice(0, markerIndex)}${raw.slice(markerEnd + 3)}`.trim();
+    return { content: narratorLine ? `${content}\n\n<!--WIKI_NARRATOR:${narratorLine}-->` : content };
   },
 };
