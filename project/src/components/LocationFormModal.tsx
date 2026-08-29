@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { LocationForm } from '@/components/LocationForm';
 import { playCancelSound, playHoverSound } from '@/lib/sound';
