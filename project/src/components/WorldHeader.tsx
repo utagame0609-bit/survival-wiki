@@ -90,19 +90,21 @@ export function WorldHeader({ world, playerPhotoUrl }: WorldHeaderProps) {
         <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-800 pt-2 md:border-t-0 md:border-l md:pl-4 md:pt-0">
           <span className="flex items-center gap-1 text-[10px] font-mono text-slate-400">
             <Users className="h-3.5 w-3.5 text-cyan-400" />
-            <span>同行仲間:</span>
+            <span>同行:</span>
           </span>
 
           {companions.map((member) => (
-            <div key={member.id} className="flex items-center gap-1 border border-cyan-500/50 bg-[#0d1220] px-1.5 py-0.5">
-              <div className="h-5 w-5 shrink-0 overflow-hidden border border-cyan-400 bg-black">
-                {memberPhotoUrls[member.id] ? (
-                  <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover pixelated" />
-                ) : (
-                  <Users className="m-auto mt-0.5 h-3 w-3 text-cyan-400" />
-                )}
-              </div>
-              <span className="max-w-[96px] truncate text-[10px] sm:text-xs font-mono font-bold text-cyan-300">@{member.name}</span>
+            <div
+              key={member.id}
+              title={`同行メンバー: ${member.name}`}
+              aria-label={`同行メンバー: ${member.name}`}
+              className="flex h-9 w-9 items-center justify-center overflow-hidden border-2 border-cyan-400/60 bg-[#0d1220]"
+            >
+              {memberPhotoUrls[member.id] ? (
+                <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover pixelated" />
+              ) : (
+                <Users className="h-4 w-4 text-cyan-400" />
+              )}
             </div>
           ))}
 
