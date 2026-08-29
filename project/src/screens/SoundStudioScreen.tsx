@@ -21,6 +21,7 @@ export function SoundStudioScreen({ onBack }: { onBack: () => void }) {
     stopWorldBgm(0);
     return () => {
       stopActiveAudio();
+      stopWorldBgm(0);
     };
   }, []);
 
