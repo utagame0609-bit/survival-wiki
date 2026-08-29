@@ -144,13 +144,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
           <div className="md:col-span-4 grid grid-cols-3 gap-0 border border-slate-700/80 bg-[#0e141f] px-2.5 py-2.5 md:border-y md:border-x md:px-3">
             <Stat label="DAYS" value={String(meta?.dayCount ?? 0).padStart(3, '0')} suffix="日" tone="emerald" />
             <Stat label="RECORDS" value={String(meta?.recordCount ?? 0).padStart(3, '0')} suffix="件" tone="amber" divider />
-            <Stat
-              label="LAST_CHECKPOINT"
-              value={meta?.lastLocationName ?? '------'}
-              tone="slate"
-              truncate
-              divider
-            />
+            <Stat label="LAST_CHECKPOINT" value={meta?.lastLocationName ?? '------'} tone="slate" truncate divider />
           </div>
 
           <div className="md:col-span-3" onClick={(event) => event.stopPropagation()}>
@@ -166,7 +160,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
           </div>
         </div>
 
-        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-[#2a3142] pt-2 text-[9px] sm:text-[10px] font-mono">
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 pt-2 text-[9px] sm:text-[10px] font-mono">
           <span className="flex items-center gap-1.5 font-black text-emerald-400">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> READY
           </span>
