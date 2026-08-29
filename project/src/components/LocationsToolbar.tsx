@@ -1,7 +1,7 @@
 import { Plus, Search } from 'lucide-react';
 import {
   playChestOpenSound,
-  playConfirmSound,
+  playAddSound,
   playHoverSound,
   playInputFocusSound,
 } from '@/lib/sound';
@@ -27,7 +27,7 @@ export function LocationsToolbar({
   };
 
   const handleCreate = () => {
-    playConfirmSound();
+    playAddSound();
     onCreate();
   };
 
