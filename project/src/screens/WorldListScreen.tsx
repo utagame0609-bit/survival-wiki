@@ -67,9 +67,9 @@ export function WorldListScreen({ gameId, gameName, navigate, goBack }: { gameId
   };
 
   return (
-    <div className="relative min-h-screen bg-[#161922] text-white font-sans overflow-x-hidden flex flex-col select-none world-select-screen">
+    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans overflow-x-hidden flex flex-col select-none world-select-screen">
       <div className="scanline-overlay" />
-      <Header title={gameName} onBack={goBack} />
+      <Header title={gameName} />
 
       <div className="relative z-10 mx-auto w-full max-w-4xl px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
         <header className="relative z-10 flex flex-col items-center mb-4 sm:mb-6 text-center">
