@@ -132,9 +132,9 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12 md:items-center md:gap-4">
           <div className="md:col-span-5 flex min-w-0 items-center gap-1.5 overflow-x-auto pb-0.5">
-            <MemberChip name={world.player || '---'} photoUrl={playerPhotoUrl} player />
+            <MemberAvatar photoUrl={playerPhotoUrl} player />
             {companions.map((member) => (
-              <MemberChip key={member.id} name={member.name} photoUrl={memberPhotoUrls[member.id] ?? ''} />
+              <MemberAvatar key={member.id} photoUrl={memberPhotoUrls[member.id] ?? ''} />
             ))}
             {companions.length === 0 && (
               <span className="ml-1 shrink-0 text-[9px] font-mono italic text-slate-500">SOLO</span>
@@ -171,32 +171,23 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
   );
 }
 
-function MemberChip({ name, photoUrl, player = false }: { name: string; photoUrl: string; player?: boolean }) {
+function MemberAvatar({ photoUrl, player = false }: { photoUrl: string; player?: boolean }) {
   return (
     <div
-      className={`flex shrink-0 items-center gap-1.5 border px-1.5 py-1 ${
-        player ? 'border-amber-500/70 bg-amber-500/10' : 'border-cyan-500/40 bg-[#101b29]'
+      title={player ? 'プレイヤー' : '同行メンバー'}
+      aria-label={player ? 'プレイヤー' : '同行メンバー'}
+      className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border-2 bg-[#080d15] ${
+        player ? 'border-amber-400/90 shadow-[0_0_8px_rgba(245,158,11,0.18)]' : 'border-cyan-400/60'
       }`}
     >
-      <div
-        className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden border bg-[#080d15] ${
-          player ? 'border-amber-400/80' : 'border-cyan-400/60'
-        }`}
-      >
-        {photoUrl ? (
-          <img src={photoUrl} alt="" className="h-full w-full object-cover pixelated" />
-        ) : player ? (
-          <User className="h-4 w-4 text-amber-400" />
-        ) : (
-          <Users className="h-4 w-4 text-cyan-400" />
-        )}
-      </div>
-      <div className="min-w-0 max-w-[72px]">
-        <div className={`truncate text-[9px] sm:text-[10px] font-bold ${player ? 'text-amber-300' : 'text-cyan-200'}`}>
-          {name}
-        </div>
-        {player && <div className="text-[7px] font-mono font-black text-amber-400/80">CMD</div>}
-      </div>
+      {photoUrl ? (
+        <img src={photoUrl} alt="" className="h-full w-full object-cover pixelated" />
+      ) : player ? (
+        <User className="h-5 w-5 text-amber-400" />
+      ) : (
+        <Users className="h-5 w-5 text-cyan-400" />
+      )}
+      {player && <span className="absolute bottom-0 right-0 bg-amber-500 px-1 text-[6px] font-black leading-3 text-black">CMD</span>}
     </div>
   );
 }
