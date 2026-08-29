@@ -1,0 +1,6 @@
+{
+  "name": "Survival Wiki",
+  "description": "レトロゲーム・サバイバルクラフトの探索記録とAI Wiki自動編纂システム（現行V3 UI/UXブラッシュアップ）",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
