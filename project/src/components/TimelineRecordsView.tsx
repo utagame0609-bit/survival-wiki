@@ -111,6 +111,7 @@ export function TimelineRecordsView({
             <select
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+              onFocus={playInputFocusSound}
               onMouseEnter={playHoverSound}
               className="min-h-[38px] bg-[#0f121b] border-2 border-slate-700 text-slate-200 text-xs px-2.5 py-1 outline-none font-mono cursor-pointer rounded-xs"
             >

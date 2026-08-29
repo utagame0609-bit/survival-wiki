@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, X, Camera, User, Users } from 'lucide-react';
 import { createWorld, fetchWorld, saveWorldMemberPhoto, saveWorldPlayerPhoto } from '@/lib/db';
-import { playAddSound, playCloseSound, playDeleteSound, playHoverSound, playInputFocusSound, playModalCloseSound, playNewRecordSound } from '@/lib/sound';
+import { playAchievementSound, playAddSound, playCloseSound, playDeleteSound, playHoverSound, playInputFocusSound, playModalCloseSound } from '@/lib/sound';
 import { ErrorBanner } from '@/components/Feedback';
 import { WORLD_PRESET_AVATAR_LIST } from '@/assets/worldPresetAvatars';
 
@@ -95,7 +95,7 @@ export function WorldCreateModal({
         }
       }
 
-      playNewRecordSound();
+      playAchievementSound();
       onCreated();
       onClose();
     } catch (e) {

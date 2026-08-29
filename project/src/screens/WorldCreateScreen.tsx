@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { createWorld, updateWorld, fetchWorld, getPhotoUrl, saveWorldMemberPhoto, saveWorldPlayerPhoto, deleteWorldMemberPhoto } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { playCloseSound, playModalCloseSound, playSaveSound, playNewRecordSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
+import { playAchievementSound, playCloseSound, playModalCloseSound, playSaveSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 import { WorldMemberFields, type MemberPhotoState } from '@/components/WorldMemberFields';
 import { WORLD_PRESET_AVATAR_LIST } from '@/assets/worldPresetAvatars';
@@ -218,7 +218,7 @@ export function WorldCreateScreen({
       }
 
       if (isEdit) playSaveSound();
-      else playNewRecordSound();
+      else playAchievementSound();
 
       goBack();
     } catch (e) {
