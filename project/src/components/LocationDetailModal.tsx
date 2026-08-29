@@ -67,7 +67,7 @@ export function LocationDetailModal({
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-2xl max-h-[92vh] bg-[#161a25] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="w-full max-w-2xl max-h-[90vh] bg-[#161a25] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.25)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 bg-[#11141e] border-b-2 border-amber-500/60 shrink-0">
           <div className="min-w-0 flex items-center gap-2">
             <span className="font-mono text-[10px] sm:text-xs px-2 py-1 border border-amber-400 bg-amber-500/20 text-amber-300 font-bold shrink-0 truncate max-w-[55vw]">
@@ -113,7 +113,7 @@ export function LocationDetailModal({
                       type="button"
                       onClick={() => setActivePhotoIdx(index)}
                       onMouseEnter={playHoverSound}
-                      className={`w-16 h-12 shrink-0 border-2 overflow-hidden cursor-pointer bg-black transition-all ${
+                      className={`w-16 h-12 shrink-0 border-2 overflow-hidden cursor-pointer transition-all ${
                         activePhotoIdx === index
                           ? 'border-amber-400 scale-105'
                           : 'border-slate-700 opacity-70 hover:opacity-100'
