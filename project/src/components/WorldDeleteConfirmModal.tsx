@@ -1,4 +1,4 @@
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { playCancelSound, playHoverSound } from '@/lib/sound';
 
@@ -11,7 +11,7 @@ type WorldDeleteConfirmModalProps = {
 export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDeleteConfirmModalProps) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 sm:p-4 backdrop-blur-sm font-sans"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
@@ -20,21 +20,46 @@ export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDel
         }
       }}
     >
-      <div role="dialog" aria-modal="true" aria-labelledby="delete-world-title" className="border-2 border-red-500 bg-[#1a1e29] w-full max-w-md p-6 text-white shadow-[0_0_40px_rgba(239,68,68,0.35)]">
-        <div className="text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center border-2 border-red-500/50 bg-red-950/50 text-red-400 shadow-md">
-            <AlertTriangle className="h-7 w-7 animate-pulse" />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-world-title"
+        className="w-full max-w-md border-2 border-rose-500 bg-[#141b2d] text-white shadow-[0_0_34px_rgba(244,63,94,0.24)]"
+      >
+        <div className="flex items-center gap-2.5 border-b border-rose-500/50 bg-[#111827] px-4 sm:px-5 py-3.5">
+          <Trash2 className="h-4.5 w-4.5 shrink-0 text-rose-400" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-black tracking-widest text-slate-200 font-mono">WARNING // セーブデータの消去</p>
+            <h2 id="delete-world-title" className="text-sm sm:text-base font-black text-white">「{world.name}」を消去しますか？</h2>
           </div>
-          <div className="text-xs tracking-widest text-red-400 font-bold font-mono">SYSTEM WARNING // DATA DELETION</div>
-          <h2 id="delete-world-title" className="mt-1.5 text-lg font-bold text-white">ワールドを削除しますか？</h2>
-          <div className="mt-3 border border-red-500/40 bg-red-950/40 p-3">
-            <p className="break-words text-sm font-bold text-amber-300">「{world.name}」</p>
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-slate-300">※この操作は元に戻せません。<br />冒険の書に保存されたすべての場所・記録が消去されます。</p>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-3 border-t border-[#2a3142] pt-4">
-          <button type="button" onClick={() => { playCancelSound(); onCancel(); }} onMouseEnter={playHoverSound} className="min-h-[44px] py-2.5 bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-bold flex items-center justify-center border border-slate-600 cursor-pointer"><X className="mr-1 inline h-4 w-4" />CANCEL</button>
-          <button type="button" onClick={onConfirm} onMouseEnter={playHoverSound} className="min-h-[44px] py-2.5 bg-red-600 text-white hover:bg-red-500 text-xs font-bold flex items-center justify-center border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] cursor-pointer"><Trash2 className="mr-1 inline h-4 w-4" />DELETE</button>
+
+        <div className="px-4 sm:px-5 py-4">
+          <p className="text-xs sm:text-sm leading-relaxed text-slate-300">
+            「<span className="font-black text-amber-300">{world.name}</span>」を消去しますか？ 記録されたすべてのロケーションや写真が削除されます。
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 border-t border-slate-800 bg-[#111827] px-4 sm:px-5 py-3.5">
+          <button
+            type="button"
+            onClick={() => {
+              playCancelSound();
+              onCancel();
+            }}
+            onMouseEnter={playHoverSound}
+            className="min-h-[42px] border border-slate-700 bg-[#141c2b] px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:border-slate-500 hover:bg-slate-800 transition-all cursor-pointer"
+          >
+            キャンセル
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            onMouseEnter={playHoverSound}
+            className="min-h-[42px] bg-rose-600 px-3 py-2.5 text-xs sm:text-sm font-black text-white shadow-[0_0_14px_rgba(244,63,94,0.2)] hover:bg-rose-500 transition-all cursor-pointer"
+          >
+            削除する
+          </button>
         </div>
       </div>
     </div>

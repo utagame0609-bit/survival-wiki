@@ -19,13 +19,22 @@ export function ChestPhotoCard({ item, onClick }: ChestPhotoCardProps) {
 
   useEffect(() => {
     let active = true;
+    let objectUrl: string | null = null;
+
     getPhotoUrl(item.storagePath)
       .then((url) => {
-        if (active) setSrc(url);
+        if (!active) {
+          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+          return;
+        }
+        objectUrl = url.startsWith('blob:') ? url : null;
+        setSrc(url);
       })
-      .catch(() => {});
+      .catch(() => setSrc(''));
+
     return () => {
       active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [item.storagePath]);
 
@@ -34,7 +43,7 @@ export function ChestPhotoCard({ item, onClick }: ChestPhotoCardProps) {
       type="button"
       onClick={onClick}
       onMouseEnter={playHoverSound}
-      className="group relative overflow-hidden bg-[#141824] border-2 border-[#2d3548] hover:border-amber-400 transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.5)] text-left cursor-pointer"
+      className="group relative w-full overflow-hidden text-left bg-[#141824] border-2 border-[#2d3548] hover:border-amber-400 transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.5)] cursor-pointer"
     >
       <div className="w-full aspect-[4/3] bg-[#12151f] overflow-hidden">
         {src ? (
@@ -50,9 +59,7 @@ export function ChestPhotoCard({ item, onClick }: ChestPhotoCardProps) {
         )}
       </div>
       <div className="p-2.5 bg-[#161a24] border-t border-[#2d3548]">
-        <div className="text-xs font-bold text-white group-hover:text-amber-300 truncate">
-          {item.location.name}
-        </div>
+        <div className="text-xs font-bold text-white group-hover:text-amber-300 truncate">{item.location.name}</div>
         <div className="text-[10px] text-emerald-400 font-mono mt-0.5 font-bold">
           X:{item.location.x} Z:{item.location.z}
         </div>

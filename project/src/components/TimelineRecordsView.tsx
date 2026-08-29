@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Share2, Shield, Users, Youtube } from 'lucide-react';
+import { ArrowUpDown, ChevronRight, Clock, MapPin, Package, Plus, Search, Share2, Shield, Users, Youtube } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playHoverSound, playRecordSelectSound } from '@/lib/sound';
+import { playHoverSound, playInputFocusSound, playRecordSelectSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 
 type TimelineRecordsViewProps = {
@@ -9,7 +9,8 @@ type TimelineRecordsViewProps = {
   locations: LocationWithPhotos[];
   onSelectLocation: (location: LocationWithPhotos) => void;
   onOpenChest: () => void;
-  onOpenSns: (location: LocationWithPhotos) => void;
+  onCreate: () => void;
+  onOpenSns?: (location: LocationWithPhotos) => void;
 };
 
 type SortOrder = 'newest' | 'oldest' | 'checkpoint';
@@ -25,6 +26,7 @@ export function TimelineRecordsView({
   locations,
   onSelectLocation,
   onOpenChest,
+  onCreate,
   onOpenSns,
 }: TimelineRecordsViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,12 +94,14 @@ export function TimelineRecordsView({
     <div className="space-y-3.5 sm:space-y-4">
       <div className="bg-[#141824] border-2 border-slate-800 p-2.5 sm:p-3 space-y-2.5 shadow-md">
         <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
+            onFocus={playInputFocusSound}
             placeholder="拠点名・タグ・メモで検索..."
-            className="w-full min-h-[42px] px-3.5 py-2 bg-[#0f121b] border-2 border-slate-700 text-white text-xs sm:text-sm placeholder-slate-500 focus:border-amber-400 outline-none transition-colors"
+            className="w-full min-h-[42px] pl-10 pr-3.5 py-2 bg-[#0f121b] border-2 border-slate-700 text-white text-xs sm:text-sm placeholder-slate-500 focus:border-amber-400 outline-none transition-colors"
           />
         </div>
 
@@ -107,6 +111,7 @@ export function TimelineRecordsView({
             <select
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+              onMouseEnter={playHoverSound}
               className="min-h-[38px] bg-[#0f121b] border-2 border-slate-700 text-slate-200 text-xs px-2.5 py-1 outline-none font-mono cursor-pointer"
             >
               <option value="newest">新しい順 (NEWEST)</option>
@@ -117,7 +122,7 @@ export function TimelineRecordsView({
 
           <button
             type="button"
-            onClick={() => onOpenChest()}
+            onClick={onOpenChest}
             onMouseEnter={playHoverSound}
             className="min-h-[38px] px-3 py-1.5 border-2 border-amber-500/80 bg-[#161a25] text-amber-300 hover:border-amber-400 font-mono text-xs font-black flex items-center gap-1.5 active:scale-95 cursor-pointer"
           >
@@ -131,6 +136,7 @@ export function TimelineRecordsView({
             <button
               type="button"
               onClick={() => setSelectedTag(null)}
+              onMouseEnter={playHoverSound}
               className={`min-h-[28px] px-2.5 text-[10px] sm:text-xs font-mono font-bold shrink-0 border ${
                 selectedTag === null
                   ? 'bg-amber-500 text-black border-amber-400'
@@ -144,6 +150,7 @@ export function TimelineRecordsView({
                 key={tag}
                 type="button"
                 onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                onMouseEnter={playHoverSound}
                 className={`min-h-[28px] px-2.5 text-[10px] sm:text-xs font-mono shrink-0 border ${
                   selectedTag === tag
                     ? 'bg-amber-500 text-black border-amber-400 font-bold'
@@ -168,7 +175,6 @@ export function TimelineRecordsView({
           {groupedByDay.map((group) => (
             <div key={group.date} className="relative pl-4 sm:pl-6 border-l-2 border-amber-500/60 space-y-2.5">
               <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-amber-500 border-2 border-black shadow-[0_0_10px_#f59e0b]" />
-
               <div className="inline-flex items-center gap-2 bg-[#10141f] border-2 border-amber-500/50 px-3 py-1 font-mono text-xs font-bold text-amber-300 shadow-sm">
                 <span>{group.displayDate}</span>
                 <span className="text-[10px] text-amber-400/80 bg-amber-500/20 px-1.5">{group.items.length}件</span>
@@ -238,19 +244,21 @@ export function TimelineRecordsView({
                             )}
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onOpenSns(location);
-                            }}
-                            onMouseEnter={playHoverSound}
-                            className="p-1 text-cyan-400 hover:text-white bg-cyan-950/40 hover:bg-cyan-600 border border-cyan-500/40 shrink-0"
-                            title="X共有"
-                            aria-label="X共有"
-                          >
-                            <Share2 className="w-3 h-3" />
-                          </button>
+                          {onOpenSns && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onOpenSns(location);
+                              }}
+                              onMouseEnter={playHoverSound}
+                              className="p-1 text-cyan-400 hover:text-white bg-cyan-950/40 hover:bg-cyan-600 border border-cyan-500/40 shrink-0"
+                              title="X共有"
+                              aria-label="X共有"
+                            >
+                              <Share2 className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
 
                         <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-400 truncate">
@@ -289,6 +297,17 @@ export function TimelineRecordsView({
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={onCreate}
+        onMouseEnter={playHoverSound}
+        aria-label="新規記録を追加"
+        className="fixed right-4 bottom-16 sm:right-8 sm:bottom-6 z-30 min-h-[48px] px-4 sm:px-5 rounded-full border-2 border-amber-400 bg-[#111624] text-amber-300 font-black font-mono text-xs sm:text-sm shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-amber-500 hover:text-black hover:border-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+      >
+        <Plus className="w-4 h-4 stroke-[3]" />
+        <span>記録を追加</span>
+      </button>
     </div>
   );
 }

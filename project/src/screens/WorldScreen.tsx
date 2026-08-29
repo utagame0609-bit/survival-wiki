@@ -1,26 +1,24 @@
 import { useEffect, useState } from 'react';
-import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
+import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, fetchWorld, getPhotoUrl } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { LocationsTab } from '@/screens/LocationsTab';
-import { TimelineTab } from '@/screens/TimelineTab';
 import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import type { NavigateFn } from '@/components/Navigation';
-import { SettingsButton } from '@/components/SettingsModal';
-import { playHoverSound, playModalCloseSound, playModalOpenSound } from '@/lib/sound';
+import { playModalOpenSound } from '@/lib/sound';
+import { stopNpcBgm } from '@/lib/bgm';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
 import { WorldHeader } from '@/components/WorldHeader';
 import { WorldTabs } from '@/components/WorldTabs';
 
-type Tab = 'locations' | 'timeline' | 'wiki';
+type Tab = 'records' | 'wiki';
 
 export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }: { worldId: string; worldName: string; navigate: NavigateFn; goBack: () => void }) {
   const [world, setWorld] = useState<WorldWithMembers | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<Tab>('locations');
-  const [tabHistory, setTabHistory] = useState<Tab[]>([]);
+  const [tab, setTab] = useState<Tab>('records');
   const [wikiArticleBack, setWikiArticleBack] = useState(false);
   const [wikiArticleViewKey, setWikiArticleViewKey] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
@@ -56,8 +54,13 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
       });
     return () => {
       active = false;
+      stopNpcBgm();
     };
   }, [worldId, reloadKey]);
+
+  useEffect(() => {
+    if (tab !== 'wiki') stopNpcBgm();
+  }, [tab]);
 
   const handleOpenLocation = async (locationId: string) => {
     try {
@@ -78,7 +81,6 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
   const handleTabChange = (nextTab: Tab) => {
     if (nextTab === tab) return;
     setWikiArticleBack(false);
-    setTabHistory([]);
     setTab(nextTab);
   };
 
@@ -93,22 +95,18 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
       return;
     }
     if (tab === 'wiki') {
-      setTab('timeline');
-      return;
-    }
-    if (tab === 'timeline') {
-      setTab('locations');
+      setTab('records');
       return;
     }
     goBack();
   };
 
   return (
-    <div className="relative min-h-screen bg-[#161922] text-white font-sans flex flex-col select-none overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden">
       <div className="scanline-overlay" />
       <Header title={world?.name || worldName} onBack={handleWorldBack} />
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
         {loading && <Spinner label="ワールドデータを読み込み中..." />}
         {error && <ErrorBanner message={error} />}
 
@@ -118,7 +116,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
             <WorldTabs activeTab={tab} onTabChange={handleTabChange} />
 
             <div className="flex-1">
-              {tab === 'locations' && (
+              {tab === 'records' && (
                 <LocationsTab
                   world={world}
                   reloadKey={reloadKey}
@@ -127,8 +125,6 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
                   onOpenLocationHandled={() => setOpenLocationId(null)}
                 />
               )}
-
-              {tab === 'timeline' && <TimelineTab world={world} reloadKey={reloadKey} />}
 
               {tab === 'wiki' && (
                 <WikiTab
@@ -143,8 +139,6 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
           </>
         )}
       </div>
-
-      {!wikiArticleBack && <SettingsButton />}
 
       {wikiLocation && <WikiLocationDetailModal location={wikiLocation} onClose={handleCloseWikiLocation} />}
     </div>
