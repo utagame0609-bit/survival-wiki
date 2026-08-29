@@ -80,6 +80,64 @@ function App() {
     };
   }, [authLoading, session, setStartupWorld]);
 
+  useEffect(() => {
+    const getScrollKey = () => {
+      switch (screen.name) {
+        case 'top':
+          return 'top';
+        case 'worldList':
+          return `worldList:${screen.gameId}`;
+        case 'worldCreate':
+          return `worldCreate:${screen.gameId}:${screen.worldId ?? 'new'}`;
+        case 'world':
+          return `world:${screen.worldId}`;
+      }
+    };
+
+    const storageKey = `survival-wiki:scroll:${getScrollKey()}`;
+    let timerA: number | null = null;
+    let timerB: number | null = null;
+
+    const readTarget = () => {
+      try {
+        const raw = sessionStorage.getItem(storageKey);
+        const target = raw === null ? 0 : Number(raw);
+        return Number.isFinite(target) && target >= 0 ? target : 0;
+      } catch {
+        return 0;
+      }
+    };
+
+    const save = () => {
+      try {
+        sessionStorage.setItem(storageKey, String(Math.round(window.scrollY)));
+      } catch {
+        // sessionStorage unavailable; ignore.
+      }
+    };
+
+    const restore = () => {
+      const target = readTarget();
+      window.scrollTo(0, target);
+    };
+
+    window.addEventListener('scroll', save, { passive: true });
+
+    const frame = window.requestAnimationFrame(() => {
+      restore();
+      timerA = window.setTimeout(restore, 80);
+      timerB = window.setTimeout(restore, 250);
+    });
+
+    return () => {
+      save();
+      window.removeEventListener('scroll', save);
+      window.cancelAnimationFrame(frame);
+      if (timerA !== null) window.clearTimeout(timerA);
+      if (timerB !== null) window.clearTimeout(timerB);
+    };
+  }, [screen]);
+
   if (authLoading || (session && startupLoading)) {
     return <div className="fixed inset-0 bg-[#11120f]" aria-hidden="true" />;
   }
