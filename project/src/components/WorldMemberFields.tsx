@@ -247,8 +247,8 @@ function PhotoPicker({
 }) {
   const accentClass =
     accent === 'amber'
-      ? 'border-amber-400 text-amber-400 hover:border-amber-300'
-      : 'border-cyan-400 text-cyan-300 hover:border-cyan-300';
+      ? 'border-amber-400 text-amber-400 hover:border-amber-300 hover:bg-amber-500/10 hover:shadow-[0_0_14px_rgba(245,158,11,0.35)] hover:brightness-110'
+      : 'border-cyan-400 text-cyan-300 hover:border-cyan-300 hover:bg-cyan-500/10 hover:shadow-[0_0_14px_rgba(34,211,238,0.32)] hover:brightness-110';
   const sizeClass = size === 'large' ? 'h-14 w-14' : 'h-10 w-12';
 
   return (
