@@ -269,10 +269,6 @@ export function TimelineRecordsView({
                           {location.name}
                         </h4>
 
-                        <div className="font-mono text-[11px] font-bold text-emerald-400">
-                          X:{location.x} Y:{location.y} Z:{location.z}
-                        </div>
-
                         <p className="text-[11px] text-slate-300 line-clamp-1">
                           {location.detail_memo || '（メモ未入力）'}
                         </p>
