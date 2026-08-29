@@ -158,7 +158,16 @@ export function useScreenHistory() {
 
   const goBack = () => {
     setHistory((h) => {
-      if (h.length === 0) return h;
+      if (h.length === 0) {
+        if (screen.name === 'worldCreate') {
+          setScreenState({
+            name: 'worldList',
+            gameId: screen.gameId,
+            gameName: screen.gameName,
+          });
+        }
+        return h;
+      }
       const prev = h[h.length - 1];
       setScreenState(prev);
       return h.slice(0, -1);
