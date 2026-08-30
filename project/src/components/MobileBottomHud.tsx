@@ -34,64 +34,57 @@ export function MobileBottomHud({ activeTab, onTabChange, onBack }: MobileBottom
     setSoundEnabled(next);
   };
 
+  const itemClass = 'flex h-10 min-w-0 flex-1 flex-col items-center justify-center rounded px-0.5 text-[#94A3B8] active:bg-[#1E293B]';
+
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0B1018]/95 backdrop-blur-lg border-t border-[#1E293B] pb-[env(safe-area-inset-bottom,2px)] pt-0.5 px-2 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.6)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0B1018]/95 backdrop-blur-lg border-t border-[#1E293B] pb-[env(safe-area-inset-bottom,2px)] pt-0.5 px-1.5 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.6)]"
       aria-label="モバイル下部HUDナビゲーション"
     >
-      <div className="flex h-12 max-w-md mx-auto items-center justify-around">
+      <div className="mx-auto flex h-12 w-full max-w-md items-center gap-0.5">
         <button
           type="button"
           onClick={() => {
             playCancelSound();
             onBack();
           }}
-          className="flex min-w-[40px] h-10 flex-col items-center justify-center rounded text-[#94A3B8] active:text-[#F59E0B] active:bg-[#1E293B]"
+          className={`${itemClass} active:text-[#F59E0B]`}
         >
-          <ChevronLeft className="w-4 h-4 text-[#F59E0B]" />
-          <span className="text-[9px] game-ui-font whitespace-nowrap">戻る</span>
+          <ChevronLeft className="h-4 w-4 text-[#F59E0B]" />
+          <span className="game-ui-font whitespace-nowrap text-[8px]">戻る</span>
         </button>
 
-        <div className="flex items-center rounded-lg border border-[#1E293B] bg-[#101827] p-0.5">
-          <button
-            type="button"
-            onClick={() => handleTabChange('records')}
-            className={`flex items-center gap-1 rounded px-2.5 py-1.5 text-xs game-ui-font transition-all whitespace-nowrap ${
-              activeTab === 'records'
-                ? 'bg-[#1E293B] text-[#F59E0B] border border-[#F59E0B]/50 shadow-[0_0_8px_rgba(245,158,11,0.25)] font-bold'
-                : 'text-[#94A3B8]'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5 shrink-0" />
-            <span>記録</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('wiki')}
-            className={`flex items-center gap-1 rounded px-2.5 py-1.5 text-xs game-ui-font transition-all whitespace-nowrap ${
-              activeTab === 'wiki'
-                ? 'bg-[#0E2A3A] text-[#06B6D4] border border-[#06B6D4]/50 shadow-[0_0_8px_rgba(6,182,212,0.25)] font-bold'
-                : 'text-[#94A3B8]'
-            }`}
-          >
-            <ScrollText className="w-3.5 h-3.5 shrink-0" />
-            <span>Wiki</span>
-          </button>
-        </div>
-
-        <button type="button" onClick={handleHome} className="flex min-w-[40px] h-10 flex-col items-center justify-center rounded text-[#94A3B8] active:text-[#F59E0B] active:bg-[#1E293B]">
-          <Home className="w-4 h-4 text-[#F59E0B]" />
-          <span className="text-[9px] game-ui-font whitespace-nowrap">スロット</span>
+        <button type="button" onClick={handleSoundToggle} className={`${itemClass} active:text-[#06B6D4]`}>
+          {soundEnabled ? <Volume2 className="h-4 w-4 text-[#06B6D4]" /> : <VolumeX className="h-4 w-4 text-[#64748B]" />}
+          <span className="game-ui-font whitespace-nowrap text-[8px]">BGM {soundEnabled ? 'ON' : 'OFF'}</span>
         </button>
 
-        <button type="button" onClick={handleSoundToggle} className="flex min-w-[38px] h-10 flex-col items-center justify-center rounded text-[#94A3B8] active:text-[#06B6D4] active:bg-[#1E293B]">
-          {soundEnabled ? <Volume2 className="w-4 h-4 text-[#06B6D4]" /> : <VolumeX className="w-4 h-4 text-[#64748B]" />}
-          <span className="text-[9px] font-mono tracking-tighter whitespace-nowrap">{soundEnabled ? 'ON' : 'OFF'}</span>
+        <button type="button" onClick={handleSettings} className={`${itemClass} active:text-[#F8FAFC]`}>
+          <Settings className="h-4 w-4" />
+          <span className="game-ui-font whitespace-nowrap text-[8px]">設定</span>
         </button>
 
-        <button type="button" onClick={handleSettings} className="flex min-w-[38px] h-10 flex-col items-center justify-center rounded text-[#94A3B8] active:text-[#F8FAFC] active:bg-[#1E293B]">
-          <Settings className="w-4 h-4" />
-          <span className="text-[9px] font-mono tracking-tighter whitespace-nowrap">設定</span>
+        <button
+          type="button"
+          onClick={() => handleTabChange('records')}
+          className={`${itemClass} ${activeTab === 'records' ? 'border border-[#F59E0B]/50 bg-[#1E293B] font-bold text-[#F59E0B] shadow-[0_0_8px_rgba(245,158,11,0.2)]' : ''}`}
+        >
+          <BookOpen className="h-4 w-4" />
+          <span className="game-ui-font whitespace-nowrap text-[8px]">記録</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabChange('wiki')}
+          className={`${itemClass} ${activeTab === 'wiki' ? 'border border-[#06B6D4]/50 bg-[#0E2A3A] font-bold text-[#06B6D4] shadow-[0_0_8px_rgba(6,182,212,0.2)]' : ''}`}
+        >
+          <ScrollText className="h-4 w-4" />
+          <span className="game-ui-font whitespace-nowrap text-[8px]">WIKI</span>
+        </button>
+
+        <button type="button" onClick={handleHome} className={`${itemClass} active:text-[#F59E0B]`}>
+          <Home className="h-4 w-4 text-[#F59E0B]" />
+          <span className="game-ui-font whitespace-nowrap text-[8px]">ホーム</span>
         </button>
       </div>
     </nav>
