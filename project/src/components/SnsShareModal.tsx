@@ -31,11 +31,13 @@ export function SnsShareModal({ world, location, onClose }: SnsShareModalProps) 
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const coords = `X:${location.x} Y:${location.y} Z:${location.z}`;
+    const coordinateLine = location.has_coordinates
+      ? `📍 X:${location.x} Y:${location.y} Z:${location.z}`
+      : null;
     setPostText([
       `【冒険記録】${location.name}`,
       location.detail_memo || '新しい冒険記録を追加しました。',
-      `📍 ${coords}`,
+      ...(coordinateLine ? [coordinateLine] : []),
       '',
       tags,
     ].join('\n'));
