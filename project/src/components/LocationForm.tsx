@@ -13,6 +13,7 @@ type SaveInput = {
   x: number;
   y: number;
   z: number;
+  has_coordinates: boolean;
   detail_memo: string;
   created_at: string;
   member_ids: string[];
@@ -30,7 +31,7 @@ type Props = {
 
 export function LocationForm({ members, editing, onSave, onComplete, onCancel, saving }: Props) {
   const [coordsText, setCoordsText] = useState(
-    editing ? formatCoords({ x: editing.x, y: editing.y, z: editing.z }) : '',
+    editing?.has_coordinates ? formatCoords({ x: editing.x, y: editing.y, z: editing.z }) : '',
   );
   const [coordsError, setCoordsError] = useState('');
   const [name, setName] = useState(editing?.name ?? '');
@@ -102,7 +103,8 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
     }
 
     const trimmedCoords = coordsText.trim();
-    const coords = trimmedCoords ? parseCoords(coordsText) : { x: 0, y: 0, z: 0 };
+    const hasCoordinates = Boolean(trimmedCoords);
+    const coords = hasCoordinates ? parseCoords(coordsText) : { x: 0, y: 0, z: 0 };
     if (!coords) {
       if (!detailOpen) setDetailOpen(true);
       setCoordsError('座標を入力する場合は「X Y Z」の3値で入力してください（例: 100 64 -20）');
@@ -115,6 +117,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         x: coords.x,
         y: coords.y,
         z: coords.z,
+        has_coordinates: hasCoordinates,
         detail_memo: detailMemo.trim(),
         created_at: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),
         member_ids: Array.from(selectedMembers),
