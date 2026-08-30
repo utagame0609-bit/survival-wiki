@@ -350,6 +350,15 @@ export function WikiTabModern({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleBackToCompilers = () => {
+    playCancelSound();
+    setCopied(false);
+    setShared(false);
+    setArticle(null);
+    setStyle(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleCopy = async () => {
     if (!article) return;
     try {
@@ -528,9 +537,19 @@ export function WikiTabModern({
       )}
 
       {hasArticle && style && narrator && (
-        <section className="min-w-0 max-w-full overflow-x-hidden border-2 border-slate-700 bg-[#0f1424]">
-          <div className="sticky top-0 z-10 border-b border-slate-800 bg-[#0f1424]/95 px-2.5 py-2 backdrop-blur-sm sm:px-4">
-            <div className="mx-auto grid max-w-md grid-cols-3 gap-1.5">
+        <div className="mx-auto w-full max-w-4xl space-y-4 pb-5 sm:space-y-5">
+          <div className="flex flex-col gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A] p-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={handleBackToCompilers}
+              onMouseEnter={playHoverSound}
+              className="game-ui-font flex min-h-[38px] items-center justify-center gap-1.5 rounded border border-[#334155] bg-[#161F30] px-3 text-xs text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:text-[#F59E0B] sm:justify-start"
+            >
+              <ArrowRight className="h-4 w-4 rotate-180 text-[#F59E0B]" />
+              <span>編纂官一覧に戻る</span>
+            </button>
+
+            <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center">
               {(Object.keys(EMPTY_SAVED) as WikiStyleId[]).map((id) => {
                 const active = id === style;
                 const available = saved[id];
@@ -542,10 +561,10 @@ export function WikiTabModern({
                     onMouseEnter={!active ? playHoverSound : undefined}
                     disabled={active}
                     title={active ? `${styleMeta[id].title}・表示中` : available ? `${styleMeta[id].title}を開く` : `${styleMeta[id].title}を生成する`}
-                    className={`game-ui-font flex min-w-0 items-center justify-center gap-1 border px-1.5 py-1 transition-all ${active ? 'border-amber-400 bg-amber-500/15 text-amber-300' : available ? 'border-slate-700 bg-[#0b101b] text-slate-300 hover:-translate-y-[2px] hover:border-cyan-400 hover:text-cyan-300' : 'border-slate-800 bg-[#090d15] text-slate-500 opacity-60 hover:-translate-y-[2px] hover:border-slate-600 hover:opacity-100'}`}
+                    className={`game-ui-font flex min-w-0 items-center justify-center gap-1.5 rounded px-2 py-1.5 text-[10px] transition-all sm:px-3 sm:text-xs ${active ? 'bg-[#06B6D4] font-bold text-[#0B1018] shadow-[0_0_10px_rgba(6,182,212,0.3)]' : available ? 'border border-[#334155] bg-[#161F30] text-[#94A3B8] hover:text-[#E2E8F0]' : 'border border-[#1E293B] bg-[#101722] text-[#64748B] opacity-65 hover:opacity-100'}`}
                   >
                     <PixelNarrator style={id} compact />
-                    <span className="hidden min-w-0 truncate text-[8px] font-bold sm:inline">{styleMeta[id].shortTitle}</span>
+                    <span className="hidden truncate sm:inline">{styleMeta[id].shortTitle}</span>
                   </button>
                 );
               })}
@@ -554,50 +573,74 @@ export function WikiTabModern({
 
           <NarratorDialogue style={style} quote={parsedArticle.line} />
 
-          {isWikipedia ? (
-            <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border border-[#a2a9b1] bg-white text-[#202122] sm:mx-4">
-              <div className="flex min-w-0 items-center gap-3 border-b border-[#c8ccd1] px-4 py-3 sm:px-6">
-                {mainPhotoUrl && <img src={mainPhotoUrl} alt="代表写真" className="h-10 w-10 shrink-0 border border-[#c8ccd1] object-cover" />}
-                <div className="min-w-0">
-                  <div className="truncate font-serif text-lg sm:text-2xl">ウタペディア</div>
-                  <div className="truncate text-[10px] text-[#54595d]">Survival Wiki // {world.name}</div>
-                </div>
+          <section className="hud-bracket min-w-0 max-w-full overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
+            <div className="border-b border-[#1E293B] bg-[#0B1018] px-4 py-2.5 sm:px-5">
+              <div className="game-ui-font flex items-center gap-2 text-[10px] tracking-wider text-[#64748B] sm:text-xs">
+                <BookOpen className="h-3.5 w-3.5 text-[#06B6D4]" />
+                <span>ARCHIVED WIKI ARTICLE // {styleMeta[style].shortTitle}</span>
               </div>
-              <div className="grid min-w-0 max-w-full grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-                <div className="min-w-0 max-w-full overflow-x-hidden">
-                  <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} />
-                </div>
-                <aside className="h-fit min-w-0 border border-[#c8ccd1] bg-[#f8f9fa] p-3 text-sm">
-                  <div className="border-b border-[#c8ccd1] pb-2 font-semibold">基本情報</div>
-                  <div className="mt-2 space-y-2">
-                    <div><b>名称</b><div className="break-words">{world.name}</div></div>
-                    <div><b>プレイヤー</b><div className="break-words">{world.player ?? '不明'}</div></div>
-                    <div><b>記録地点</b><div>{locations.length}</div></div>
-                    <div><b>参加メンバー</b><div>{world.members.length}</div></div>
-                  </div>
-                </aside>
-              </div>
-            </article>
-          ) : (
-            <article className={`mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 p-4 sm:mx-4 sm:p-6 ${style === 'scp' ? 'border-cyan-400/60 bg-[#07141b] text-zinc-200' : 'border-orange-500/60 bg-[#160e09] text-[#ead8bf]'}`}>
-              <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} className={style === 'ancient' ? 'font-serif' : 'font-sans'} />
-            </article>
-          )}
+            </div>
 
-          <div ref={footerRef} className="border-t border-slate-800 bg-[#0f1424] px-3 py-3 sm:px-4">
-            <div className="grid grid-cols-3 gap-2">
-              <button type="button" onClick={handleShare} onMouseEnter={playHoverSound} className="game-ui-font flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-cyan-500/60 bg-[#0d1624] text-[10px] font-bold text-cyan-300 transition-all hover:-translate-y-[2px] hover:border-cyan-300 hover:bg-cyan-500/10 sm:text-xs">
-                <Share2 className="h-4 w-4" />{shared ? '共有完了' : '共有'}
+            {isWikipedia ? (
+              <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border border-[#a2a9b1] bg-white text-[#202122] sm:mx-4">
+                <div className="flex min-w-0 items-center gap-3 border-b border-[#c8ccd1] px-4 py-3 sm:px-6">
+                  {mainPhotoUrl && <img src={mainPhotoUrl} alt="代表写真" className="h-10 w-10 shrink-0 border border-[#c8ccd1] object-cover" />}
+                  <div className="min-w-0">
+                    <div className="truncate font-serif text-lg sm:text-2xl">ウタペディア</div>
+                    <div className="truncate text-[10px] text-[#54595d]">Survival Wiki // {world.name}</div>
+                  </div>
+                </div>
+                <div className="grid min-w-0 max-w-full grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+                  <div className="min-w-0 max-w-full overflow-x-hidden">
+                    <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} />
+                  </div>
+                  <aside className="h-fit min-w-0 border border-[#c8ccd1] bg-[#f8f9fa] p-3 text-sm">
+                    <div className="border-b border-[#c8ccd1] pb-2 font-semibold">基本情報</div>
+                    <div className="mt-2 space-y-2">
+                      <div><b>名称</b><div className="break-words">{world.name}</div></div>
+                      <div><b>プレイヤー</b><div className="break-words">{world.player ?? '不明'}</div></div>
+                      <div><b>記録地点</b><div>{locations.length}</div></div>
+                      <div><b>参加メンバー</b><div>{world.members.length}</div></div>
+                    </div>
+                  </aside>
+                </div>
+              </article>
+            ) : (
+              <article className={`mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 p-4 sm:mx-4 sm:p-6 ${style === 'scp' ? 'border-cyan-400/60 bg-[#07141b] text-zinc-200' : 'border-orange-500/60 bg-[#160e09] text-[#ead8bf]'}`}>
+                <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} className={style === 'ancient' ? 'font-serif' : 'font-sans'} />
+              </article>
+            )}
+          </section>
+
+          <div ref={footerRef} className="flex flex-col items-stretch justify-between gap-2.5 rounded-xl border border-[#1E293B] bg-[#0F172A] p-2.5 sm:flex-row sm:items-center sm:p-3.5">
+            <button
+              type="button"
+              onClick={() => setResetTarget(true)}
+              onMouseEnter={playHoverSound}
+              className="game-ui-font flex min-h-[40px] items-center justify-center gap-1.5 rounded border border-transparent px-3 text-xs text-[#64748B] transition-colors hover:border-[#EF4444]/40 hover:bg-[#2A161C] hover:text-[#EF4444]"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />この記事をリセット
+            </button>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+              <button
+                type="button"
+                onClick={handleCopy}
+                onMouseEnter={playHoverSound}
+                className="game-ui-font flex min-h-[40px] items-center justify-center gap-1.5 rounded border border-[#334155] bg-[#161F30] px-3 text-xs text-[#F8FAFC] transition-colors hover:bg-[#1E293B] sm:px-4"
+              >
+                <Copy className="h-3.5 w-3.5 text-[#06B6D4]" />{copied ? 'コピー完了' : '本文をコピー'}
               </button>
-              <button type="button" onClick={handleCopy} onMouseEnter={playHoverSound} className="game-ui-font flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-200 transition-all hover:-translate-y-[2px] hover:border-cyan-400 sm:text-xs">
-                <Copy className="h-4 w-4" />{copied ? 'コピー完了' : '本文コピー'}
-              </button>
-              <button type="button" onClick={() => setResetTarget(true)} onMouseEnter={playHoverSound} className="game-ui-font flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-300 transition-all hover:-translate-y-[2px] hover:border-amber-400 hover:text-amber-300 sm:text-xs">
-                <RotateCcw className="h-4 w-4" />リセット
+              <button
+                type="button"
+                onClick={handleShare}
+                onMouseEnter={playHoverSound}
+                className="game-ui-font flex min-h-[40px] items-center justify-center gap-1.5 rounded bg-[#06B6D4] px-3 text-xs font-bold text-[#0B1018] shadow-[0_0_10px_rgba(6,182,212,0.3)] transition-all hover:bg-[#0891B2] active:scale-95 sm:px-4"
+              >
+                <Share2 className="h-3.5 w-3.5" />{shared ? '共有完了' : '記事を共有'}
               </button>
             </div>
           </div>
-        </section>
+        </div>
       )}
 
       {hasArticle && !footerVisible && (
@@ -614,31 +657,41 @@ export function WikiTabModern({
       )}
 
       {generationReveal && createPortal((
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-5 backdrop-blur-sm">
-          <div className="w-full max-w-lg text-center">
-            <div className="mx-auto mb-4 w-fit"><PixelNarrator style={generationReveal.style} /></div>
-            <div className={`game-ui-font text-xs font-black sm:text-sm ${NARRATORS[generationReveal.style]?.text ?? 'text-amber-300'}`}>
-              【{NARRATORS[generationReveal.style]?.name}】
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#05080E]/95 p-4 backdrop-blur-lg">
+          <div className="hud-scanlines relative w-full max-w-lg space-y-5 rounded-2xl border-2 border-[#06B6D4] bg-[#0F172A] p-5 text-center shadow-[0_0_40px_rgba(6,182,212,0.3)] sm:p-7">
+            <div className="mx-auto w-fit rounded-2xl border-2 border-[#06B6D4] bg-[#07101c] p-1 shadow-[0_0_20px_rgba(6,182,212,0.35)]">
+              <PixelNarrator style={generationReveal.style} />
             </div>
-            <div className="game-ui-font mt-2 text-[9px] tracking-[0.14em] text-slate-500 sm:text-[10px]">
-              {generationReveal.phase === 'waiting' ? `${NARRATORS[generationReveal.style]?.name} // ARCHIVE ANALYSIS` : generationReveal.phase === 'result' ? '所見を受信' : '編纂完了'}
-            </div>
-            <div className="mx-auto mt-3 min-h-[112px] max-w-md border border-slate-700 bg-[#050a14] px-5 py-5 text-left font-serif text-sm leading-7 text-slate-100 shadow-[0_0_30px_rgba(0,0,0,.65)] sm:text-base">
-              「{typedReveal || '……'}{generationReveal.phase !== 'ready' && <span className="animate-pulse text-slate-500">▌</span>}」
-            </div>
-            {generationReveal.phase === 'waiting' && waitingComplete && !generationReveal.article && (
-              <div className="game-ui-font mt-3 flex items-center justify-center gap-2 text-[9px] tracking-[0.16em] text-slate-600">
-                <span className="h-2.5 w-2.5 animate-spin rounded-full border border-slate-500 border-t-transparent" />記録照合中...
+
+            <div>
+              <div className="game-ui-font text-[10px] uppercase tracking-wider text-[#06B6D4] sm:text-xs">
+                {NARRATORS[generationReveal.style]?.role}
               </div>
-            )}
-            {generationReveal.phase === 'ready' && (
+              <h3 className="game-ui-font mt-0.5 text-lg font-bold text-[#F8FAFC] sm:text-xl">
+                {NARRATORS[generationReveal.style]?.name}
+              </h3>
+            </div>
+
+            <div className="min-h-[110px] rounded-xl border border-[#1E293B] bg-[#0B1018] p-4 text-left sm:p-5">
+              <p className="text-sm italic leading-relaxed text-[#E2E8F0] sm:text-base">
+                「{typedReveal || '……'}{generationReveal.phase !== 'ready' && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#06B6D4] align-middle" />}」
+              </p>
+            </div>
+
+            {generationReveal.phase !== 'ready' ? (
+              <div className="game-ui-font flex items-center justify-center gap-2 text-[10px] text-[#64748B] sm:text-xs">
+                <Sparkles className="h-4 w-4 animate-spin text-[#06B6D4]" />
+                <span>{generationReveal.phase === 'waiting' ? '年代記を編纂中…… 記録を照合しています' : '編纂結果を確定しています……'}</span>
+              </div>
+            ) : (
               <button
                 type="button"
                 onClick={openGeneratedArticle}
                 onMouseEnter={playHoverSound}
-                className="game-ui-font mx-auto mt-5 flex min-h-[46px] min-w-[190px] items-center justify-center gap-2 border-2 border-amber-500 bg-amber-500/15 px-5 text-sm font-black text-amber-300 transition-all hover:-translate-y-[3px] hover:bg-amber-500/25"
+                className="game-ui-font flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#06B6D4] text-sm font-bold tracking-wider text-[#0B1018] shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all hover:bg-[#0891B2] active:scale-95 sm:text-base"
               >
-                <BookOpen className="h-4 w-4" />記事を読む
+                <CheckCircle2 className="h-5 w-5" />
+                <span>編纂完了 // 記事を読む</span>
               </button>
             )}
           </div>
