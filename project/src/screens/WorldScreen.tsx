@@ -11,6 +11,7 @@ import { stopNpcBgm } from '@/lib/bgm';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
 import { WorldHeader } from '@/components/WorldHeader';
 import { WorldTabs } from '@/components/WorldTabs';
+import { MobileBottomHud } from '@/components/MobileBottomHud';
 
 type Tab = 'records' | 'wiki';
 
@@ -102,9 +103,9 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden pb-14 md:pb-0">
       <div className="scanline-overlay" />
-      <Header title={world?.name || worldName} onBack={handleWorldBack} />
+      <Header title={world?.name || worldName} onBack={handleWorldBack} hideMobileActions />
 
       <div className="relative w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1 flex flex-col">
         {loading && <Spinner label="ワールドデータを読み込み中..." />}
@@ -139,6 +140,10 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
           </>
         )}
       </div>
+
+      {!loading && world && (
+        <MobileBottomHud activeTab={tab} onTabChange={handleTabChange} onBack={handleWorldBack} />
+      )}
 
       {wikiLocation && <WikiLocationDetailModal location={wikiLocation} onClose={handleCloseWikiLocation} />}
     </div>
