@@ -82,179 +82,40 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Mobile Wiki first-use swipe hint: real Hand icon with GPU-friendly transform-only motion. */
-@media (max-width: 767px) {
-  .wiki-swipe-hint {
-    width: 10rem;
-    height: 12.5rem;
-    opacity: 0.92;
-    animation: wiki-hand-glow 3s ease-in-out infinite;
-    will-change: opacity;
-  }
-
-  .wiki-swipe-hand,
-  .wiki-swipe-trail,
-  .wiki-swipe-ripple {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-  }
-
-  .wiki-swipe-hand {
-    z-index: 3;
-    width: 4.5rem;
-    height: 5.5rem;
-    margin-left: -2.25rem;
-    margin-top: -2.75rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    transform: translate3d(0, 48px, 0) scale(0.96);
-    animation: wiki-hand-swipe 3s cubic-bezier(0.22, 0.72, 0.24, 1) infinite;
-    will-change: transform, opacity;
-  }
-
-  .wiki-swipe-hand-icon {
-    width: 4rem;
-    height: 4rem;
-    color: rgba(207, 250, 254, 0.95);
-    fill: rgba(34, 211, 238, 0.12);
-    transform: rotate(-12deg);
-    filter: drop-shadow(0 0 8px rgba(103, 232, 249, 0.72)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.34));
-  }
-
-  .wiki-swipe-touch {
-    position: absolute;
-    left: 50%;
-    top: -0.15rem;
-    width: 1rem;
-    height: 1rem;
-    margin-left: -0.5rem;
-    border: 2px solid rgba(207, 250, 254, 0.92);
-    border-radius: 9999px;
-    background: rgba(34, 211, 238, 0.32);
-    box-shadow: 0 0 12px rgba(103, 232, 249, 0.8), 0 0 24px rgba(6, 182, 212, 0.35);
-  }
-
-  .wiki-swipe-ripple {
-    z-index: 1;
-    width: 3.4rem;
-    height: 3.4rem;
-    margin-left: -1.7rem;
-    margin-top: 2.65rem;
-    border: 1.5px solid rgba(103, 232, 249, 0.58);
-    border-radius: 9999px;
-    background: rgba(34, 211, 238, 0.05);
-    transform: translate3d(0, 0, 0) scale(0.45);
-    animation: wiki-hand-ripple 3s ease-out infinite;
-    will-change: transform, opacity;
-  }
-
-  .wiki-swipe-trail {
-    z-index: 2;
-    width: 0.34rem;
-    height: 6.4rem;
-    margin-left: -0.17rem;
-    margin-top: -0.3rem;
-    border-radius: 9999px;
-    background: linear-gradient(to top, transparent, rgba(34, 211, 238, 0.38), rgba(165, 243, 252, 0.9));
-    box-shadow: 0 0 12px rgba(34, 211, 238, 0.32);
-    transform-origin: center bottom;
-    transform: translate3d(0, 34px, 0) scaleY(0.05);
-    animation: wiki-hand-trail 3s cubic-bezier(0.22, 0.72, 0.24, 1) infinite;
-    will-change: transform, opacity;
-  }
-}
-
-@keyframes wiki-hand-swipe {
-  0%, 10% {
+/* Mobile Wiki first-use swipe hint: one SVG on one composited layer. */
+@keyframes smooth-swipe-up {
+  0% {
     opacity: 0;
-    transform: translate3d(0, 48px, 0) scale(0.96);
+    transform: translate3d(0, 48px, 0);
   }
-  20% {
-    opacity: 0.76;
-    transform: translate3d(0, 44px, 0) scale(0.985);
+  12% {
+    opacity: 0.85;
+    transform: translate3d(0, 40px, 0);
   }
-  32% {
-    opacity: 1;
-    transform: translate3d(0, 34px, 0) scale(1);
-  }
-  72% {
-    opacity: 1;
-    transform: translate3d(0, -40px, 0) scale(1);
+  75% {
+    opacity: 0.85;
+    transform: translate3d(0, -48px, 0);
   }
   88% {
-    opacity: 0.32;
-    transform: translate3d(0, -58px, 0) scale(0.985);
+    opacity: 0;
+    transform: translate3d(0, -60px, 0);
   }
   100% {
     opacity: 0;
-    transform: translate3d(0, -64px, 0) scale(0.96);
+    transform: translate3d(0, 48px, 0);
   }
 }
 
-@keyframes wiki-hand-ripple {
-  0%, 10% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.45);
-  }
-  20% {
-    opacity: 0.88;
-    transform: translate3d(0, 0, 0) scale(0.72);
-  }
-  46% {
-    opacity: 0.2;
-    transform: translate3d(0, 0, 0) scale(1.42);
-  }
-  60%, 100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scale(1.7);
-  }
-}
-
-@keyframes wiki-hand-trail {
-  0%, 12% {
-    opacity: 0;
-    transform: translate3d(0, 34px, 0) scaleY(0.05);
-  }
-  25% {
-    opacity: 0.36;
-    transform: translate3d(0, 28px, 0) scaleY(0.28);
-  }
-  48% {
-    opacity: 0.74;
-    transform: translate3d(0, 10px, 0) scaleY(0.7);
-  }
-  72% {
-    opacity: 0.84;
-    transform: translate3d(0, -18px, 0) scaleY(1);
-  }
-  88% {
-    opacity: 0.22;
-    transform: translate3d(0, -34px, 0) scaleY(0.68);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, -46px, 0) scaleY(0.08);
-  }
-}
-
-@keyframes wiki-hand-glow {
-  0%, 100% {
-    opacity: 0.72;
-  }
-  50% {
-    opacity: 1;
-  }
+.animate-smooth-swipe {
+  animation: smooth-swipe-up 2.2s cubic-bezier(0.2, 0.65, 0.35, 1) infinite;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wiki-swipe-hint,
-  .wiki-swipe-hand,
-  .wiki-swipe-ripple,
-  .wiki-swipe-trail {
+  .animate-smooth-swipe {
     animation: none !important;
   }
 }
