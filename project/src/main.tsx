@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './hudBrackets.css';
+import './wikiScpDossier.css';
 import { initializeUserSoundSettings } from './lib/userSoundSettingsBootstrap';
 
 void initializeUserSoundSettings();
