@@ -394,11 +394,11 @@ export function WikiTabModern({
             <div className="flex min-w-0 items-center gap-2">
               <Sparkles className="h-4 w-4 shrink-0 text-cyan-400" />
               <div className="min-w-0">
-                <h2 className="truncate font-mono text-xs font-bold text-cyan-300 sm:text-sm">冒険譚・年代記自動編纂</h2>
-                <p className="truncate text-[9px] text-slate-400 sm:text-[10px]">記録を、どんな世界の物語として残す？</p>
+                <h2 className="game-ui-font truncate text-xs font-bold text-cyan-300 sm:text-sm">冒険譚・年代記自動編纂</h2>
+                <p className="game-ui-font truncate text-[9px] text-slate-400 sm:text-[10px]">記録を、どんな世界の物語として残す？</p>
               </div>
             </div>
-            <span className="shrink-0 border border-cyan-500/40 bg-cyan-950/60 px-1.5 py-0.5 font-mono text-[9px] text-cyan-300">
+            <span className="game-ui-font shrink-0 border border-cyan-500/40 bg-cyan-950/60 px-1.5 py-0.5 text-[9px] text-cyan-300">
               保存: {Object.values(saved).filter(Boolean).length}/3
             </span>
           </div>
@@ -420,7 +420,7 @@ export function WikiTabModern({
                   onMouseEnter={playHoverSound}
                   disabled={generating || resetting}
                   title={`${meta.title}${saved[id] ? '・保存済み' : ''}`}
-                  className={`relative min-w-0 overflow-hidden border-2 p-1.5 text-left transition-all hover:-translate-y-[3px] sm:p-2 ${selected ? 'border-amber-500 bg-[#161a24] shadow-[0_0_14px_rgba(245,158,11,.18)]' : 'border-slate-700 bg-[#0c101c] hover:border-slate-500'}`}
+                  className={`game-ui-font relative min-w-0 overflow-hidden border-2 p-1.5 text-left transition-all hover:-translate-y-[3px] sm:p-2 ${selected ? 'border-amber-500 bg-[#161a24] shadow-[0_0_14px_rgba(245,158,11,.18)]' : 'border-slate-700 bg-[#0c101c] hover:border-slate-500'}`}
                 >
                   <div className="flex min-w-0 items-center gap-1.5">
                     <PixelNarrator style={id} compact />
@@ -442,12 +442,12 @@ export function WikiTabModern({
             onClick={handleGenerate}
             onMouseEnter={playHoverSound}
             disabled={!style || saved[style] || locations.length === 0 || generating || resetting || cooldownUntil > Date.now()}
-            className="mt-2.5 flex min-h-[44px] w-full items-center justify-center gap-2 border-b-2 border-cyan-700 bg-cyan-500 py-2.5 font-mono text-xs font-black text-black transition-all hover:-translate-y-[2px] hover:bg-cyan-400 disabled:opacity-40 sm:text-sm"
+            className="game-ui-font mt-2.5 flex min-h-[44px] w-full items-center justify-center gap-2 border-b-2 border-cyan-700 bg-cyan-500 py-2.5 text-xs font-black text-black transition-all hover:-translate-y-[2px] hover:bg-cyan-400 disabled:opacity-40 sm:text-sm"
           >
             <Sparkles className="h-4 w-4" />このワールドの Wiki 冒険譚を生成する
           </button>
-          {locations.length === 0 && <p className="mt-2 text-center font-mono text-[9px] text-amber-400">※ まずロケーションを1件以上記録してください。</p>}
-          {locations.length > 0 && <p className="mt-2 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">記録されたメモ・写真・冒険ログを元に「旅の書」を編纂します。保存済みの人物はカードから直接開けます。</p>}
+          {locations.length === 0 && <p className="game-ui-font mt-2 text-center text-[9px] text-amber-400">※ まずロケーションを1件以上記録してください。</p>}
+          {locations.length > 0 && <p className="game-ui-font mt-2 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">記録されたメモ・写真・冒険ログを元に「旅の書」を編纂します。保存済みの人物はカードから直接開けます。</p>}
         </section>
       )}
 
@@ -466,10 +466,10 @@ export function WikiTabModern({
                     onMouseEnter={!active ? playHoverSound : undefined}
                     disabled={active}
                     title={active ? `${styleMeta[id].title}・表示中` : available ? `${styleMeta[id].title}を開く` : `${styleMeta[id].title}を生成する`}
-                    className={`flex min-w-0 items-center justify-center gap-1 border px-1.5 py-1 transition-all ${active ? 'border-amber-400 bg-amber-500/15 text-amber-300' : available ? 'border-slate-700 bg-[#0b101b] text-slate-300 hover:-translate-y-[2px] hover:border-cyan-400 hover:text-cyan-300' : 'border-slate-800 bg-[#090d15] text-slate-500 opacity-60 hover:-translate-y-[2px] hover:border-slate-600 hover:opacity-100'}`}
+                    className={`game-ui-font flex min-w-0 items-center justify-center gap-1 border px-1.5 py-1 transition-all ${active ? 'border-amber-400 bg-amber-500/15 text-amber-300' : available ? 'border-slate-700 bg-[#0b101b] text-slate-300 hover:-translate-y-[2px] hover:border-cyan-400 hover:text-cyan-300' : 'border-slate-800 bg-[#090d15] text-slate-500 opacity-60 hover:-translate-y-[2px] hover:border-slate-600 hover:opacity-100'}`}
                   >
                     <PixelNarrator style={id} compact />
-                    <span className="hidden min-w-0 truncate font-mono text-[8px] font-bold sm:inline">{styleMeta[id].shortTitle}</span>
+                    <span className="hidden min-w-0 truncate text-[8px] font-bold sm:inline">{styleMeta[id].shortTitle}</span>
                   </button>
                 );
               })}
@@ -510,13 +510,13 @@ export function WikiTabModern({
 
           <div ref={footerRef} className="border-t border-slate-800 bg-[#0f1424] px-3 py-3 sm:px-4">
             <div className="grid grid-cols-3 gap-2">
-              <button type="button" onClick={handleShare} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-cyan-500/60 bg-[#0d1624] text-[10px] font-bold text-cyan-300 transition-all hover:-translate-y-[2px] hover:border-cyan-300 hover:bg-cyan-500/10 sm:text-xs">
+              <button type="button" onClick={handleShare} onMouseEnter={playHoverSound} className="game-ui-font flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-cyan-500/60 bg-[#0d1624] text-[10px] font-bold text-cyan-300 transition-all hover:-translate-y-[2px] hover:border-cyan-300 hover:bg-cyan-500/10 sm:text-xs">
                 <Share2 className="h-4 w-4" />{shared ? '共有完了' : '共有'}
               </button>
-              <button type="button" onClick={handleCopy} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-200 transition-all hover:-translate-y-[2px] hover:border-cyan-400 sm:text-xs">
+              <button type="button" onClick={handleCopy} onMouseEnter={playHoverSound} className="game-ui-font flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-200 transition-all hover:-translate-y-[2px] hover:border-cyan-400 sm:text-xs">
                 <Copy className="h-4 w-4" />{copied ? 'コピー完了' : '本文コピー'}
               </button>
-              <button type="button" onClick={() => setResetTarget(true)} onMouseEnter={playHoverSound} className="flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-300 transition-all hover:-translate-y-[2px] hover:border-amber-400 hover:text-amber-300 sm:text-xs">
+              <button type="button" onClick={() => setResetTarget(true)} onMouseEnter={playHoverSound} className="game-ui-font flex min-h-[44px] items-center justify-center gap-1.5 border-2 border-slate-700 bg-[#121724] text-[10px] font-bold text-slate-300 transition-all hover:-translate-y-[2px] hover:border-amber-400 hover:text-amber-300 sm:text-xs">
                 <RotateCcw className="h-4 w-4" />リセット
               </button>
             </div>
@@ -541,17 +541,17 @@ export function WikiTabModern({
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-5 backdrop-blur-sm">
           <div className="w-full max-w-lg text-center">
             <div className="mx-auto mb-4 w-fit"><PixelNarrator style={generationReveal.style} /></div>
-            <div className={`font-mono text-xs font-black sm:text-sm ${NARRATORS[generationReveal.style]?.text ?? 'text-amber-300'}`}>
+            <div className={`game-ui-font text-xs font-black sm:text-sm ${NARRATORS[generationReveal.style]?.text ?? 'text-amber-300'}`}>
               【{NARRATORS[generationReveal.style]?.name}】
             </div>
-            <div className="mt-2 font-mono text-[9px] tracking-[0.14em] text-slate-500 sm:text-[10px]">
+            <div className="game-ui-font mt-2 text-[9px] tracking-[0.14em] text-slate-500 sm:text-[10px]">
               {generationReveal.phase === 'waiting' ? `${NARRATORS[generationReveal.style]?.name} // ARCHIVE ANALYSIS` : generationReveal.phase === 'result' ? '所見を受信' : '編纂完了'}
             </div>
             <div className="mx-auto mt-3 min-h-[112px] max-w-md border border-slate-700 bg-[#050a14] px-5 py-5 text-left font-serif text-sm leading-7 text-slate-100 shadow-[0_0_30px_rgba(0,0,0,.65)] sm:text-base">
               「{typedReveal || '……'}{generationReveal.phase !== 'ready' && <span className="animate-pulse text-slate-500">▌</span>}」
             </div>
             {generationReveal.phase === 'waiting' && waitingComplete && !generationReveal.article && (
-              <div className="mt-3 flex items-center justify-center gap-2 font-mono text-[9px] tracking-[0.16em] text-slate-600">
+              <div className="game-ui-font mt-3 flex items-center justify-center gap-2 text-[9px] tracking-[0.16em] text-slate-600">
                 <span className="h-2.5 w-2.5 animate-spin rounded-full border border-slate-500 border-t-transparent" />記録照合中...
               </div>
             )}
@@ -560,7 +560,7 @@ export function WikiTabModern({
                 type="button"
                 onClick={openGeneratedArticle}
                 onMouseEnter={playHoverSound}
-                className="mx-auto mt-5 flex min-h-[46px] min-w-[190px] items-center justify-center gap-2 border-2 border-amber-500 bg-amber-500/15 px-5 font-mono text-sm font-black text-amber-300 transition-all hover:-translate-y-[3px] hover:bg-amber-500/25"
+                className="game-ui-font mx-auto mt-5 flex min-h-[46px] min-w-[190px] items-center justify-center gap-2 border-2 border-amber-500 bg-amber-500/15 px-5 text-sm font-black text-amber-300 transition-all hover:-translate-y-[3px] hover:bg-amber-500/25"
               >
                 <BookOpen className="h-4 w-4" />記事を読む
               </button>
@@ -572,11 +572,11 @@ export function WikiTabModern({
       {resetTarget && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setResetTarget(false); } }}>
           <div className="w-full max-w-md border-2 border-red-700 bg-[#0d1627] p-5 shadow-[0_0_35px_rgba(0,0,0,.7)]">
-            <div className="flex items-center gap-2 font-bold text-red-300"><AlertTriangle className="h-5 w-5" />旅の書をリセットしますか？</div>
+            <div className="game-ui-font flex items-center gap-2 font-bold text-red-300"><AlertTriangle className="h-5 w-5" />旅の書をリセットしますか？</div>
             <p className="mt-2 text-xs text-slate-400">この人物の保存済みWiki記事だけを削除します。他の記事は残ります。</p>
             <div className="mt-5 grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => { playCancelSound(); setResetTarget(false); }} onMouseEnter={playHoverSound} className="min-h-[42px] border border-slate-700 text-slate-300 transition-all hover:-translate-y-[2px]">キャンセル</button>
-              <button type="button" onClick={confirmReset} onMouseEnter={playHoverSound} className="min-h-[42px] bg-red-700 font-bold text-white transition-all hover:-translate-y-[2px] hover:bg-red-600">リセットする</button>
+              <button type="button" onClick={() => { playCancelSound(); setResetTarget(false); }} onMouseEnter={playHoverSound} className="game-ui-font min-h-[42px] border border-slate-700 text-slate-300 transition-all hover:-translate-y-[2px]">キャンセル</button>
+              <button type="button" onClick={confirmReset} onMouseEnter={playHoverSound} className="game-ui-font min-h-[42px] bg-red-700 font-bold text-white transition-all hover:-translate-y-[2px] hover:bg-red-600">リセットする</button>
             </div>
           </div>
         </div>
