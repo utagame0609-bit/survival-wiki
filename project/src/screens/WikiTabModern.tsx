@@ -22,6 +22,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { NARRATORS, NarratorDialogue, PixelNarrator } from '@/components/wiki/WikiNarrator';
 import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
 import { WIKI_STYLES } from '@/lib/wiki';
+import { scpDossierToPlainText } from '@/lib/wikiScp';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import {
   playCancelSound,
@@ -319,6 +320,10 @@ export function WikiTabModern({
   const mainPhoto = articlePhotos[0] ?? null;
   const additionalPhotos = articlePhotos.slice(1, 5);
   const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
+  const articleExportText = useMemo(() => {
+    if (style !== 'scp') return parsedArticle.content;
+    return scpDossierToPlainText(parsedArticle.content) ?? parsedArticle.content;
+  }, [style, parsedArticle.content]);
 
   useEffect(() => {
     let cancelled = false;
@@ -447,7 +452,7 @@ export function WikiTabModern({
   const handleCopy = async () => {
     if (!article) return;
     try {
-      await navigator.clipboard.writeText(parsedArticle.content);
+      await navigator.clipboard.writeText(articleExportText);
       setCopied(true);
       setShared(false);
       playConfirmSound();
@@ -461,10 +466,10 @@ export function WikiTabModern({
     if (!article) return;
     try {
       if (navigator.share) {
-        await navigator.share({ title: `ウタペディア // ${world.name}`, text: parsedArticle.content });
+        await navigator.share({ title: `ウタペディア // ${world.name}`, text: articleExportText });
         setShared(true);
       } else {
-        await navigator.clipboard.writeText(parsedArticle.content);
+        await navigator.clipboard.writeText(articleExportText);
         setShared(true);
       }
       playConfirmSound();
