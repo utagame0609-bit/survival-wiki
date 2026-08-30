@@ -197,6 +197,12 @@ article[class*="border-cyan-400/60"] .wiki-markdown button {
   text-decoration-color: #b91c1c;
 }
 
+@media (min-width: 1024px) {
+  div.mx-auto.w-full.max-w-4xl:has(article[class*="border-cyan-400/60"]) {
+    max-width: 88rem !important;
+  }
+}
+
 @media (max-width: 767px) {
   article[class*="border-cyan-400/60"] {
     margin-left: 0.4rem !important;
