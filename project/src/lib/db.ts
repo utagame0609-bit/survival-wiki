@@ -163,8 +163,8 @@ export async function fetchLocations(worldId: string): Promise<LocationWithPhoto
   return locations.map((l) => ({ ...l, photos: l.location_photos ?? [], members: memberMap.get(l.id) ?? [] }));
 }
 
-export async function createLocation(worldId: string, input: { name: string; x: number; y: number; z: number; detail_memo: string; created_at: string; member_ids: string[] }): Promise<Location> {
-  const { data, error } = await supabase.from('locations').insert({ world_id: worldId, name: input.name, x: input.x, y: input.y, z: input.z, detail_memo: input.detail_memo || null, created_at: input.created_at || undefined }).select().single();
+export async function createLocation(worldId: string, input: { name: string; x: number; y: number; z: number; has_coordinates: boolean; detail_memo: string; created_at: string; member_ids: string[] }): Promise<Location> {
+  const { data, error } = await supabase.from('locations').insert({ world_id: worldId, name: input.name, x: input.x, y: input.y, z: input.z, has_coordinates: input.has_coordinates, detail_memo: input.detail_memo || null, created_at: input.created_at || undefined }).select().single();
   if (error) throw error;
   const loc = data as Location;
   if (input.member_ids.length > 0) {
@@ -175,8 +175,8 @@ export async function createLocation(worldId: string, input: { name: string; x: 
   return loc;
 }
 
-export async function updateLocation(id: string, input: { name: string; x: number; y: number; z: number; detail_memo: string; created_at: string; member_ids: string[] }): Promise<void> {
-  const { error } = await supabase.from('locations').update({ name: input.name, x: input.x, y: input.y, z: input.z, detail_memo: input.detail_memo || null, created_at: input.created_at }).eq('id', id);
+export async function updateLocation(id: string, input: { name: string; x: number; y: number; z: number; has_coordinates: boolean; detail_memo: string; created_at: string; member_ids: string[] }): Promise<void> {
+  const { error } = await supabase.from('locations').update({ name: input.name, x: input.x, y: input.y, z: input.z, has_coordinates: input.has_coordinates, detail_memo: input.detail_memo || null, created_at: input.created_at }).eq('id', id);
   if (error) throw error;
   const { error: dErr } = await supabase.from('location_members').delete().eq('location_id', id);
   if (dErr) throw dErr;
