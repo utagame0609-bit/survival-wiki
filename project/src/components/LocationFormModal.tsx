@@ -9,6 +9,7 @@ type LocationFormInput = {
   x: number;
   y: number;
   z: number;
+  has_coordinates: boolean;
   detail_memo: string;
   created_at: string;
   member_ids: string[];
