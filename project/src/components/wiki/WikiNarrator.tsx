@@ -32,7 +32,7 @@ export function PixelNarrator({ style, compact = false }: { style: string; compa
   const coat = isScp ? '#d7e1e6' : isWikipedia ? '#27364b' : '#5b3b27';
 
   return (
-    <div className={`relative shrink-0 rounded-sm border-2 border-double border-white/70 bg-[#07101c] overflow-hidden ${compact ? 'h-10 w-10 sm:h-12 sm:w-12 shadow-[inset_0_0_0_1px_rgba(255,176,0,.25)]' : 'h-20 w-16 sm:h-24 sm:w-20 shadow-[inset_0_0_0_1px_rgba(255,176,0,.35),0_0_16px_rgba(0,0,0,.45)]'}`}>
+    <div className={`relative shrink-0 overflow-hidden rounded-lg border-2 border-[#334155]/80 bg-[#07101c] ${compact ? 'h-10 w-10 sm:h-12 sm:w-12 shadow-[inset_0_0_0_1px_rgba(148,163,184,.08)]' : 'h-20 w-16 sm:h-24 sm:w-20 shadow-[inset_0_0_0_1px_rgba(148,163,184,.1),0_0_16px_rgba(0,0,0,.35)]'}`}>
       <svg viewBox="0 0 64 72" className="h-full w-full [image-rendering:pixelated]" shapeRendering="crispEdges" aria-hidden="true">
         <rect x="8" y="58" width="48" height="8" fill={coat}/>
         <rect x="14" y="35" width="36" height="27" fill={coat}/>
