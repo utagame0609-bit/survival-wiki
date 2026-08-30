@@ -82,117 +82,184 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Mobile Wiki first-use swipe hint: AS proposal A, reduced to fit the production Tac-HUD. */
+/* Mobile Wiki first-use swipe hint: backgroundless game-tutorial gesture. */
 @media (max-width: 767px) {
   div.pointer-events-none.fixed.left-1\/2.md\:hidden {
-    top: 54% !important;
+    top: 56% !important;
+    width: 7rem !important;
+    height: 9rem !important;
+    filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.38)) drop-shadow(0 0 22px rgba(6, 182, 212, 0.18));
+    animation: wiki-gesture-glow 2.2s ease-in-out infinite;
   }
 
   div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font {
-    min-width: 184px !important;
-    gap: 0.3rem !important;
-    padding: 0.85rem 1.15rem !important;
-    border: 1px solid rgba(6, 182, 212, 0.25) !important;
-    border-radius: 0.85rem !important;
-    background: rgba(5, 12, 24, 0.78) !important;
-    color: #A5F3FC !important;
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48), 0 0 16px rgba(6, 182, 212, 0.1) !important;
-    backdrop-filter: blur(10px);
-    animation: wiki-scroll-hint-glow 2.5s ease-in-out infinite;
+    position: relative !important;
+    display: block !important;
+    width: 7rem !important;
+    height: 9rem !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    color: transparent !important;
   }
 
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before {
-    content: '';
-    display: block;
-    width: 15px;
-    height: 28px;
-    margin-bottom: 0.18rem;
-    border: 2px solid rgba(103, 232, 249, 0.82);
-    border-radius: 999px 999px 7px 7px;
-    background: rgba(6, 182, 212, 0.08);
-    box-shadow: 0 0 9px rgba(6, 182, 212, 0.28);
-    animation: wiki-swipe-finger 1.8s ease-in-out infinite;
-  }
-
+  /* Touch-start ripple. */
   div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span {
+    position: absolute !important;
+    left: 50% !important;
+    top: 69% !important;
+    display: block !important;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    margin: 0 !important;
+    border: 1px solid rgba(103, 232, 249, 0.58) !important;
+    border-radius: 9999px !important;
+    background: rgba(34, 211, 238, 0.08) !important;
     font-size: 0 !important;
-    letter-spacing: 0 !important;
-    line-height: 1 !important;
+    line-height: 0 !important;
+    transform: translate(-50%, -50%);
+    animation: wiki-touch-ripple 2.2s ease-out infinite;
   }
 
   div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span::after {
-    content: '上へスワイプ';
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: #CFFAFE;
+    content: none !important;
   }
 
+  /* Existing chevron is hidden; the gesture itself carries the instruction. */
   div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > svg {
-    width: 17px !important;
-    height: 17px !important;
-    margin-top: 0.1rem !important;
-    color: rgba(34, 211, 238, 0.8) !important;
-    animation: wiki-chevron-flow 1.5s ease-in-out infinite !important;
+    display: none !important;
   }
 
+  /* Stylized luminous fingertip/pointer travelling upward. */
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    left: calc(50% - 9px);
+    top: calc(50% - 22px);
+    width: 18px;
+    height: 44px;
+    border: 2px solid rgba(207, 250, 254, 0.9);
+    border-radius: 999px 999px 9px 9px;
+    background: linear-gradient(to bottom, rgba(103, 232, 249, 0.34), rgba(6, 182, 212, 0.08));
+    box-shadow:
+      0 0 10px rgba(103, 232, 249, 0.62),
+      0 0 24px rgba(6, 182, 212, 0.34),
+      inset 0 0 8px rgba(207, 250, 254, 0.16);
+    transform-origin: center bottom;
+    animation: wiki-gesture-swipe-up 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  }
+
+  /* Streaming light trail behind the upward gesture. */
   div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::after {
-    content: 'この下に編纂ボタンがあります';
-    display: block;
-    margin-top: 0.05rem;
-    font-family: ui-sans-serif, system-ui, sans-serif;
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: rgba(148, 163, 184, 0.9);
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: calc(50% - 2px);
+    top: 50%;
+    width: 4px;
+    height: 0;
+    border-radius: 999px;
+    background: linear-gradient(to top, transparent, rgba(34, 211, 238, 0.45), rgba(165, 243, 252, 0.92));
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.35);
+    animation: wiki-trail-stream 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
   }
 }
 
-@keyframes wiki-swipe-finger {
+@keyframes wiki-gesture-swipe-up {
   0% {
     opacity: 0;
-    transform: translateY(9px) scale(0.94);
+    transform: translateY(32px) scale(0.95);
   }
-  20% {
-    opacity: 0.9;
-    transform: translateY(7px) scale(1);
+  15% {
+    opacity: 0.85;
+    transform: translateY(28px) scale(1);
   }
-  72% {
-    opacity: 0.9;
-    transform: translateY(-7px) scale(1);
+  30% {
+    opacity: 0.96;
+    transform: translateY(16px) scale(1);
+  }
+  65% {
+    opacity: 0.96;
+    transform: translateY(-24px) scale(1);
+  }
+  82% {
+    opacity: 0;
+    transform: translateY(-38px) scale(0.96);
   }
   100% {
     opacity: 0;
-    transform: translateY(-11px) scale(0.94);
+    transform: translateY(32px) scale(0.95);
   }
 }
 
-@keyframes wiki-chevron-flow {
-  0%, 100% {
-    opacity: 0.35;
-    transform: translateY(-2px);
+@keyframes wiki-touch-ripple {
+  0%, 10% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  20% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.7);
   }
   50% {
-    opacity: 0.95;
-    transform: translateY(3px);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6);
   }
 }
 
-@keyframes wiki-scroll-hint-glow {
+@keyframes wiki-trail-stream {
+  0% {
+    opacity: 0;
+    height: 0;
+    transform: translateY(24px);
+  }
+  20% {
+    opacity: 0.6;
+    height: 24px;
+    transform: translateY(20px);
+  }
+  55% {
+    opacity: 0.82;
+    height: 56px;
+    transform: translateY(0);
+  }
+  75% {
+    opacity: 0.3;
+    height: 36px;
+    transform: translateY(-16px);
+  }
+  90%, 100% {
+    opacity: 0;
+    height: 0;
+    transform: translateY(-32px);
+  }
+}
+
+@keyframes wiki-gesture-glow {
   0%, 100% {
-    border-color: rgba(6, 182, 212, 0.22);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48), 0 0 12px rgba(6, 182, 212, 0.07);
+    opacity: 0.82;
+    filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.38)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.18));
   }
   50% {
-    border-color: rgba(6, 182, 212, 0.34);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48), 0 0 20px rgba(6, 182, 212, 0.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.62)) drop-shadow(0 0 32px rgba(6, 182, 212, 0.3));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font,
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden,
   div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before,
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > svg {
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::after,
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span {
     animation: none !important;
   }
 }
