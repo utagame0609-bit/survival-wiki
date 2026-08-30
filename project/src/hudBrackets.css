@@ -1,9 +1,11 @@
 /* Shared AS-style HUD corner accents.
-   Keep the accent subordinate to the card border: short strokes that follow rounded corners. */
+   Accent corners are square; the opposite two corners keep the card radius. */
 .hud-bracket,
 .hud-bracket-cyan,
 .hud-bracket-emerald {
   position: relative;
+  border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .hud-bracket::before,
@@ -27,7 +29,6 @@
   left: -1px;
   border-top: 2px solid var(--hud-bracket-color, #F2A100);
   border-left: 2px solid var(--hud-bracket-color, #F2A100);
-  border-top-left-radius: 4px;
 }
 
 .hud-bracket::after,
@@ -37,7 +38,6 @@
   bottom: -1px;
   border-right: 2px solid var(--hud-bracket-color, #F2A100);
   border-bottom: 2px solid var(--hud-bracket-color, #F2A100);
-  border-bottom-right-radius: 4px;
 }
 
 .hud-bracket {
