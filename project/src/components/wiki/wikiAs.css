@@ -3,6 +3,8 @@
 /* Top-view header: AS cyan corner brackets (top-left / bottom-right only). */
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan {
   position: relative;
+  border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::before,
@@ -19,7 +21,6 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::before {
   left: -1px;
   border-top: 2px solid #00D2FF;
   border-left: 2px solid #00D2FF;
-  border-top-left-radius: 4px;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
@@ -27,12 +28,13 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
   bottom: -1px;
   border-right: 2px solid #00D2FF;
   border-bottom: 2px solid #00D2FF;
-  border-bottom-right-radius: 4px;
 }
 
-/* Selected-NPC dossier: AS amber corner brackets with the rounded-card correction. */
+/* Selected-NPC dossier: AS amber corner brackets. */
 div:has(> section.hud-bracket-cyan) > section.hud-bracket {
   position: relative;
+  border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket::before,
@@ -49,7 +51,6 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket::before {
   left: -1px;
   border-top: 2px solid #F2A100;
   border-left: 2px solid #F2A100;
-  border-top-left-radius: 4px;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket::after {
@@ -57,7 +58,6 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket::after {
   bottom: -1px;
   border-right: 2px solid #F2A100;
   border-bottom: 2px solid #F2A100;
-  border-bottom-right-radius: 4px;
 }
 
 /* AS top-view vertical rhythm. */
@@ -100,9 +100,11 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Article NPC dialogue: same AS bracket language, corrected to follow the rounded shell. */
+/* Article NPC dialogue: same two-corner HUD language. */
 .wiki-as-bracket {
   position: relative;
+  border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .wiki-as-bracket::before,
@@ -119,7 +121,6 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   left: -1px;
   border-top: 2px solid #F2A100;
   border-left: 2px solid #F2A100;
-  border-top-left-radius: 4px;
 }
 
 .wiki-as-bracket::after {
@@ -127,5 +128,4 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   bottom: -1px;
   border-right: 2px solid #F2A100;
   border-bottom: 2px solid #F2A100;
-  border-bottom-right-radius: 4px;
 }
