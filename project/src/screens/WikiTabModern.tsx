@@ -61,19 +61,19 @@ const styleMeta: Record<WikiStyleId, { title: string; shortTitle: string; subtit
 
 const styleCardAccent: Record<WikiStyleId, { selected: string; idle: string; pill: string }> = {
   wikipedia: {
-    selected: 'scale-[1.02] border-[#F59E0B] bg-[#21190B] shadow-[0_0_16px_rgba(245,158,11,0.28)]',
-    idle: 'border-[#3B2B12] bg-[#0F172A]/80 opacity-80 hover:border-[#F59E0B]/55 hover:opacity-100',
-    pill: 'border-[#F59E0B]/40 text-[#FBBF24]',
+    selected: 'scale-[1.02] border-[#B89A5A] bg-[#181713] shadow-[0_0_14px_rgba(184,154,90,0.18)]',
+    idle: 'border-[#302D25] bg-[#0F172A]/80 opacity-90 hover:border-[#B89A5A]/55 hover:opacity-100',
+    pill: 'border-[#B89A5A]/45 text-[#C9AE72]',
   },
   scp: {
-    selected: 'scale-[1.02] border-[#06B6D4] bg-[#132238] shadow-[0_0_16px_rgba(6,182,212,0.28)]',
-    idle: 'border-[#173341] bg-[#0F172A]/80 opacity-80 hover:border-[#06B6D4]/55 hover:opacity-100',
-    pill: 'border-[#06B6D4]/40 text-[#22D3EE]',
+    selected: 'scale-[1.02] border-[#4F8F9A] bg-[#111B22] shadow-[0_0_14px_rgba(79,143,154,0.18)]',
+    idle: 'border-[#24343A] bg-[#0F172A]/80 opacity-90 hover:border-[#4F8F9A]/55 hover:opacity-100',
+    pill: 'border-[#4F8F9A]/45 text-[#6FA9B1]',
   },
   ancient: {
-    selected: 'scale-[1.02] border-[#F97316] bg-[#24150C] shadow-[0_0_16px_rgba(249,115,22,0.28)]',
-    idle: 'border-[#4A2818] bg-[#0F172A]/80 opacity-80 hover:border-[#F97316]/55 hover:opacity-100',
-    pill: 'border-[#F97316]/40 text-[#FB923C]',
+    selected: 'scale-[1.02] border-[#9A635D] bg-[#1A1517] shadow-[0_0_14px_rgba(154,99,93,0.18)]',
+    idle: 'border-[#37292A] bg-[#0F172A]/80 opacity-90 hover:border-[#9A635D]/55 hover:opacity-100',
+    pill: 'border-[#9A635D]/45 text-[#B57D77]',
   },
 };
 
@@ -153,6 +153,7 @@ export function WikiTabModern({
   const [generationReveal, setGenerationReveal] = useState<GenerationReveal | null>(null);
   const [typedReveal, setTypedReveal] = useState('');
   const [waitingComplete, setWaitingComplete] = useState(false);
+  const [pendingMobileDetailScroll, setPendingMobileDetailScroll] = useState<WikiStyleId | null>(null);
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
   const compilerDetailRef = useRef<HTMLElement | null>(null);
@@ -224,6 +225,7 @@ export function WikiTabModern({
     setCopied(false);
     setShared(false);
     setArticle(null);
+    setPendingMobileDetailScroll(null);
 
     const previousStyle: WikiStyleId | null = style === 'ancient'
       ? 'scp'
@@ -233,6 +235,24 @@ export function WikiTabModern({
     setStyle(previousStyle);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [backRequestKey, style]);
+
+  useEffect(() => {
+    if (!pendingMobileDetailScroll || style !== pendingMobileDetailScroll || article !== null || loading) return;
+    if (typeof window === 'undefined' || !window.matchMedia('(max-width: 767px)').matches) {
+      setPendingMobileDetailScroll(null);
+      return;
+    }
+
+    const firstFrame = window.requestAnimationFrame(() => {
+      const secondFrame = window.requestAnimationFrame(() => {
+        compilerDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setPendingMobileDetailScroll(null);
+      });
+      return () => window.cancelAnimationFrame(secondFrame);
+    });
+
+    return () => window.cancelAnimationFrame(firstFrame);
+  }, [pendingMobileDetailScroll, style, article, loading]);
 
   useEffect(() => {
     if (!generationReveal) {
@@ -380,6 +400,7 @@ export function WikiTabModern({
       setSaved((current) => ({ ...current, [style]: false }));
       setArticle(null);
       setStyle(null);
+      setPendingMobileDetailScroll(null);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -393,13 +414,15 @@ export function WikiTabModern({
     setCopied(false);
     setShared(false);
     setArticle(null);
+
+    const shouldScrollOnMobile = scrollToDetail
+      && !saved[id]
+      && typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 767px)').matches;
+    setPendingMobileDetailScroll(shouldScrollOnMobile ? id : null);
     setStyle(id);
 
-    if (scrollToDetail && !saved[id] && typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
-      window.setTimeout(() => {
-        compilerDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 120);
-    } else {
+    if (!shouldScrollOnMobile) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -410,6 +433,7 @@ export function WikiTabModern({
     setShared(false);
     setArticle(null);
     setStyle(null);
+    setPendingMobileDetailScroll(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
