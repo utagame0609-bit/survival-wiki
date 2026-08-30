@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
-  Hand,
   Play,
   RotateCcw,
   ScrollText,
@@ -619,12 +618,64 @@ export function WikiTabModern({
       )}
 
       {showScrollHint && !hasArticle && (
-        <div aria-hidden="true" className="wiki-swipe-hint pointer-events-none fixed left-1/2 top-[56%] z-40 -translate-x-1/2 -translate-y-1/2 md:hidden">
-          <div className="wiki-swipe-trail" />
-          <div className="wiki-swipe-ripple" />
-          <div className="wiki-swipe-hand">
-            <span className="wiki-swipe-touch" />
-            <Hand className="wiki-swipe-hand-icon" strokeWidth={1.7} />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed left-1/2 top-[58%] z-40 -translate-x-1/2 -translate-y-1/2 md:hidden"
+          style={{ contain: 'layout style paint' }}
+        >
+          <div className="animate-smooth-swipe flex items-center justify-center">
+            <svg
+              width="76"
+              height="100"
+              viewBox="0 0 76 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="overflow-visible"
+            >
+              <defs>
+                <linearGradient id="wikiTacLineGrad" x1="38" y1="90" x2="38" y2="10" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#67e8f9" stopOpacity="0.85" />
+                </linearGradient>
+              </defs>
+
+              <line
+                x1="38"
+                y1="82"
+                x2="38"
+                y2="18"
+                stroke="url(#wikiTacLineGrad)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="4 4"
+              />
+              <path
+                d="M31 22L38 15L45 22"
+                stroke="#67e8f9"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="38"
+                cy="52"
+                r="12"
+                fill="#06b6d4"
+                fillOpacity="0.25"
+                stroke="#22d3ee"
+                strokeWidth="1.5"
+              />
+              <circle cx="38" cy="52" r="4.5" fill="#a5f3fc" />
+              <path
+                d="M38 52V40C38 37.8 39.8 36 42 36C44.2 36 46 37.8 46 40V54C46 54.5 46.5 55 47 55C47.5 55 48 54.5 48 54V46C48 44.3 49.3 43 51 43C52.7 43 54 44.3 54 46V56C54 56.5 54.5 57 55 57C55.5 57 56 56.5 56 56V49C56 47.6 57.1 46.5 58.5 46.5C59.9 46.5 61 47.6 61 49V64C61 72.8 53.8 80 45 80H43C36.4 80 30.7 75.8 28.5 69.5L24.2 57.2C23.5 55.2 24.5 53 26.5 52.3C28.5 51.6 30.7 52.6 31.4 54.6L34 62V52C34 49.8 35.8 48 38 48V52Z"
+                fill="#083344"
+                fillOpacity="0.75"
+                stroke="#22d3ee"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         </div>
       )}
