@@ -106,11 +106,15 @@ export function WikiTabModern({
   reloadKey,
   onOpenLocation,
   onArticleStateChange,
+  backRequestKey = 0,
+  onInternalBackAvailableChange,
 }: {
   world: WorldWithMembers;
   reloadKey: number;
   onOpenLocation?: (locationId: string) => void;
   onArticleStateChange?: (isArticle: boolean) => void;
+  backRequestKey?: number;
+  onInternalBackAvailableChange?: (available: boolean) => void;
 }) {
   const [style, setStyle] = useState<WikiStyleId | null>(null);
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
@@ -133,6 +137,9 @@ export function WikiTabModern({
   const [waitingComplete, setWaitingComplete] = useState(false);
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
+  const compilerDetailRef = useRef<HTMLElement | null>(null);
+  const styleHistoryRef = useRef<WikiStyleId[]>([]);
+  const lastBackRequestRef = useRef(backRequestKey);
 
   const load = async (nextStyle: WikiStyleId | null = style) => {
     setLoading(true);
@@ -186,6 +193,29 @@ export function WikiTabModern({
   useEffect(() => {
     onArticleStateChange?.(article !== null);
   }, [article, onArticleStateChange]);
+
+  useEffect(() => {
+    onInternalBackAvailableChange?.(style !== null);
+  }, [style, onInternalBackAvailableChange]);
+
+  useEffect(() => {
+    if (lastBackRequestRef.current === backRequestKey) return;
+    lastBackRequestRef.current = backRequestKey;
+    if (style === null) return;
+
+    playCancelSound();
+    setCopied(false);
+    setShared(false);
+    setArticle(null);
+
+    const previousStyle = styleHistoryRef.current.pop();
+    if (previousStyle) {
+      setStyle(previousStyle);
+    } else {
+      setStyle(null);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [backRequestKey, style]);
 
   useEffect(() => {
     if (!generationReveal) {
@@ -333,6 +363,7 @@ export function WikiTabModern({
       setSaved((current) => ({ ...current, [style]: false }));
       setArticle(null);
       setStyle(null);
+      styleHistoryRef.current = [];
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -340,18 +371,27 @@ export function WikiTabModern({
     }
   };
 
-  const selectStyleFromArticle = (id: WikiStyleId) => {
+  const selectStyle = (id: WikiStyleId, scrollToDetail = false) => {
     if (id === style) return;
+    if (style) styleHistoryRef.current.push(style);
     playConfirmSound();
     setCopied(false);
     setShared(false);
     setArticle(null);
     setStyle(id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (scrollToDetail && !saved[id] && typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      window.setTimeout(() => {
+        compilerDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleBackToCompilers = () => {
     playCancelSound();
+    styleHistoryRef.current = [];
     setCopied(false);
     setShared(false);
     setArticle(null);
@@ -454,11 +494,7 @@ export function WikiTabModern({
                   <button
                     key={id}
                     type="button"
-                    onClick={() => {
-                      playConfirmSound();
-                      setStyle(id);
-                      setArticle(null);
-                    }}
+                    onClick={() => selectStyle(id, true)}
                     onMouseEnter={playHoverSound}
                     disabled={generating || resetting}
                     title={`${meta.title}${saved[id] ? '・保存済み' : ''}`}
@@ -490,7 +526,7 @@ export function WikiTabModern({
           </section>
 
           {style && narrator && selectedWikiStyle && (
-            <section className="hud-bracket space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
+            <section ref={compilerDetailRef} className="hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
               <div className="flex items-start gap-3.5">
                 <PixelNarrator style={style} />
                 <div className="min-w-0 flex-1">
@@ -543,13 +579,13 @@ export function WikiTabModern({
               type="button"
               onClick={handleBackToCompilers}
               onMouseEnter={playHoverSound}
-              className="game-ui-font flex min-h-[38px] items-center justify-center gap-1.5 rounded border border-[#334155] bg-[#161F30] px-3 text-xs text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:text-[#F59E0B] sm:justify-start"
+              className="game-ui-font hidden min-h-[38px] items-center justify-center gap-1.5 rounded border border-[#334155] bg-[#161F30] px-3 text-xs text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:text-[#F59E0B] md:flex md:justify-start"
             >
               <ArrowRight className="h-4 w-4 rotate-180 text-[#F59E0B]" />
               <span>編纂官一覧に戻る</span>
             </button>
 
-            <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center">
+            <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center md:ml-auto">
               {(Object.keys(EMPTY_SAVED) as WikiStyleId[]).map((id) => {
                 const active = id === style;
                 const available = saved[id];
@@ -557,7 +593,7 @@ export function WikiTabModern({
                   <button
                     key={id}
                     type="button"
-                    onClick={() => selectStyleFromArticle(id)}
+                    onClick={() => selectStyle(id)}
                     onMouseEnter={!active ? playHoverSound : undefined}
                     disabled={active}
                     title={active ? `${styleMeta[id].title}・表示中` : available ? `${styleMeta[id].title}を開く` : `${styleMeta[id].title}を生成する`}
