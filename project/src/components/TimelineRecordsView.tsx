@@ -91,7 +91,7 @@ export function TimelineRecordsView({
   }, [locations, searchQuery, selectedTag, sortOrder]);
 
   return (
-    <div className="space-y-3.5 sm:space-y-4">
+    <div className="space-y-3.5 pb-28 sm:space-y-4 sm:pb-0">
       <div className="bg-[#141824] border-2 border-slate-800 p-2.5 sm:p-3 space-y-2.5 shadow-md">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -303,7 +303,7 @@ export function TimelineRecordsView({
         onClick={onCreate}
         onMouseEnter={playHoverSound}
         aria-label="新規記録を追加"
-        className="fixed right-4 bottom-16 sm:right-8 sm:bottom-6 z-30 min-h-[48px] px-4 sm:px-5 rounded-full border-2 border-amber-400 bg-[#111624] text-amber-300 font-black font-mono text-xs sm:text-sm shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-amber-500 hover:text-black hover:border-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+        className="fixed right-4 bottom-24 sm:right-8 sm:bottom-6 z-30 min-h-[48px] px-4 sm:px-5 rounded-full border-2 border-amber-400 bg-[#111624] text-amber-300 font-black font-mono text-xs sm:text-sm shadow-[0_4px_18px_rgba(0,0,0,0.45)] hover:bg-amber-500 hover:text-black hover:border-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
       >
         <Plus className="w-4 h-4 stroke-[3]" />
         <span>記録を追加</span>
