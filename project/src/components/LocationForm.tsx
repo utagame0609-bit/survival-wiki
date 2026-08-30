@@ -136,36 +136,38 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   };
 
   return (
-    <div className="px-4 sm:px-5 py-4 sm:py-5 max-w-3xl mx-auto space-y-4 text-slate-100 font-mono">
+    <div className="p-4 sm:p-5 space-y-4 text-slate-100">
       {error && (
-        <div className="p-3 rounded-sm bg-rose-950/50 border-2 border-rose-500/60 text-rose-200 text-xs shadow-[0_0_14px_rgba(244,63,94,0.15)] flex items-center gap-2">
-          <span className="font-black text-rose-400">[!]</span>
+        <div className="p-3 rounded-lg bg-[#2A1218] border border-[#EF4444]/60 text-[#FCA5A5] text-xs flex items-center gap-2">
+          <span className="font-black text-[#EF4444]">[!]</span>
           <span>{error}</span>
         </div>
       )}
 
-      <LocationBasicFields name={name} onNameChange={setName} />
+      <div className="space-y-3.5">
+        <LocationBasicFields name={name} onNameChange={setName} />
 
-      <div className="space-y-1">
-        <label className="block text-xs font-bold text-slate-200">
-          体験メモ・発見の物語
-        </label>
-        <textarea
-          value={detailMemo}
-          onChange={(event) => setDetailMemo(event.target.value)}
-          onFocus={playInputFocusSound}
-          placeholder="思いついたこと、何が起きたか、手に入れたアイテムなどを自由に記録..."
-          rows={3}
-          className="location-input w-full px-3.5 py-2 bg-[#10141f] border-2 border-slate-700 text-white text-xs sm:text-sm focus:border-amber-400 outline-none resize-none leading-relaxed"
+        <div>
+          <label className="block text-xs game-ui-font text-[#94A3B8] mb-1.5">
+            体験メモ・発見の物語
+          </label>
+          <textarea
+            value={detailMemo}
+            onChange={(event) => setDetailMemo(event.target.value)}
+            onFocus={playInputFocusSound}
+            placeholder="その場所で起きた出来事、見つけた資材、周囲の状況などを自由にメモ..."
+            rows={3}
+            className="location-input w-full px-3 py-2 text-xs text-[#F8FAFC] placeholder-[#64748B] outline-none resize-none leading-relaxed"
+          />
+        </div>
+
+        <LocationPhotoField
+          preview={mainPreview}
+          inputRef={fileInputRef}
+          onSelect={handleMainSelect}
+          onClear={clearMainPreview}
         />
       </div>
-
-      <LocationPhotoField
-        preview={mainPreview}
-        inputRef={fileInputRef}
-        onSelect={handleMainSelect}
-        onClear={clearMainPreview}
-      />
 
       <LocationAdvancedFields
         open={detailOpen}
@@ -193,7 +195,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
         onSubmit={handleSubmit}
       />
 
-      <style>{`.location-input{width:100%;padding:.7rem .8rem;border-radius:.25rem;border:1px solid #334155;background:#090d16;color:#f1f5f9;outline:none;transition:border-color 160ms ease,box-shadow 160ms ease,background 160ms ease}.location-input::placeholder{color:#64748b}.location-input:focus{border-color:#38bdf8;background:#0d1627;box-shadow:0 0 0 1px #38bdf8,0 0 14px rgba(56,189,248,.15)}`}</style>
+      <style>{`.location-input{width:100%;border-radius:.375rem;border:1px solid #334155;background:#0b1018;color:#f8fafc;outline:none;transition:border-color 160ms ease,box-shadow 160ms ease,background 160ms ease}.location-input::placeholder{color:#64748b}.location-input:focus{border-color:#f59e0b;background:#0b1018;box-shadow:0 0 0 1px rgba(245,158,11,.15)}`}</style>
     </div>
   );
 }
