@@ -1,5 +1,6 @@
 import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './wiki';
 import { getWikiSystemPrompt } from './wiki';
+import { parseScpAiResponse, SCP_STRUCTURED_OUTPUT_INSTRUCTIONS } from './wikiScp';
 import { supabase } from './supabase';
 
 const NARRATOR_MARKER = '<!--NARRATOR_LINE:';
@@ -34,7 +35,9 @@ export const openRouterTestProvider: WikiProvider = {
       ].join('\n')),
     ].join('\n');
 
-    const systemPrompt = `${getWikiSystemPrompt(style)}\n\n【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、今回の記録を読んだあなた自身がプレイヤーへ向けて言う短い一言を40〜70文字程度で追加してください。記事と同じ人格・口調を守り、記事本文の要約ではなく、その人物らしい皮肉・評価・感想にしてください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`;
+    const systemPrompt = style === 'scp'
+      ? `${getWikiSystemPrompt(style)}\n\n${SCP_STRUCTURED_OUTPUT_INSTRUCTIONS}`
+      : `${getWikiSystemPrompt(style)}\n\n【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、今回の記録を読んだあなた自身がプレイヤーへ向けて言う短い一言を40〜70文字程度で追加してください。記事と同じ人格・口調を守り、記事本文の要約ではなく、その人物らしい皮肉・評価・感想にしてください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`;
     const mainPhoto = locations[0]?.photos.find((photo) => photo.is_main) ?? null;
     const imageStoragePath = mainPhoto?.storage_path;
 
@@ -42,7 +45,7 @@ export const openRouterTestProvider: WikiProvider = {
       body: {
         systemPrompt,
         message: imageStoragePath
-          ? `${message}\n\n【画像について】\n添付画像はロケーション1「${locations[0]?.name}」の代表写真です。画像そのものを確認し、写真に写っている内容をロケーション1の情報と関連付けてWiki記事を作成してください。`
+          ? `${message}\n\n【画像について】\n添付画像はロケーション1「${locations[0]?.name}」の代表写真です。画像そのものを確認し、写真に写っている内容をロケーション1の情報と関連付けて記事を作成してください。`
           : message,
         ...(imageStoragePath ? { imageStoragePath } : {}),
       },
@@ -52,6 +55,14 @@ export const openRouterTestProvider: WikiProvider = {
     if (!data?.ok) throw new Error(data?.error || 'AIから正常な応答がありません。');
 
     const raw = String(data.message || '').trim();
+
+    if (style === 'scp') {
+      const { dossier, narratorLine } = parseScpAiResponse(raw);
+      return {
+        content: `${JSON.stringify(dossier)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`,
+      };
+    }
+
     const markerIndex = raw.lastIndexOf(NARRATOR_MARKER);
     if (markerIndex < 0) return { content: raw };
 
