@@ -42,9 +42,9 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket::after {
   border-bottom: 2px solid #F2A100;
 }
 
-/* AS top-view vertical rhythm. */
+/* AS top-view vertical rhythm. Mobile bottom spacing is handled by WorldScreen's fixed-HUD safe area. */
 div:has(> section.hud-bracket-cyan) {
-  padding-bottom: 5rem !important;
+  padding-bottom: 0 !important;
 }
 
 div:has(> section.hud-bracket-cyan) > :not([hidden]) ~ :not([hidden]) {
