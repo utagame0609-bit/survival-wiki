@@ -1,0 +1,6 @@
+{
+  "name": "Survival Wiki - SCP Style Redesign",
+  "description": "Survival Wiki WIKI記事ページ 3スタイルUI/UX再設計（第1フェーズ：特異点研究員 Dr.アーク／SCP調 3案比較・検証プロトタイプ）",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

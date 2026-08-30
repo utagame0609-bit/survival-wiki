@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* High Density Theme Utilities */
+.bg-stripe {
+  background-image: linear-gradient(45deg, #222226 25%, transparent 25%, transparent 50%, #222226 50%, #222226 75%, transparent 75%, transparent 100%);
+  background-size: 8px 8px;
+}
+
+.bg-stripe-red {
+  background-image: linear-gradient(45deg, #3d1414 25%, transparent 25%, transparent 50%, #3d1414 50%, #3d1414 75%, transparent 75%, transparent 100%);
+  background-size: 8px 8px;
+}
+
+/* High Density Custom Thin Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0d0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333338;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #55555e;
+}
+
+/* Scanline subtle overlay */
+.scanline-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+}
