@@ -1,5 +1,5 @@
 /* Shared AS-style HUD corner accents.
-   Rounded cards keep their normal border-radius; the accent follows the same corner curve. */
+   Keep the accent subordinate to the card border: short strokes that follow rounded corners. */
 .hud-bracket,
 .hud-bracket-cyan,
 .hud-bracket-emerald {
@@ -14,8 +14,8 @@
 .hud-bracket-emerald::after {
   content: '';
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   pointer-events: none;
   z-index: 2;
 }
@@ -27,7 +27,7 @@
   left: -1px;
   border-top: 2px solid var(--hud-bracket-color, #F2A100);
   border-left: 2px solid var(--hud-bracket-color, #F2A100);
-  border-top-left-radius: 0.5rem;
+  border-top-left-radius: 4px;
 }
 
 .hud-bracket::after,
@@ -37,7 +37,7 @@
   bottom: -1px;
   border-right: 2px solid var(--hud-bracket-color, #F2A100);
   border-bottom: 2px solid var(--hud-bracket-color, #F2A100);
-  border-bottom-right-radius: 0.5rem;
+  border-bottom-right-radius: 4px;
 }
 
 .hud-bracket {
