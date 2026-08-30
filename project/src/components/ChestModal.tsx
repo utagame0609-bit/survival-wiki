@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Camera, X, Sparkles, MapPin, ExternalLink, Shield } from 'lucide-react';
+import { ArrowRight, Box, Camera, Clock, MapPin, Shield, Sparkles, X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
 import { playConfirmSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
-import { ChestPhotoCard } from '@/components/ChestPhotoCard';
 import { ChestFullImage } from '@/components/ChestFullImage';
 import type { CollectionItem } from '@/components/locations/locationData';
 
@@ -22,10 +21,12 @@ function isCheckpointLocation(location: LocationWithPhotos): boolean {
 }
 
 export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestModalProps) {
-  const [selectedPhoto, setSelectedPhoto] = useState<CollectionItem | null>(null);
-  const checkpointItems = collectionItems.filter((item) => isCheckpointLocation(item.location));
-  const hasCheckpoint = checkpointItems.length > 0;
-  const selectedIsCheckpoint = selectedPhoto ? isCheckpointLocation(selectedPhoto.location) : false;
+  const [selectedPhoto, setSelectedPhoto] = useState<CollectionItem | null>(collectionItems[0] ?? null);
+  const selectedIndex = selectedPhoto
+    ? collectionItems.findIndex(
+        (item) => item.storagePath === selectedPhoto.storagePath && item.location.id === selectedPhoto.location.id,
+      )
+    : -1;
 
   const handleClose = () => {
     playModalCloseSound();
@@ -41,100 +42,158 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
 
   return createPortal((
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm font-sans"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="w-full max-w-4xl max-h-[88vh] bg-[#1e2330] border-2 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.28)] overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-        <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-[#161a24] border-b-2 border-amber-500/60 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <span aria-hidden="true" className="relative flex h-7 w-7 shrink-0 items-center justify-center border border-amber-400 bg-amber-500/20 text-amber-300 font-bold text-xs">📦</span>
+      <div className="hud-bracket relative my-auto flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#F59E0B]/50 bg-[#161F30]">
+              <Box className="h-4 w-4 text-[#F59E0B]" />
+            </div>
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-bold text-white tracking-wide truncate">
-                CHEST // 宝箱ギャラリー <span className="font-mono text-amber-400">({collectionItems.length}枚)</span>
+              <div className="game-ui-font truncate text-[10px] uppercase leading-none tracking-wider text-[#06B6D4]">
+                PHOTO GALLERY ARCHIVE
+              </div>
+              <h2 className="game-ui-font mt-0.5 truncate text-sm font-bold tracking-wider text-[#F8FAFC]">
+                CHEST // 冒険写真の宝箱
               </h2>
-              <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate">各拠点・探索記録に紐づいたスクリーンショット一覧</p>
             </div>
           </div>
-          <button type="button" onClick={handleClose} onMouseEnter={playHoverSound} className="min-h-[36px] min-w-[36px] flex items-center justify-center text-slate-300 hover:text-white cursor-pointer" aria-label="閉じる">
-            <X className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-3">
+            <span className="game-ui-font hidden rounded border border-[#334155] bg-[#161F30] px-2 py-0.5 text-[10px] text-[#94A3B8] sm:inline-block">
+              TOTAL: {collectionItems.length} PHOTOS // CAPACITY: UNLIMITED
+            </span>
+            <button
+              type="button"
+              onClick={handleClose}
+              onMouseEnter={playHoverSound}
+              className="rounded p-1 text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
+              aria-label="閉じる"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1">
-          {collectionItems.length === 0 ? (
-            <div className="py-14 text-center">
-              <Camera className="w-12 h-12 mx-auto text-slate-500 mb-3" />
-              <p className="text-sm font-bold text-white">まだ写真が保存されていません。</p>
-              <p className="text-xs text-slate-400 mt-1">記録に写真を添付するとここに保管されます。</p>
-            </div>
-          ) : (
-            <div className={hasCheckpoint ? 'grid grid-cols-1 md:grid-cols-3 gap-4 items-start' : 'block'}>
-              <div className={hasCheckpoint ? 'md:col-span-2 space-y-2' : 'space-y-2'}>
-                {hasCheckpoint && checkpointItems.length > 0 && (
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-amber-300 pb-0.5">
-                    <Shield className="w-3.5 h-3.5 text-amber-400" />
-                    <span>CHECKPOINT PHOTO // 大きく表示できる重要拠点</span>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5">
+          {collectionItems.length > 0 && selectedPhoto ? (
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
+              <div className="space-y-3 lg:col-span-7">
+                <div className="group relative aspect-video w-full overflow-hidden rounded-lg border-2 border-[#F59E0B]/50 bg-[#0B1018] shadow-[0_0_15px_rgba(245,158,11,0.15)] sm:aspect-[4/3]">
+                  <ChestFullImage storagePath={selectedPhoto.storagePath} alt={selectedPhoto.location.name} />
+
+                  <div className="game-ui-font absolute left-2 top-2 flex items-center gap-1 rounded border border-[#F59E0B]/40 bg-[#0B1018]/85 px-2 py-0.5 text-[10px] text-[#F59E0B]">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    SELECTED PHOTO ({Math.max(selectedIndex, 0) + 1}/{collectionItems.length})
                   </div>
-                )}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+
+                  {isCheckpointLocation(selectedPhoto.location) && (
+                    <div className="game-ui-font absolute right-2 top-2 flex items-center gap-1 rounded border border-[#F59E0B]/50 bg-[#F59E0B]/90 px-2 py-0.5 text-[10px] font-bold text-[#0B1018]">
+                      <Shield className="h-3 w-3" />
+                      CHECKPOINT
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-3 rounded-lg border border-[#1E293B] bg-[#0B1018]/90 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="game-ui-font mb-1 flex flex-wrap items-center gap-2 text-[10px] text-[#64748B]">
+                      <span className="flex items-center gap-0.5">
+                        <Clock className="h-2.5 w-2.5 text-[#06B6D4]" />
+                        {selectedPhoto.location.created_at.split('T')[0]}
+                      </span>
+                      <span className="flex items-center gap-0.5 text-[#94A3B8]">
+                        <MapPin className="h-2.5 w-2.5 text-[#F59E0B]" />
+                        X:{selectedPhoto.location.x} Y:{selectedPhoto.location.y} Z:{selectedPhoto.location.z}
+                      </span>
+                    </div>
+                    <h3 className="game-ui-font truncate text-sm font-bold text-[#F8FAFC]">
+                      {selectedPhoto.location.name}
+                    </h3>
+                    {selectedPhoto.location.detail_memo && (
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#94A3B8]">
+                        {selectedPhoto.location.detail_memo}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenLocation}
+                    onMouseEnter={playHoverSound}
+                    className="game-ui-font inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-[#F59E0B] px-3.5 py-2 text-xs font-bold tracking-wider text-[#0B1018] shadow-[0_0_10px_rgba(245,158,11,0.25)] transition-all hover:bg-[#D97706] active:scale-95"
+                  >
+                    <span>記録詳細を見る</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2 lg:col-span-5">
+                <div className="game-ui-font flex items-center justify-between gap-2 text-xs text-[#94A3B8]">
+                  <span>写真アーカイブ一覧</span>
+                  <span className="text-[10px] text-[#64748B]">タップで拡大プレビュー</span>
+                </div>
+
+                <div className="grid max-h-[380px] grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-4 lg:grid-cols-3">
                   {collectionItems.map((item, index) => {
-                    const selected = selectedPhoto?.storagePath === item.storagePath && selectedPhoto?.location.id === item.location.id;
-                    const checkpoint = isCheckpointLocation(item.location);
+                    const isSelected = selectedIndex === index;
                     return (
-                      <div key={`${item.storagePath}-${index}`} className={selected ? 'ring-2 ring-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.35)]' : ''}>
-                        <ChestPhotoCard item={item} onClick={() => setSelectedPhoto(item)} />
-                        {checkpoint && (
-                          <div className="mt-0.5 px-1.5 py-0.5 bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[8px] font-mono font-bold text-center">
-                            CHECKPOINT
+                      <button
+                        key={`${item.storagePath}-${item.location.id}-${index}`}
+                        type="button"
+                        onClick={() => {
+                          playConfirmSound();
+                          setSelectedPhoto(item);
+                        }}
+                        onMouseEnter={playHoverSound}
+                        className={`group relative aspect-square overflow-hidden rounded-md border-2 transition-all ${
+                          isSelected
+                            ? 'scale-95 border-[#F59E0B] ring-2 ring-[#F59E0B]/40 shadow-md'
+                            : 'border-[#1E293B] opacity-75 hover:border-[#06B6D4]/60 hover:opacity-100'
+                        }`}
+                        aria-label={`${item.location.name} の写真を表示`}
+                      >
+                        <ChestFullImage storagePath={item.storagePath} alt={item.location.name} />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0B1018] to-transparent p-1">
+                          <div className="game-ui-font truncate text-[8px] leading-tight text-[#F1F5F9]">
+                            {item.location.name}
+                          </div>
+                        </div>
+                        {isCheckpointLocation(item.location) && (
+                          <div className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F59E0B] text-[#0B1018]">
+                            <Shield className="h-2.5 w-2.5" />
                           </div>
                         )}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
               </div>
-
-              {hasCheckpoint && (
-                <aside className="border-2 border-slate-700 bg-[#11141e] p-3.5 flex flex-col gap-3 md:sticky md:top-0">
-                  {selectedPhoto && selectedIsCheckpoint ? (
-                    <>
-                      <div className="aspect-video bg-black border border-slate-800 overflow-hidden">
-                        <ChestFullImage storagePath={selectedPhoto.storagePath} alt={selectedPhoto.location.name} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="text-[10px] font-mono text-emerald-400 font-bold">
-                          POS X:{selectedPhoto.location.x} Y:{selectedPhoto.location.y} Z:{selectedPhoto.location.z}
-                        </div>
-                        <h3 className="text-sm font-bold text-white line-clamp-2">{selectedPhoto.location.name}</h3>
-                        <p className="text-xs text-slate-300 line-clamp-4 leading-relaxed">
-                          {selectedPhoto.location.detail_memo || '（メモなし）'}
-                        </p>
-                      </div>
-                      <button type="button" onClick={handleOpenLocation} onMouseEnter={playHoverSound} className="w-full min-h-[44px] py-2.5 bg-amber-500 text-black font-black text-xs font-mono border-b-2 border-amber-700 hover:bg-amber-400 flex items-center justify-center gap-1.5 cursor-pointer">
-                        <ExternalLink className="w-4 h-4" />
-                        <span>このロケーション詳細を開く</span>
-                      </button>
-                    </>
-                  ) : (
-                    <div className="min-h-[220px] flex flex-col items-center justify-center text-center text-slate-500 font-mono text-xs gap-2">
-                      <Shield className="w-8 h-8 text-amber-500/50" />
-                      <span>重要チェックポイントの写真を選択してください</span>
-                    </div>
-                  )}
-                </aside>
-              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-[#1E293B] bg-[#0B1018]/50 px-4 py-16 text-center">
+              <Camera className="mx-auto mb-3 h-12 w-12 text-[#64748B]" />
+              <h3 className="game-ui-font text-sm text-[#94A3B8]">写真がまだありません</h3>
+              <p className="mt-1 text-xs text-[#64748B]">
+                記録の作成時に写真を添付すると、このCHESTに自動的に保存されます。
+              </p>
             </div>
           )}
         </div>
 
-        <div className="px-4 sm:px-5 py-3 bg-[#161a24] border-t-2 border-[#2d3548] flex justify-between items-center text-[10px] sm:text-xs text-slate-400 font-mono shrink-0">
-          <div className="flex items-center gap-1.5 text-emerald-400">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>CAPACITY: UNLIMITED</span>
-          </div>
-          <button type="button" onClick={handleClose} onMouseEnter={playHoverSound} className="min-h-[38px] px-4 py-1.5 bg-[#141824] text-slate-200 hover:text-amber-400 border border-slate-700 hover:border-amber-500 font-bold text-xs cursor-pointer">
+        <div className="game-ui-font flex shrink-0 items-center justify-between border-t border-[#1E293B] bg-[#0B1018] px-4 py-3 text-xs text-[#64748B]">
+          <span className="text-[10px]">UTAPEDIA // PHOTO VAULT</span>
+          <button
+            type="button"
+            onClick={handleClose}
+            onMouseEnter={playHoverSound}
+            className="rounded bg-[#161F30] px-4 py-1.5 text-xs text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
+          >
             閉じる
           </button>
         </div>
