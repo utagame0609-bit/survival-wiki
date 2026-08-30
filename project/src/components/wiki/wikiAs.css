@@ -88,15 +88,15 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
     opacity: 0;
     transform: translate3d(0, 48px, 0);
   }
-  12% {
+  10% {
     opacity: 0.85;
-    transform: translate3d(0, 40px, 0);
+    transform: translate3d(0, 34px, 0);
   }
-  75% {
+  78% {
     opacity: 0.85;
     transform: translate3d(0, -48px, 0);
   }
-  88% {
+  90% {
     opacity: 0;
     transform: translate3d(0, -60px, 0);
   }
@@ -106,12 +106,29 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   }
 }
 
+/* Keep the tutorial above normal app chrome while remaining below full-screen generation overlays. */
+div:has(> .animate-smooth-swipe) {
+  z-index: 190 !important;
+}
+
 .animate-smooth-swipe {
-  animation: smooth-swipe-up 2.2s cubic-bezier(0.2, 0.65, 0.35, 1) infinite;
+  animation: smooth-swipe-up 2.35s linear infinite;
   will-change: transform, opacity;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   perspective: 1000px;
+}
+
+.animate-smooth-swipe svg {
+  width: 95px;
+  height: 125px;
+}
+
+/* Angle the hand silhouette so the extended finger reads as a swipe pointer, not a raised middle finger. */
+.animate-smooth-swipe svg > path:last-of-type {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translate(-2px, 2px) rotate(-16deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
