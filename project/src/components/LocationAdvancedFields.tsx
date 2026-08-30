@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Compass, Users } from 'lucide-react';
+import { Check, ChevronDown, MapPin, Users } from 'lucide-react';
 import type { WorldMember } from '@/lib/types';
 import { playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
@@ -48,63 +48,86 @@ export function LocationAdvancedFields({
   };
 
   return (
-    <>
+    <div className="pt-2 border-t border-[#1E293B]">
       <button
         type="button"
-        onClick={() => { onToggleOpen(); playConfirmSound(); }}
+        onClick={() => {
+          onToggleOpen();
+          playConfirmSound();
+        }}
         onMouseEnter={playHoverSound}
-        className="flex w-full items-center justify-between gap-2 border border-amber-500/30 bg-amber-950/10 px-3 py-2.5 text-xs font-bold text-amber-400 transition-all hover:-translate-y-[2px] hover:border-amber-400/60 hover:text-amber-300 cursor-pointer"
+        className="w-full flex items-center justify-between py-2 text-xs game-ui-font text-[#94A3B8] hover:text-[#06B6D4] transition-colors cursor-pointer"
       >
-        <span className="flex min-w-0 items-center gap-1.5">
-          <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
-          <span className="truncate">{open ? '詳細オプションを閉じる' : '詳細オプションを開く'}</span>
-        </span>
-        <span className="shrink-0 text-[9px] font-normal text-slate-500">座標・仲間・日時</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <MapPin className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
+          <span>詳細オプション（座標・同行者）</span>
+          <span className="hidden sm:inline text-[10px] font-mono text-[#64748B]">
+            {open ? '展開中' : '未設定時は座標非表示'}
+          </span>
+        </div>
+        <ChevronDown className={`w-3.5 h-3.5 text-[#64748B] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="space-y-4 border border-slate-800 bg-[#090d16] p-3.5 sm:p-4">
+        <div className="mt-2.5 space-y-3.5 bg-[#0B1018]/60 p-3 rounded-lg border border-[#1E293B]">
           <div>
-            <label className="mb-1.5 flex flex-col gap-0.5 text-xs font-bold uppercase tracking-wider text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-              <span className="flex items-center gap-1.5 text-emerald-400"><Compass className="h-4 w-4" /><span>COORDINATES // 座標</span></span>
-              <span className="text-[9px] font-normal text-slate-500">X / Y / Z を入力（任意）</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5 gap-2">
+              <label className="text-xs game-ui-font text-[#94A3B8] flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-[#F59E0B]" />
+                空間座標 (X / Y / Z)
+              </label>
+              <span className="text-[10px] font-mono text-[#64748B]">
+                空欄なら座標情報なし
+              </span>
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               {(['X', 'Y', 'Z'] as const).map((axis, index) => (
-                <div key={axis} className="min-w-0">
-                  <div className="mb-1 text-[9px] font-mono font-bold text-slate-500">{axis}</div>
+                <div key={axis}>
+                  <div className="text-[10px] font-mono text-[#64748B] mb-0.5">
+                    {axis === 'Y' ? 'Y 軸 (高度)' : `${axis} 軸`}
+                  </div>
                   <input
                     type="text"
                     inputMode="numeric"
                     value={coords[index]}
                     onChange={(event) => changeCoord(index, event.target.value)}
                     onFocus={playInputFocusSound}
-                    placeholder={axis === 'Y' ? '64' : '0'}
-                    className="location-input w-full text-sm font-mono tabular-nums text-emerald-300 placeholder-slate-600"
+                    placeholder={axis === 'Y' ? '例: 64' : axis === 'X' ? '例: 120' : '例: -310'}
+                    className="location-input w-full px-2.5 py-1.5 text-xs font-mono text-[#F8FAFC]"
                   />
                 </div>
               ))}
             </div>
-            {coordsError && <p className="mt-1 text-xs text-rose-400">{coordsError}</p>}
+            {coordsError && <p className="mt-1 text-xs text-[#EF4444]">{coordsError}</p>}
           </div>
 
           {members.length > 0 && (
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-300">
-                <Users className="h-4 w-4 text-cyan-400" /> COMPANIONS // 同行メンバー
+              <label className="block text-xs game-ui-font text-[#94A3B8] mb-1.5 flex items-center gap-1">
+                <Users className="w-3 h-3 text-[#06B6D4]" />
+                同行メンバーを選択
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {members.map((member) => {
                   const checked = selectedMembers.has(member.id);
                   return (
                     <button
                       type="button"
                       key={member.id}
-                      onClick={() => { playConfirmSound(); onToggleMember(member.id); }}
+                      onClick={() => {
+                        playConfirmSound();
+                        onToggleMember(member.id);
+                      }}
                       onMouseEnter={playHoverSound}
-                      className={`flex min-h-[40px] items-center gap-1.5 rounded-sm border-2 px-3 py-1.5 text-xs font-mono transition-all hover:-translate-y-[2px] cursor-pointer ${checked ? 'border-cyan-400 bg-cyan-950/50 font-bold text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,0.18)]' : 'border-slate-800 bg-[#0d1627] text-slate-400 hover:border-slate-600 hover:text-slate-200'}`}
+                      className={`px-2.5 py-1 rounded text-xs transition-colors border cursor-pointer flex items-center gap-1 ${
+                        checked
+                          ? 'bg-[#06B6D4]/20 border-[#06B6D4] text-[#38BDF8] font-bold'
+                          : 'bg-[#161F30] border-[#334155] text-[#94A3B8] hover:text-[#E2E8F0]'
+                      }`}
                     >
-                      {checked && <Check className="h-3.5 w-3.5 text-cyan-400 stroke-[3]" />}{member.name}
+                      {checked && <Check className="w-3 h-3" />}
+                      {member.name}
                     </button>
                   );
                 })}
@@ -113,11 +136,19 @@ export function LocationAdvancedFields({
           )}
 
           <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-300">TIMESTAMP // 記録日時</label>
-            <input type="datetime-local" value={createdAt} onChange={(event) => onCreatedAtChange(event.target.value)} onFocus={playInputFocusSound} className="location-input w-full text-xs" />
+            <label className="block text-xs game-ui-font text-[#94A3B8] mb-1.5">
+              記録日時
+            </label>
+            <input
+              type="datetime-local"
+              value={createdAt}
+              onChange={(event) => onCreatedAtChange(event.target.value)}
+              onFocus={playInputFocusSound}
+              className="location-input w-full text-xs"
+            />
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
