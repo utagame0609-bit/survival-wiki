@@ -1,4 +1,4 @@
-import { Save, X } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { playCancelSound, playHoverSound } from '@/lib/sound';
 
 type LocationFormActionsProps = {
@@ -10,7 +10,7 @@ type LocationFormActionsProps = {
 
 export function LocationFormActions({ saving, editing, onCancel, onSubmit }: LocationFormActionsProps) {
   return (
-    <div className="flex gap-3 pt-4 pb-1 border-t border-slate-800">
+    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#1E293B]">
       <button
         type="button"
         onClick={() => {
@@ -18,19 +18,20 @@ export function LocationFormActions({ saving, editing, onCancel, onSubmit }: Loc
           onCancel();
         }}
         onMouseEnter={playHoverSound}
-        className="flex-1 min-h-[44px] py-2.5 rounded-sm bg-[#141824] border-2 border-slate-700 text-slate-300 font-bold hover:bg-slate-800 hover:border-slate-600 active:scale-[0.98] transition-all text-xs uppercase tracking-wider cursor-pointer"
+        className="px-3.5 py-2 rounded text-xs game-ui-font text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors cursor-pointer"
       >
-        <X className="w-4 h-4 inline mr-1" />キャンセル
+        キャンセル
       </button>
+
       <button
         type="button"
         onClick={onSubmit}
         onMouseEnter={playHoverSound}
         disabled={saving}
-        className="flex-1 min-h-[44px] py-2.5 rounded-sm bg-amber-500 text-slate-950 font-black border-b-2 border-amber-700 shadow-[0_0_16px_rgba(245,158,11,0.22)] hover:bg-amber-400 active:scale-[0.98] transition-all disabled:opacity-50 text-xs uppercase tracking-wider cursor-pointer"
+        className="px-5 py-2 rounded bg-[#F59E0B] hover:bg-[#D97706] text-[#0B1018] game-ui-font font-bold text-xs tracking-wider transition-all shadow-[0_0_12px_rgba(245,158,11,0.3)] flex items-center gap-1.5 active:scale-95 disabled:opacity-50 cursor-pointer"
       >
-        <Save className="w-4 h-4 inline mr-1" />
-        {saving ? 'SAVING // 保存中...' : editing ? '▶ 更新を記録' : '▶ 冒険の書に刻む'}
+        <Save className="w-3.5 h-3.5" />
+        <span>{saving ? '保存中...' : editing ? '変更を保存' : '記録を保存する'}</span>
       </button>
     </div>
   );
