@@ -7,17 +7,20 @@ type LocationBasicFieldsProps = {
 
 export function LocationBasicFields({ name, onNameChange }: LocationBasicFieldsProps) {
   return (
-    <div className="space-y-1">
-      <label className="block text-xs font-bold text-slate-200">
-        場所名・発見したこと <span className="text-amber-400">*</span>
+    <div>
+      <label className="mb-1.5 flex items-center justify-between text-xs game-ui-font text-[#F8FAFC]">
+        <span>タイトル / 発見場所の名称</span>
+        <span className="px-1.5 py-0.5 rounded border border-[#F59E0B]/30 bg-[#F59E0B]/10 text-[10px] font-mono font-bold text-[#F59E0B]">
+          必須
+        </span>
       </label>
       <input
         type="text"
         value={name}
         onChange={(event) => onNameChange(event.target.value)}
         onFocus={playInputFocusSound}
-        placeholder="例: 浅めの洞窟、桜の丘、砂漠の寺院..."
-        className="location-input min-h-[44px] text-sm text-white placeholder-slate-600"
+        placeholder="例: 第一前哨基地の完成、海中鍾乳洞の発見"
+        className="location-input w-full px-3 py-2 text-sm text-[#F8FAFC] placeholder-[#64748B]"
         autoFocus
         required
       />
