@@ -6,6 +6,7 @@ type NarratorStyle = {
   quote: string;
   panel: string;
   text: string;
+  corner: string;
 };
 
 export const NARRATORS: Record<string, NarratorStyle> = {
@@ -13,22 +14,25 @@ export const NARRATORS: Record<string, NarratorStyle> = {
     name: '民俗学者 エルナン',
     role: '百科事典編纂官',
     quote: 'ふむ……この記録から判断するに、君はまた随分と無計画だったようだね。',
-    panel: 'border-[#F59E0B]/70 shadow-[0_0_18px_rgba(245,158,11,0.12)]',
-    text: 'text-[#F59E0B]',
+    panel: 'shadow-[0_0_18px_rgba(184,154,90,0.10)]',
+    text: 'text-[#B89A5A]',
+    corner: 'border-[#B89A5A]',
   },
   scp: {
     name: '特異点研究員 Dr.アーク',
     role: '最高機密研究班',
     quote: '……記録を確認した。残念ながら、今回も君が原因である可能性を排除できない。',
-    panel: 'border-[#06B6D4]/70 shadow-[0_0_18px_rgba(6,182,212,0.12)]',
-    text: 'text-[#06B6D4]',
+    panel: 'shadow-[0_0_18px_rgba(79,143,154,0.10)]',
+    text: 'text-[#4F8F9A]',
+    corner: 'border-[#4F8F9A]',
   },
   ancient: {
     name: '老吟遊詩人 ギルダス',
     role: '狂学者・古文書の語り部',
     quote: '……また一人、己の身の程を知らぬ者が、この地へ足を踏み入れたか。',
-    panel: 'border-[#D97706]/70 shadow-[0_0_18px_rgba(217,119,6,0.12)]',
-    text: 'text-[#F59E0B]',
+    panel: 'shadow-[0_0_18px_rgba(154,99,93,0.10)]',
+    text: 'text-[#9A635D]',
+    corner: 'border-[#9A635D]',
   },
 };
 
@@ -79,7 +83,12 @@ export function NarratorDialogue({ style, quote }: { style: string; quote?: stri
   const dialogue = quote?.trim() || narrator.quote;
 
   return (
-    <div className={`game-ui-font mx-3 mt-4 min-w-0 rounded-xl border bg-[#0F172A] p-3 sm:mx-4 sm:p-4 ${narrator.panel}`}>
+    <div className={`game-ui-font relative w-full min-w-0 rounded-xl border border-[#263247] bg-[#0F172A] p-3 sm:p-4 ${narrator.panel}`}>
+      <span className={`pointer-events-none absolute -left-px -top-px h-5 w-5 border-l-2 border-t-2 ${narrator.corner}`} />
+      <span className={`pointer-events-none absolute -right-px -top-px h-5 w-5 border-r-2 border-t-2 ${narrator.corner}`} />
+      <span className={`pointer-events-none absolute -bottom-px -left-px h-5 w-5 border-b-2 border-l-2 ${narrator.corner}`} />
+      <span className={`pointer-events-none absolute -bottom-px -right-px h-5 w-5 border-b-2 border-r-2 ${narrator.corner}`} />
+
       <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <PixelNarrator style={style} compact />
         <div className="min-w-0 flex-1">
@@ -87,7 +96,7 @@ export function NarratorDialogue({ style, quote }: { style: string; quote?: stri
             <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
             <span className="break-words">【{narrator.name}】</span>
           </div>
-          <span className={`mt-1 inline-block rounded border border-current/60 bg-[#0B1018] px-1.5 py-0.5 text-[7px] font-bold sm:text-[9px] ${narrator.text}`}>
+          <span className={`mt-1 inline-block rounded border border-current/50 bg-[#0B1018] px-1.5 py-0.5 text-[7px] font-bold sm:text-[9px] ${narrator.text}`}>
             {narrator.role}
           </span>
         </div>
