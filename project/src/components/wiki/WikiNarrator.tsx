@@ -1,3 +1,5 @@
+import './wikiAs.css';
+
 type NarratorStyle = {
   name: string;
   role: string;
