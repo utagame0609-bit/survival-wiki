@@ -40,11 +40,17 @@ export function LocationCard({ location, index, onSelect, PhotoImage }: Location
 
         <div className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-[#12151f] border border-slate-700 text-xs text-emerald-400 font-bold mb-3 font-mono">
           <Compass className="w-3.5 h-3.5 text-amber-400" />
-          <span>X: {location.x}</span>
-          <span className="text-slate-600">|</span>
-          <span>Y: {location.y}</span>
-          <span className="text-slate-600">|</span>
-          <span className="text-cyan-300">Z: {location.z}</span>
+          {location.has_coordinates ? (
+            <>
+              <span>X: {location.x}</span>
+              <span className="text-slate-600">|</span>
+              <span>Y: {location.y}</span>
+              <span className="text-slate-600">|</span>
+              <span className="text-cyan-300">Z: {location.z}</span>
+            </>
+          ) : (
+            <span className="text-slate-500">座標未入力</span>
+          )}
         </div>
 
         {location.detail_memo && (
