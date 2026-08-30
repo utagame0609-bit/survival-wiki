@@ -76,7 +76,7 @@ export function TimelineRecordsView({
   }, [locations, searchQuery, sortOrder, world.members]);
 
   return (
-    <div className="w-full pb-20 md:pb-6">
+    <div className="w-full pb-36 md:pb-6">
       <div className="mb-6 flex flex-col items-stretch justify-between gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A]/70 p-3 sm:flex-row sm:items-center">
         <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
@@ -260,7 +260,7 @@ export function TimelineRecordsView({
         </div>
       )}
 
-      <div className="fixed bottom-20 right-4 z-30 sm:right-8 md:bottom-6">
+      <div className="fixed bottom-[4.25rem] right-2.5 z-30 sm:right-4 md:bottom-6 md:right-8">
         <button
           type="button"
           onClick={onCreate}
