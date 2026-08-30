@@ -45,6 +45,7 @@ type GenerationReveal = {
 
 const EMPTY_SAVED: SavedState = { wikipedia: false, scp: false, ancient: false };
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
+const WIKI_SCROLL_HINT_SESSION_KEY = 'wiki-scroll-hint-shown';
 const NARRATOR_MARKER = /<!--WIKI_NARRATOR:([\s\S]*?)-->/;
 
 const WAITING_LINES: Record<WikiStyleId, string> = {
@@ -153,11 +154,10 @@ export function WikiTabModern({
   const [generationReveal, setGenerationReveal] = useState<GenerationReveal | null>(null);
   const [typedReveal, setTypedReveal] = useState('');
   const [waitingComplete, setWaitingComplete] = useState(false);
-  const [pendingMobileDetailScroll, setPendingMobileDetailScroll] = useState<WikiStyleId | null>(null);
+  const [showScrollHint, setShowScrollHint] = useState(false);
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
-  const compilerDetailRef = useRef<HTMLElement | null>(null);
-  const generateButtonRef = useRef<HTMLButtonElement | null>(null);
+  const scrollHintStartYRef = useRef(0);
   const lastBackRequestRef = useRef(backRequestKey);
 
   const load = async (nextStyle: WikiStyleId | null = style) => {
@@ -226,7 +226,7 @@ export function WikiTabModern({
     setCopied(false);
     setShared(false);
     setArticle(null);
-    setPendingMobileDetailScroll(null);
+    setShowScrollHint(false);
 
     const previousStyle: WikiStyleId | null = style === 'ancient'
       ? 'scp'
@@ -238,30 +238,16 @@ export function WikiTabModern({
   }, [backRequestKey, style]);
 
   useEffect(() => {
-    if (!pendingMobileDetailScroll || style !== pendingMobileDetailScroll || article !== null || loading) return;
-    if (typeof window === 'undefined' || !window.matchMedia('(max-width: 767px)').matches) {
-      setPendingMobileDetailScroll(null);
-      return;
-    }
-
-    const firstFrame = window.requestAnimationFrame(() => {
-      const secondFrame = window.requestAnimationFrame(() => {
-        const button = generateButtonRef.current;
-        if (button) {
-          const rect = button.getBoundingClientRect();
-          const desiredBottom = window.innerHeight - 92;
-          const delta = rect.bottom - desiredBottom;
-          if (Math.abs(delta) > 4) {
-            window.scrollBy({ top: delta, behavior: 'smooth' });
-          }
-        }
-        setPendingMobileDetailScroll(null);
-      });
-      return () => window.cancelAnimationFrame(secondFrame);
-    });
-
-    return () => window.cancelAnimationFrame(firstFrame);
-  }, [pendingMobileDetailScroll, style, article, loading]);
+    if (!showScrollHint) return;
+    const startY = scrollHintStartYRef.current;
+    const handleScroll = () => {
+      if (window.scrollY - startY >= 120) {
+        setShowScrollHint(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showScrollHint]);
 
   useEffect(() => {
     if (!generationReveal) {
@@ -361,6 +347,7 @@ export function WikiTabModern({
     if (generating || resetting || article !== null || !style || locations.length === 0 || now < cooldownUntil) return;
 
     const selectedStyle = style;
+    setShowScrollHint(false);
     setGenerating(true);
     setError('');
     setTypedReveal('');
@@ -409,7 +396,7 @@ export function WikiTabModern({
       setSaved((current) => ({ ...current, [style]: false }));
       setArticle(null);
       setStyle(null);
-      setPendingMobileDetailScroll(null);
+      setShowScrollHint(false);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -417,28 +404,31 @@ export function WikiTabModern({
     }
   };
 
-  const selectStyle = (id: WikiStyleId, scrollToDetail = false) => {
-    const shouldScrollOnMobile = scrollToDetail
-      && !saved[id]
-      && typeof window !== 'undefined'
-      && window.matchMedia('(max-width: 767px)').matches;
-
-    if (id === style) {
-      if (shouldScrollOnMobile) {
-        setPendingMobileDetailScroll(null);
-        window.requestAnimationFrame(() => setPendingMobileDetailScroll(id));
-      }
-      return;
-    }
+  const selectStyle = (id: WikiStyleId, showMobileHint = false) => {
+    if (id === style) return;
 
     playConfirmSound();
     setCopied(false);
     setShared(false);
     setArticle(null);
-    setPendingMobileDetailScroll(shouldScrollOnMobile ? id : null);
+
+    const shouldShowHint = showMobileHint
+      && !saved[id]
+      && typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 767px)').matches
+      && window.sessionStorage.getItem(WIKI_SCROLL_HINT_SESSION_KEY) !== '1';
+
+    if (shouldShowHint) {
+      scrollHintStartYRef.current = window.scrollY;
+      setShowScrollHint(true);
+      window.sessionStorage.setItem(WIKI_SCROLL_HINT_SESSION_KEY, '1');
+    } else {
+      setShowScrollHint(false);
+    }
+
     setStyle(id);
 
-    if (!shouldScrollOnMobile) {
+    if (!showMobileHint) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -449,7 +439,7 @@ export function WikiTabModern({
     setShared(false);
     setArticle(null);
     setStyle(null);
-    setPendingMobileDetailScroll(null);
+    setShowScrollHint(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -581,7 +571,7 @@ export function WikiTabModern({
           </section>
 
           {style && narrator && selectedWikiStyle && (
-            <section ref={compilerDetailRef} className="hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
+            <section className="hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
               <div className="flex items-start gap-3.5">
                 <PixelNarrator style={style} />
                 <div className="min-w-0 flex-1">
@@ -610,7 +600,6 @@ export function WikiTabModern({
                 </div>
 
                 <button
-                  ref={generateButtonRef}
                   type="button"
                   onClick={handleGenerate}
                   onMouseEnter={playHoverSound}
@@ -625,6 +614,15 @@ export function WikiTabModern({
               </div>
             </section>
           )}
+        </div>
+      )}
+
+      {showScrollHint && !hasArticle && (
+        <div className="pointer-events-none fixed left-1/2 top-[58%] z-40 -translate-x-1/2 -translate-y-1/2 md:hidden">
+          <div className="game-ui-font flex min-w-[108px] flex-col items-center rounded-xl border border-[#06B6D4]/35 bg-[#07101c]/90 px-4 py-2.5 text-[#6FA9B1] shadow-[0_0_18px_rgba(6,182,212,0.16)] backdrop-blur-md">
+            <span className="text-[9px] tracking-[0.28em]">SCROLL</span>
+            <ChevronDown className="mt-1 h-5 w-5 motion-safe:animate-bounce" />
+          </div>
         </div>
       )}
 
