@@ -157,6 +157,7 @@ export function WikiTabModern({
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
   const compilerDetailRef = useRef<HTMLElement | null>(null);
+  const generateButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastBackRequestRef = useRef(backRequestKey);
 
   const load = async (nextStyle: WikiStyleId | null = style) => {
@@ -245,7 +246,15 @@ export function WikiTabModern({
 
     const firstFrame = window.requestAnimationFrame(() => {
       const secondFrame = window.requestAnimationFrame(() => {
-        compilerDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const button = generateButtonRef.current;
+        if (button) {
+          const rect = button.getBoundingClientRect();
+          const desiredBottom = window.innerHeight - 92;
+          const delta = rect.bottom - desiredBottom;
+          if (Math.abs(delta) > 4) {
+            window.scrollBy({ top: delta, behavior: 'smooth' });
+          }
+        }
         setPendingMobileDetailScroll(null);
       });
       return () => window.cancelAnimationFrame(secondFrame);
@@ -409,16 +418,23 @@ export function WikiTabModern({
   };
 
   const selectStyle = (id: WikiStyleId, scrollToDetail = false) => {
-    if (id === style) return;
-    playConfirmSound();
-    setCopied(false);
-    setShared(false);
-    setArticle(null);
-
     const shouldScrollOnMobile = scrollToDetail
       && !saved[id]
       && typeof window !== 'undefined'
       && window.matchMedia('(max-width: 767px)').matches;
+
+    if (id === style) {
+      if (shouldScrollOnMobile) {
+        setPendingMobileDetailScroll(null);
+        window.requestAnimationFrame(() => setPendingMobileDetailScroll(id));
+      }
+      return;
+    }
+
+    playConfirmSound();
+    setCopied(false);
+    setShared(false);
+    setArticle(null);
     setPendingMobileDetailScroll(shouldScrollOnMobile ? id : null);
     setStyle(id);
 
@@ -594,6 +610,7 @@ export function WikiTabModern({
                 </div>
 
                 <button
+                  ref={generateButtonRef}
                   type="button"
                   onClick={handleGenerate}
                   onMouseEnter={playHoverSound}
