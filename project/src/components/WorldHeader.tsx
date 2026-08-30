@@ -77,17 +77,17 @@ export function WorldHeader({ world, playerPhotoUrl }: WorldHeaderProps) {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1 font-mono text-[10px] text-[#F59E0B] sm:text-[11px]">
+              <span className="game-ui-font flex items-center gap-1 text-[10px] text-[#F59E0B] sm:text-[11px]">
                 <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 {world.player?.trim() || '開拓者'}
               </span>
-              <span className="flex items-center gap-1 font-mono text-[9px] text-[#64748B] sm:text-[10px]">
+              <span className="game-ui-font flex items-center gap-1 text-[9px] text-[#64748B] sm:text-[10px]">
                 <Calendar className="h-2.5 w-2.5" />
                 EST. {createdDate}
               </span>
             </div>
 
-            <h2 className="mt-0.5 truncate text-sm font-black tracking-wide text-[#F8FAFC] sm:text-lg">
+            <h2 className="game-ui-font mt-0.5 truncate text-sm font-black tracking-wide text-[#F8FAFC] sm:text-lg">
               {world.name}
             </h2>
 
@@ -101,7 +101,7 @@ export function WorldHeader({ world, playerPhotoUrl }: WorldHeaderProps) {
 
         <div className="flex shrink-0 items-center justify-between gap-2.5 border-t border-[#1E293B]/70 pt-1.5 sm:gap-4 md:justify-end md:border-t-0 md:pt-0">
           <div className="flex items-center gap-1.5 sm:flex-col sm:items-end sm:gap-0">
-            <div className="flex items-center gap-1 font-mono text-[9px] text-[#94A3B8] sm:text-[10px]">
+            <div className="game-ui-font flex items-center gap-1 text-[9px] text-[#94A3B8] sm:text-[10px]">
               <Users className="h-2.5 w-2.5 text-[#06B6D4] sm:h-3 sm:w-3" />
               <span className="hidden sm:inline">PARTY</span> ({companions.length + 1})
             </div>
@@ -122,7 +122,7 @@ export function WorldHeader({ world, playerPhotoUrl }: WorldHeaderProps) {
                   </div>
                 ))
               ) : (
-                <span className="text-[10px] text-[#64748B] sm:text-[11px]">単独探索</span>
+                <span className="game-ui-font text-[10px] text-[#64748B] sm:text-[11px]">単独探索</span>
               )}
             </div>
           </div>
