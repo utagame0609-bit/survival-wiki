@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
+  Hand,
   Play,
   RotateCcw,
   ScrollText,
@@ -618,10 +619,12 @@ export function WikiTabModern({
       )}
 
       {showScrollHint && !hasArticle && (
-        <div className="pointer-events-none fixed left-1/2 top-[58%] z-40 -translate-x-1/2 -translate-y-1/2 md:hidden">
-          <div className="game-ui-font flex min-w-[108px] flex-col items-center rounded-xl border border-[#06B6D4]/35 bg-[#07101c]/90 px-4 py-2.5 text-[#6FA9B1] shadow-[0_0_18px_rgba(6,182,212,0.16)] backdrop-blur-md">
-            <span className="text-[9px] tracking-[0.28em]">SCROLL</span>
-            <ChevronDown className="mt-1 h-5 w-5 motion-safe:animate-bounce" />
+        <div aria-hidden="true" className="wiki-swipe-hint pointer-events-none fixed left-1/2 top-[56%] z-40 -translate-x-1/2 -translate-y-1/2 md:hidden">
+          <div className="wiki-swipe-trail" />
+          <div className="wiki-swipe-ripple" />
+          <div className="wiki-swipe-hand">
+            <span className="wiki-swipe-touch" />
+            <Hand className="wiki-swipe-hand-icon" strokeWidth={1.7} />
           </div>
         </div>
       )}
