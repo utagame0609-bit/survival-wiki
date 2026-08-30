@@ -82,181 +82,168 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Mobile Wiki first-use swipe hint: backgroundless game-tutorial gesture. */
+/* Mobile Wiki first-use swipe hint: real Hand icon with GPU-friendly transform-only motion. */
 @media (max-width: 767px) {
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden {
-    top: 56% !important;
-    width: 8.5rem !important;
-    height: 11rem !important;
-    opacity: 0.9;
-    filter: drop-shadow(0 0 13px rgba(6, 182, 212, 0.42)) drop-shadow(0 0 28px rgba(6, 182, 212, 0.2));
-    animation: wiki-gesture-glow 2.6s ease-in-out infinite;
+  .wiki-swipe-hint {
+    width: 10rem;
+    height: 12.5rem;
+    opacity: 0.92;
+    animation: wiki-hand-glow 3s ease-in-out infinite;
     will-change: opacity;
   }
 
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font {
-    position: relative !important;
-    display: block !important;
-    width: 8.5rem !important;
-    height: 11rem !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    color: transparent !important;
-  }
-
-  /* Touch-start ripple. */
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span {
-    position: absolute !important;
-    left: 50% !important;
-    top: 70% !important;
-    display: block !important;
-    width: 2.75rem !important;
-    height: 2.75rem !important;
-    margin: 0 !important;
-    border: 1.5px solid rgba(103, 232, 249, 0.62) !important;
-    border-radius: 9999px !important;
-    background: rgba(34, 211, 238, 0.08) !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    transform: translate3d(-50%, -50%, 0) scale(0.45);
-    animation: wiki-touch-ripple 2.6s ease-out infinite;
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-  }
-
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span::after {
-    content: none !important;
-  }
-
-  /* Existing chevron is hidden; the gesture itself carries the instruction. */
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > svg {
-    display: none !important;
-  }
-
-  /* Stylized luminous fingertip/pointer travelling upward. */
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before {
-    content: '';
+  .wiki-swipe-hand,
+  .wiki-swipe-trail,
+  .wiki-swipe-ripple {
     position: absolute;
-    z-index: 2;
-    left: calc(50% - 11px);
-    top: calc(50% - 27px);
-    width: 22px;
-    height: 54px;
+    left: 50%;
+    top: 50%;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
+
+  .wiki-swipe-hand {
+    z-index: 3;
+    width: 4.5rem;
+    height: 5.5rem;
+    margin-left: -2.25rem;
+    margin-top: -2.75rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    transform: translate3d(0, 48px, 0) scale(0.96);
+    animation: wiki-hand-swipe 3s cubic-bezier(0.22, 0.72, 0.24, 1) infinite;
+    will-change: transform, opacity;
+  }
+
+  .wiki-swipe-hand-icon {
+    width: 4rem;
+    height: 4rem;
+    color: rgba(207, 250, 254, 0.95);
+    fill: rgba(34, 211, 238, 0.12);
+    transform: rotate(-12deg);
+    filter: drop-shadow(0 0 8px rgba(103, 232, 249, 0.72)) drop-shadow(0 0 20px rgba(6, 182, 212, 0.34));
+  }
+
+  .wiki-swipe-touch {
+    position: absolute;
+    left: 50%;
+    top: -0.15rem;
+    width: 1rem;
+    height: 1rem;
+    margin-left: -0.5rem;
     border: 2px solid rgba(207, 250, 254, 0.92);
-    border-radius: 999px 999px 11px 11px;
-    background: linear-gradient(to bottom, rgba(103, 232, 249, 0.38), rgba(6, 182, 212, 0.09));
-    box-shadow:
-      0 0 13px rgba(103, 232, 249, 0.66),
-      0 0 30px rgba(6, 182, 212, 0.36),
-      inset 0 0 10px rgba(207, 250, 254, 0.18);
-    transform-origin: center bottom;
-    transform: translate3d(0, 42px, 0) scale(0.96);
-    animation: wiki-gesture-swipe-up 2.6s cubic-bezier(0.22, 0.72, 0.24, 1) infinite;
-    will-change: transform, opacity;
-    backface-visibility: hidden;
+    border-radius: 9999px;
+    background: rgba(34, 211, 238, 0.32);
+    box-shadow: 0 0 12px rgba(103, 232, 249, 0.8), 0 0 24px rgba(6, 182, 212, 0.35);
   }
 
-  /* Streaming light trail behind the upward gesture. Fixed geometry + scale avoids layout work while animating. */
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::after {
-    content: '';
-    position: absolute;
+  .wiki-swipe-ripple {
     z-index: 1;
-    left: calc(50% - 2.5px);
-    top: 44%;
-    width: 5px;
-    height: 76px;
-    border-radius: 999px;
-    background: linear-gradient(to top, transparent, rgba(34, 211, 238, 0.5), rgba(165, 243, 252, 0.94));
-    box-shadow: 0 0 13px rgba(34, 211, 238, 0.4);
-    transform-origin: center bottom;
-    transform: translate3d(0, 32px, 0) scaleY(0.05);
-    animation: wiki-trail-stream 2.6s cubic-bezier(0.22, 0.72, 0.24, 1) infinite;
+    width: 3.4rem;
+    height: 3.4rem;
+    margin-left: -1.7rem;
+    margin-top: 2.65rem;
+    border: 1.5px solid rgba(103, 232, 249, 0.58);
+    border-radius: 9999px;
+    background: rgba(34, 211, 238, 0.05);
+    transform: translate3d(0, 0, 0) scale(0.45);
+    animation: wiki-hand-ripple 3s ease-out infinite;
     will-change: transform, opacity;
-    backface-visibility: hidden;
+  }
+
+  .wiki-swipe-trail {
+    z-index: 2;
+    width: 0.34rem;
+    height: 6.4rem;
+    margin-left: -0.17rem;
+    margin-top: -0.3rem;
+    border-radius: 9999px;
+    background: linear-gradient(to top, transparent, rgba(34, 211, 238, 0.38), rgba(165, 243, 252, 0.9));
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.32);
+    transform-origin: center bottom;
+    transform: translate3d(0, 34px, 0) scaleY(0.05);
+    animation: wiki-hand-trail 3s cubic-bezier(0.22, 0.72, 0.24, 1) infinite;
+    will-change: transform, opacity;
   }
 }
 
-@keyframes wiki-gesture-swipe-up {
-  0%, 8% {
-    opacity: 0;
-    transform: translate3d(0, 42px, 0) scale(0.96);
-  }
-  18% {
-    opacity: 0.82;
-    transform: translate3d(0, 36px, 0) scale(0.985);
-  }
-  32% {
-    opacity: 0.98;
-    transform: translate3d(0, 24px, 0) scale(1);
-  }
-  68% {
-    opacity: 0.98;
-    transform: translate3d(0, -30px, 0) scale(1);
-  }
-  84% {
-    opacity: 0.45;
-    transform: translate3d(0, -45px, 0) scale(0.985);
-  }
-  94%, 100% {
-    opacity: 0;
-    transform: translate3d(0, -52px, 0) scale(0.96);
-  }
-}
-
-@keyframes wiki-touch-ripple {
-  0%, 9% {
-    opacity: 0;
-    transform: translate3d(-50%, -50%, 0) scale(0.45);
-  }
-  18% {
-    opacity: 0.9;
-    transform: translate3d(-50%, -50%, 0) scale(0.72);
-  }
-  42% {
-    opacity: 0.28;
-    transform: translate3d(-50%, -50%, 0) scale(1.35);
-  }
-  58%, 100% {
-    opacity: 0;
-    transform: translate3d(-50%, -50%, 0) scale(1.7);
-  }
-}
-
-@keyframes wiki-trail-stream {
+@keyframes wiki-hand-swipe {
   0%, 10% {
     opacity: 0;
-    transform: translate3d(0, 32px, 0) scaleY(0.05);
+    transform: translate3d(0, 48px, 0) scale(0.96);
   }
-  22% {
-    opacity: 0.42;
-    transform: translate3d(0, 27px, 0) scaleY(0.3);
-  }
-  42% {
+  20% {
     opacity: 0.76;
-    transform: translate3d(0, 13px, 0) scaleY(0.7);
+    transform: translate3d(0, 44px, 0) scale(0.985);
   }
-  66% {
-    opacity: 0.86;
-    transform: translate3d(0, -10px, 0) scaleY(1);
+  32% {
+    opacity: 1;
+    transform: translate3d(0, 34px, 0) scale(1);
   }
-  82% {
-    opacity: 0.34;
-    transform: translate3d(0, -27px, 0) scaleY(0.7);
+  72% {
+    opacity: 1;
+    transform: translate3d(0, -40px, 0) scale(1);
   }
-  94%, 100% {
+  88% {
+    opacity: 0.32;
+    transform: translate3d(0, -58px, 0) scale(0.985);
+  }
+  100% {
     opacity: 0;
-    transform: translate3d(0, -40px, 0) scaleY(0.08);
+    transform: translate3d(0, -64px, 0) scale(0.96);
   }
 }
 
-@keyframes wiki-gesture-glow {
+@keyframes wiki-hand-ripple {
+  0%, 10% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.45);
+  }
+  20% {
+    opacity: 0.88;
+    transform: translate3d(0, 0, 0) scale(0.72);
+  }
+  46% {
+    opacity: 0.2;
+    transform: translate3d(0, 0, 0) scale(1.42);
+  }
+  60%, 100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1.7);
+  }
+}
+
+@keyframes wiki-hand-trail {
+  0%, 12% {
+    opacity: 0;
+    transform: translate3d(0, 34px, 0) scaleY(0.05);
+  }
+  25% {
+    opacity: 0.36;
+    transform: translate3d(0, 28px, 0) scaleY(0.28);
+  }
+  48% {
+    opacity: 0.74;
+    transform: translate3d(0, 10px, 0) scaleY(0.7);
+  }
+  72% {
+    opacity: 0.84;
+    transform: translate3d(0, -18px, 0) scaleY(1);
+  }
+  88% {
+    opacity: 0.22;
+    transform: translate3d(0, -34px, 0) scaleY(0.68);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -46px, 0) scaleY(0.08);
+  }
+}
+
+@keyframes wiki-hand-glow {
   0%, 100% {
-    opacity: 0.76;
+    opacity: 0.72;
   }
   50% {
     opacity: 1;
@@ -264,10 +251,10 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
 }
 
 @media (prefers-reduced-motion: reduce) {
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden,
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before,
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::after,
-  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span {
+  .wiki-swipe-hint,
+  .wiki-swipe-hand,
+  .wiki-swipe-ripple,
+  .wiki-swipe-trail {
     animation: none !important;
   }
 }
