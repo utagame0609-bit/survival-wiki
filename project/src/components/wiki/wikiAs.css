@@ -82,6 +82,121 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
+/* Mobile Wiki first-use swipe hint: AS proposal A, reduced to fit the production Tac-HUD. */
+@media (max-width: 767px) {
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden {
+    top: 54% !important;
+  }
+
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font {
+    min-width: 184px !important;
+    gap: 0.3rem !important;
+    padding: 0.85rem 1.15rem !important;
+    border: 1px solid rgba(6, 182, 212, 0.25) !important;
+    border-radius: 0.85rem !important;
+    background: rgba(5, 12, 24, 0.78) !important;
+    color: #A5F3FC !important;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48), 0 0 16px rgba(6, 182, 212, 0.1) !important;
+    backdrop-filter: blur(10px);
+    animation: wiki-scroll-hint-glow 2.5s ease-in-out infinite;
+  }
+
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before {
+    content: '';
+    display: block;
+    width: 15px;
+    height: 28px;
+    margin-bottom: 0.18rem;
+    border: 2px solid rgba(103, 232, 249, 0.82);
+    border-radius: 999px 999px 7px 7px;
+    background: rgba(6, 182, 212, 0.08);
+    box-shadow: 0 0 9px rgba(6, 182, 212, 0.28);
+    animation: wiki-swipe-finger 1.8s ease-in-out infinite;
+  }
+
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span {
+    font-size: 0 !important;
+    letter-spacing: 0 !important;
+    line-height: 1 !important;
+  }
+
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > span::after {
+    content: '上へスワイプ';
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #CFFAFE;
+  }
+
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > svg {
+    width: 17px !important;
+    height: 17px !important;
+    margin-top: 0.1rem !important;
+    color: rgba(34, 211, 238, 0.8) !important;
+    animation: wiki-chevron-flow 1.5s ease-in-out infinite !important;
+  }
+
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::after {
+    content: 'この下に編纂ボタンがあります';
+    display: block;
+    margin-top: 0.05rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(148, 163, 184, 0.9);
+  }
+}
+
+@keyframes wiki-swipe-finger {
+  0% {
+    opacity: 0;
+    transform: translateY(9px) scale(0.94);
+  }
+  20% {
+    opacity: 0.9;
+    transform: translateY(7px) scale(1);
+  }
+  72% {
+    opacity: 0.9;
+    transform: translateY(-7px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-11px) scale(0.94);
+  }
+}
+
+@keyframes wiki-chevron-flow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: translateY(-2px);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(3px);
+  }
+}
+
+@keyframes wiki-scroll-hint-glow {
+  0%, 100% {
+    border-color: rgba(6, 182, 212, 0.22);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48), 0 0 12px rgba(6, 182, 212, 0.07);
+  }
+  50% {
+    border-color: rgba(6, 182, 212, 0.34);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.48), 0 0 20px rgba(6, 182, 212, 0.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font,
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font::before,
+  div.pointer-events-none.fixed.left-1\/2.md\:hidden > div.game-ui-font > svg {
+    animation: none !important;
+  }
+}
+
 /* Article NPC dialogue keeps the AS two-corner HUD accent. */
 .wiki-as-bracket {
   position: relative;
