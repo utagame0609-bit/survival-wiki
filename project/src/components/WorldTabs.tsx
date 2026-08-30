@@ -9,8 +9,8 @@ type WorldTabsProps = {
 };
 
 const tabs: { id: Tab; label: string; icon: typeof ScrollText }[] = [
-  { id: 'records', label: '冒険の記録', icon: ScrollText },
-  { id: 'wiki', label: '旅の書 (Wiki)', icon: BookOpen },
+  { id: 'records', label: '冒険の記録 (TIMELINE)', icon: BookOpen },
+  { id: 'wiki', label: '旅の書 (AI WIKI CHRONICLE)', icon: ScrollText },
 ];
 
 export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
@@ -21,27 +21,26 @@ export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 mb-3 sm:mb-5 bg-[#0f1424] p-1.5 border-2 border-slate-700/80 shadow-inner">
+    <div className="hidden md:flex items-center gap-2 mb-6 border-b border-[#1E293B] pb-3">
       {tabs.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
-
         return (
           <button
             key={item.id}
             type="button"
             onClick={() => handleTabChange(item.id)}
             onMouseEnter={playHoverSound}
-            className={`min-h-[44px] px-3 sm:px-4 font-mono text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer border-2 ${
+            className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs game-ui-font tracking-wider transition-all cursor-pointer ${
               isActive && item.id === 'wiki'
-                ? 'border-cyan-400 bg-cyan-500/15 text-cyan-300 font-black shadow-[0_0_10px_rgba(6,182,212,0.18)]'
+                ? 'bg-[#0E2A3A] text-[#06B6D4] border border-[#06B6D4]/60 shadow-[0_0_12px_rgba(6,182,212,0.2)] font-bold'
                 : isActive
-                  ? 'border-amber-400 bg-amber-500/20 text-amber-300 font-black shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                  : 'border-slate-800 bg-[#121828] text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  ? 'bg-[#161F30] text-[#F59E0B] border border-[#F59E0B]/60 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-bold'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#161F30]/50 border border-transparent'
             }`}
           >
-            <Icon className={`w-4 h-4 shrink-0 ${item.id === 'wiki' ? 'text-cyan-400' : 'text-amber-400'}`} />
-            <span className="truncate">{item.label}</span>
+            <Icon className={`w-4 h-4 shrink-0 ${item.id === 'wiki' ? 'text-[#06B6D4]' : 'text-[#F59E0B]'}`} />
+            <span>{item.label}</span>
           </button>
         );
       })}
