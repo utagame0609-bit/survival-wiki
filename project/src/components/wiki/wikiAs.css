@@ -1,33 +1,15 @@
 /* AS v4 Wiki chrome, scoped to the production Wiki structures only. */
 
-/* Top-view header: AS cyan corner brackets (top-left / bottom-right only). */
+/* Intro card is a normal rounded AS panel: no decorative corner accents. */
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan {
   position: relative;
-  border-top-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::before,
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
-  content: '';
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  pointer-events: none;
-}
-
-div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::before {
-  top: -1px;
-  left: -1px;
-  border-top: 2px solid #00D2FF;
-  border-left: 2px solid #00D2FF;
-}
-
-div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
-  right: -1px;
-  bottom: -1px;
-  border-right: 2px solid #00D2FF;
-  border-bottom: 2px solid #00D2FF;
+  content: none !important;
 }
 
 /* Selected-NPC dossier: AS amber corner brackets. */
@@ -100,7 +82,7 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Article NPC dialogue: same two-corner HUD language. */
+/* Article NPC dialogue keeps the AS two-corner HUD accent. */
 .wiki-as-bracket {
   position: relative;
   border-top-left-radius: 0 !important;
@@ -128,4 +110,15 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   bottom: -1px;
   border-right: 2px solid #F2A100;
   border-bottom: 2px solid #F2A100;
+}
+
+/* Main archived Wiki article shell is a normal rounded AS container. */
+.wiki-as-bracket + section.hud-bracket {
+  border-top-left-radius: 0.75rem !important;
+  border-bottom-right-radius: 0.75rem !important;
+}
+
+.wiki-as-bracket + section.hud-bracket::before,
+.wiki-as-bracket + section.hud-bracket::after {
+  content: none !important;
 }
