@@ -17,7 +17,7 @@ export const openRouterTestProvider: WikiProvider = {
       ...locations.map((location, locationIndex) => [
         `【ロケーション${locationIndex + 1}】`,
         `ロケーション名: ${location.name}`,
-        `座標: ${location.x}, ${location.y}, ${location.z}`,
+        `座標: ${location.has_coordinates ? `${location.x}, ${location.y}, ${location.z}` : '未入力'}`,
         `詳細メモ: ${location.detail_memo || 'なし'}`,
         `作成日時: ${location.created_at}`,
         `関連メンバー: ${location.members.map((m) => m.name).join('・') || 'なし'}`,
