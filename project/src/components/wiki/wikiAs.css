@@ -9,8 +9,8 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::before,
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   pointer-events: none;
 }
 
@@ -19,6 +19,7 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::before {
   left: -1px;
   border-top: 2px solid #00D2FF;
   border-left: 2px solid #00D2FF;
+  border-top-left-radius: 0.5rem;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
@@ -26,9 +27,10 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket-cyan::after {
   bottom: -1px;
   border-right: 2px solid #00D2FF;
   border-bottom: 2px solid #00D2FF;
+  border-bottom-right-radius: 0.5rem;
 }
 
-/* Selected-NPC dossier: AS amber corner brackets. */
+/* Selected-NPC dossier: AS amber corner brackets with the rounded-card correction. */
 div:has(> section.hud-bracket-cyan) > section.hud-bracket {
   position: relative;
 }
@@ -37,8 +39,8 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket::before,
 div:has(> section.hud-bracket-cyan) > section.hud-bracket::after {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   pointer-events: none;
 }
 
@@ -47,6 +49,7 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket::before {
   left: -1px;
   border-top: 2px solid #F2A100;
   border-left: 2px solid #F2A100;
+  border-top-left-radius: 0.5rem;
 }
 
 div:has(> section.hud-bracket-cyan) > section.hud-bracket::after {
@@ -54,6 +57,7 @@ div:has(> section.hud-bracket-cyan) > section.hud-bracket::after {
   bottom: -1px;
   border-right: 2px solid #F2A100;
   border-bottom: 2px solid #F2A100;
+  border-bottom-right-radius: 0.5rem;
 }
 
 /* AS top-view vertical rhythm. */
@@ -96,7 +100,7 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Article NPC dialogue: exact AS bracket geometry, kept independent of article-paper styling. */
+/* Article NPC dialogue: same AS bracket language, corrected to follow the rounded shell. */
 .wiki-as-bracket {
   position: relative;
 }
@@ -105,8 +109,8 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
 .wiki-as-bracket::after {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   pointer-events: none;
 }
 
@@ -115,6 +119,7 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   left: -1px;
   border-top: 2px solid #F2A100;
   border-left: 2px solid #F2A100;
+  border-top-left-radius: 0.5rem;
 }
 
 .wiki-as-bracket::after {
@@ -122,4 +127,5 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   bottom: -1px;
   border-right: 2px solid #F2A100;
   border-bottom: 2px solid #F2A100;
+  border-bottom-right-radius: 0.5rem;
 }
