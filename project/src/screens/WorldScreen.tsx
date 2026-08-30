@@ -20,12 +20,12 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('records');
-  const [wikiArticleBack, setWikiArticleBack] = useState(false);
-  const [wikiArticleViewKey, setWikiArticleViewKey] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
   const [openLocationId, setOpenLocationId] = useState<string | null>(null);
   const [wikiLocation, setWikiLocation] = useState<LocationWithPhotos | null>(null);
   const [playerPhotoUrl, setPlayerPhotoUrl] = useState('');
+  const [wikiInternalBackAvailable, setWikiInternalBackAvailable] = useState(false);
+  const [wikiBackRequestKey, setWikiBackRequestKey] = useState(0);
 
   const reload = () => setReloadKey((k) => k + 1);
 
@@ -60,7 +60,10 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
   }, [worldId, reloadKey]);
 
   useEffect(() => {
-    if (tab !== 'wiki') stopNpcBgm();
+    if (tab !== 'wiki') {
+      stopNpcBgm();
+      setWikiInternalBackAvailable(false);
+    }
   }, [tab]);
 
   const handleOpenLocation = async (locationId: string) => {
@@ -81,18 +84,13 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
 
   const handleTabChange = (nextTab: Tab) => {
     if (nextTab === tab) return;
-    setWikiArticleBack(false);
+    setWikiInternalBackAvailable(false);
     setTab(nextTab);
   };
 
-  const handleWikiArticleStateChange = (isArticle: boolean) => {
-    setWikiArticleBack(isArticle);
-  };
-
   const handleWorldBack = () => {
-    if (tab === 'wiki' && wikiArticleBack) {
-      setWikiArticleBack(false);
-      setWikiArticleViewKey((key) => key + 1);
+    if (tab === 'wiki' && wikiInternalBackAvailable) {
+      setWikiBackRequestKey((key) => key + 1);
       return;
     }
     if (tab === 'wiki') {
@@ -129,11 +127,11 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
 
               {tab === 'wiki' && (
                 <WikiTab
-                  key={wikiArticleViewKey}
                   world={world}
                   reloadKey={reloadKey}
                   onOpenLocation={handleOpenLocation}
-                  onArticleStateChange={handleWikiArticleStateChange}
+                  backRequestKey={wikiBackRequestKey}
+                  onInternalBackAvailableChange={setWikiInternalBackAvailable}
                 />
               )}
             </div>
