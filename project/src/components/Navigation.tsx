@@ -25,9 +25,11 @@ export function useBackButton(onBack: () => void) {
 export function Header({
   title,
   onBack,
+  hideMobileActions = false,
 }: {
   title: string;
   onBack?: () => void;
+  hideMobileActions?: boolean;
 }) {
   const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
 
@@ -84,7 +86,7 @@ export function Header({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className={`${hideMobileActions ? 'hidden md:flex' : 'flex'} shrink-0 items-center gap-1.5 sm:gap-2`}>
           <button
             type="button"
             onClick={handleSoundToggle}
