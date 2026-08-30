@@ -82,7 +82,7 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Mobile Wiki first-use swipe hint: one SVG on one composited layer. */
+/* Mobile Wiki first-use swipe hint: one moving layer with a quiet double-chevron cue. */
 @keyframes smooth-swipe-up {
   0% {
     opacity: 0;
@@ -103,6 +103,15 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   100% {
     opacity: 0;
     transform: translate3d(0, 48px, 0);
+  }
+}
+
+@keyframes wiki-swipe-chevron-pulse {
+  0%, 100% {
+    opacity: 0.38;
+  }
+  50% {
+    opacity: 0.9;
   }
 }
 
@@ -128,16 +137,37 @@ div:has(> .animate-smooth-swipe) {
   height: 125px;
 }
 
-/* Replace the hand silhouette with a neutral rounded swipe pointer. */
-.animate-smooth-swipe svg > path:last-of-type {
+/* The original SVG guide, circles, arrow and hand are hidden; CSS provides the final compact cue. */
+.animate-smooth-swipe svg > line,
+.animate-smooth-swipe svg > circle,
+.animate-smooth-swipe svg > path {
   display: none;
 }
 
+/* Two tight upward chevrons above the swipe pointer. */
+.animate-smooth-swipe::before {
+  content: '∧\A∧';
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  white-space: pre;
+  transform: translateX(-50%);
+  font-family: Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 0.52;
+  text-align: center;
+  color: rgba(210, 221, 229, 0.92);
+  text-shadow: 0 0 8px rgba(148, 163, 184, 0.28);
+  animation: wiki-swipe-chevron-pulse 2.8s ease-in-out infinite;
+}
+
+/* Neutral rounded swipe pointer below the chevrons. */
 .animate-smooth-swipe::after {
   content: '';
   position: absolute;
   left: 50%;
-  top: 55%;
+  top: 61%;
   width: 22px;
   height: 58px;
   border: 2px solid rgba(248, 231, 178, 0.9);
@@ -151,7 +181,8 @@ div:has(> .animate-smooth-swipe) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-smooth-swipe {
+  .animate-smooth-swipe,
+  .animate-smooth-swipe::before {
     animation: none !important;
   }
 }
