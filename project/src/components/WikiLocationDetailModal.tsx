@@ -48,7 +48,9 @@ export function WikiLocationDetailModal({ location, onClose }: WikiLocationDetai
             <tbody>
               <tr className="border-b border-[#1a2333]">
                 <th className="w-1/3 bg-[#1a2333] p-2.5 text-left font-bold text-[#ffb000] border-r border-[#1a2333]">座標 (X, Y, Z)</th>
-                <td className="p-2.5 font-mono text-[#32cd32] font-bold">X: {location.x} / Y: {location.y} / Z: {location.z}</td>
+                <td className={`p-2.5 font-mono font-bold ${location.has_coordinates ? 'text-[#32cd32]' : 'text-zinc-500'}`}>
+                  {location.has_coordinates ? `X: ${location.x} / Y: ${location.y} / Z: ${location.z}` : '未入力'}
+                </td>
               </tr>
               <tr>
                 <th className="bg-[#1a2333] p-2.5 text-left font-bold text-[#ffb000] border-r border-[#1a2333]">記録日時</th>
