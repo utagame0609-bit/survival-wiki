@@ -59,6 +59,24 @@ const styleMeta: Record<WikiStyleId, { title: string; shortTitle: string; subtit
   ancient: { title: '古代伝承の詩', shortTitle: '古代伝承', subtitle: '語り継がれる叙事詩・神話' },
 };
 
+const styleCardAccent: Record<WikiStyleId, { selected: string; idle: string; pill: string }> = {
+  wikipedia: {
+    selected: 'scale-[1.02] border-[#F59E0B] bg-[#21190B] shadow-[0_0_16px_rgba(245,158,11,0.28)]',
+    idle: 'border-[#3B2B12] bg-[#0F172A]/80 opacity-80 hover:border-[#F59E0B]/55 hover:opacity-100',
+    pill: 'border-[#F59E0B]/40 text-[#FBBF24]',
+  },
+  scp: {
+    selected: 'scale-[1.02] border-[#06B6D4] bg-[#132238] shadow-[0_0_16px_rgba(6,182,212,0.28)]',
+    idle: 'border-[#173341] bg-[#0F172A]/80 opacity-80 hover:border-[#06B6D4]/55 hover:opacity-100',
+    pill: 'border-[#06B6D4]/40 text-[#22D3EE]',
+  },
+  ancient: {
+    selected: 'scale-[1.02] border-[#F97316] bg-[#24150C] shadow-[0_0_16px_rgba(249,115,22,0.28)]',
+    idle: 'border-[#4A2818] bg-[#0F172A]/80 opacity-80 hover:border-[#F97316]/55 hover:opacity-100',
+    pill: 'border-[#F97316]/40 text-[#FB923C]',
+  },
+};
+
 function uniquePhotos(locations: LocationWithPhotos[]) {
   return locations
     .flatMap((location) => location.photos)
@@ -138,7 +156,6 @@ export function WikiTabModern({
   const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
   const compilerDetailRef = useRef<HTMLElement | null>(null);
-  const styleHistoryRef = useRef<WikiStyleId[]>([]);
   const lastBackRequestRef = useRef(backRequestKey);
 
   const load = async (nextStyle: WikiStyleId | null = style) => {
@@ -208,12 +225,12 @@ export function WikiTabModern({
     setShared(false);
     setArticle(null);
 
-    const previousStyle = styleHistoryRef.current.pop();
-    if (previousStyle) {
-      setStyle(previousStyle);
-    } else {
-      setStyle(null);
-    }
+    const previousStyle: WikiStyleId | null = style === 'ancient'
+      ? 'scp'
+      : style === 'scp'
+        ? 'wikipedia'
+        : null;
+    setStyle(previousStyle);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [backRequestKey, style]);
 
@@ -363,7 +380,6 @@ export function WikiTabModern({
       setSaved((current) => ({ ...current, [style]: false }));
       setArticle(null);
       setStyle(null);
-      styleHistoryRef.current = [];
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -373,7 +389,6 @@ export function WikiTabModern({
 
   const selectStyle = (id: WikiStyleId, scrollToDetail = false) => {
     if (id === style) return;
-    if (style) styleHistoryRef.current.push(style);
     playConfirmSound();
     setCopied(false);
     setShared(false);
@@ -391,7 +406,6 @@ export function WikiTabModern({
 
   const handleBackToCompilers = () => {
     playCancelSound();
-    styleHistoryRef.current = [];
     setCopied(false);
     setShared(false);
     setArticle(null);
@@ -490,6 +504,7 @@ export function WikiTabModern({
                 const selected = style === id;
                 const meta = styleMeta[id];
                 const npc = NARRATORS[id];
+                const accent = styleCardAccent[id];
                 return (
                   <button
                     key={id}
@@ -498,7 +513,7 @@ export function WikiTabModern({
                     onMouseEnter={playHoverSound}
                     disabled={generating || resetting}
                     title={`${meta.title}${saved[id] ? '・保存済み' : ''}`}
-                    className={`relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? 'scale-[1.02] border-[#06B6D4] bg-[#132238] shadow-[0_0_15px_rgba(6,182,212,0.25)]' : 'border-[#1E293B] bg-[#0F172A]/80 opacity-80 hover:border-[#334155] hover:opacity-100'}`}
+                    className={`relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? accent.selected : accent.idle}`}
                   >
                     <div className="absolute right-1.5 top-1.5 sm:right-2 sm:top-2">
                       {saved[id] ? (
@@ -514,7 +529,7 @@ export function WikiTabModern({
                     <div className="mb-2 mt-1 sm:mb-3">
                       <PixelNarrator style={id} />
                     </div>
-                    <span className="game-ui-font mb-0.5 whitespace-nowrap rounded border border-[#06B6D4]/30 bg-[#0B1018] px-2 py-0.5 text-[10px] font-bold text-[#06B6D4] sm:mb-1 sm:text-xs">
+                    <span className={`game-ui-font mb-0.5 whitespace-nowrap rounded border bg-[#0B1018] px-2 py-0.5 text-[10px] font-bold sm:mb-1 sm:text-xs ${accent.pill}`}>
                       {meta.shortTitle}
                     </span>
                     <h3 className="game-ui-font line-clamp-1 text-[10px] font-bold text-[#F8FAFC] sm:text-sm">{npc.name}</h3>
