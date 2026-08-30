@@ -1,0 +1,254 @@
+/* SCP article A: DECLASSIFIED DOSSIER
+   Visual-only layer. Existing Wiki generation/data/navigation/audio remain untouched. */
+
+article[class*="border-cyan-400/60"] {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid #4b4540 !important;
+  background:
+    linear-gradient(rgba(87, 72, 56, 0.035) 1px, transparent 1px),
+    #f3f0e8 !important;
+  background-size: 100% 28px, auto;
+  color: #24211e !important;
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  padding-top: 4.4rem !important;
+}
+
+article[class*="border-cyan-400/60"]::before {
+  content: "TOP SECRET // DECLASSIFIED DOSSIER";
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #363230;
+  background: #151416;
+  color: #ef4444;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  z-index: 2;
+}
+
+article[class*="border-cyan-400/60"]::after {
+  content: "SURVIVAL WIKI // ANOMALY ARCHIVE";
+  position: absolute;
+  top: 2.72rem;
+  right: 1rem;
+  color: #78716c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  z-index: 2;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown {
+  counter-reset: scp-evidence;
+  color: #292524;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.94rem;
+  line-height: 1.9;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown > div {
+  gap: 2rem;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown nav {
+  border: 1px solid #cfc6b8;
+  background: #e9e3d7;
+  padding: 0.8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown nav > div:first-child {
+  color: #7f1d1d !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown nav button {
+  color: #44403c !important;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown h1,
+article[class*="border-cyan-400/60"] .wiki-markdown h2,
+article[class*="border-cyan-400/60"] .wiki-markdown h3,
+article[class*="border-cyan-400/60"] .wiki-markdown h4,
+article[class*="border-cyan-400/60"] .wiki-markdown h5,
+article[class*="border-cyan-400/60"] .wiki-markdown h6 {
+  color: #1c1917 !important;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown h1 {
+  position: relative;
+  margin-top: 0.2rem !important;
+  border-bottom: 2px solid #292524 !important;
+  padding: 0 0 0.75rem !important;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown h1::before {
+  content: "SPECIAL ANOMALY OBSERVATION DOSSIER";
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #991b1b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown h2 {
+  border-bottom: 1px solid #bdb4a6 !important;
+  padding-bottom: 0.35rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.015em;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown h2::before {
+  content: "■ ";
+  color: #991b1b;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown h3,
+article[class*="border-cyan-400/60"] .wiki-markdown h4 {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-weight: 750 !important;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown p {
+  color: #292524;
+  text-align: justify;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown strong {
+  color: #1c1917;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown code {
+  border: 1px solid #d6cfc3;
+  background: #e8e2d7 !important;
+  color: #7f1d1d;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown hr {
+  border-color: #bdb4a6 !important;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown figure {
+  counter-increment: scp-evidence;
+  position: relative;
+  border: 1px solid #c8bfb1;
+  background: #fbfaf7;
+  padding: 0.55rem;
+  box-shadow: 0 5px 13px rgba(41, 37, 36, 0.14);
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown figure::before {
+  content: "EVIDENCE " counter(scp-evidence, decimal-leading-zero);
+  display: inline-block;
+  margin: -0.55rem 0 0.5rem -0.55rem;
+  padding: 0.28rem 0.55rem;
+  background: #991b1b;
+  color: white;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown figure img {
+  border: 1px solid #57534e !important;
+  background: #111;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown table {
+  background: #f9f7f2;
+  color: #292524;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown thead {
+  background: #ded7ca !important;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown th,
+article[class*="border-cyan-400/60"] .wiki-markdown td {
+  border-color: #bdb4a6 !important;
+}
+
+article[class*="border-cyan-400/60"] .wiki-markdown button {
+  color: #7f1d1d !important;
+  text-decoration-color: #b91c1c;
+}
+
+@media (max-width: 767px) {
+  article[class*="border-cyan-400/60"] {
+    margin-left: 0.4rem !important;
+    margin-right: 0.4rem !important;
+    padding: 3.85rem 0.9rem 1.15rem !important;
+    background-size: 100% 26px, auto !important;
+  }
+
+  article[class*="border-cyan-400/60"]::before {
+    min-height: 2.1rem;
+    padding: 0.48rem 0.75rem;
+    font-size: 0.57rem;
+    letter-spacing: 0.085em;
+  }
+
+  article[class*="border-cyan-400/60"]::after {
+    top: 2.55rem;
+    right: 0.75rem;
+    max-width: calc(100% - 1.5rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.5rem;
+  }
+
+  article[class*="border-cyan-400/60"] .wiki-markdown {
+    font-size: 0.9rem;
+    line-height: 1.82;
+  }
+
+  article[class*="border-cyan-400/60"] .wiki-markdown nav {
+    padding: 0.7rem;
+  }
+
+  article[class*="border-cyan-400/60"] .wiki-markdown h1 {
+    font-size: 1.45rem !important;
+    line-height: 1.35;
+  }
+
+  article[class*="border-cyan-400/60"] .wiki-markdown h2 {
+    margin-top: 1.7rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5;
+  }
+
+  article[class*="border-cyan-400/60"] .wiki-markdown p {
+    text-align: left;
+  }
+
+  article[class*="border-cyan-400/60"] .wiki-markdown figure {
+    float: none !important;
+    width: 100% !important;
+    margin: 1.2rem 0 !important;
+  }
+}
