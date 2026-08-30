@@ -69,7 +69,7 @@ export function PixelNarrator({ style, compact = false }: { style: string; compa
           <rect x="26" y="49" width="12" height="8" fill="#b89462"/>
         </>}
       </svg>
-      <span className="absolute left-1 top-1 text-[5px] sm:text-[6px] font-mono text-white/50">16BIT</span>
+      <span className="game-ui-font absolute left-1 top-1 text-[5px] sm:text-[6px] text-white/50">16BIT</span>
     </div>
   );
 }
@@ -79,21 +79,21 @@ export function NarratorDialogue({ style, quote }: { style: string; quote?: stri
   const dialogue = quote?.trim() || narrator.quote;
 
   return (
-    <div className={`mx-3 mt-4 min-w-0 rounded-sm border-2 p-3 sm:mx-4 sm:p-4 ${narrator.panel} shadow-[0_0_20px_rgba(0,0,0,.25)]`}>
+    <div className={`game-ui-font mx-3 mt-4 min-w-0 rounded-sm border-2 p-3 sm:mx-4 sm:p-4 ${narrator.panel} shadow-[0_0_20px_rgba(0,0,0,.25)]`}>
       <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
         <PixelNarrator style={style} compact />
         <div className="min-w-0 flex-1">
-          <div className={`flex min-w-0 items-center gap-1.5 text-[11px] sm:text-sm font-bold font-mono ${narrator.text}`}>
+          <div className={`flex min-w-0 items-center gap-1.5 text-[11px] sm:text-sm font-bold ${narrator.text}`}>
             <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
             <span className="break-words">【{narrator.name}】</span>
           </div>
-          <span className={`mt-1 inline-block border border-current px-1.5 py-0.5 text-[7px] sm:text-[9px] font-bold font-mono ${narrator.text}`}>
+          <span className={`mt-1 inline-block border border-current px-1.5 py-0.5 text-[7px] sm:text-[9px] font-bold ${narrator.text}`}>
             {narrator.role}
           </span>
         </div>
       </div>
 
-      <div className="relative mt-2.5 w-full min-w-0 rounded-sm border border-[#2d3548] bg-[#050a14] px-3 py-3 text-[11px] sm:px-4 sm:py-3.5 sm:text-sm leading-6 text-slate-100 font-serif shadow-inner break-words [overflow-wrap:anywhere]">
+      <div className="relative mt-2.5 w-full min-w-0 rounded-sm border border-[#2d3548] bg-[#050a14] px-3 py-3 text-[11px] sm:px-4 sm:py-3.5 sm:text-sm leading-6 text-slate-100 shadow-inner break-words [overflow-wrap:anywhere]">
         <MessageSquareQuote className={`absolute -left-2 -top-2 h-4 w-4 ${narrator.text} bg-[#07101c]`} />
         <span className="text-slate-500 mr-1">「</span>{dialogue}<span className="text-slate-500 ml-1">」</span>
       </div>
