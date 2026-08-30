@@ -108,14 +108,16 @@ function normalizeSections(value: unknown): ScpSection[] {
 
     const idBase = typeof record.id === 'string' && record.id.trim() ? record.id.trim() : `section-${index + 1}`;
     const id = idBase.replace(/[^a-zA-Z0-9_-]/g, '-');
+    const callout = normalizeCallout(record.callout);
+    const logEntries = normalizeLogEntries(record.logEntries);
     return [{
       id,
       number: typeof record.number === 'string' && record.number.trim() ? record.number.trim() : `§ ${index + 1}.0`,
       title: typeof record.title === 'string' && record.title.trim() ? record.title.trim() : `観察記録 ${index + 1}`,
       ...(typeof record.subTitle === 'string' && record.subTitle.trim() ? { subTitle: record.subTitle.trim() } : {}),
       paragraphs,
-      ...(normalizeCallout(record.callout) ? { callout: normalizeCallout(record.callout) } : {}),
-      ...(normalizeLogEntries(record.logEntries) ? { logEntries: normalizeLogEntries(record.logEntries) } : {}),
+      ...(callout ? { callout } : {}),
+      ...(logEntries ? { logEntries } : {}),
     }];
   });
 
@@ -182,6 +184,43 @@ export function parseStoredScpDossier(content: string): ScpDossierV1 | null {
   } catch {
     return null;
   }
+}
+
+export function scpDossierToPlainText(content: string): string | null {
+  const dossier = parseStoredScpDossier(content);
+  if (!dossier) return null;
+
+  const lines = [
+    dossier.title,
+    '',
+    `項目番号: ${dossier.itemNumber}`,
+    `案件コード: ${dossier.caseId}`,
+    `オブジェクトクラス: ${dossier.objectClass}`,
+    `セキュリティクリアランス: LV-${dossier.securityClearance}`,
+    '',
+    `WARNING: ${dossier.warningNotice}`,
+    '',
+    '特別収容プロトコル',
+    dossier.containmentProcedure,
+    '',
+    '調書要旨',
+    dossier.executiveSummary,
+  ];
+
+  for (const section of dossier.sections) {
+    lines.push('', `${section.number} ${section.title}`);
+    if (section.subTitle) lines.push(section.subTitle);
+    lines.push(...section.paragraphs);
+    if (section.logEntries?.length) {
+      lines.push('', '[TRANSCRIPT LOG]');
+      for (const log of section.logEntries) {
+        lines.push(`${log.time}${log.speaker ? ` / ${log.speaker}` : ''}: ${log.text}`);
+      }
+    }
+    if (section.callout) lines.push('', `${section.callout.label}: ${section.callout.text}`);
+  }
+
+  return lines.join('\n');
 }
 
 export const SCP_STRUCTURED_OUTPUT_INSTRUCTIONS = `
