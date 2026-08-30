@@ -20,6 +20,7 @@ import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, ge
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { NARRATORS, NarratorDialogue, PixelNarrator } from '@/components/wiki/WikiNarrator';
+import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
 import { WIKI_STYLES } from '@/lib/wiki';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import {
@@ -681,7 +682,7 @@ export function WikiTabModern({
       )}
 
       {hasArticle && style && narrator && (
-        <div className="mx-auto w-full max-w-4xl space-y-4 pb-5 sm:space-y-5">
+        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
           <div className="flex flex-col gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A] p-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
@@ -707,7 +708,9 @@ export function WikiTabModern({
                     title={active ? `${styleMeta[id].title}・表示中` : available ? `${styleMeta[id].title}を開く` : `${styleMeta[id].title}を生成する`}
                     className={`game-ui-font flex min-w-0 items-center justify-center gap-1.5 rounded px-2 py-1.5 text-[10px] transition-all sm:px-3 sm:text-xs ${active ? 'bg-[#06B6D4] font-bold text-[#0B1018] shadow-[0_0_10px_rgba(6,182,212,0.3)]' : available ? 'border border-[#334155] bg-[#161F30] text-[#94A3B8] hover:text-[#E2E8F0]' : 'border border-[#1E293B] bg-[#101722] text-[#64748B] opacity-65 hover:opacity-100'}`}
                   >
-                    <PixelNarrator style={id} compact />
+                    <span className="h-10 w-10 shrink-0 overflow-hidden rounded-lg sm:h-12 sm:w-12">
+                      <PixelNarrator style={id} compact />
+                    </span>
                     <span className="hidden truncate sm:inline">{styleMeta[id].shortTitle}</span>
                   </button>
                 );
@@ -715,7 +718,7 @@ export function WikiTabModern({
             </div>
           </div>
 
-          <NarratorDialogue style={style} quote={parsedArticle.line} />
+          {style !== 'scp' && <NarratorDialogue style={style} quote={parsedArticle.line} />}
 
           <section className="hud-bracket min-w-0 max-w-full overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
             <div className="border-b border-[#1E293B] bg-[#0B1018] px-4 py-2.5 sm:px-5">
@@ -725,7 +728,16 @@ export function WikiTabModern({
               </div>
             </div>
 
-            {isWikipedia ? (
+            {style === 'scp' ? (
+              <ScpDossierArticle
+                world={world}
+                locations={locations}
+                content={articleWithPhotos}
+                mainPhotoUrl={mainPhotoUrl}
+                narratorLine={parsedArticle.line}
+                locationLinks={locationLinks}
+              />
+            ) : isWikipedia ? (
               <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border border-[#a2a9b1] bg-white text-[#202122] sm:mx-4">
                 <div className="flex min-w-0 items-center gap-3 border-b border-[#c8ccd1] px-4 py-3 sm:px-6">
                   {mainPhotoUrl && <img src={mainPhotoUrl} alt="代表写真" className="h-10 w-10 shrink-0 border border-[#c8ccd1] object-cover" />}
@@ -750,8 +762,8 @@ export function WikiTabModern({
                 </div>
               </article>
             ) : (
-              <article className={`mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 p-4 sm:mx-4 sm:p-6 ${style === 'scp' ? 'border-cyan-400/60 bg-[#07141b] text-zinc-200' : 'border-orange-500/60 bg-[#160e09] text-[#ead8bf]'}`}>
-                <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} className={style === 'ancient' ? 'font-serif' : 'font-sans'} />
+              <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 border-orange-500/60 bg-[#160e09] p-4 text-[#ead8bf] sm:mx-4 sm:p-6">
+                <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} className="font-serif" />
               </article>
             )}
           </section>
