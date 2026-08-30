@@ -34,6 +34,7 @@ export type Location = {
   x: number;
   y: number;
   z: number;
+  has_coordinates: boolean;
   detail_memo: string | null;
   created_at: string;
   updated_at: string;
