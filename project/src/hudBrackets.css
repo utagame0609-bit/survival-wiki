@@ -1,19 +1,15 @@
 /* Shared AS-style HUD corner accents.
-   Accent corners are square; the opposite two corners keep the card radius. */
-.hud-bracket,
-.hud-bracket-cyan,
-.hud-bracket-emerald {
+   Only .hud-bracket creates the two-corner accent.
+   Cyan/emerald classes are color modifiers and must not create corners by themselves. */
+.hud-bracket {
   position: relative;
   border-top-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
+  --hud-bracket-color: #F2A100;
 }
 
 .hud-bracket::before,
-.hud-bracket::after,
-.hud-bracket-cyan::before,
-.hud-bracket-cyan::after,
-.hud-bracket-emerald::before,
-.hud-bracket-emerald::after {
+.hud-bracket::after {
   content: '';
   position: absolute;
   width: 8px;
@@ -22,26 +18,18 @@
   z-index: 2;
 }
 
-.hud-bracket::before,
-.hud-bracket-cyan::before,
-.hud-bracket-emerald::before {
+.hud-bracket::before {
   top: -1px;
   left: -1px;
   border-top: 2px solid var(--hud-bracket-color, #F2A100);
   border-left: 2px solid var(--hud-bracket-color, #F2A100);
 }
 
-.hud-bracket::after,
-.hud-bracket-cyan::after,
-.hud-bracket-emerald::after {
+.hud-bracket::after {
   right: -1px;
   bottom: -1px;
   border-right: 2px solid var(--hud-bracket-color, #F2A100);
   border-bottom: 2px solid var(--hud-bracket-color, #F2A100);
-}
-
-.hud-bracket {
-  --hud-bracket-color: #F2A100;
 }
 
 .hud-bracket-cyan {
