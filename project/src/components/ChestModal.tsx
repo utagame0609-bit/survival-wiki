@@ -108,7 +108,9 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
                       </span>
                       <span className="flex items-center gap-0.5 text-[#94A3B8]">
                         <MapPin className="h-2.5 w-2.5 text-[#F59E0B]" />
-                        X:{selectedPhoto.location.x} Y:{selectedPhoto.location.y} Z:{selectedPhoto.location.z}
+                        {selectedPhoto.location.has_coordinates
+                          ? `X:${selectedPhoto.location.x} Y:${selectedPhoto.location.y} Z:${selectedPhoto.location.z}`
+                          : '座標未入力'}
                       </span>
                     </div>
                     <h3 className="game-ui-font truncate text-sm font-bold text-[#F8FAFC]">
