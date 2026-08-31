@@ -119,7 +119,9 @@ export function GildasChronicleArticle({
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
   const [photos, setPhotos] = useState<ResolvedPhoto[]>([]);
   const [photoIndex, setPhotoIndex] = useState<number | null>(null);
+  const [heroHeight, setHeroHeight] = useState<number | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
+  const heroFigureRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setActiveChapterId(chronicle?.chapters[0]?.id ?? '');
@@ -165,6 +167,19 @@ export function GildasChronicleArticle({
     });
     return () => observer.disconnect();
   }, [chronicle]);
+
+  useEffect(() => {
+    const element = heroFigureRef.current;
+    if (!element || typeof ResizeObserver === 'undefined') {
+      setHeroHeight(null);
+      return;
+    }
+    const updateHeight = () => setHeroHeight(Math.round(element.getBoundingClientRect().height));
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [photos]);
 
   if (!chronicle) return null;
 
@@ -266,14 +281,19 @@ export function GildasChronicleArticle({
         </div>
       </div>
 
-      <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 pt-6 sm:px-8 sm:pt-8 lg:flex-row lg:gap-12">
-        <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="sticky top-20 rounded-2xl border border-amber-500/20 bg-[#0d1420]/90 p-5 shadow-xl backdrop-blur-md">
-            <div className="gildas-cinzel mb-4 flex items-center gap-2 border-b border-amber-500/20 pb-2 text-xs font-semibold tracking-wider text-amber-400">
-              <BookOpen className="h-4 w-4" />
-              <span>旅程マイルストーン</span>
+      <div className="relative mx-auto w-full max-w-6xl px-4 pt-6 sm:px-8 sm:pt-8">
+        <div className="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start lg:gap-12">
+          <aside
+            className="hidden min-h-0 lg:flex lg:flex-col lg:overflow-hidden lg:rounded-2xl lg:border lg:border-amber-500/20 lg:bg-[#0d1420]/90 lg:p-5 lg:shadow-xl lg:backdrop-blur-md"
+            style={{ height: heroHeight ? `${heroHeight}px` : undefined, maxHeight: heroHeight ? `${heroHeight}px` : '420px' }}
+          >
+            <div className="gildas-cinzel shrink-0 border-b border-amber-500/20 pb-3 text-xs font-semibold tracking-wider text-amber-400">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span>旅程マイルストーン</span>
+              </div>
             </div>
-            <nav className="gildas-sans flex flex-col gap-2.5">
+            <nav className="gildas-sans my-3 min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain pr-1 [scrollbar-gutter:stable]">
               {chronicle.chapters.map((chapter) => {
                 const isActive = chapter.id === activeChapterId;
                 return (
@@ -282,7 +302,7 @@ export function GildasChronicleArticle({
                     type="button"
                     onClick={() => selectChapter(chapter.id)}
                     onMouseEnter={playHoverSound}
-                    className={`group flex items-start gap-2.5 rounded-lg p-2 text-left text-xs transition-all ${isActive ? 'border-l-2 border-amber-400 bg-amber-500/20 font-semibold text-amber-200' : 'text-slate-400 hover:bg-slate-800/40 hover:text-amber-300'}`}
+                    className={`group flex w-full items-start gap-2.5 rounded-lg p-2 text-left text-xs transition-all ${isActive ? 'border-l-2 border-amber-400 bg-amber-500/20 font-semibold text-amber-200' : 'text-slate-400 hover:bg-slate-800/40 hover:text-amber-300'}`}
                   >
                     <span className="gildas-cinzel mt-0.5 shrink-0 text-amber-400/90">第{chapter.numeral}節</span>
                     <span className="min-w-0">
@@ -293,34 +313,36 @@ export function GildasChronicleArticle({
                 );
               })}
             </nav>
-            <div className="mt-6 space-y-1.5 border-t border-slate-800 pt-4 font-mono text-[11px] text-slate-400">
+            <div className="shrink-0 space-y-1.5 border-t border-slate-800 pt-3 font-mono text-[11px] text-slate-400">
               <div className="flex justify-between"><span>総節数</span><span className="text-amber-400">{chronicle.chapters.length} 節</span></div>
               <div className="flex justify-between"><span>記録写真</span><span className="text-amber-400">{photos.length} 枚</span></div>
             </div>
-          </div>
-        </aside>
+          </aside>
 
-        <div className="min-w-0 flex-1">
-          {heroPhoto ? (
-            <figure className="gildas-photo group mb-8 overflow-hidden rounded-2xl border border-amber-500/30 bg-[#0e1624] shadow-2xl sm:mb-10">
-              <button type="button" onClick={() => setPhotoIndex(0)} className="block w-full overflow-hidden text-left">
-                <img src={heroPhoto.url} alt={heroPhoto.alt} className="aspect-[16/9] w-full object-cover" />
-              </button>
-              <figcaption className="gildas-sans flex items-center justify-between gap-2 border-t border-amber-500/20 bg-[#0c1320] p-3 text-xs text-amber-200/90 sm:p-4">
-                <span className="min-w-0 break-words font-medium">{heroPhoto.title}</span>
-                <span className="shrink-0 font-mono text-[10px] text-slate-400 sm:text-[11px]">旅の記憶 01</span>
-              </figcaption>
-            </figure>
-          ) : (
-            <div className="mb-8 overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-b from-[#101928] to-[#0a101b] p-6 text-center">
-              <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 text-amber-400">
-                <Feather className="h-5 w-5" />
+          <div className="min-w-0">
+            {heroPhoto ? (
+              <figure ref={heroFigureRef} className="gildas-photo group mb-8 overflow-hidden rounded-2xl border border-amber-500/30 bg-[#0e1624] shadow-2xl sm:mb-10 lg:mb-0">
+                <button type="button" onClick={() => setPhotoIndex(0)} className="block w-full overflow-hidden text-left">
+                  <img src={heroPhoto.url} alt={heroPhoto.alt} className="aspect-[16/9] w-full object-cover" />
+                </button>
+                <figcaption className="gildas-sans flex items-center justify-between gap-2 border-t border-amber-500/20 bg-[#0c1320] p-3 text-xs text-amber-200/90 sm:p-4">
+                  <span className="min-w-0 break-words font-medium">{heroPhoto.title}</span>
+                  <span className="shrink-0 font-mono text-[10px] text-slate-400 sm:text-[11px]">旅の記憶 01</span>
+                </figcaption>
+              </figure>
+            ) : (
+              <div ref={heroFigureRef as React.RefObject<HTMLDivElement>} className="mb-8 overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-b from-[#101928] to-[#0a101b] p-6 text-center sm:mb-10 lg:mb-0">
+                <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 text-amber-400">
+                  <Feather className="h-5 w-5" />
+                </div>
+                <p className="gildas-cinzel text-xs uppercase tracking-[0.18em] text-amber-300">The Traveler&apos;s Inscribed Chronicle</p>
+                <p className="mt-1 text-xs text-slate-400">――写真がなくとも、残された言葉から旅路は編まれてゆく。</p>
               </div>
-              <p className="gildas-cinzel text-xs uppercase tracking-[0.18em] text-amber-300">The Traveler&apos;s Inscribed Chronicle</p>
-              <p className="mt-1 text-xs text-slate-400">――写真がなくとも、残された言葉から旅路は編まれてゆく。</p>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
 
+        <div className="mt-8 min-w-0 sm:mt-10 lg:mt-12">
           <div className="space-y-12 sm:space-y-16">
             {chronicle.chapters.map((chapter, chapterIndex) => (
               <section key={chapter.id} id={`gildas-${chapter.id}`} className="scroll-mt-20">
