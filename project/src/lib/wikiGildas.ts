@@ -6,6 +6,7 @@ export type GildasChapter = {
   paragraphs: string[];
   bardMarginalia?: string;
   keyMoment?: string;
+  photoIndexes?: number[];
 };
 
 export type GildasChronicleV1 = {
@@ -35,6 +36,14 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+function normalizePhotoIndexes(value: unknown): number[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const indexes = Array.from(new Set(value
+    .filter((item): item is number => Number.isInteger(item) && item >= 1 && item <= 5)
+    .map((item) => Number(item))));
+  return indexes.length > 0 ? indexes : undefined;
+}
+
 function normalizeChapters(value: unknown): GildasChapter[] {
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error('ギルダス構造化記事の chapters が不足しています。');
@@ -52,6 +61,7 @@ function normalizeChapters(value: unknown): GildasChapter[] {
 
     const rawId = optionalString(record.id) ?? `chapter-${index + 1}`;
     const id = rawId.replace(/[^a-zA-Z0-9_-]/g, '-') || `chapter-${index + 1}`;
+    const photoIndexes = normalizePhotoIndexes(record.photoIndexes);
 
     return [{
       id,
@@ -61,6 +71,7 @@ function normalizeChapters(value: unknown): GildasChapter[] {
       paragraphs,
       ...(optionalString(record.bardMarginalia) ? { bardMarginalia: optionalString(record.bardMarginalia) } : {}),
       ...(optionalString(record.keyMoment) ? { keyMoment: optionalString(record.keyMoment) } : {}),
+      ...(photoIndexes ? { photoIndexes } : {}),
     }];
   });
 
@@ -170,7 +181,8 @@ export const GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS = `
       "subtitle": "任意の短い副題",
       "paragraphs": ["本文段落1", "本文段落2"],
       "keyMoment": "任意。章の核となる短い一節。入力事実か、詩的解釈と分かる表現にする",
-      "bardMarginalia": "任意。ギルダスの短い余白書き。本文にない新事実は追加しない"
+      "bardMarginalia": "任意。ギルダスの短い余白書き。本文にない新事実は追加しない",
+      "photoIndexes": [1]
     }
   ],
   "gildasComment": {
@@ -188,6 +200,9 @@ export const GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS = `
 - 星、夜空、天体、滅亡、終末を固定モチーフにしない。入力に根拠がある場合だけ使う。
 - keyMoment / bardMarginalia は毎章必須ではない。ない場合は空文字ではなくキー自体を省略してよい。
 - 確認事実と詩的解釈・仮想伝承の境界はSystem Promptの規則を厳守する。
-- 写真の枚数や配置はUI側で処理するため、写真URL、Storageパス、画像IDをJSONへ出さない。
+- 写真URL、Storageパス、画像IDをJSONへ出さない。
+- 入力には写真1〜写真5が各ラベルと実画像の組で与えられる。章本文で具体的に扱う写真番号だけを photoIndexes に設定する。
+- 写真と無関係な章へ均等配置目的で番号を割り当てない。同じ写真を原則として複数章へ重複配置しない。
+- 写真について本文で語る場合は、対応する photoIndexes を同じ章へ必ず付ける。写真が0枚なら photoIndexes を省略する。
 - narratorLineは記事本文の要約にせず、ギルダス本人が最後まで本気で記録価値を認める一言にする。
 `;
