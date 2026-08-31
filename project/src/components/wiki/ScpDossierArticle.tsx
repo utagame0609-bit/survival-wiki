@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AlertTriangle,
   ChevronDown,
@@ -14,6 +15,7 @@ import {
   ShieldAlert,
   Stamp,
   Users,
+  X,
   ZoomIn,
 } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
@@ -252,23 +254,46 @@ export function ScpDossierArticle({
         </main>
       </div>
 
-      {selectedPhoto && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm" onClick={() => setSelectedPhoto(null)}>
-          <div className="w-full max-w-2xl border-2 border-[#ff3e3e] bg-[#111114] p-3 font-mono text-xs text-slate-100 shadow-2xl sm:p-4" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between gap-2 border-b border-[#333] pb-2">
-              <span className="flex min-w-0 items-center gap-1.5 truncate font-bold text-[#ff3e3e]"><ShieldAlert className="h-4 w-4 shrink-0" />EXHIBIT FORENSIC VIEWER // {selectedPhoto.code}</span>
-              <button type="button" onClick={() => setSelectedPhoto(null)} className="shrink-0 border border-[#444] bg-[#222] px-2 py-0.5 text-[#aaa] hover:text-white">[ CLOSE ]</button>
+      {selectedPhoto && createPortal(
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-3 backdrop-blur-md sm:p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSelectedPhoto(null);
+          }}
+        >
+          <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-[#334155] bg-[#0F172A] font-sans text-[#E2E8F0] shadow-2xl motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#1E293B] bg-[#0B1018] px-4 py-3">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="flex shrink-0 items-center gap-1.5 rounded border border-[#EF4444]/35 bg-[#EF4444]/10 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-[#EF4444]">
+                  <ShieldAlert className="h-3.5 w-3.5" />
+                  EVIDENCE
+                </span>
+                <div className="min-w-0">
+                  <div className="truncate font-mono text-[10px] text-[#64748B]">FORENSIC VIEWER // {selectedPhoto.code}</div>
+                  <div className="truncate text-xs font-bold text-[#F8FAFC] sm:text-sm">{selectedPhoto.title}</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPhoto(null)}
+                aria-label="写真を閉じる"
+                className="shrink-0 rounded p-1 text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <div className="flex max-h-[60vh] items-center justify-center overflow-hidden border border-[#333] bg-black">
-              <img src={selectedPhoto.url} alt={selectedPhoto.title} className="max-h-[60vh] w-auto object-contain" />
+
+            <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-black p-2 sm:p-3">
+              <img src={selectedPhoto.url} alt={selectedPhoto.title} className="max-h-[68vh] max-w-full object-contain" />
             </div>
-            <div className="mt-2.5 space-y-1">
-              <div className="text-sm font-bold text-white">{selectedPhoto.title}</div>
-              <p className="font-sans text-xs text-[#aaa]">{selectedPhoto.caption}</p>
-              <div className="pt-0.5 text-[9px] text-[#666]">撮影日時: {selectedPhoto.timestamp}</div>
+
+            <div className="shrink-0 border-t border-[#1E293B] bg-[#0B1018] px-4 py-3">
+              <p className="text-xs leading-relaxed text-[#CBD5E1]">{selectedPhoto.caption}</p>
+              <div className="mt-1.5 font-mono text-[9px] tracking-wide text-[#64748B]">撮影日時: {selectedPhoto.timestamp}</div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
