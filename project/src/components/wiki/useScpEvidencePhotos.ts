@@ -19,6 +19,7 @@ export function formatScpTimestamp(value: string) {
 
 export function useScpEvidencePhotos(locations: LocationWithPhotos[]) {
   const [evidencePhotos, setEvidencePhotos] = useState<ScpEvidenceView[]>([]);
+  const [activeCarouselIdx, setActiveCarouselIdx] = useState(0);
 
   const sourcePhotos = useMemo(() => locations
     .slice()
@@ -45,7 +46,10 @@ export function useScpEvidencePhotos(locations: LocationWithPhotos[]) {
         } satisfies ScpEvidenceView;
       }));
 
-      if (!cancelled) setEvidencePhotos(resolved);
+      if (!cancelled) {
+        setEvidencePhotos(resolved);
+        setActiveCarouselIdx(0);
+      }
     };
 
     void loadPhotos().catch(() => {
@@ -58,5 +62,5 @@ export function useScpEvidencePhotos(locations: LocationWithPhotos[]) {
     };
   }, [sourcePhotos]);
 
-  return evidencePhotos;
+  return { evidencePhotos, activeCarouselIdx, setActiveCarouselIdx };
 }
