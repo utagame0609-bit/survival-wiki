@@ -5,7 +5,6 @@ import { GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS, parseGildasAiResponse } from './
 import { HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS, parseHernanAiResponse } from './wikiHernan';
 import { supabase } from './supabase';
 
-const NARRATOR_MARKER = '<!--NARRATOR_LINE:';
 const MAX_WIKI_AI_PHOTOS = 5;
 
 type WikiPhotoInput = {
@@ -64,15 +63,11 @@ export const openRouterTestProvider: WikiProvider = {
       ].join('\n')),
     ].join('\n');
 
-    const narratorInstruction = style === 'wikipedia'
-      ? `【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、百科事典編纂を終えた民俗学者エルナン本人からプレイヤーへ向けた1〜2文・80文字以内の短評を追加してください。記事の要約ではなく、今回の実際の記録から一つだけ拾い、自分の分析への強い自信を見せつつ、ときどき記録上の小さな現実によってその自信にわずかな綻びが出る内容にしてください。本文にない新事実は追加せず、プレイヤー本人の人格・知性・能力・容姿を侮辱しないでください。同じ導入句や同じオチを繰り返さないでください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`
-      : `【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、今回の記録を読んだ編纂官本人からプレイヤーへ向けた40〜70文字程度の短い一言を追加してください。記事本文の要約ではなく、今回実際に記録された行動・結果・写真の状況のどれか一つを軽く拾い、その人格らしい明快なツッコミや感想にしてください。プレイヤー本人の知性・能力・容姿・人格を否定する表現は禁止です。編纂官本人の大げささやズレが少し見える一言を優先してください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`;
-
     const systemPrompt = style === 'scp'
       ? `${getWikiSystemPrompt(style)}\n\n${SCP_STRUCTURED_OUTPUT_INSTRUCTIONS}`
       : style === 'ancient'
         ? `${getWikiSystemPrompt(style)}\n\n${GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS}`
-        : `${getWikiSystemPrompt(style)}\n\n${HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS}\n\n${narratorInstruction}`;
+        : `${getWikiSystemPrompt(style)}\n\n${HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS}`;
 
     const { data, error } = await supabase.functions.invoke('wiki-ai-test', {
       body: {
@@ -104,21 +99,9 @@ export const openRouterTestProvider: WikiProvider = {
       };
     }
 
-    if (style === 'wikipedia') {
-      const { article, narratorLine } = parseHernanAiResponse(raw);
-      return {
-        content: `${JSON.stringify(article)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`,
-      };
-    }
-
-    const markerIndex = raw.lastIndexOf(NARRATOR_MARKER);
-    if (markerIndex < 0) return { content: raw };
-
-    const markerEnd = raw.indexOf('-->', markerIndex);
-    if (markerEnd < 0) return { content: raw };
-
-    const narratorLine = raw.slice(markerIndex + NARRATOR_MARKER.length, markerEnd).trim();
-    const content = `${raw.slice(0, markerIndex)}${raw.slice(markerEnd + 3)}`.trim();
-    return { content: narratorLine ? `${content}\n\n<!--WIKI_NARRATOR:${narratorLine}-->` : content };
+    const { article, narratorLine } = parseHernanAiResponse(raw);
+    return {
+      content: `${JSON.stringify(article)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`,
+    };
   },
 };
