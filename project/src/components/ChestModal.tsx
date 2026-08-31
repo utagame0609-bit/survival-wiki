@@ -4,7 +4,7 @@ import { ArrowRight, Box, Camera, Clock, MapPin, Shield, Sparkles, X } from 'luc
 import type { LocationWithPhotos } from '@/lib/types';
 import { playConfirmSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { ChestFullImage } from '@/components/ChestFullImage';
-import type { CollectionItem } from '@/components/locations/locationData';
+import type { CollectionItem } from '@/lib/chestCollection';
 
 type ChestModalProps = {
   collectionItems: CollectionItem[];
