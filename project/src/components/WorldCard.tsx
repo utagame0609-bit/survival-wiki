@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, Edit3, Play, Shield, Trash2, User, Users } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
+import type { WorldMeta } from '@/lib/worldMeta';
 import { getPhotoUrl } from '@/lib/db';
 import { playHoverSound } from '@/lib/sound';
-
-export type WorldMeta = {
-  recordCount: number;
-  dayCount: number;
-  lastLocationName: string | null;
-  lastLocationDate: string | null;
-  lastPhotoPath: string | null;
-};
 
 type WorldCardProps = {
   slotNumber: number;
