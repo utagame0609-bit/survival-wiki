@@ -82,11 +82,6 @@ div:has(> section.hud-bracket-cyan) > section:nth-of-type(2) .grid.grid-cols-3 >
   color: #06B6D4 !important;
 }
 
-/* Mobile Wiki swipe guide is intentionally withdrawn. Keep the production page unchanged. */
-div:has(> .animate-smooth-swipe) {
-  display: none !important;
-}
-
 /* Generation dialogue uses typewriter text without the cyan block cursor. */
 .hud-scanlines p > span.animate-pulse {
   display: none !important;
