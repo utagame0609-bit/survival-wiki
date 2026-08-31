@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Calendar, Clock, Edit3, Play, Shield, Trash2, User, Users } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import type { WorldMeta } from '@/lib/worldMeta';
-import { getPhotoUrl } from '@/lib/db';
 import { playHoverSound } from '@/lib/sound';
+import { useWorldCardPhotos } from '@/components/useWorldCardPhotos';
 
 type WorldCardProps = {
   slotNumber: number;
@@ -15,60 +14,7 @@ type WorldCardProps = {
 };
 
 export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }: WorldCardProps) {
-  const [playerPhotoUrl, setPlayerPhotoUrl] = useState('');
-  const [memberPhotoUrls, setMemberPhotoUrls] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    let active = true;
-    let objectUrls: string[] = [];
-
-    const loadPhotos = async () => {
-      const paths = [world.player_photo_path, ...world.members.map((member) => member.photo_path)].filter(
-        (path): path is string => Boolean(path),
-      );
-
-      if (paths.length === 0) {
-        if (active) {
-          setPlayerPhotoUrl('');
-          setMemberPhotoUrls({});
-        }
-        return;
-      }
-
-      const urls = await Promise.all(
-        paths.map(async (path) => {
-          try {
-            return [path, await getPhotoUrl(path)] as const;
-          } catch {
-            return [path, ''] as const;
-          }
-        }),
-      );
-
-      if (!active) {
-        urls.forEach(([, url]) => {
-          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-        });
-        return;
-      }
-
-      objectUrls = urls.map(([, url]) => url).filter((url) => url.startsWith('blob:'));
-      const urlMap = new Map(urls);
-      setPlayerPhotoUrl(world.player_photo_path ? urlMap.get(world.player_photo_path) ?? '' : '');
-      setMemberPhotoUrls(
-        Object.fromEntries(
-          world.members.map((member) => [member.id, member.photo_path ? urlMap.get(member.photo_path) ?? '' : '']),
-        ),
-      );
-    };
-
-    loadPhotos();
-    return () => {
-      active = false;
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [world.player_photo_path, world.members]);
-
+  const { playerPhotoUrl, memberPhotoUrls } = useWorldCardPhotos(world);
   const slotLabel = String(slotNumber).padStart(2, '0');
   const createdDate = new Date(world.created_at).toLocaleDateString('ja-JP');
   const formattedLastRecordDate = meta?.lastLocationDate
