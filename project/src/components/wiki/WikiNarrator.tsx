@@ -41,7 +41,6 @@ export function PixelNarrator({ style, compact = false }: { style: string; compa
         aria-hidden="true"
         className={`absolute inset-0 h-full w-full object-contain object-bottom ${compact ? 'scale-[1.12]' : 'scale-[1.08]'}`}
       />
-      <span className="game-ui-font absolute left-1 top-1 text-[5px] text-white/50 sm:text-[6px]">16BIT</span>
     </div>
   );
 }
