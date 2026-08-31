@@ -13,6 +13,7 @@ import { WikiArticleToolbar } from '@/components/wiki/WikiArticleToolbar';
 import { WikiArticleActions } from '@/components/wiki/WikiArticleActions';
 import { WikiResetConfirmModal } from '@/components/wiki/WikiResetConfirmModal';
 import { WikiArticleContent } from '@/components/wiki/WikiArticleContent';
+import { addWikiPhotoMarkers, splitWikiNarrator, uniqueWikiPhotos } from '@/lib/wikiArticlePresentation';
 import { scpDossierToPlainText } from '@/lib/wikiScp';
 import { gildasChronicleToPlainText, parseStoredGildasChronicle } from '@/lib/wikiGildas';
 import { hernanArticleToPlainText, parseStoredHernanArticle } from '@/lib/wikiHernan';
@@ -40,55 +41,12 @@ type GenerationReveal = {
 
 const EMPTY_SAVED: SavedState = { wikipedia: false, scp: false, ancient: false };
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
-const NARRATOR_MARKER = /<!--WIKI_NARRATOR:([\s\S]*?)-->/;
 
 const WAITING_LINES: Record<WikiStyleId, string> = {
   wikipedia: '少し待ちたまえ。君の散らかった足跡を、せめて学術資料として読める形に整えているところだ。',
   scp: 'そのまま待機しろ。君の行動記録を機密資料として成立させるため、現在照合処理を行っている。',
   ancient: 'しばし待つがよい。旅人よ……そなたの足跡を、後世に残す物語へと編み直しておる。',
 };
-
-function uniquePhotos(locations: LocationWithPhotos[]) {
-  return locations
-    .flatMap((location) => location.photos)
-    .filter((photo, index, list) => list.findIndex((item) => item.storage_path === photo.storage_path) === index)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at));
-}
-
-function splitWikiNarrator(content: string) {
-  const match = content.match(NARRATOR_MARKER);
-  return {
-    content: content.replace(NARRATOR_MARKER, '').trim(),
-    line: match?.[1]?.trim() ?? '',
-  };
-}
-
-async function addWikiPhotoMarkers(content: string, photos: { storage_path: string }[]) {
-  if (!content || photos.length === 0) return content;
-  const blocks = content.replace(/\r\n/g, '\n').split(/\n\s*\n/);
-  const maxInsertions = Math.min(photos.length, Math.max(0, blocks.length - 1));
-  if (maxInsertions === 0) return content;
-
-  const positions: number[] = [];
-  const available = blocks.length - 1;
-  let previous = 0;
-  for (let index = 0; index < maxInsertions; index += 1) {
-    let position = maxInsertions === available
-      ? index + 1
-      : Math.floor(((index + 1) * available) / (maxInsertions + 1));
-    position = Math.max(1, position);
-    if (position <= previous) position = previous + 1;
-    position = Math.min(available, position);
-    positions.push(position);
-    previous = position;
-  }
-
-  const urls = await Promise.all(photos.slice(0, maxInsertions).map((photo) => getPhotoUrl(photo.storage_path)));
-  for (let index = positions.length - 1; index >= 0; index -= 1) {
-    blocks.splice(positions[index], 0, `<!--WIKI_PHOTO:${urls[index]}-->`);
-  }
-  return blocks.join('\n\n');
-}
 
 export function WikiTabModern({
   world,
@@ -269,7 +227,7 @@ export function WikiTabModern({
     return () => observer.disconnect();
   }, [article]);
 
-  const articlePhotos = useMemo(() => uniquePhotos(locations), [locations]);
+  const articlePhotos = useMemo(() => uniqueWikiPhotos(locations), [locations]);
   const mainPhoto = articlePhotos[0] ?? null;
   const additionalPhotos = articlePhotos.slice(1, 5);
   const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
