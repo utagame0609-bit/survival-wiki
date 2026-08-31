@@ -6,10 +6,9 @@ import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import { WorldCard } from '@/components/WorldCard';
-import type { WorldMeta } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { buildWorldMeta } from '@/lib/worldMeta';
+import { buildWorldMeta, type WorldMeta } from '@/lib/worldMeta';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
