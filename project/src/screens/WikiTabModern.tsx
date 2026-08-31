@@ -21,8 +21,10 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { NARRATORS, NarratorDialogue, PixelNarrator } from '@/components/wiki/WikiNarrator';
 import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
+import { GildasChronicleArticle } from '@/components/wiki/GildasChronicleArticle';
 import { WIKI_STYLES } from '@/lib/wiki';
 import { scpDossierToPlainText } from '@/lib/wikiScp';
+import { gildasChronicleToPlainText, parseStoredGildasChronicle } from '@/lib/wikiGildas';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import {
   playCancelSound,
@@ -53,7 +55,7 @@ const NARRATOR_MARKER = /<!--WIKI_NARRATOR:([\s\S]*?)-->/;
 const WAITING_LINES: Record<WikiStyleId, string> = {
   wikipedia: '少し待ちたまえ。君の散らかった足跡を、せめて学術資料として読める形に整えているところだ。',
   scp: 'そのまま待機しろ。君の行動記録を機密資料として成立させるため、現在照合処理を行っている。',
-  ancient: 'しばし待つがよい。愚かなる旅人よ……そなたの足跡を、後世に残す言葉へと編み直しておる。',
+  ancient: 'しばし待つがよい。旅人よ……そなたの足跡を、後世に残す物語へと編み直しておる。',
 };
 
 const styleMeta: Record<WikiStyleId, { title: string; shortTitle: string; subtitle: string }> = {
@@ -320,10 +322,12 @@ export function WikiTabModern({
   const mainPhoto = articlePhotos[0] ?? null;
   const additionalPhotos = articlePhotos.slice(1, 5);
   const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
+  const isStructuredGildas = style === 'ancient' && Boolean(parseStoredGildasChronicle(parsedArticle.content));
   const articleExportText = useMemo(() => {
-    if (style !== 'scp') return parsedArticle.content;
-    return scpDossierToPlainText(parsedArticle.content) ?? parsedArticle.content;
-  }, [style, parsedArticle.content]);
+    if (style === 'scp') return scpDossierToPlainText(parsedArticle.content) ?? parsedArticle.content;
+    if (style === 'ancient') return gildasChronicleToPlainText(parsedArticle.content, parsedArticle.line) ?? parsedArticle.content;
+    return parsedArticle.content;
+  }, [style, parsedArticle.content, parsedArticle.line]);
 
   useEffect(() => {
     let cancelled = false;
@@ -687,7 +691,7 @@ export function WikiTabModern({
       )}
 
       {hasArticle && style && narrator && (
-        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
+        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' || isStructuredGildas ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
           <div className="flex flex-col gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A] p-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
@@ -723,7 +727,7 @@ export function WikiTabModern({
             </div>
           </div>
 
-          {style !== 'scp' && <NarratorDialogue style={style} quote={parsedArticle.line} />}
+          {style !== 'scp' && !isStructuredGildas && <NarratorDialogue style={style} quote={parsedArticle.line} />}
 
           <section className="hud-bracket min-w-0 max-w-full overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
             <div className="border-b border-[#1E293B] bg-[#0B1018] px-4 py-2.5 sm:px-5">
@@ -739,6 +743,14 @@ export function WikiTabModern({
                 locations={locations}
                 content={articleWithPhotos}
                 mainPhotoUrl={mainPhotoUrl}
+                narratorLine={parsedArticle.line}
+                locationLinks={locationLinks}
+              />
+            ) : isStructuredGildas ? (
+              <GildasChronicleArticle
+                world={world}
+                locations={locations}
+                content={parsedArticle.content}
                 narratorLine={parsedArticle.line}
                 locationLinks={locationLinks}
               />
