@@ -1,14 +1,6 @@
 import { Play } from 'lucide-react';
 import { playHoverSound } from '@/lib/sound';
-
-export type BgmCandidate = {
-  id: 'bgm_world_select' | 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
-  name: string;
-  nameJa: string;
-  description: string;
-  toneInfo: string;
-  keyCharacteristic: string;
-};
+import type { BgmCandidate } from '@/lib/bgmCandidates';
 
 type BgmCandidateCardProps = {
   candidate: BgmCandidate;
