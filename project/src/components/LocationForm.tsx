@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { WorldMember, LocationWithPhotos } from '@/lib/types';
 import { parseCoords, formatCoords } from '@/lib/coords';
-import { uploadPhoto, deletePhoto, getPhotoUrl } from '@/lib/db';
+import { uploadPhoto, deletePhoto } from '@/lib/db';
 import { playSaveSound, playInputFocusSound, playNewRecordSound } from '@/lib/sound';
 import { LocationBasicFields } from '@/components/LocationBasicFields';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
 import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
 import { LocationFormActions } from '@/components/LocationFormActions';
+import { useLocationMainPhoto } from '@/components/useLocationMainPhoto';
 
 type SaveInput = {
   name: string;
@@ -45,53 +46,14 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   );
   const existingMain = editing?.photos.find((photo) => photo.is_main) ?? null;
   const [existingMainPhoto] = useState(existingMain);
-  const [mainFile, setMainFile] = useState<File | null>(null);
-  const [mainPreview, setMainPreview] = useState<string | null>(null);
+  const {
+    mainFile,
+    mainPreview,
+    fileInputRef,
+    handleMainSelect,
+    clearMainPreview,
+  } = useLocationMainPhoto(existingMainPhoto);
   const [error, setError] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    let active = true;
-    if (!existingMainPhoto) {
-      setMainPreview(null);
-      return () => {
-        active = false;
-      };
-    }
-    getPhotoUrl(existingMainPhoto.storage_path)
-      .then((url) => {
-        if (active) setMainPreview(url);
-        else if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-      })
-      .catch(() => {
-        if (active) setMainPreview(null);
-      });
-    return () => {
-      active = false;
-      setMainPreview((current) => {
-        if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
-        return null;
-      });
-    };
-  }, [existingMainPhoto]);
-
-  const handleMainSelect = (file: File | null) => {
-    if (!file) return;
-    setMainPreview((current) => {
-      if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
-      return URL.createObjectURL(file);
-    });
-    setMainFile(file);
-  };
-
-  const clearMainPreview = () => {
-    setMainFile(null);
-    setMainPreview((current) => {
-      if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
-      return null;
-    });
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
 
   const handleSubmit = async () => {
     setError('');
