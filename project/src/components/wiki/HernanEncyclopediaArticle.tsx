@@ -246,8 +246,8 @@ export function HernanEncyclopediaArticle({
       </header>
 
       <div className="mx-auto w-full max-w-[1280px] px-3.5 py-5 sm:px-6 sm:py-7 lg:px-8">
-        <div className="lg:flex lg:items-start lg:gap-8">
-          <aside className="hidden w-[210px] shrink-0 lg:sticky lg:top-4 lg:block">
+        <div className="lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:items-start lg:gap-8">
+          <aside className="hidden lg:block">
             <div className="mb-2 flex items-center gap-1.5 border-b border-[#eaecf0] pb-2 font-mono text-[11px] font-bold text-neutral-600">
               <BookOpen className="h-3.5 w-3.5" />目次 (CONTENTS)
             </div>
@@ -266,7 +266,7 @@ export function HernanEncyclopediaArticle({
             </nav>
           </aside>
 
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0">
             <header className="mb-4">
               <h1 className="break-words border-b border-[#a2a9b1] pb-1.5 font-serif text-[26px] font-normal leading-[1.3] tracking-tight sm:text-[30px] lg:text-[34px]">
                 {article.title}
@@ -304,68 +304,70 @@ export function HernanEncyclopediaArticle({
                 </nav>
               )}
             </div>
-
-            <main className="mt-5 space-y-7 sm:space-y-8">
-              {article.sections.map((section, sectionIndex) => {
-                const sectionPhotos = photoAssignments.get(sectionIndex) ?? [];
-                const firstPhoto = sectionPhotos[0] ?? null;
-                const laterPhotos = sectionPhotos.slice(1);
-                const firstPhotoNumber = firstPhoto ? photos.findIndex((photo) => photo.id === firstPhoto.id) + 1 : 0;
-                return (
-                  <section key={section.id} id={`hernan-${section.id}`} className="scroll-mt-20 pt-1">
-                    <h2 className="mb-3 mt-5 flex items-baseline gap-2 border-b border-[#a2a9b1] pb-1 font-serif text-[19px] font-normal tracking-tight sm:text-[21px] lg:text-[22px]">
-                      <span className="shrink-0 font-mono text-[13px] text-neutral-500 sm:text-[15px]">{section.number}.</span>
-                      <span>{section.title}</span>
-                    </h2>
-                    {section.subTitle && <div className="-mt-2 mb-3 font-mono text-[11px] text-neutral-400">{section.subTitle}</div>}
-
-                    <div className="clearfix space-y-3.5 text-left text-[15px] leading-[1.85] text-neutral-800 sm:text-[15.5px]">
-                      {firstPhoto && (
-                        <>
-                          <PhotoFigure photo={firstPhoto} number={firstPhotoNumber} variant="inline" onOpen={() => setSelectedPhoto(firstPhotoNumber - 1)} />
-                          <div className="lg:hidden"><PhotoFigure photo={firstPhoto} number={firstPhotoNumber} variant="wide" onOpen={() => setSelectedPhoto(firstPhotoNumber - 1)} /></div>
-                        </>
-                      )}
-                      {section.paragraphs.map((paragraph, index) => <p key={index}>{linkedText(paragraph, locationLinks)}</p>)}
-                    </div>
-
-                    {laterPhotos.length > 0 && (
-                      <div className={`mt-5 grid gap-3 ${laterPhotos.length > 1 ? 'sm:grid-cols-2' : 'grid-cols-1'}`}>
-                        {laterPhotos.map((photo) => {
-                          const photoNumber = photos.findIndex((item) => item.id === photo.id) + 1;
-                          return <PhotoFigure key={photo.id} photo={photo} number={photoNumber} variant="gallery" onOpen={() => setSelectedPhoto(photoNumber - 1)} />;
-                        })}
-                      </div>
-                    )}
-                  </section>
-                );
-              })}
-            </main>
-
-            {article.citations?.length ? (
-              <section className="mt-10 border-t border-[#a2a9b1] pt-4">
-                <h2 className="mb-3 border-b border-[#eaecf0] pb-1 font-serif text-[18px] font-normal sm:text-[19px]">脚注・観測出典</h2>
-                <ol className="list-decimal space-y-1.5 pl-6 text-[12.5px] leading-relaxed text-neutral-600 sm:text-[13px]">
-                  {article.citations.map((citation) => <li key={citation.id}>{citation.text}</li>)}
-                </ol>
-              </section>
-            ) : null}
-
-            <aside className="mt-8 border-l-4 border-[#a2a9b1] bg-[#f8f9fa] px-4 py-3 text-[13px] leading-relaxed text-neutral-700">
-              <div className="mb-1 font-serif text-sm font-bold text-neutral-900">編纂官注記</div>
-              <p>{article.hernanComment}</p>
-              {narratorLine && <p className="mt-2 italic text-neutral-600">— エルナン「{narratorLine}」</p>}
-            </aside>
-
-            {article.categories?.length ? (
-              <footer className="mt-6 border border-[#eaecf0] bg-[#f8f9fa] p-2.5 text-[11.5px] text-neutral-600 sm:text-[12.5px]">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="flex items-center gap-1 font-serif font-bold text-neutral-700"><Tag className="h-3 w-3" />カテゴリ:</span>
-                  {article.categories.map((category, index) => <Fragment key={category}><span className="text-[#0645ad]">{category}</span>{index < article.categories!.length - 1 && <span className="text-neutral-300">|</span>}</Fragment>)}
-                </div>
-              </footer>
-            ) : null}
           </div>
+        </div>
+
+        <div className="mt-2 border-t border-[#eaecf0] pt-1 lg:mt-5 lg:pt-2">
+          <main className="space-y-7 sm:space-y-8">
+            {article.sections.map((section, sectionIndex) => {
+              const sectionPhotos = photoAssignments.get(sectionIndex) ?? [];
+              const firstPhoto = sectionPhotos[0] ?? null;
+              const laterPhotos = sectionPhotos.slice(1);
+              const firstPhotoNumber = firstPhoto ? photos.findIndex((photo) => photo.id === firstPhoto.id) + 1 : 0;
+              return (
+                <section key={section.id} id={`hernan-${section.id}`} className="scroll-mt-20 pt-1">
+                  <h2 className="mb-3 mt-5 flex items-baseline gap-2 border-b border-[#a2a9b1] pb-1 font-serif text-[19px] font-normal tracking-tight sm:text-[21px] lg:text-[22px]">
+                    <span className="shrink-0 font-mono text-[13px] text-neutral-500 sm:text-[15px]">{section.number}.</span>
+                    <span>{section.title}</span>
+                  </h2>
+                  {section.subTitle && <div className="-mt-2 mb-3 font-mono text-[11px] text-neutral-400">{section.subTitle}</div>}
+
+                  <div className="clearfix space-y-3.5 text-left text-[15px] leading-[1.85] text-neutral-800 sm:text-[15.5px]">
+                    {firstPhoto && (
+                      <>
+                        <PhotoFigure photo={firstPhoto} number={firstPhotoNumber} variant="inline" onOpen={() => setSelectedPhoto(firstPhotoNumber - 1)} />
+                        <div className="lg:hidden"><PhotoFigure photo={firstPhoto} number={firstPhotoNumber} variant="wide" onOpen={() => setSelectedPhoto(firstPhotoNumber - 1)} /></div>
+                      </>
+                    )}
+                    {section.paragraphs.map((paragraph, index) => <p key={index}>{linkedText(paragraph, locationLinks)}</p>)}
+                  </div>
+
+                  {laterPhotos.length > 0 && (
+                    <div className={`mt-5 grid gap-3 ${laterPhotos.length > 1 ? 'sm:grid-cols-2' : 'grid-cols-1'}`}>
+                      {laterPhotos.map((photo) => {
+                        const photoNumber = photos.findIndex((item) => item.id === photo.id) + 1;
+                        return <PhotoFigure key={photo.id} photo={photo} number={photoNumber} variant="gallery" onOpen={() => setSelectedPhoto(photoNumber - 1)} />;
+                      })}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
+          </main>
+
+          {article.citations?.length ? (
+            <section className="mt-10 border-t border-[#a2a9b1] pt-4">
+              <h2 className="mb-3 border-b border-[#eaecf0] pb-1 font-serif text-[18px] font-normal sm:text-[19px]">脚注・観測出典</h2>
+              <ol className="list-decimal space-y-1.5 pl-6 text-[12.5px] leading-relaxed text-neutral-600 sm:text-[13px]">
+                {article.citations.map((citation) => <li key={citation.id}>{citation.text}</li>)}
+              </ol>
+            </section>
+          ) : null}
+
+          <aside className="mt-8 border-l-4 border-[#a2a9b1] bg-[#f8f9fa] px-4 py-3 text-[13px] leading-relaxed text-neutral-700">
+            <div className="mb-1 font-serif text-sm font-bold text-neutral-900">編纂官注記</div>
+            <p>{article.hernanComment}</p>
+            {narratorLine && <p className="mt-2 italic text-neutral-600">— エルナン「{narratorLine}」</p>}
+          </aside>
+
+          {article.categories?.length ? (
+            <footer className="mt-6 border border-[#eaecf0] bg-[#f8f9fa] p-2.5 text-[11.5px] text-neutral-600 sm:text-[12.5px]">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="flex items-center gap-1 font-serif font-bold text-neutral-700"><Tag className="h-3 w-3" />カテゴリ:</span>
+                {article.categories.map((category, index) => <Fragment key={category}><span className="text-[#0645ad]">{category}</span>{index < article.categories!.length - 1 && <span className="text-neutral-300">|</span>}</Fragment>)}
+              </div>
+            </footer>
+          ) : null}
         </div>
       </div>
 
