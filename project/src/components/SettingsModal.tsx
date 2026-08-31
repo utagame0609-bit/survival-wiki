@@ -1,6 +1,6 @@
 import { ChevronDown, Disc, Settings, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { SoundStudioScreen } from '@/screens/SoundStudioScreen';
+import { SoundStudioPanel } from '@/components/SoundStudioPanel';
 import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { BasicSoundSettings } from '@/components/BasicSoundSettings';
 import { WorldBgmChannelSettings } from '@/components/WorldBgmChannelSettings';
@@ -70,7 +70,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
     window.dispatchEvent(new CustomEvent('survival-wiki:settings-closed'));
   };
 
-  if (soundStudioOpen) return <SoundStudioScreen onBack={() => { setSoundStudioOpen(false); window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed')); }} />;
+  if (soundStudioOpen) return <SoundStudioPanel onBack={() => { setSoundStudioOpen(false); window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed')); }} />;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 font-mono backdrop-blur-sm">
