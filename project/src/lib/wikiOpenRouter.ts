@@ -37,7 +37,7 @@ export const openRouterTestProvider: WikiProvider = {
 
     const systemPrompt = style === 'scp'
       ? `${getWikiSystemPrompt(style)}\n\n${SCP_STRUCTURED_OUTPUT_INSTRUCTIONS}`
-      : `${getWikiSystemPrompt(style)}\n\n【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、今回の記録を読んだあなた自身がプレイヤーへ向けて言う短い一言を40〜70文字程度で追加してください。記事と同じ人格・口調を守り、記事本文の要約ではなく、その人物らしい皮肉・評価・感想にしてください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`;
+      : `${getWikiSystemPrompt(style)}\n\n【NPCの一言出力ルール】\n記事本文を書き終えたあと、最後の1行だけに、今回の記録を読んだ編纂官本人からプレイヤーへ向けた40〜70文字程度の短い一言を追加してください。記事本文の要約ではなく、今回実際に記録された行動・結果・写真の状況のどれか一つを軽く拾い、その人格らしい明快なツッコミや感想にしてください。プレイヤー本人の知性・能力・容姿・人格を否定する表現は禁止です。編纂官本人の大げささやズレが少し見える一言を優先してください。形式は必ず <!--NARRATOR_LINE:ここに一言--> とし、このマーカー以外の補足は付けないでください。`;
     const mainPhoto = locations[0]?.photos.find((photo) => photo.is_main) ?? null;
     const imageStoragePath = mainPhoto?.storage_path;
 
