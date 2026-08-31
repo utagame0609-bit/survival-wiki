@@ -1,0 +1,6 @@
+{
+  "name": "Survival Wiki - エルナン百科事典記事リーダー",
+  "description": "Survival Wikiの百科事典編纂官・民俗学者エルナンによる記事閲覧ページの成熟した百科事典UI/UX設計とインタラクティブプレビュー",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

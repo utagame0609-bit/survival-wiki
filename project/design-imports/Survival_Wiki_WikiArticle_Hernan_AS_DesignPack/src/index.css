@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "BIZ UDPGothic", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    color: #202122;
+    background-color: #09090b;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-break: strict;
+  }
+
+  /* Serif styling for classical encyclopedia feel */
+  .font-serif {
+    font-family: "Noto Serif JP", "BIZ UDPMincho", "Hiragino Mincho ProN", "Yu Mincho", "Georgia", serif;
+  }
+}
+
+/* Custom Clearfix */
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* Subtle scrollbar for table of contents */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
