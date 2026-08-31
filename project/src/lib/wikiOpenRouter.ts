@@ -1,6 +1,7 @@
 import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './wiki';
 import { getWikiSystemPrompt } from './wiki';
 import { parseScpAiResponse, SCP_STRUCTURED_OUTPUT_INSTRUCTIONS } from './wikiScp';
+import { GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS, parseGildasAiResponse } from './wikiGildas';
 import { supabase } from './supabase';
 
 const NARRATOR_MARKER = '<!--NARRATOR_LINE:';
@@ -41,7 +42,9 @@ export const openRouterTestProvider: WikiProvider = {
 
     const systemPrompt = style === 'scp'
       ? `${getWikiSystemPrompt(style)}\n\n${SCP_STRUCTURED_OUTPUT_INSTRUCTIONS}`
-      : `${getWikiSystemPrompt(style)}\n\n${narratorInstruction}`;
+      : style === 'ancient'
+        ? `${getWikiSystemPrompt(style)}\n\n${GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS}`
+        : `${getWikiSystemPrompt(style)}\n\n${narratorInstruction}`;
     const mainPhoto = locations[0]?.photos.find((photo) => photo.is_main) ?? null;
     const imageStoragePath = mainPhoto?.storage_path;
 
@@ -64,6 +67,13 @@ export const openRouterTestProvider: WikiProvider = {
       const { dossier, narratorLine } = parseScpAiResponse(raw);
       return {
         content: `${JSON.stringify(dossier)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`,
+      };
+    }
+
+    if (style === 'ancient') {
+      const { chronicle, narratorLine } = parseGildasAiResponse(raw);
+      return {
+        content: `${JSON.stringify(chronicle)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`,
       };
     }
 
