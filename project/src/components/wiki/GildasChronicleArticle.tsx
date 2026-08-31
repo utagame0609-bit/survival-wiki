@@ -192,10 +192,27 @@ export function GildasChronicleArticle({
   const companions = Array.from(new Set(locations.flatMap((location) => location.members.map((member) => member.name)).filter(Boolean)));
   const activeChapter = chronicle.chapters.find((chapter) => chapter.id === activeChapterId) ?? chronicle.chapters[0];
   const heroPhoto = photos[0];
-  const assignmentIndexes = photoChapterIndexes(photos.length, chronicle.chapters.length);
   const chapterPhotos = new Map<number, ResolvedPhoto[]>();
-  photos.slice(1).forEach((photo, index) => {
-    const chapterIndex = assignmentIndexes[index] ?? Math.min(index, chronicle.chapters.length - 1);
+  const assignedPhotoNumbers = new Set<number>();
+  if (heroPhoto) assignedPhotoNumbers.add(1);
+
+  chronicle.chapters.forEach((chapter, chapterIndex) => {
+    chapter.photoIndexes?.forEach((photoNumber) => {
+      if (photoNumber <= 1 || photoNumber > photos.length || assignedPhotoNumbers.has(photoNumber)) return;
+      const photo = photos[photoNumber - 1];
+      if (!photo) return;
+      chapterPhotos.set(chapterIndex, [...(chapterPhotos.get(chapterIndex) ?? []), photo]);
+      assignedPhotoNumbers.add(photoNumber);
+    });
+  });
+
+  const unassignedPhotos = photos
+    .slice(1)
+    .map((photo, index) => ({ photo, photoNumber: index + 2 }))
+    .filter(({ photoNumber }) => !assignedPhotoNumbers.has(photoNumber));
+  const fallbackIndexes = photoChapterIndexes(unassignedPhotos.length + 1, chronicle.chapters.length);
+  unassignedPhotos.forEach(({ photo }, index) => {
+    const chapterIndex = fallbackIndexes[index] ?? Math.min(index, chronicle.chapters.length - 1);
     chapterPhotos.set(chapterIndex, [...(chapterPhotos.get(chapterIndex) ?? []), photo]);
   });
 
