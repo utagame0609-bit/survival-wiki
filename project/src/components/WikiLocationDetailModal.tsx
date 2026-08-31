@@ -1,7 +1,7 @@
+import { createPortal } from 'react-dom';
 import { FileText, MapPin, X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
-import { playHoverSound } from '@/lib/sound';
-import { UTAPEDIA_AVATAR } from '@/assets/utapediaAvatar';
+import { playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 
 type WikiLocationDetailModalProps = {
@@ -10,67 +10,91 @@ type WikiLocationDetailModalProps = {
 };
 
 export function WikiLocationDetailModal({ location, onClose }: WikiLocationDetailModalProps) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <button aria-label="閉じる" className="absolute inset-0" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-hidden rounded-sm bg-[#0a1120] text-[#e2e8f0] border-4 border-double border-[#ffb000] shadow-[0_0_25px_rgba(255,176,0,0.2),inset_0_0_10px_rgba(255,176,0,0.1)] flex flex-col motion-safe:animate-[wiki-modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
-        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0 border-b-2 border-[#1a2333] bg-[#0d1627] text-[#ffb000]">
-          <div className="text-xs tracking-wider flex items-center gap-2.5">
-            <img src={UTAPEDIA_AVATAR} alt="ウタペディア" className="w-6 h-6 object-cover rounded-sm border border-[#ffb000]" />
-            <span className="font-bold text-[#ffb000]">ウタペディア</span>
-            <span className="text-zinc-600 font-mono">//</span>
-            <span className="text-zinc-300">ロケーション詳細</span>
+  const mainPhoto = location.photos.find((photo) => photo.is_main) ?? location.photos[0] ?? null;
+
+  const handleClose = () => {
+    playModalCloseSound();
+    onClose();
+  };
+
+  return createPortal((
+    <div
+      className="fixed inset-0 z-[220] flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-3 font-sans backdrop-blur-md sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) handleClose();
+      }}
+    >
+      <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] text-[#E2E8F0] shadow-2xl motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#1E293B] bg-[#0B1018] px-4 py-3">
+          <div className="min-w-0">
+            <div className="mb-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#06B6D4]">RELATED RECORD</div>
+            <div className="truncate text-xs font-bold text-[#F8FAFC] sm:text-sm">ロケーション詳細</div>
           </div>
-          <button onClick={onClose} aria-label="閉じる" onMouseEnter={playHoverSound} className="p-1 rounded-sm text-zinc-400 hover:bg-[#1a2333] hover:text-[#ffb000] transition-colors border border-transparent hover:border-[#334155]">
-            <X className="w-[18px] h-[18px]" />
+          <button
+            type="button"
+            onClick={handleClose}
+            onMouseEnter={playHoverSound}
+            aria-label="閉じる"
+            className="shrink-0 rounded p-1 text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="overflow-y-auto overscroll-contain p-5 space-y-4">
-          <div className="flex items-center gap-2 border-l-4 border-[#ffb000] pl-3">
-            <h2 className="text-lg sm:text-xl font-bold text-[#ffb000] break-words">{location.name}</h2>
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+          <div>
+            <h2 className="break-words text-lg font-game font-bold leading-snug text-[#F8FAFC] sm:text-xl">{location.name}</h2>
           </div>
 
-          <div className="p-1 rounded-sm border-2 border-[#334155] bg-[#0d1627]">
-            {(() => {
-              const mainPhoto = location.photos.find((photo) => photo.is_main);
-              return mainPhoto ? (
-                <LocationPhotoImage storagePath={mainPhoto.storage_path} alt={location.name} className="w-full h-48 sm:h-56 object-cover rounded-sm" />
-              ) : (
-                <div className="w-full h-48 sm:h-56 bg-[#1a2333] rounded-sm flex items-center justify-center">
-                  <MapPin className="w-12 h-12 text-zinc-600" />
-                </div>
-              );
-            })()}
+          <div className="overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B1018]">
+            {mainPhoto ? (
+              <LocationPhotoImage
+                storagePath={mainPhoto.storage_path}
+                alt={location.name}
+                className="h-52 w-full object-cover sm:h-64"
+              />
+            ) : (
+              <div className="flex h-52 w-full items-center justify-center bg-[#111827] sm:h-64">
+                <MapPin className="h-12 w-12 text-[#475569]" />
+              </div>
+            )}
           </div>
 
-          <table className="w-full text-xs border-collapse rounded-sm overflow-hidden border-2 border-[#1a2333] bg-[#0d1627]">
-            <tbody>
-              <tr className="border-b border-[#1a2333]">
-                <th className="w-1/3 bg-[#1a2333] p-2.5 text-left font-bold text-[#ffb000] border-r border-[#1a2333]">座標 (X, Y, Z)</th>
-                <td className={`p-2.5 font-mono font-bold ${location.has_coordinates ? 'text-[#32cd32]' : 'text-zinc-500'}`}>
-                  {location.has_coordinates ? `X: ${location.x} / Y: ${location.y} / Z: ${location.z}` : '未入力'}
-                </td>
-              </tr>
-              <tr>
-                <th className="bg-[#1a2333] p-2.5 text-left font-bold text-[#ffb000] border-r border-[#1a2333]">記録日時</th>
-                <td className="p-2.5 text-zinc-300 font-mono">{new Date(location.created_at).toLocaleString('ja-JP')}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="grid grid-cols-1 gap-2.5">
+            {location.has_coordinates && (
+              <div className="flex items-center gap-2 rounded border border-[#F59E0B]/35 bg-[#161F30] px-3 py-2 font-mono text-xs text-[#F59E0B]">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span className="truncate">POS: X:{location.x} Y:{location.y} Z:{location.z}</span>
+              </div>
+            )}
 
-          <div className="p-3 text-xs rounded-sm border-l-4 bg-[#0d1627] border-[#32cd32] text-zinc-300">
-            <div className="font-bold mb-1 flex items-center gap-1.5 text-[#32cd32]"><FileText className="w-3.5 h-3.5" /><span>記録資料</span></div>
-            <p className="text-zinc-400 text-[11px] leading-relaxed font-mono">このロケーションは、ウタペディア冒険の書に永久記録された関連資料です。</p>
+            <div className="rounded border border-[#334155]/60 bg-[#161F30] px-3 py-2 font-mono text-xs text-[#94A3B8]">
+              記録日時: {new Date(location.created_at).toLocaleString('ja-JP')}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3.5">
+            <div className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#06B6D4]">
+              <FileText className="h-3.5 w-3.5" />
+              <span>RECORD MEMO</span>
+            </div>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#CBD5E1]">
+              {location.detail_memo || 'メモの記録はありません。'}
+            </p>
           </div>
         </div>
 
-        <div className="p-3 bg-[#0d1627] border-t-2 border-[#1a2333] flex justify-end">
-          <button onClick={onClose} onMouseEnter={playHoverSound} className="px-4 py-2 bg-[#1a2333] text-[#ffb000] text-xs font-bold font-mono border border-[#334155] hover:border-[#ffb000] transition-colors">閉じる (ESC)</button>
+        <div className="flex shrink-0 justify-end border-t border-[#1E293B] bg-[#0B1018] px-4 py-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            onMouseEnter={playHoverSound}
+            className="rounded border border-[#334155] bg-[#161F30] px-4 py-2 font-game text-xs font-bold text-[#CBD5E1] transition-colors hover:border-[#06B6D4]/60 hover:text-[#06B6D4]"
+          >
+            閉じる
+          </button>
         </div>
       </div>
-
-      <style>{`@keyframes wiki-modal-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } } @media (prefers-reduced-motion: reduce) { .motion-safe\\:animate-\\[wiki-modal-enter_180ms_cubic-bezier\\(.22\\,.8\\,.35\\,1)\\] { animation: none !important; } }`}</style>
     </div>
-  );
+  ), document.body);
 }
