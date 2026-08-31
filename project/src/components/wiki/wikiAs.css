@@ -87,6 +87,11 @@ div:has(> .animate-smooth-swipe) {
   display: none !important;
 }
 
+/* Generation dialogue uses typewriter text without the cyan block cursor. */
+.hud-scanlines p > span.animate-pulse {
+  display: none !important;
+}
+
 /* Article NPC dialogue keeps the AS two-corner HUD accent. */
 .wiki-as-bracket {
   position: relative;
