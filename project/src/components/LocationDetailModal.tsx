@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Clock, Edit3, MapPin, Share2, Shield, Trash2, Users, X } from 'lucide-react';
+import { Clock, Edit3, MapPin, Share2, Trash2, Users, X } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { LocationDetailInfo } from '@/components/LocationDetailInfo';
+import { LocationDetailGallery } from '@/components/LocationDetailGallery';
+import { LocationDeleteConfirm } from '@/components/LocationDeleteConfirm';
 import { SnsShareModal } from '@/components/SnsShareModal';
 
 type PhotoImageProps = {
@@ -65,8 +67,6 @@ export function LocationDetailModal({
     onClose();
   };
 
-  const currentPhoto = photos[activePhotoIdx] ?? photos[0];
-
   return createPortal((
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md overflow-y-auto font-sans"
@@ -95,71 +95,12 @@ export function LocationDetailModal({
         </div>
 
         <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
-          {currentPhoto && (
-            <div className="space-y-2">
-              <div className="relative w-full aspect-video sm:aspect-[16/10] max-h-[360px] rounded-lg overflow-hidden bg-[#0B1018] border border-[#1E293B]">
-                <PhotoImage
-                  storagePath={currentPhoto.storage_path}
-                  alt={location.name}
-                  className="w-full h-full object-cover"
-                />
-
-                {photos.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : photos.length - 1))}
-                      onMouseEnter={playHoverSound}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-[#0B1018]/80 text-[#F8FAFC] hover:bg-[#F59E0B] hover:text-[#0B1018] transition-colors"
-                      aria-label="前の写真"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActivePhotoIdx((prev) => (prev < photos.length - 1 ? prev + 1 : 0))}
-                      onMouseEnter={playHoverSound}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-[#0B1018]/80 text-[#F8FAFC] hover:bg-[#F59E0B] hover:text-[#0B1018] transition-colors"
-                      aria-label="次の写真"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                    <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-[#0B1018]/90 text-[10px] font-mono text-[#06B6D4] border border-[#06B6D4]/30">
-                      {activePhotoIdx + 1} / {photos.length}
-                    </div>
-                  </>
-                )}
-
-                {location.is_checkpoint && (
-                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-[#F59E0B]/90 text-[#0B1018] text-[10px] font-mono font-black border border-[#FDE68A] flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    <span>CHECKPOINT</span>
-                  </div>
-                )}
-              </div>
-
-              {photos.length > 1 && (
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                  {photos.map((photo, index) => (
-                    <button
-                      key={photo.id}
-                      type="button"
-                      onClick={() => setActivePhotoIdx(index)}
-                      onMouseEnter={playHoverSound}
-                      className={`relative w-14 h-14 rounded overflow-hidden shrink-0 border-2 transition-all ${
-                        activePhotoIdx === index
-                          ? 'border-[#F59E0B] scale-105'
-                          : 'border-[#334155] opacity-60 hover:opacity-100'
-                      }`}
-                      aria-label={`写真 ${index + 1} を表示`}
-                    >
-                      <PhotoImage storagePath={photo.storage_path} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <LocationDetailGallery
+            location={location}
+            activePhotoIdx={activePhotoIdx}
+            onActivePhotoChange={setActivePhotoIdx}
+            PhotoImage={PhotoImage}
+          />
 
           <div>
             <h3 className="text-lg sm:text-xl font-game font-bold text-[#F8FAFC] tracking-wide leading-snug">
@@ -247,33 +188,11 @@ export function LocationDetailModal({
         </div>
 
         {showConfirmDelete && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#05080E]/90 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-sm rounded-lg border border-[#EF4444]/60 bg-[#2A1218] p-4 shadow-[0_0_24px_rgba(239,68,68,0.2)]">
-              <div className="flex items-start gap-2 text-xs font-game text-[#EF4444] font-bold">
-                <Trash2 className="mt-0.5 w-4 h-4 shrink-0" />
-                <span>この探索記録を削除しますか？ この操作は取り消せません。</span>
-              </div>
-              <p className="mt-2 text-[11px] text-[#FCA5A5] font-mono">「{location.name}」の記録と添付写真を削除します。</p>
-              <div className="mt-4 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmDelete(false)}
-                  onMouseEnter={playHoverSound}
-                  className="px-3 py-1.5 rounded text-xs font-game text-[#94A3B8] hover:bg-[#1E293B]"
-                >
-                  キャンセル
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  onMouseEnter={playHoverSound}
-                  className="px-3 py-1.5 rounded bg-[#EF4444] hover:bg-[#DC2626] text-white font-game text-xs font-bold"
-                >
-                  削除を実行
-                </button>
-              </div>
-            </div>
-          </div>
+          <LocationDeleteConfirm
+            locationName={location.name}
+            onCancel={() => setShowConfirmDelete(false)}
+            onConfirm={handleDelete}
+          />
         )}
       </div>
 
