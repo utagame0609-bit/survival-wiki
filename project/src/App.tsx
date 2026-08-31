@@ -4,7 +4,6 @@ import { SettingsButton } from '@/components/SettingsModal';
 import { AuthScreen } from '@/screens/AuthScreen';
 import { TopScreen } from '@/screens/TopScreen';
 import { WorldListScreen } from '@/screens/WorldListScreen';
-import { WorldCreateScreen } from '@/screens/WorldCreateScreen';
 import { WorldScreen } from '@/screens/WorldScreen';
 import { fetchGames, fetchWorlds } from '@/lib/db';
 import { supabase } from '@/lib/supabase';
@@ -87,8 +86,6 @@ function App() {
           return 'top';
         case 'worldList':
           return `worldList:${screen.gameId}`;
-        case 'worldCreate':
-          return `worldCreate:${screen.gameId}:${screen.worldId ?? 'new'}`;
         case 'world':
           return `world:${screen.worldId}`;
       }
@@ -157,17 +154,6 @@ function App() {
         <WorldListScreen
           gameId={screen.gameId}
           gameName={screen.gameName}
-          navigate={setScreen}
-          goBack={goBack}
-        />
-      );
-      break;
-    case 'worldCreate':
-      screenContent = (
-        <WorldCreateScreen
-          gameId={screen.gameId}
-          gameName={screen.gameName}
-          worldId={screen.worldId}
           navigate={setScreen}
           goBack={goBack}
         />
