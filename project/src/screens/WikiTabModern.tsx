@@ -22,9 +22,11 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { NARRATORS, NarratorDialogue, PixelNarrator } from '@/components/wiki/WikiNarrator';
 import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
 import { GildasChronicleArticle } from '@/components/wiki/GildasChronicleArticle';
+import { HernanEncyclopediaArticle } from '@/components/wiki/HernanEncyclopediaArticle';
 import { WIKI_STYLES } from '@/lib/wiki';
 import { scpDossierToPlainText } from '@/lib/wikiScp';
 import { gildasChronicleToPlainText, parseStoredGildasChronicle } from '@/lib/wikiGildas';
+import { hernanArticleToPlainText, parseStoredHernanArticle } from '@/lib/wikiHernan';
 import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
 import {
   playCancelSound,
@@ -323,9 +325,11 @@ export function WikiTabModern({
   const additionalPhotos = articlePhotos.slice(1, 5);
   const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
   const isStructuredGildas = style === 'ancient' && Boolean(parseStoredGildasChronicle(parsedArticle.content));
+  const isStructuredHernan = style === 'wikipedia' && Boolean(parseStoredHernanArticle(parsedArticle.content));
   const articleExportText = useMemo(() => {
     if (style === 'scp') return scpDossierToPlainText(parsedArticle.content) ?? parsedArticle.content;
     if (style === 'ancient') return gildasChronicleToPlainText(parsedArticle.content, parsedArticle.line) ?? parsedArticle.content;
+    if (style === 'wikipedia') return hernanArticleToPlainText(parsedArticle.content, parsedArticle.line) ?? parsedArticle.content;
     return parsedArticle.content;
   }, [style, parsedArticle.content, parsedArticle.line]);
 
@@ -691,7 +695,7 @@ export function WikiTabModern({
       )}
 
       {hasArticle && style && narrator && (
-        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' || isStructuredGildas ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
+        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' || isStructuredGildas || isStructuredHernan ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
           <div className="flex flex-col gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A] p-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
@@ -727,7 +731,7 @@ export function WikiTabModern({
             </div>
           </div>
 
-          {style !== 'scp' && !isStructuredGildas && <NarratorDialogue style={style} quote={parsedArticle.line} />}
+          {style !== 'scp' && !isStructuredGildas && !isStructuredHernan && <NarratorDialogue style={style} quote={parsedArticle.line} />}
 
           <section className="hud-bracket min-w-0 max-w-full overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
             <div className="border-b border-[#1E293B] bg-[#0B1018] px-4 py-2.5 sm:px-5">
@@ -748,6 +752,14 @@ export function WikiTabModern({
               />
             ) : isStructuredGildas ? (
               <GildasChronicleArticle
+                world={world}
+                locations={locations}
+                content={parsedArticle.content}
+                narratorLine={parsedArticle.line}
+                locationLinks={locationLinks}
+              />
+            ) : isStructuredHernan ? (
+              <HernanEncyclopediaArticle
                 world={world}
                 locations={locations}
                 content={parsedArticle.content}
