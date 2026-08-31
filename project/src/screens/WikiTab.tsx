@@ -1,1 +1,1 @@
-export { WikiTabModern as WikiTab } from './WikiTabModern';
+export { WikiWorkspace as WikiTab } from './WikiWorkspace';
