@@ -2,44 +2,14 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Calendar, ChevronDown, ChevronUp, MapPin, Maximize2, Tag, Users, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { getPhotoUrl } from '@/lib/db';
 import { playHoverSound } from '@/lib/sound';
 import { parseStoredHernanArticle } from '@/lib/wikiHernan';
+import { formatHernanRecordedDate, useHernanPhotos, type HernanResolvedPhoto } from '@/components/wiki/useHernanPhotos';
 
 type LocationLink = {
   name: string;
   onClick: () => void;
 };
-
-type ResolvedPhoto = {
-  id: string;
-  url: string;
-  title: string;
-  alt: string;
-  locationName?: string;
-  timestamp?: string;
-};
-
-function uniqueLocationPhotos(locations: LocationWithPhotos[]) {
-  return locations
-    .flatMap((location) => location.photos.map((photo) => ({ location, photo })))
-    .filter((entry, index, list) => list.findIndex((item) => item.photo.storage_path === entry.photo.storage_path) === index)
-    .sort((a, b) => a.photo.created_at.localeCompare(b.photo.created_at))
-    .slice(0, 5);
-}
-
-function formatRecordedDate(value?: string | null) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
 
 function linkedText(text: string, links: LocationLink[]): ReactNode[] {
   if (!text || links.length === 0) return [text];
@@ -80,9 +50,9 @@ function linkedText(text: string, links: LocationLink[]): ReactNode[] {
 
 function buildPhotoAssignments(
   sections: ReturnType<typeof parseStoredHernanArticle> extends infer T ? NonNullable<T>['sections'] : never,
-  photos: ResolvedPhoto[],
+  photos: HernanResolvedPhoto[],
 ) {
-  const assignments = new Map<number, ResolvedPhoto[]>();
+  const assignments = new Map<number, HernanResolvedPhoto[]>();
   const used = new Set<number>();
 
   sections.forEach((section, sectionIndex) => {
@@ -114,7 +84,7 @@ function PhotoFigure({
   variant,
   onOpen,
 }: {
-  photo: ResolvedPhoto;
+  photo: HernanResolvedPhoto;
   number: number;
   variant: 'inline' | 'wide' | 'gallery';
   onOpen: () => void;
@@ -162,29 +132,11 @@ export function HernanEncyclopediaArticle({
   logoSrc?: string;
 }) {
   const article = useMemo(() => parseStoredHernanArticle(content), [content]);
-  const [photos, setPhotos] = useState<ResolvedPhoto[]>([]);
+  const photos = useHernanPhotos(locations, world.name);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('');
   const articleRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const entries = uniqueLocationPhotos(locations);
-    const resolve = async () => {
-      const resolved = await Promise.all(entries.map(async ({ location, photo }, index) => ({
-        id: photo.id,
-        url: await getPhotoUrl(photo.storage_path),
-        title: location.detail_memo?.trim() || location.name || `記録写真 ${index + 1}`,
-        alt: `${location.name || world.name}の記録写真 ${index + 1}`,
-        locationName: location.name || undefined,
-        timestamp: formatRecordedDate(photo.created_at) || undefined,
-      })));
-      if (!cancelled) setPhotos(resolved);
-    };
-    void resolve().catch(() => { if (!cancelled) setPhotos([]); });
-    return () => { cancelled = true; };
-  }, [locations, world.name]);
 
   useEffect(() => {
     if (!article || typeof IntersectionObserver === 'undefined') return;
@@ -238,7 +190,7 @@ export function HernanEncyclopediaArticle({
             </div>
           </div>
           <div className="hidden shrink-0 items-center gap-2 font-mono text-[10.5px] text-neutral-500 lg:flex">
-            {earliestTimestamp && <span>記録起点: {formatRecordedDate(earliestTimestamp)}</span>}
+            {earliestTimestamp && <span>記録起点: {formatHernanRecordedDate(earliestTimestamp)}</span>}
             <span className="text-neutral-300">•</span>
             <span>記録地点: {locations.length}</span>
           </div>
@@ -281,7 +233,7 @@ export function HernanEncyclopediaArticle({
               {onlyLocation?.name && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{onlyLocation.name}</span>}
               {!onlyLocation && locations.length > 0 && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />記録地点 {locations.length}件</span>}
               {onlyLocation?.has_coordinates && <span className="font-mono">X:{onlyLocation.x} / Y:{onlyLocation.y} / Z:{onlyLocation.z}</span>}
-              {earliestTimestamp && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatRecordedDate(earliestTimestamp)}</span>}
+              {earliestTimestamp && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatHernanRecordedDate(earliestTimestamp)}</span>}
               {companions.length > 0 && <span className="flex items-center gap-1"><Users className="h-3 w-3" />同行：{companions.join('、')}</span>}
             </div>
 
