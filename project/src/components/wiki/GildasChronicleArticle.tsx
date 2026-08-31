@@ -13,7 +13,7 @@ import { GildasPhotoModal } from '@/components/wiki/GildasPhotoModal';
 import { GildasDesktopJourneyNavigation, GildasMobileChapterNavigation } from '@/components/wiki/GildasChapterNavigation';
 import { GildasArticleBody, renderGildasLinkedText, type GildasLocationLink } from '@/components/wiki/GildasArticleBody';
 import { formatGildasRecordedDate, useGildasPhotos } from '@/components/wiki/useGildasPhotos';
-import '@/wikiGildasChronicle.css';
+import '@/styles/wikiGildasChronicle.css';
 
 export function GildasChronicleArticle({
   world,
