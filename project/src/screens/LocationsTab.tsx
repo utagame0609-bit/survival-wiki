@@ -6,7 +6,7 @@ import { ChestModal } from '@/components/ChestModal';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
-import { buildCollectionItems, type CollectionItem } from '@/components/locations/locationData';
+import { buildCollectionItems, type CollectionItem } from '@/lib/chestCollection';
 import { TimelineRecordsView } from '@/components/TimelineRecordsView';
 import { SnsShareModal } from '@/components/SnsShareModal';
 import {
