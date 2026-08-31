@@ -5,7 +5,6 @@ import { playCancelSound, playHoverSound, isSoundEnabled, toggleSound } from '..
 type Screen =
   | { name: 'top' }
   | { name: 'worldList'; gameId: string; gameName: string }
-  | { name: 'worldCreate'; gameId: string; gameName: string; worldId?: string }
   | { name: 'world'; worldId: string; worldName: string };
 
 export type NavigateFn = (screen: Screen) => void;
@@ -160,16 +159,7 @@ export function useScreenHistory() {
 
   const goBack = () => {
     setHistory((h) => {
-      if (h.length === 0) {
-        if (screen.name === 'worldCreate') {
-          setScreenState({
-            name: 'worldList',
-            gameId: screen.gameId,
-            gameName: screen.gameName,
-          });
-        }
-        return h;
-      }
+      if (h.length === 0) return h;
       const prev = h[h.length - 1];
       setScreenState(prev);
       return h.slice(0, -1);
