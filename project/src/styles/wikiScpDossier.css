@@ -1,0 +1,224 @@
+/* SCP A / DECLASSIFIED DOSSIER
+   Dedicated styling for the AS-based DOM in ScpDossierArticle.
+   No Wiki generation/data/navigation/audio behavior is changed here. */
+
+.scp-as-shell {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown {
+  color: #292524;
+  font-size: 0.94rem;
+  line-height: 1.9;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown > div {
+  gap: 2rem;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown nav {
+  border: 1px solid #cfc6b8;
+  background: #ebe5d6;
+  padding: 0.8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown nav > div:first-child {
+  color: #7f1d1d !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown nav button {
+  color: #57534e !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown h1,
+.scp-as-shell .scp-as-markdown .wiki-markdown h2,
+.scp-as-shell .scp-as-markdown .wiki-markdown h3,
+.scp-as-shell .scp-as-markdown .wiki-markdown h4,
+.scp-as-shell .scp-as-markdown .wiki-markdown h5,
+.scp-as-shell .scp-as-markdown .wiki-markdown h6 {
+  color: #1c1917 !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown h1 {
+  margin-top: 0.3rem !important;
+  border-bottom: 2px solid #292524 !important;
+  padding-bottom: 0.65rem !important;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 800 !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown h2 {
+  border-bottom: 1px solid #bdb4a6 !important;
+  padding-bottom: 0.35rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown h2::before {
+  content: "■ ";
+  color: #991b1b;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown h3,
+.scp-as-shell .scp-as-markdown .wiki-markdown h4 {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-weight: 750 !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown p {
+  color: #292524;
+  text-align: justify;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown strong {
+  color: #1c1917;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown code {
+  border: 1px solid #d6cfc3;
+  background: #e8e2d7 !important;
+  color: #7f1d1d;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown hr {
+  border-color: #bdb4a6 !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown figure {
+  counter-increment: scp-evidence;
+  position: relative;
+  border: 1px solid #c8bfb1;
+  background: #fbfaf7;
+  padding: 0.55rem;
+  box-shadow: 0 5px 13px rgba(41, 37, 36, 0.14);
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown {
+  counter-reset: scp-evidence;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown figure::before {
+  content: "EVIDENCE " counter(scp-evidence, decimal-leading-zero);
+  display: inline-block;
+  margin: -0.55rem 0 0.5rem -0.55rem;
+  padding: 0.28rem 0.55rem;
+  background: #991b1b;
+  color: #fff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown figure img {
+  border: 1px solid #57534e !important;
+  background: #111;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown table {
+  background: #f9f7f2;
+  color: #292524;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown thead {
+  background: #ded7ca !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown th,
+.scp-as-shell .scp-as-markdown .wiki-markdown td {
+  border-color: #bdb4a6 !important;
+}
+
+.scp-as-shell .scp-as-markdown .wiki-markdown button {
+  color: #7f1d1d !important;
+  text-decoration-color: #b91c1c;
+}
+
+/* Desktop dossier intro: let the white cover end at WARNING instead of
+   stretching to the researcher sidebar's natural height. The sidebar is
+   overlaid inside the intro row and scrolls only when its content exceeds
+   the cover height. */
+@media (min-width: 1024px) {
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] {
+    position: relative;
+    display: block !important;
+    padding-left: calc(33.333333% + 1.25rem);
+  }
+
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] > div:first-child {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 33.333333%;
+    min-height: 0;
+  }
+
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] > div:first-child > aside {
+    height: 100% !important;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #333 #0d0d0f;
+  }
+
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] > div:nth-child(2),
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] > div:nth-child(2) > div,
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] > div:nth-child(2) > div > div:last-child {
+    width: 100%;
+    height: auto !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] {
+    padding-left: calc(25% + 1.25rem);
+  }
+
+  .scp-as-shell div[class~="grid-cols-12"][class~="items-stretch"] > div:first-child {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  .scp-as-shell .scp-as-markdown .wiki-markdown {
+    font-size: 0.9rem;
+    line-height: 1.82;
+  }
+
+  .scp-as-shell .scp-as-markdown .wiki-markdown > div {
+    gap: 1rem;
+  }
+
+  .scp-as-shell .scp-as-markdown .wiki-markdown nav {
+    padding: 0.7rem;
+  }
+
+  .scp-as-shell .scp-as-markdown .wiki-markdown h1 {
+    font-size: 1.4rem !important;
+    line-height: 1.35;
+  }
+
+  .scp-as-shell .scp-as-markdown .wiki-markdown h2 {
+    margin-top: 1.7rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5;
+  }
+
+  .scp-as-shell .scp-as-markdown .wiki-markdown p {
+    text-align: left;
+  }
+
+  .scp-as-shell .scp-as-markdown .wiki-markdown figure {
+    float: none !important;
+    width: 100% !important;
+    margin: 1.2rem 0 !important;
+  }
+}
