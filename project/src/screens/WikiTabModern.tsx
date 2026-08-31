@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import {
   AlertCircle,
   AlertTriangle,
@@ -20,6 +19,7 @@ import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, ge
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { NARRATORS, NarratorDialogue, PixelNarrator } from '@/components/wiki/WikiNarrator';
+import { WikiGenerationRevealModal } from '@/components/wiki/WikiGenerationRevealModal';
 import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
 import { GildasChronicleArticle } from '@/components/wiki/GildasChronicleArticle';
 import { HernanEncyclopediaArticle } from '@/components/wiki/HernanEncyclopediaArticle';
@@ -744,47 +744,11 @@ export function WikiTabModern({
         </button>
       )}
 
-      {generationReveal && createPortal((
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#05080E]/95 p-4 backdrop-blur-lg">
-          <div className="hud-scanlines relative w-full max-w-lg space-y-5 rounded-2xl border-2 border-[#06B6D4] bg-[#0F172A] p-5 text-center shadow-[0_0_40px_rgba(6,182,212,0.3)] sm:p-7">
-            <div className="mx-auto w-fit rounded-2xl border-2 border-[#06B6D4] bg-[#07101c] p-1 shadow-[0_0_20px_rgba(6,182,212,0.35)]">
-              <PixelNarrator style={generationReveal.style} />
-            </div>
-
-            <div>
-              <div className="game-ui-font text-[10px] uppercase tracking-wider text-[#06B6D4] sm:text-xs">
-                {NARRATORS[generationReveal.style]?.role}
-              </div>
-              <h3 className="game-ui-font mt-0.5 text-lg font-bold text-[#F8FAFC] sm:text-xl">
-                {NARRATORS[generationReveal.style]?.name}
-              </h3>
-            </div>
-
-            <div className="min-h-[110px] rounded-xl border border-[#1E293B] bg-[#0B1018] p-4 text-left sm:p-5">
-              <p className="text-sm italic leading-relaxed text-[#E2E8F0] sm:text-base">
-                「{typedReveal || '……'}{generationReveal.phase !== 'ready' && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#06B6D4] align-middle" />}」
-              </p>
-            </div>
-
-            {generationReveal.phase !== 'ready' ? (
-              <div className="game-ui-font flex items-center justify-center gap-2 text-[10px] text-[#64748B] sm:text-xs">
-                <Sparkles className="h-4 w-4 animate-spin text-[#06B6D4]" />
-                <span>{generationReveal.phase === 'waiting' ? '年代記を編纂中…… 記録を照合しています' : '編纂結果を確定しています……'}</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={openGeneratedArticle}
-                onMouseEnter={playHoverSound}
-                className="game-ui-font flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#06B6D4] text-sm font-bold tracking-wider text-[#0B1018] shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all hover:bg-[#0891B2] active:scale-95 sm:text-base"
-              >
-                <CheckCircle2 className="h-5 w-5" />
-                <span>編纂完了 // 記事を読む</span>
-              </button>
-            )}
-          </div>
-        </div>
-      ), document.body)}
+      <WikiGenerationRevealModal
+        reveal={generationReveal}
+        typedText={typedReveal}
+        onOpenArticle={openGeneratedArticle}
+      />
 
       {resetTarget && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { playCancelSound(); setResetTarget(false); } }}>
