@@ -9,7 +9,7 @@ import { WorldCard } from '@/components/WorldCard';
 import type { WorldMeta } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
 import type { NavigateFn } from '@/components/Navigation';
-import { buildWorldMeta } from '@/components/world/worldListData';
+import { buildWorldMeta } from '@/lib/worldMeta';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
