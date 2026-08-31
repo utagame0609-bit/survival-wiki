@@ -142,6 +142,44 @@
   text-decoration-color: #b91c1c;
 }
 
+/* Desktop reading pass:
+   Keep Researcher / case-summary framing through WARNING, then let the
+   actual dossier body reclaim the researcher-column width. This preserves
+   the AS header treatment while removing the long unused left gutter. */
+@media (min-width: 1024px) {
+  .scp-as-shell > .grid > main > .mx-auto > div:nth-child(4) {
+    overflow: visible !important;
+  }
+
+  .scp-as-shell > .grid > main > .mx-auto > div:nth-child(4) > div:nth-child(2) > div:nth-child(2) {
+    margin-bottom: 0 !important;
+  }
+
+  .scp-as-shell > .grid > main > .mx-auto > div:nth-child(4) > div:nth-child(2) > :nth-child(n + 3) {
+    position: relative;
+    z-index: 2;
+    left: -18rem;
+    width: calc(100% + 18rem);
+    box-sizing: border-box;
+  }
+
+  .scp-as-shell > .grid > main > .mx-auto > div:nth-child(4) > div:nth-child(2) > :nth-child(n + 3)::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -1.5rem;
+    right: 0;
+    bottom: -1.5rem;
+    left: 0;
+    background: #f5f2ea;
+    pointer-events: none;
+  }
+
+  .scp-as-shell > .grid > main > .mx-auto > div:nth-child(4) > div:nth-child(2) > section:nth-child(3) {
+    padding-top: 1.25rem;
+  }
+}
+
 @media (max-width: 767px) {
   .scp-as-shell .scp-as-markdown .wiki-markdown {
     font-size: 0.9rem;
