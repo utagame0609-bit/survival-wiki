@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Volume2, Waves, Radio, ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Navigation';
-import { BgmCandidateCard, type BgmCandidate } from '@/components/sound/BgmCandidateCard';
+import { BgmCandidateCard } from '@/components/sound/BgmCandidateCard';
 import { SoundCandidateCard } from '@/components/sound/SoundCandidateCard';
-import { BGM_CANDIDATES } from '@/components/sound/BgmCandidates';
+import { BGM_CANDIDATES, type BgmCandidate } from '@/lib/bgmCandidates';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
