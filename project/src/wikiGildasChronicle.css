@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Noto+Serif+JP:wght@400;500;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap');
+
+.gildas-chronicle-root {
+  --gildas-bg: #080d16;
+  --gildas-panel: #0d1420;
+  --gildas-panel-2: #101927;
+  --gildas-amber: #f4b942;
+  --gildas-amber-soft: #f5cf7a;
+  --gildas-text: #e2e8f0;
+  --gildas-muted: #94a3b8;
+  font-family: 'Noto Serif JP', 'Shippori Mincho', serif;
+  color: var(--gildas-text);
+  background: var(--gildas-bg);
+}
+
+.gildas-chronicle-root .gildas-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.gildas-chronicle-root .gildas-display {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+}
+
+.gildas-chronicle-root .gildas-sans {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+}
+
+.gildas-chronicle-root .gildas-photo img {
+  image-rendering: auto;
+}
+
+.gildas-chronicle-root .gildas-photo:hover img {
+  transform: scale(1.025);
+}
+
+.gildas-chronicle-root .gildas-photo img {
+  transition: transform 600ms cubic-bezier(.22,.8,.35,1);
+}
+
+@keyframes gildas-sheet-in {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.gildas-mobile-toc-sheet {
+  animation: gildas-sheet-in 180ms cubic-bezier(.22,.8,.35,1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gildas-chronicle-root *,
+  .gildas-mobile-toc-sheet {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
