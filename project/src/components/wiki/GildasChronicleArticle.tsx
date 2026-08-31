@@ -13,41 +13,16 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { getPhotoUrl } from '@/lib/db';
 import { playHoverSound } from '@/lib/sound';
 import { parseStoredGildasChronicle } from '@/lib/wikiGildas';
-import { GildasPhotoModal, type GildasPhotoItem } from '@/components/wiki/GildasPhotoModal';
+import { GildasPhotoModal } from '@/components/wiki/GildasPhotoModal';
+import { formatGildasRecordedDate, useGildasPhotos, type GildasResolvedPhoto } from '@/components/wiki/useGildasPhotos';
 import '@/wikiGildasChronicle.css';
 
 type LocationLink = {
   name: string;
   onClick: () => void;
 };
-
-type ResolvedPhoto = GildasPhotoItem & {
-  storagePath: string;
-};
-
-function uniqueLocationPhotos(locations: LocationWithPhotos[]) {
-  return locations
-    .flatMap((location) => location.photos.map((photo) => ({ photo, location })))
-    .filter((entry, index, list) => list.findIndex((item) => item.photo.storage_path === entry.photo.storage_path) === index)
-    .sort((a, b) => a.photo.created_at.localeCompare(b.photo.created_at))
-    .slice(0, 5);
-}
-
-function formatRecordedDate(value?: string | null) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
 
 function linkedText(text: string, links: LocationLink[]): ReactNode[] {
   if (!text || links.length === 0) return [text];
@@ -117,7 +92,7 @@ export function GildasChronicleArticle({
   const chronicle = useMemo(() => parseStoredGildasChronicle(content), [content]);
   const [activeChapterId, setActiveChapterId] = useState('');
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
-  const [photos, setPhotos] = useState<ResolvedPhoto[]>([]);
+  const photos = useGildasPhotos(locations, world.name);
   const [photoIndex, setPhotoIndex] = useState<number | null>(null);
   const [heroHeight, setHeroHeight] = useState<number | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
@@ -126,29 +101,6 @@ export function GildasChronicleArticle({
   useEffect(() => {
     setActiveChapterId(chronicle?.chapters[0]?.id ?? '');
   }, [chronicle]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const entries = uniqueLocationPhotos(locations);
-    const resolve = async () => {
-      const resolved = await Promise.all(entries.map(async ({ photo, location }, index) => ({
-        id: photo.id,
-        storagePath: photo.storage_path,
-        url: await getPhotoUrl(photo.storage_path),
-        title: location.name || `記録写真 ${index + 1}`,
-        alt: `${location.name || world.name}の記録写真 ${index + 1}`,
-        locationName: location.name || undefined,
-        timestamp: formatRecordedDate(photo.created_at) || undefined,
-      })));
-      if (!cancelled) setPhotos(resolved);
-    };
-    void resolve().catch(() => {
-      if (!cancelled) setPhotos([]);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [locations, world.name]);
 
   useEffect(() => {
     if (!chronicle || typeof IntersectionObserver === 'undefined') return;
@@ -192,7 +144,7 @@ export function GildasChronicleArticle({
   const companions = Array.from(new Set(locations.flatMap((location) => location.members.map((member) => member.name)).filter(Boolean)));
   const activeChapter = chronicle.chapters.find((chapter) => chapter.id === activeChapterId) ?? chronicle.chapters[0];
   const heroPhoto = photos[0];
-  const chapterPhotos = new Map<number, ResolvedPhoto[]>();
+  const chapterPhotos = new Map<number, GildasResolvedPhoto[]>();
   const assignedPhotoNumbers = new Set<number>();
   if (heroPhoto) assignedPhotoNumbers.add(1);
 
@@ -253,7 +205,7 @@ export function GildasChronicleArticle({
           {earliestTimestamp && (
             <div className="flex items-center gap-1.5 rounded border border-slate-800 bg-slate-900/80 px-2.5 py-1 font-mono text-xs text-slate-300">
               <Calendar className="h-3.5 w-3.5 text-amber-400/80" />
-              <span>{formatRecordedDate(earliestTimestamp)}</span>
+              <span>{formatGildasRecordedDate(earliestTimestamp)}</span>
             </div>
           )}
 
