@@ -1,22 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  BookOpen,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
-import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { NARRATORS, NarratorDialogue } from '@/components/wiki/WikiNarrator';
 import { WikiCompilerHome } from '@/components/wiki/WikiCompilerHome';
 import { WikiGenerationRevealModal } from '@/components/wiki/WikiGenerationRevealModal';
 import { WikiArticleToolbar } from '@/components/wiki/WikiArticleToolbar';
 import { WikiArticleActions } from '@/components/wiki/WikiArticleActions';
 import { WikiResetConfirmModal } from '@/components/wiki/WikiResetConfirmModal';
-import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
-import { GildasChronicleArticle } from '@/components/wiki/GildasChronicleArticle';
-import { HernanEncyclopediaArticle } from '@/components/wiki/HernanEncyclopediaArticle';
+import { WikiArticleContent } from '@/components/wiki/WikiArticleContent';
 import { scpDossierToPlainText } from '@/lib/wikiScp';
 import { gildasChronicleToPlainText, parseStoredGildasChronicle } from '@/lib/wikiGildas';
 import { hernanArticleToPlainText, parseStoredHernanArticle } from '@/lib/wikiHernan';
@@ -50,12 +46,6 @@ const WAITING_LINES: Record<WikiStyleId, string> = {
   wikipedia: '少し待ちたまえ。君の散らかった足跡を、せめて学術資料として読める形に整えているところだ。',
   scp: 'そのまま待機しろ。君の行動記録を機密資料として成立させるため、現在照合処理を行っている。',
   ancient: 'しばし待つがよい。旅人よ……そなたの足跡を、後世に残す物語へと編み直しておる。',
-};
-
-const styleMeta: Record<WikiStyleId, { title: string; shortTitle: string; subtitle: string }> = {
-  wikipedia: { title: '百科事典 Wiki風', shortTitle: '百科事典', subtitle: '体系的・客観的解説' },
-  scp: { title: '特異事象報告 (SCP風)', shortTitle: 'SCP報告', subtitle: '調査員ログ・異常観測' },
-  ancient: { title: '古代伝承の詩', shortTitle: '古代伝承', subtitle: '語り継がれる叙事詩・神話' },
 };
 
 function uniquePhotos(locations: LocationWithPhotos[]) {
@@ -439,7 +429,6 @@ export function WikiTabModern({
   if (loading) return <Spinner label="旅の書（Wiki）を読み込み中" />;
 
   const hasArticle = article !== null;
-  const isWikipedia = style === 'wikipedia';
   const narrator = style ? NARRATORS[style] : null;
   const locationLinks = locations.map((location) => ({
     name: location.name,
@@ -474,69 +463,18 @@ export function WikiTabModern({
 
           {style !== 'scp' && !isStructuredGildas && !isStructuredHernan && <NarratorDialogue style={style} quote={parsedArticle.line} />}
 
-          <section className="hud-bracket min-w-0 max-w-full overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
-            <div className="border-b border-[#1E293B] bg-[#0B1018] px-4 py-2.5 sm:px-5">
-              <div className="game-ui-font flex items-center gap-2 text-[10px] tracking-wider text-[#64748B] sm:text-xs">
-                <BookOpen className="h-3.5 w-3.5 text-[#06B6D4]" />
-                <span>ARCHIVED WIKI ARTICLE // {styleMeta[style].shortTitle}</span>
-              </div>
-            </div>
-
-            {style === 'scp' ? (
-              <ScpDossierArticle
-                world={world}
-                locations={locations}
-                content={articleWithPhotos}
-                mainPhotoUrl={mainPhotoUrl}
-                narratorLine={parsedArticle.line}
-                locationLinks={locationLinks}
-              />
-            ) : isStructuredGildas ? (
-              <GildasChronicleArticle
-                world={world}
-                locations={locations}
-                content={parsedArticle.content}
-                narratorLine={parsedArticle.line}
-                locationLinks={locationLinks}
-              />
-            ) : isStructuredHernan ? (
-              <HernanEncyclopediaArticle
-                world={world}
-                locations={locations}
-                content={parsedArticle.content}
-                narratorLine={parsedArticle.line}
-                locationLinks={locationLinks}
-              />
-            ) : isWikipedia ? (
-              <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border border-[#a2a9b1] bg-white text-[#202122] sm:mx-4">
-                <div className="flex min-w-0 items-center gap-3 border-b border-[#c8ccd1] px-4 py-3 sm:px-6">
-                  {mainPhotoUrl && <img src={mainPhotoUrl} alt="代表写真" className="h-10 w-10 shrink-0 border border-[#c8ccd1] object-cover" />}
-                  <div className="min-w-0">
-                    <div className="truncate font-serif text-lg sm:text-2xl">ウタペディア</div>
-                    <div className="truncate text-[10px] text-[#54595d]">Survival Wiki // {world.name}</div>
-                  </div>
-                </div>
-                <div className="grid min-w-0 max-w-full grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-                  <div className="min-w-0 max-w-full overflow-x-hidden">
-                    <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} />
-                  </div>
-                  <aside className="h-fit min-w-0 border border-[#c8ccd1] bg-[#f8f9fa] p-3 text-sm">
-                    <div className="border-b border-[#c8ccd1] pb-2 font-semibold">基本情報</div>
-                    <div className="mt-2 space-y-2">
-                      <div><b>名称</b><div className="break-words">{world.name}</div></div>
-                      <div><b>プレイヤー</b><div className="break-words">{world.player ?? '不明'}</div></div>
-                      <div><b>記録地点</b><div>{locations.length}</div></div>
-                      <div><b>参加メンバー</b><div>{world.members.length}</div></div>
-                    </div>
-                  </aside>
-                </div>
-              </article>
-            ) : (
-              <article className="mx-3 mb-4 mt-4 min-w-0 max-w-full overflow-x-hidden border-2 border-orange-500/60 bg-[#160e09] p-4 text-[#ead8bf] sm:mx-4 sm:p-6">
-                <MarkdownRenderer content={articleWithPhotos} locationLinks={locationLinks} className="font-serif" />
-              </article>
-            )}
-          </section>
+          <WikiArticleContent
+            style={style}
+            world={world}
+            locations={locations}
+            parsedContent={parsedArticle.content}
+            articleWithPhotos={articleWithPhotos}
+            mainPhotoUrl={mainPhotoUrl}
+            narratorLine={parsedArticle.line}
+            locationLinks={locationLinks}
+            isStructuredGildas={isStructuredGildas}
+            isStructuredHernan={isStructuredHernan}
+          />
 
           <WikiArticleActions
             ref={footerRef}
