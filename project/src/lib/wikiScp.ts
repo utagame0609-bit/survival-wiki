@@ -226,18 +226,18 @@ export function scpDossierToPlainText(content: string): string | null {
 export const SCP_STRUCTURED_OUTPUT_INSTRUCTIONS = `
 【SCP A案 / DECLASSIFIED DOSSIER 構造化出力ルール】
 この指示は上記のMarkdown出力指定より優先します。Markdown本文は出力しないでください。
-返答は必ずJSONオブジェクト1個だけにしてください。コードフェンス、前置き、後書きは禁止です。
+返答は必ずJSONオブジェクト1個だけにしてください。コードフェンス、前置き、後書きは禁止です。指定外のキーを追加しないでください。
 
 出力スキーマ:
 {
   "title": "文書タイトル",
-  "itemNumber": "SCP-XXXX-JP等の項目番号",
-  "caseId": "CASE-XXXX等の案件コード",
+  "itemNumber": "Dossier内の管理記号",
+  "caseId": "今回の記事固有の案件コード",
   "objectClass": "SAFE | EUCLID | KETER | ANOMALOUS のいずれか",
   "securityClearance": 1から5の整数,
   "warningNotice": "機密資料の警告文",
-  "containmentProcedure": "特別収容プロトコル。1〜3段落相当の文章",
-  "executiveSummary": "調書要旨。150〜300文字程度",
+  "containmentProcedure": "組織が管理する場合の仮想・暫定手順。1〜3段落相当",
+  "executiveSummary": "事実・主要仮説・現在評価をまとめる150〜300文字程度の調書要旨",
   "sections": [
     {
       "id": "英数字とハイフンの一意なID",
@@ -247,19 +247,35 @@ export const SCP_STRUCTURED_OUTPUT_INSTRUCTIONS = `
       "paragraphs": ["本文段落1", "本文段落2"],
       "callout": { "type": "WARNING | PROTOCOL | NOTE | REDACTED", "label": "短いラベル", "text": "任意の注記" },
       "logEntries": [
-        { "time": "記録時刻または時系列ラベル", "speaker": "任意", "text": "観察ログ", "severity": "NORMAL | CAUTION | CRITICAL" }
+        { "time": "入力に存在する時刻または時系列ラベル", "speaker": "入力に存在する話者または観測記録", "text": "観察ログ", "severity": "NORMAL | CAUTION | CRITICAL" }
       ]
     }
   ],
-  "narratorLine": "Dr.アークが今回の記録された行動・結果・写真の状況のどれか一つを拾い、真顔で軽くツッコむ40〜70文字程度の一言"
+  "narratorLine": "今回固有の事実を一つ拾い、研究員として筋の通った判断と案件化しすぎの落差を同居させる40〜70文字程度のDr.アークの一言"
 }
 
 必須条件:
 - title / itemNumber / caseId / objectClass / securityClearance / warningNotice / containmentProcedure / executiveSummary / sections / narratorLine は必須。
-- sectionsは3〜6章を基本とし、記録量が少ない場合は無理に水増ししない。
+- sectionsは2〜6章程度。情報が少ない場合は2〜3章でよく、無理に水増ししない。
 - ユーザー入力のロケーション名は一文字も変更しない。
-- 記録に存在しない出来事を事実として断定しない。推測・解釈・世界観演出を加える場合は「推測される」「可能性を排除できない」「記録上は確認不能」等、推測と分かる書き方にする。
-- 座標、同行者、写真の有無などの実データはUI側で表示するため、JSON内で捏造しない。
-- 写真URLやStorage pathを本文へ出力しない。
-- narratorLineは記事本文の要約ではなく、実際の記録を一つだけ拾ったDr.アークらしい乾いたツッコミとする。プレイヤーの知性・能力・容姿・人格を否定してはいけない。Dr.アーク自身が少し過剰に案件化している愛嬌がにじむ内容を優先する。
+- 記録に存在しない出来事、人物、職員、敵、怪物、会話、調査結果、被害、超常現象を事実として追加しない。
+- 異常仮説、潜在リスク、分類候補、仮想プロトコルは大胆に作ってよいが、「可能性」「暫定」「組織が管理する場合」など事実と区別できる書き方にする。
+- 座標、同行者、写真の有無などの実データはUI側でも表示するため、入力にない値をJSON内で捏造しない。
+- 写真URL、Storage path、内部IDを本文へ出力しない。
+
+分類・演出の運用:
+- objectClassは派手さではなく理解度・予測可能性・管理難度で決める。SAFEは理解され管理容易、EUCLIDは情報不足や条件依存、KETERは入力上継続的かつ重大な管理困難性が確認できる場合、ANOMALOUSは通常分類が適さないか判定保留の場合に使う。
+- securityClearanceとseverityを笑いのためだけに最大値へ上げない。毎回KETER / Clearance 5 / CRITICALにしない。
+- warningNoticeは入力事実または明確な潜在リスクに基づく。存在しない危険を暗示しない。
+- containmentProcedureは「組織が管理する場合」の仮想・暫定手順であり、すでに封鎖・監視・押収等を実施した事実として書かない。
+- executiveSummaryは事実・主要仮説・現在評価を簡潔にまとめ、オチを詰め込みすぎない。
+- calloutは必要な場合だけ使う。WARNINGは事実または潜在リスク、PROTOCOLは仮想手順、NOTEは普通の説明・反証・研究員注記に使用する。
+- REDACTEDは入力上、本当に伏せる対象がある場合だけ使う。情報不足を架空の秘密や隠蔽へ変換しない。
+- logEntriesは入力に実際の時刻・順序・話者がある場合だけ使う。架空の時刻、職員、会話を作らない。単なる記録ならspeakerを「観測記録」等の非人物ラベルにできる。
+
+Dr.アークv2の文章運用:
+- 通常の小規模記録では「案件化 → 暫定評価 → 過剰だが筋の通った対策 → 反証 → 普通の事情へ着地 → 条件付きで記録を残す」の落差を原則1回使う。
+- ただし本当に危険、不気味、重大な記録では、無理にSAFEや通常事象へ格下げしない。入力上の危険性を真面目に継続評価し、笑いを弱める。
+- 一記事で脅威評価を何度も上下させない。「解析不能」「異常な執着」「可能性を排除できない」だけで笑いを作らない。
+- narratorLineは記事本文の要約ではなく、今回のロケーション名、数量、反復、失敗、未完成、結果など一つの固有事実を拾う。プレイヤーの知性・能力・容姿・人格を否定しない。毎回「監視継続」で終わらせない。
 `;
