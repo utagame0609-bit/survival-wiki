@@ -26,7 +26,6 @@ export function TimelineRecordsView({
   const [sortOrder, setSortOrder] = useState<TimelineSortOrder>('newest');
   const { totalPhotos, groupedByDay } = useTimelineRecordGroups({
     locations,
-    members: world.members,
     searchQuery,
     sortOrder,
   });
