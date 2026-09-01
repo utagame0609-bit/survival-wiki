@@ -1,64 +1,21 @@
-import { ChevronDown, Disc, Settings, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ChevronDown, Disc, X } from 'lucide-react';
+import { useState } from 'react';
 import { SoundStudioPanel } from '@/components/SoundStudioPanel';
 import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import { BasicSoundSettings } from '@/components/BasicSoundSettings';
 import { WorldBgmChannelSettings } from '@/components/WorldBgmChannelSettings';
 import { SettingsAppActions } from '@/components/SettingsAppActions';
 
-type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
-type SettingsModalProps = { onClose: () => void; installPrompt: BeforeInstallPromptEvent | null; onInstallPromptUsed: () => void };
-
-type SettingsButtonProps = {
-  showButton?: boolean;
+export type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 };
 
-export function SettingsButton({ showButton = true }: SettingsButtonProps) {
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-    const handleOpenSettings = () => {
-      playConfirmSound();
-      setSettingsOpen(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('survival-wiki:settings', handleOpenSettings);
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('survival-wiki:settings', handleOpenSettings);
-    };
-  }, []);
-
-  return (
-    <>
-      {showButton && (
-        <button
-          type="button"
-          onClick={() => { playConfirmSound(); setSettingsOpen(true); }}
-          aria-label="設定"
-          onMouseEnter={playHoverSound}
-          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center border-2 border-amber-500/80 bg-[#0d1627] text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-[3px] hover:bg-amber-500 hover:text-slate-950 active:scale-95 cursor-pointer"
-        >
-          <Settings className="h-5 w-5" />
-        </button>
-      )}
-
-      {settingsOpen && (
-        <SettingsModal
-          onClose={() => setSettingsOpen(false)}
-          installPrompt={installPrompt}
-          onInstallPromptUsed={() => setInstallPrompt(null)}
-        />
-      )}
-    </>
-  );
-}
+type SettingsModalProps = {
+  onClose: () => void;
+  installPrompt: BeforeInstallPromptEvent | null;
+  onInstallPromptUsed: () => void;
+};
 
 export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: SettingsModalProps) {
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
@@ -70,7 +27,16 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
     window.dispatchEvent(new CustomEvent('survival-wiki:settings-closed'));
   };
 
-  if (soundStudioOpen) return <SoundStudioPanel onBack={() => { setSoundStudioOpen(false); window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed')); }} />;
+  if (soundStudioOpen) {
+    return (
+      <SoundStudioPanel
+        onBack={() => {
+          setSoundStudioOpen(false);
+          window.dispatchEvent(new CustomEvent('survival-wiki:sound-studio-closed'));
+        }}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 font-mono backdrop-blur-sm">
