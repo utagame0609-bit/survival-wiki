@@ -61,7 +61,9 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           <section className="space-y-3.5 rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3.5">
             <div className="text-xs font-bold text-[#F59E0B]">16-bit 音響システム設定</div>
             <BasicSoundSettings />
-            <WorldBgmChannelSettings />
+            <div className="hidden md:block">
+              <WorldBgmChannelSettings />
+            </div>
           </section>
 
           <section className="overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B1018]/60">
@@ -77,7 +79,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
             >
               <div className="min-w-0">
                 <div className="text-xs font-bold tracking-wide text-[#F8FAFC]">詳細設定</div>
-                <div className="mt-0.5 truncate text-[10px] text-[#64748B]">SOUND STUDIO / PWA / APP ACTIONS</div>
+                <div className="mt-0.5 truncate text-[10px] text-[#64748B]">BGM CHANNELS / SOUND STUDIO / PWA / APP ACTIONS</div>
               </div>
               {advancedOpen ? (
                 <ChevronUp className="h-4 w-4 shrink-0 text-[#F59E0B]" />
@@ -88,6 +90,10 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
 
             {advancedOpen && (
               <div className="space-y-4 border-t border-[#1E293B] p-3.5">
+                <div className="md:hidden">
+                  <WorldBgmChannelSettings />
+                </div>
+
                 <button
                   type="button"
                   onClick={() => {
