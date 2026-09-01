@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playCancelSound } from '@/lib/sound';
+import type { UserLastWorldTab } from '@/lib/userLastView';
 
 type Screen =
   | { name: 'top' }
   | { name: 'worldList'; gameId: string; gameName: string }
-  | { name: 'world'; worldId: string; worldName: string };
+  | { name: 'world'; gameId: string; worldId: string; worldName: string; initialTab?: UserLastWorldTab };
 
 type HomeScreen =
   | { name: 'top' }
