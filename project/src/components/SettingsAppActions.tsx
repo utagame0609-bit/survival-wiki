@@ -1,11 +1,7 @@
 import { Download, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import type { BeforeInstallPromptEvent } from '@/lib/pwaInstall';
 import { playCancelSound, playHoverSound, playToggleSound } from '@/lib/sound';
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-};
 
 type SettingsAppActionsProps = {
   installPrompt: BeforeInstallPromptEvent | null;
