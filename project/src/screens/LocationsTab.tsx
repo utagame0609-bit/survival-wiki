@@ -8,7 +8,7 @@ import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { buildCollectionItems, type CollectionItem } from '@/lib/chestCollection';
 import { TimelineRecordsView } from '@/components/TimelineRecordsView';
 import { SnsShareModal } from '@/components/SnsShareModal';
-import { useLocationsData, type LocationSaveInput } from '@/components/useLocationsData';
+import { useLocationsData, type LocationSaveInput } from '@/hooks/useLocationsData';
 import {
   playRecordSelectSound,
   playModalCloseSound,
