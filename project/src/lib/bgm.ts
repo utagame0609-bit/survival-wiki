@@ -3,7 +3,8 @@ import { getBgmChannelSettings, subscribeToBgmChannelSettings } from './bgmSetti
 import { BGM_OUTPUT_GAIN, NPC_BGM_OUTPUT_GAIN } from './audioMaster';
 import { soundEngine } from './soundEngine';
 
-type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
+export type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
+export type BgmTarget = { type: 'world' } | { type: 'npc'; id: NpcBgmId } | null;
 interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
 
 const DEFAULT_BGM_VOLUME = 0.3;
@@ -156,13 +157,17 @@ function createAncientBgm(): ActiveNpcBgm {
   return { id: 'npc_bgm_ancient', intervalId: interval, stop: () => window.clearInterval(interval) };
 }
 
+export function getActiveBgmTarget(): BgmTarget {
+  if (activeNpcBgm) return { type: 'npc', id: activeNpcBgm.id };
+  if (bgmSequencer.getIsPlaying()) return { type: 'world' };
+  return null;
+}
+
 export function playNpcBgm(id: NpcBgmId): void {
   soundEngine.init();
+  if (bgmSequencer.getIsPlaying()) stopWorldBgm(0);
   syncVolume();
-  if (activeNpcBgm?.id === id) {
-    stopNpcBgm();
-    return;
-  }
+  if (activeNpcBgm?.id === id) return;
   stopNpcBgm();
   if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm();
   if (id === 'npc_bgm_scp') activeNpcBgm = createScpBgm();
@@ -176,6 +181,7 @@ export function stopNpcBgm(): void {
 }
 
 export function playWorldBgm(): void {
+  stopNpcBgm();
   ensureSettingsSubscription();
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
@@ -216,6 +222,20 @@ export function stopWorldBgm(fadeMs = 300): void {
   } else {
     fadeTimerId = window.setTimeout(fade, stepMs);
   }
+}
+
+export function stopAllBgm(fadeMs = 0): void {
+  stopNpcBgm();
+  stopWorldBgm(fadeMs);
+}
+
+export function restoreBgmTarget(target: BgmTarget): void {
+  if (!target) return;
+  if (target.type === 'world') {
+    playWorldBgm();
+    return;
+  }
+  playNpcBgm(target.id);
 }
 
 export function isWorldBgmPlaying(): boolean {
