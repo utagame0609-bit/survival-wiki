@@ -10,7 +10,11 @@ export type UserLastView = {
   worldTab: UserLastWorldTab;
 };
 
+let lastViewSaveQueue: Promise<void> = Promise.resolve();
+
 export async function loadUserLastView(): Promise<UserLastView | null> {
+  await lastViewSaveQueue.catch(() => undefined);
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -34,32 +38,36 @@ export async function loadUserLastView(): Promise<UserLastView | null> {
   };
 }
 
-async function saveUserLastView(view: UserLastView): Promise<void> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+function queueUserLastViewSave(view: UserLastView): Promise<void> {
+  lastViewSaveQueue = lastViewSaveQueue.catch(() => undefined).then(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) return;
+    if (!user) return;
 
-  const { error } = await supabase
-    .from('user_settings')
-    .upsert(
-      {
-        user_id: user.id,
-        last_screen: view.screen,
-        last_game_id: view.gameId,
-        last_world_id: view.worldId,
-        last_world_tab: view.worldTab,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' },
-    );
+    const { error } = await supabase
+      .from('user_settings')
+      .upsert(
+        {
+          user_id: user.id,
+          last_screen: view.screen,
+          last_game_id: view.gameId,
+          last_world_id: view.worldId,
+          last_world_tab: view.worldTab,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      );
 
-  if (error) throw error;
+    if (error) throw error;
+  });
+
+  return lastViewSaveQueue;
 }
 
 export function saveUserWorldListView(gameId: string): Promise<void> {
-  return saveUserLastView({
+  return queueUserLastViewSave({
     screen: 'worldList',
     gameId,
     worldId: null,
@@ -68,7 +76,7 @@ export function saveUserWorldListView(gameId: string): Promise<void> {
 }
 
 export function saveUserWorldView(gameId: string, worldId: string, worldTab: UserLastWorldTab): Promise<void> {
-  return saveUserLastView({
+  return queueUserLastViewSave({
     screen: 'world',
     gameId,
     worldId,
