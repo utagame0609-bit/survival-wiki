@@ -2,14 +2,10 @@ import { ChevronDown, Disc, X } from 'lucide-react';
 import { useState } from 'react';
 import { SoundStudioPanel } from '@/components/SoundStudioPanel';
 import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
+import type { BeforeInstallPromptEvent } from '@/lib/pwaInstall';
 import { BasicSoundSettings } from '@/components/BasicSoundSettings';
 import { WorldBgmChannelSettings } from '@/components/WorldBgmChannelSettings';
 import { SettingsAppActions } from '@/components/SettingsAppActions';
-
-export type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-};
 
 type SettingsModalProps = {
   onClose: () => void;
