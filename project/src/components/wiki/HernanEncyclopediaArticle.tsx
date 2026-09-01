@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Calendar, MapPin, Users, X } from 'lucide-react';
+import { BookOpen, Calendar, MapPin, Users } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { parseStoredHernanArticle } from '@/lib/wikiHernan';
 import { HernanArticleBody, renderHernanLinkedText, type HernanLocationLink } from '@/components/wiki/HernanArticleBody';
 import { HernanDesktopTableOfContents, HernanMobileTableOfContents } from '@/components/wiki/HernanTableOfContents';
+import { HernanImageViewer } from '@/components/wiki/HernanImageViewer';
 import { formatHernanRecordedDate, useHernanPhotos } from '@/components/wiki/useHernanPhotos';
 
 export function HernanEncyclopediaArticle({
@@ -42,23 +43,11 @@ export function HernanEncyclopediaArticle({
     return () => observer.disconnect();
   }, [article]);
 
-  useEffect(() => {
-    if (selectedPhoto === null) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSelectedPhoto(null);
-      if (photos.length > 1 && event.key === 'ArrowLeft') setSelectedPhoto((current) => current === null ? null : (current - 1 + photos.length) % photos.length);
-      if (photos.length > 1 && event.key === 'ArrowRight') setSelectedPhoto((current) => current === null ? null : (current + 1) % photos.length);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPhoto, photos.length]);
-
   if (!article) return null;
 
   const onlyLocation = locations.length === 1 ? locations[0] : null;
   const earliestTimestamp = locations.map((location) => location.created_at).filter(Boolean).sort()[0];
   const companions = Array.from(new Set(locations.flatMap((location) => location.members.map((member) => member.name)).filter(Boolean)));
-  const selected = selectedPhoto === null ? null : photos[selectedPhoto];
 
   const goToSection = (id: string) => {
     setMobileTocOpen(false);
@@ -135,23 +124,12 @@ export function HernanEncyclopediaArticle({
         />
       </div>
 
-      {selected && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 p-3 backdrop-blur-sm" onClick={() => setSelectedPhoto(null)}>
-          <div className="w-full max-w-5xl bg-white p-3 shadow-2xl sm:p-4" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-2 flex items-center justify-between gap-2 border-b border-[#a2a9b1] pb-2">
-              <div className="min-w-0 truncate font-serif text-sm text-neutral-800 sm:text-base">図{selectedPhoto! + 1}：{selected.title}</div>
-              <button type="button" onClick={() => setSelectedPhoto(null)} className="shrink-0 p-1 text-neutral-500 hover:text-neutral-900" aria-label="画像を閉じる"><X className="h-5 w-5" /></button>
-            </div>
-            <div className="flex max-h-[72vh] items-center justify-center bg-neutral-950"><img src={selected.url} alt={selected.alt} className="max-h-[72vh] max-w-full object-contain" /></div>
-            {(selected.locationName || selected.timestamp) && <div className="mt-2 font-mono text-[11px] text-neutral-500">{[selected.locationName, selected.timestamp].filter(Boolean).join(' • ')}</div>}
-            {photos.length > 1 && (
-              <div className="mt-3 flex gap-1.5 overflow-x-auto border-t border-[#eaecf0] pt-3">
-                {photos.map((photo, index) => <button key={photo.id} type="button" onClick={() => setSelectedPhoto(index)} className={`h-12 w-16 shrink-0 overflow-hidden border ${selectedPhoto === index ? 'border-[#0645ad] ring-1 ring-[#0645ad]' : 'border-[#c8ccd1]'}`}><img src={photo.url} alt="" className="h-full w-full object-cover" /></button>)}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <HernanImageViewer
+        photos={photos}
+        selectedIndex={selectedPhoto}
+        onClose={() => setSelectedPhoto(null)}
+        onSelectIndex={setSelectedPhoto}
+      />
     </article>
   );
 }
