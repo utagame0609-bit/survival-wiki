@@ -57,7 +57,7 @@ export function TimelineRecordsToolbar({
           title="並び順を切り替え"
         >
           <ArrowUpDown className="h-3.5 w-3.5 text-[#94A3B8]" />
-          <span>{sortOrder === 'newest' ? 'NEWEST' : 'OLDEST'}</span>
+          <span>{sortOrder === 'newest' ? '新しい順' : '古い順'}</span>
         </button>
 
         <div className="flex items-center gap-2 rounded border border-[#334155] bg-[#0B1018] px-2.5 py-1.5">
@@ -70,9 +70,9 @@ export function TimelineRecordsToolbar({
               className="cursor-pointer bg-transparent text-[#94A3B8] outline-none"
               aria-label="記録年で絞り込み"
             >
-              <option value="" className="bg-[#0B1018] text-[#F8FAFC]">YEAR</option>
+              <option value="" className="bg-[#0B1018] text-[#F8FAFC]">全年</option>
               {availableYears.map((year) => (
-                <option key={year} value={year} className="bg-[#0B1018] text-[#F8FAFC]">{year}</option>
+                <option key={year} value={year} className="bg-[#0B1018] text-[#F8FAFC]">{year}年</option>
               ))}
             </select>
             <span>/</span>
@@ -84,9 +84,9 @@ export function TimelineRecordsToolbar({
               className="cursor-pointer bg-transparent text-[#94A3B8] outline-none disabled:text-[#475569]"
               aria-label="記録月で絞り込み"
             >
-              <option value="" className="bg-[#0B1018] text-[#F8FAFC]">ALL</option>
+              <option value="" className="bg-[#0B1018] text-[#F8FAFC]">全月</option>
               {availableMonths.map((month) => (
-                <option key={month} value={month} className="bg-[#0B1018] text-[#F8FAFC]">{month.padStart(2, '0')}</option>
+                <option key={month} value={month} className="bg-[#0B1018] text-[#F8FAFC]">{Number(month)}月</option>
               ))}
             </select>
           </div>
@@ -105,7 +105,7 @@ export function TimelineRecordsToolbar({
           <Package className="h-4 w-4 text-[#F59E0B]" />
           <span>CHEST</span>
           <span className="rounded bg-[#F59E0B]/20 px-1.5 font-mono text-[10px] text-[#F59E0B]">
-            {totalPhotos}
+            {totalPhotos}枚
           </span>
         </button>
       </div>
