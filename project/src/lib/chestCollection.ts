@@ -5,6 +5,14 @@ export type CollectionItem = {
   storagePath: string;
 };
 
+type CheckpointLocation = LocationWithPhotos & {
+  is_checkpoint?: boolean;
+};
+
+export function isCheckpointCollectionLocation(location: LocationWithPhotos): boolean {
+  return Boolean((location as CheckpointLocation).is_checkpoint);
+}
+
 export function buildCollectionItems(locations: LocationWithPhotos[]): CollectionItem[] {
   return locations
     .flatMap((location) =>
