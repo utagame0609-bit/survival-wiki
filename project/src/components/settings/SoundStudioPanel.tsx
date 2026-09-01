@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sparkles, Volume2, Waves, X } from 'lucide-react';
 import { BgmCandidateCard } from '@/components/sound/BgmCandidateCard';
 import { SoundCandidateCard } from '@/components/sound/SoundCandidateCard';
@@ -6,23 +6,26 @@ import { BGM_CANDIDATES, type BgmCandidate } from '@/lib/bgmCandidates';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
-import { isWorldBgmPlaying, playWorldBgm, stopWorldBgm } from '@/lib/bgm';
+import { getActiveBgmTarget, isWorldBgmPlaying, playWorldBgm, restoreBgmTarget, stopAllBgm, stopWorldBgm, type BgmTarget } from '@/lib/bgm';
 import { playCancelSound, playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   const [reverb, setReverb] = useState<number>(() => Math.round(getStoredReverbAmount() * 100));
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activePlayingId, setActivePlayingId] = useState<string | null>(null);
+  const previousBgmRef = useRef<BgmTarget>(null);
 
   useEffect(() => subscribeToReverbAmount((value) => setReverb(Math.round(value * 100))), []);
   useEffect(() => subscribeSoundState((id, isPlaying) => setActivePlayingId(isPlaying ? id : null)), []);
   useEffect(() => {
-    stopWorldBgm(0);
+    previousBgmRef.current = getActiveBgmTarget();
+    stopAllBgm(0);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       stopActiveAudio();
-      stopWorldBgm(0);
+      stopAllBgm(0);
+      restoreBgmTarget(previousBgmRef.current);
       document.body.style.overflow = previousOverflow;
     };
   }, []);
