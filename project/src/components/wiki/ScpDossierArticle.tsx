@@ -38,13 +38,13 @@ export function ScpDossierArticle({ world, locations, content, mainPhotoUrl, nar
   const [declassifiedMode, setDeclassifiedMode] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<ScpEvidenceView | null>(null);
   const { evidencePhotos, activeCarouselIdx, setActiveCarouselIdx } = useScpEvidencePhotos(locations);
-  const relatedLocationLinks = useMemo<LocationLink[]>(() => locationLinks.map((link) => {
-    const evidencePhoto = evidencePhotos.find((photo) => photo.title === link.name);
-    if (!evidencePhoto) return link;
-    return {
+  const relatedLocationLinks = useMemo<LocationLink[]>(() => evidencePhotos.flatMap((photo) => {
+    const link = locationLinks.find((candidate) => candidate.name === photo.title);
+    if (!link) return [];
+    return [{
       ...link,
-      onClick: () => setSelectedPhoto(evidencePhoto),
-    };
+      onClick: () => setSelectedPhoto(photo),
+    }];
   }), [locationLinks, evidencePhotos]);
 
   if (!dossier) {
