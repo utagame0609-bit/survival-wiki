@@ -7,7 +7,7 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import { WorldCard } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
-import { useWorldListData } from '@/components/useWorldListData';
+import { useWorldListData } from '@/hooks/useWorldListData';
 import type { NavigateFn } from '@/lib/screenNavigation';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
