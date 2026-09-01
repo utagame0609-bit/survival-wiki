@@ -5,12 +5,31 @@ import { soundEngine } from './soundEngine';
 
 type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
 interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
+type BgmResumeTarget = { type: 'world' } | { type: 'npc'; id: NpcBgmId } | null;
 
 const DEFAULT_BGM_VOLUME = 0.3;
+const BGM_ENABLED_STORAGE_KEY = 'survival-wiki:bgm-enabled';
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let fadeTimerId: number | null = null;
 let settingsUnsubscribe: (() => void) | null = null;
 let activeNpcBgm: ActiveNpcBgm | null = null;
+let resumeTarget: BgmResumeTarget = null;
+let bgmEnabled = readStoredBgmEnabled();
+
+function readStoredBgmEnabled(): boolean {
+  if (typeof window === 'undefined') return true;
+  return window.localStorage.getItem(BGM_ENABLED_STORAGE_KEY) !== 'false';
+}
+
+function persistBgmEnabled(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(BGM_ENABLED_STORAGE_KEY, String(bgmEnabled));
+}
+
+function notifyBgmEnabledChanged(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('survival-wiki:bgm-enabled-changed', { detail: bgmEnabled }));
+}
 
 function syncChannels(): void {
   bgmSequencer.channels = getBgmChannelSettings();
@@ -28,6 +47,10 @@ export function setMasterBgmVolume(value: number): number {
 
 export function getMasterBgmVolume(): number {
   return masterBgmVolume;
+}
+
+export function isBgmEnabled(): boolean {
+  return bgmEnabled;
 }
 
 function ensureSettingsSubscription(): void {
@@ -156,26 +179,25 @@ function createAncientBgm(): ActiveNpcBgm {
   return { id: 'npc_bgm_ancient', intervalId: interval, stop: () => window.clearInterval(interval) };
 }
 
-export function playNpcBgm(id: NpcBgmId): void {
+function startNpcBgm(id: NpcBgmId): void {
   soundEngine.init();
   syncVolume();
-  if (activeNpcBgm?.id === id) {
-    stopNpcBgm();
-    return;
+  if (activeNpcBgm) {
+    activeNpcBgm.stop();
+    activeNpcBgm = null;
   }
-  stopNpcBgm();
   if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm();
   if (id === 'npc_bgm_scp') activeNpcBgm = createScpBgm();
   if (id === 'npc_bgm_ancient') activeNpcBgm = createAncientBgm();
 }
 
-export function stopNpcBgm(): void {
+function stopNpcBgmInternal(): void {
   if (!activeNpcBgm) return;
   activeNpcBgm.stop();
   activeNpcBgm = null;
 }
 
-export function playWorldBgm(): void {
+function startWorldBgm(): void {
   ensureSettingsSubscription();
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
@@ -185,7 +207,7 @@ export function playWorldBgm(): void {
   bgmSequencer.play();
 }
 
-export function stopWorldBgm(fadeMs = 300): void {
+function stopWorldBgmInternal(fadeMs = 300): void {
   if (fadeTimerId !== null) window.clearTimeout(fadeTimerId);
   const currentVolume = masterBgmVolume;
   const ctx = soundEngine.getContext();
@@ -216,6 +238,60 @@ export function stopWorldBgm(fadeMs = 300): void {
   } else {
     fadeTimerId = window.setTimeout(fade, stepMs);
   }
+}
+
+export function setBgmEnabled(next: boolean): boolean {
+  if (bgmEnabled === next) return bgmEnabled;
+
+  if (!next) {
+    if (activeNpcBgm) resumeTarget = { type: 'npc', id: activeNpcBgm.id };
+    else if (bgmSequencer.getIsPlaying()) resumeTarget = { type: 'world' };
+    stopNpcBgmInternal();
+    stopWorldBgmInternal(0);
+  }
+
+  bgmEnabled = next;
+  persistBgmEnabled();
+  notifyBgmEnabledChanged();
+
+  if (next && resumeTarget) {
+    const target = resumeTarget;
+    resumeTarget = null;
+    if (target.type === 'world') startWorldBgm();
+    else startNpcBgm(target.id);
+  }
+
+  return bgmEnabled;
+}
+
+export function toggleBgmEnabled(): boolean {
+  return setBgmEnabled(!bgmEnabled);
+}
+
+export function playNpcBgm(id: NpcBgmId): void {
+  resumeTarget = { type: 'npc', id };
+  if (!bgmEnabled) return;
+  if (activeNpcBgm?.id === id) {
+    stopNpcBgm();
+    return;
+  }
+  startNpcBgm(id);
+}
+
+export function stopNpcBgm(): void {
+  stopNpcBgmInternal();
+  if (resumeTarget?.type === 'npc') resumeTarget = null;
+}
+
+export function playWorldBgm(): void {
+  resumeTarget = { type: 'world' };
+  if (!bgmEnabled) return;
+  startWorldBgm();
+}
+
+export function stopWorldBgm(fadeMs = 300): void {
+  stopWorldBgmInternal(fadeMs);
+  if (resumeTarget?.type === 'world') resumeTarget = null;
 }
 
 export function isWorldBgmPlaying(): boolean {
