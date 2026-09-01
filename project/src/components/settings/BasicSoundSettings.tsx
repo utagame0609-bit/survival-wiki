@@ -16,7 +16,7 @@ export function BasicSoundSettings() {
 
   return (
     <>
-      <section className="border border-slate-800 bg-[#090d16] p-3 space-y-1.5">
+      <section className="space-y-1.5 rounded-md border border-slate-800 bg-[#090d16] p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-cyan-400">
             <Music2 className="h-4 w-4" />
@@ -39,7 +39,7 @@ export function BasicSoundSettings() {
         <p className="text-[10px] leading-4 text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
       </section>
 
-      <section className="border border-violet-500/30 bg-[#090d16] p-3 space-y-1.5">
+      <section className="space-y-1.5 rounded-md border border-violet-500/30 bg-[#090d16] p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-violet-400">
             <Waves className="h-4 w-4" />
@@ -62,7 +62,7 @@ export function BasicSoundSettings() {
         <p className="text-[10px] leading-4 text-slate-500">地下ダンジョンや洞窟のような反響音を付与します。</p>
       </section>
 
-      <section className="border border-slate-800 bg-[#090d16] p-3 space-y-1.5">
+      <section className="space-y-1.5 rounded-md border border-slate-800 bg-[#090d16] p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-emerald-400">
             {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
