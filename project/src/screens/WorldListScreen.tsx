@@ -1,46 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Database, Gamepad2, Plus } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
-import { deleteWorld, fetchWorlds } from '@/lib/db';
+import { deleteWorld } from '@/lib/db';
 import { Header } from '@/components/Navigation';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import { WorldCard } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
+import { useWorldListData } from '@/components/useWorldListData';
 import type { NavigateFn } from '@/components/Navigation';
-import { buildWorldMeta, type WorldMeta } from '@/lib/worldMeta';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
 export function WorldListScreen({ gameId, gameName: _gameName, navigate }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
-  const [worlds, setWorlds] = useState<WorldWithMembers[]>([]);
-  const [worldMeta, setWorldMeta] = useState<Record<string, WorldMeta>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { worlds, worldMeta, loading, error, setError, load } = useWorldListData(gameId);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState<WorldWithMembers | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WorldWithMembers | null>(null);
-
-  const load = () => {
-    setLoading(true);
-    setError('');
-    fetchWorlds(gameId)
-      .then(async (data) => {
-        const lastOpenedWorldId = localStorage.getItem(`survival-wiki:last-opened-world:${gameId}`);
-        const sortedWorlds = [...data].sort((a, b) => {
-          if (a.id === lastOpenedWorldId) return -1;
-          if (b.id === lastOpenedWorldId) return 1;
-          return 0;
-        });
-        const meta = await buildWorldMeta(data);
-        setWorlds(sortedWorlds);
-        setWorldMeta(meta);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { load(); }, [gameId]);
 
   useEffect(() => {
     playWorldBgm();
@@ -67,7 +43,7 @@ export function WorldListScreen({ gameId, gameName: _gameName, navigate }: { gam
     try {
       setError('');
       await deleteWorld(worldId);
-      load();
+      await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'ワールドの削除に失敗しました');
     }
