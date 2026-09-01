@@ -124,10 +124,17 @@ export function LocationDetailModal({
               <span>{formattedDate}</span>
             </div>
 
-            <div className="flex items-center gap-2 px-3 py-2 bg-[#161F30] rounded border border-[#F59E0B]/40 text-xs font-mono text-[#F59E0B]">
-              <MapPin className="w-4 h-4 text-[#F59E0B] shrink-0" />
-              <span className="truncate">POS: X:{location.x} Y:{location.y} Z:{location.z}</span>
-            </div>
+            {location.has_coordinates ? (
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#161F30] rounded border border-[#F59E0B]/40 text-xs font-mono text-[#F59E0B]">
+                <MapPin className="w-4 h-4 text-[#F59E0B] shrink-0" />
+                <span className="truncate">POS: X:{location.x} Y:{location.y} Z:{location.z}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#161F30]/50 rounded border border-[#334155]/30 text-xs font-mono text-[#64748B]">
+                <MapPin className="w-4 h-4 text-[#64748B] shrink-0" />
+                <span>座標未設定（任意）</span>
+              </div>
+            )}
 
             {memberNames.length > 0 && (
               <div className="sm:col-span-2 flex items-center gap-2 px-3 py-2 bg-[#161F30] rounded border border-[#334155]/60 text-xs font-mono text-[#94A3B8]">
