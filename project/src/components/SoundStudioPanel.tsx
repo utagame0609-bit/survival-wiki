@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Volume2, Waves, Radio, ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/Navigation';
+import { AppHeader } from '@/components/AppHeader';
 import { BgmCandidateCard } from '@/components/sound/BgmCandidateCard';
 import { SoundCandidateCard } from '@/components/sound/SoundCandidateCard';
 import { BGM_CANDIDATES, type BgmCandidate } from '@/lib/bgmCandidates';
@@ -77,7 +77,7 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   return (
     <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#161922] text-[#f0f0f0] font-sans flex flex-col select-none overflow-x-hidden">
       <div className="scanline-overlay" />
-      <Header title="SOUND STUDIO // 16BIT 音響研究所" onBack={onBack} />
+      <AppHeader title="SOUND STUDIO // 16BIT 音響研究所" onBack={onBack} />
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-3.5 py-4 sm:py-6 sm:px-8 flex-1 flex flex-col space-y-5">
         <div className="bg-[#1e2330] border-2 border-amber-500/70 p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex flex-col md:flex-row md:items-center justify-between gap-4">
