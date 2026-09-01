@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
-import { fetchLocations, createLocation, updateLocation, deleteLocation } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
 import { LocationDetailModal } from '@/components/LocationDetailModal';
@@ -9,29 +8,17 @@ import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { buildCollectionItems, type CollectionItem } from '@/lib/chestCollection';
 import { TimelineRecordsView } from '@/components/TimelineRecordsView';
 import { SnsShareModal } from '@/components/SnsShareModal';
+import { useLocationsData, type LocationSaveInput } from '@/components/useLocationsData';
 import {
   playRecordSelectSound,
   playModalCloseSound,
   playModalOpenSound,
-  playDeleteSound,
-
 } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
   | { type: 'create' }
   | { type: 'edit'; location: LocationWithPhotos };
-
-type LocationFormInput = {
-  name: string;
-  x: number;
-  y: number;
-  z: number;
-  has_coordinates: boolean;
-  detail_memo: string;
-  created_at: string;
-  member_ids: string[];
-};
 
 export function LocationsTab({
   world,
@@ -46,58 +33,35 @@ export function LocationsTab({
   openLocationId?: string | null;
   onOpenLocationHandled?: () => void;
 }) {
-  const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const {
+    locations,
+    loading,
+    saving,
+    error,
+    setError,
+    load,
+    saveLocation,
+    removeLocation,
+  } = useLocationsData(world.id, reloadKey);
   const [mode, setMode] = useState<Mode>({ type: 'list' });
-  const [saving, setSaving] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationWithPhotos | null>(null);
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [snsLocation, setSnsLocation] = useState<LocationWithPhotos | null>(null);
-  const loadRequestRef = useRef(0);
 
-  const load = async () => {
-    const requestId = ++loadRequestRef.current;
-    setLoading(true);
-    try {
-      const nextLocations = await fetchLocations(world.id);
-      if (requestId !== loadRequestRef.current) return;
-      setLocations(nextLocations);
-      setError('');
-    } catch (e) {
-      if (requestId !== loadRequestRef.current) return;
-      setError((e as Error).message);
-    } finally {
-      if (requestId === loadRequestRef.current) setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, [world.id, reloadKey]);
-
-  useEffect(() => {
-    if (!openLocationId || loading) return;
+  if (openLocationId && !loading) {
     const location = locations.find((loc) => loc.id === openLocationId);
-    if (!location) return;
-    setSelectedLocation(location);
-    onOpenLocationHandled?.();
-  }, [openLocationId, loading, locations, onOpenLocationHandled]);
+    if (location && selectedLocation?.id !== location.id) {
+      setSelectedLocation(location);
+      onOpenLocationHandled?.();
+    }
+  }
 
-  const handleSave = async (input: LocationFormInput): Promise<string> => {
-    setSaving(true);
+  const handleSave = async (input: LocationSaveInput): Promise<string> => {
     try {
-      if (mode.type === 'edit') {
-        await updateLocation(mode.location.id, input);
-        return mode.location.id;
-      }
-      const loc = await createLocation(world.id, input);
-      return loc.id;
+      return await saveLocation(mode.type === 'edit' ? mode.location : null, input);
     } catch (e) {
       setError((e as Error).message);
       throw e;
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -113,14 +77,14 @@ export function LocationsTab({
 
   const handleDelete = async (loc: LocationWithPhotos) => {
     try {
-      await deleteLocation(loc.id);
+      await removeLocation(loc.id);
       setSelectedLocation((prev) => (prev?.id === loc.id ? null : prev));
       setSnsLocation((prev) => (prev?.id === loc.id ? null : prev));
       onReload();
     } catch (e) {
       setError((e as Error).message);
     }
-  }
+  };
 
   const openCreateModal = () => {
     setMode({ type: 'create' });
@@ -198,7 +162,6 @@ export function LocationsTab({
           onClose={() => setSnsLocation(null)}
         />
       )}
-
 
       {mode.type !== 'list' && (
         <LocationFormModal
