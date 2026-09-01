@@ -10,44 +10,42 @@ type BgmCandidateCardProps = {
 
 export function BgmCandidateCard({ candidate, isPlaying, onPlay }: BgmCandidateCardProps) {
   return (
-    <div
-      className={`bg-[#1e2330] border-2 p-4 flex flex-col justify-between transition-all ${
+    <button
+      type="button"
+      onClick={() => onPlay(candidate)}
+      onMouseEnter={playHoverSound}
+      className={`group relative flex min-h-[112px] flex-col justify-between overflow-hidden rounded-lg border p-3 text-left transition-all duration-150 ${
         isPlaying
-          ? 'border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.25)] bg-[#12262d]'
-          : 'border-cyan-500/30 hover:border-cyan-500/60'
+          ? 'scale-[0.98] border-[#06B6D4] bg-[#06B6D4]/15 shadow-[0_0_12px_rgba(6,182,212,0.35)]'
+          : 'border-[#1E293B] bg-[#0B1018]/90 hover:border-[#06B6D4]/50 hover:bg-[#131E35]'
       }`}
     >
-      <div>
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div>
-            <span className="text-[10px] px-2 py-0.5 bg-[#141824] border border-cyan-500/30 text-cyan-300 font-bold">
-              {candidate.id === 'bgm_world_select' ? 'WORLD / SAVE BGM' : 'NPC PERSONALITY BGM'}
-            </span>
-            <h3 className="font-bold text-sm sm:text-base text-white mt-1.5">{candidate.nameJa}</h3>
-            <p className="text-[10px] text-cyan-400 font-mono">{candidate.name}</p>
+      <div className="mb-1 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="line-clamp-1 text-xs font-bold text-[#F8FAFC] transition-colors group-hover:text-[#CFFAFE]">
+            {candidate.nameJa}
           </div>
-          <button
-            type="button"
-            onClick={() => onPlay(candidate)}
-            onMouseEnter={playHoverSound}
-            className={`min-h-[44px] min-w-[44px] p-3 border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer ${
-              isPlaying
-                ? 'border-cyan-400 bg-cyan-400 text-black scale-105 shadow-[0_0_12px_#22d3ee]'
-                : 'border-cyan-500 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-400 hover:text-black active:scale-95'
-            }`}
-            title={isPlaying ? '停止' : 'ループ試聴'}
-          >
-            <Play className="w-4 h-4 fill-current" />
-          </button>
+          <div className="mt-0.5 truncate font-mono text-[9px] text-[#64748B]">{candidate.name}</div>
         </div>
-        <p className="text-xs text-slate-200 leading-relaxed mb-3">{candidate.description}</p>
-      </div>
-      <div className="pt-2.5 border-t border-[#2d3548] space-y-1 text-[10px] sm:text-xs font-mono text-slate-300">
-        <div className="flex items-center justify-between text-cyan-400 font-bold">
-          <span>TONE: {candidate.toneInfo}</span>
+        <div
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
+            isPlaying
+              ? 'border-[#06B6D4] bg-[#06B6D4] text-[#0B1018]'
+              : 'border-[#334155] bg-[#161F30] text-[#06B6D4] group-hover:border-[#06B6D4]'
+          }`}
+        >
+          <Play className="ml-0.5 h-3 w-3 fill-current" />
         </div>
-        <div className="text-slate-400">演出: {candidate.keyCharacteristic}</div>
       </div>
-    </div>
+
+      <p className="line-clamp-2 text-[11px] leading-relaxed text-[#94A3B8]">{candidate.description}</p>
+
+      <div className="mt-2 flex items-center justify-between border-t border-[#1E293B] pt-1 font-mono text-[9px] text-[#64748B]">
+        <span className="truncate">{candidate.toneInfo}</span>
+        <span className="ml-2 shrink-0 uppercase text-[#06B6D4]">
+          {candidate.id === 'bgm_world_select' ? 'WORLD BGM' : 'NPC BGM'}
+        </span>
+      </div>
+    </button>
   );
 }
