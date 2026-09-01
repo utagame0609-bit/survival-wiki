@@ -1,10 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { playCancelSound } from '@/lib/sound';
 
 type Screen =
   | { name: 'top' }
   | { name: 'worldList'; gameId: string; gameName: string }
   | { name: 'world'; worldId: string; worldName: string };
+
+type HomeScreen =
+  | { name: 'top' }
+  | { name: 'worldList'; gameId: string; gameName: string };
 
 export type NavigateFn = (screen: Screen) => void;
 
@@ -23,8 +27,10 @@ export function useBackButton(onBack: () => void) {
 export function useScreenHistory() {
   const [screen, setScreenState] = useState<Screen>({ name: 'top' });
   const [history, setHistory] = useState<Screen[]>([]);
+  const homeScreenRef = useRef<HomeScreen>({ name: 'top' });
 
   const setScreen = (s: Screen) => {
+    if (s.name === 'worldList') homeScreenRef.current = s;
     setScreenState((prev) => {
       setHistory((h) => [...h, prev]);
       return s;
@@ -32,13 +38,28 @@ export function useScreenHistory() {
     window.history.pushState({}, '');
   };
 
+  const setStartupWorldList = useCallback((game: { gameId: string; gameName: string }) => {
+    const homeScreen: HomeScreen = {
+      name: 'worldList',
+      gameId: game.gameId,
+      gameName: game.gameName,
+    };
+    homeScreenRef.current = homeScreen;
+    setScreenState(homeScreen);
+    setHistory([]);
+    window.history.replaceState({}, '');
+  }, []);
+
   const setStartupWorld = useCallback(
     (world: Screen & { name: 'world' }, game: { gameId: string; gameName: string }) => {
+      const homeScreen: HomeScreen = {
+        name: 'worldList',
+        gameId: game.gameId,
+        gameName: game.gameName,
+      };
+      homeScreenRef.current = homeScreen;
       setScreenState(world);
-      setHistory([
-        { name: 'top' },
-        { name: 'worldList', gameId: game.gameId, gameName: game.gameName },
-      ]);
+      setHistory([homeScreen]);
       window.history.replaceState({}, '');
     },
     [],
@@ -55,8 +76,9 @@ export function useScreenHistory() {
 
   useEffect(() => {
     const handler = () => {
-      setScreenState({ name: 'top' });
+      setScreenState(homeScreenRef.current);
       setHistory([]);
+      window.history.replaceState({}, '');
     };
     window.addEventListener('survival-wiki:home', handler);
     return () => window.removeEventListener('survival-wiki:home', handler);
@@ -64,5 +86,5 @@ export function useScreenHistory() {
 
   useBackButton(goBack);
 
-  return { screen, setScreen, setStartupWorld, goBack };
+  return { screen, setScreen, setStartupWorldList, setStartupWorld, goBack };
 }

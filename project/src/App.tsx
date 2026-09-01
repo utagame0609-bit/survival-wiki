@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
 function App() {
-  const { screen, setScreen, setStartupWorld, goBack } = useScreenHistory();
+  const { screen, setScreen, setStartupWorldList, setStartupWorld, goBack } = useScreenHistory();
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [startupLoading, setStartupLoading] = useState(true);
@@ -48,6 +48,7 @@ function App() {
     const restoreLastWorld = async () => {
       try {
         const games = await fetchGames();
+        const defaultGame = games.find((game) => game.available) ?? games[0] ?? null;
 
         for (const game of games) {
           const lastOpenedWorldId = localStorage.getItem(`survival-wiki:last-opened-world:${game.id}`);
@@ -65,8 +66,12 @@ function App() {
           }
           return;
         }
+
+        if (!cancelled && defaultGame) {
+          setStartupWorldList({ gameId: defaultGame.id, gameName: defaultGame.name });
+        }
       } catch {
-        // 起動時の自動復元に失敗した場合は、従来どおりトップ画面から開始する。
+        // ゲーム情報の取得自体に失敗した場合のみ、旧TopScreenを非常用フォールバックとして残す。
       } finally {
         if (!cancelled) setStartupLoading(false);
       }
@@ -77,7 +82,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, session, setStartupWorld]);
+  }, [authLoading, session, setStartupWorldList, setStartupWorld]);
 
   useEffect(() => {
     const getScrollKey = () => {
