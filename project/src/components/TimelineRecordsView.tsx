@@ -5,6 +5,7 @@ import { playConfirmSound, playHoverSound } from '@/lib/sound';
 import { loadUserTimelineSortOrder, saveUserTimelineSortOrder } from '@/lib/userTimelineSettings';
 import { TimelineRecordCard } from '@/components/TimelineRecordCard';
 import { TimelineRecordsToolbar } from '@/components/TimelineRecordsToolbar';
+import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { useTimelineRecordGroups, type TimelineSortOrder } from '@/hooks/useTimelineRecordGroups';
 
 type TimelineRecordsViewProps = {
@@ -93,7 +94,7 @@ export function TimelineRecordsView({
       />
 
       {groupedByDay.length > 0 ? (
-        <div className="space-y-4 sm:space-y-5">
+        <div className="space-y-3.5 sm:space-y-4">
           {groupedByDay.map((group) => {
             const expanded = expandedDate === group.date;
             const dayBackgroundPhoto = locations
@@ -112,32 +113,46 @@ export function TimelineRecordsView({
                   }}
                   onMouseEnter={playHoverSound}
                   aria-expanded={expanded}
-                  className="group flex w-full items-center gap-3 text-left"
+                  className={`group relative flex min-h-[3.25rem] w-full items-center overflow-hidden rounded-lg border text-left shadow-sm transition-all sm:min-h-[3.5rem] ${expanded ? 'border-[#F59E0B]/50 bg-[#182033]' : 'border-[#334155]/60 bg-[#161F30] hover:border-[#64748B]'}`}
                 >
-                  <div className={`flex items-center gap-2 rounded border px-3 py-1 shadow-sm transition-colors ${expanded ? 'border-[#F59E0B]/40 bg-[#182033]' : 'border-[#334155]/60 bg-[#161F30] group-hover:border-[#64748B]'}`}>
+                  {dayBackgroundPhoto && (
+                    <>
+                      <LocationPhotoImage
+                        storagePath={dayBackgroundPhoto}
+                        alt=""
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 h-full w-full scale-105 object-cover opacity-[0.18] blur-[0.5px] transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0B1018]/96 via-[#111827]/86 to-[#0F172A]/76" />
+                    </>
+                  )}
+
+                  <div className="relative z-10 flex w-full items-center gap-3 px-4 py-2.5 sm:px-5 sm:py-3">
                     {expanded ? (
-                      <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[#F59E0B]" />
+                      <ChevronDown className="h-4 w-4 shrink-0 text-[#F59E0B]" />
                     ) : (
-                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#64748B]" />
+                      <ChevronRight className="h-4 w-4 shrink-0 text-[#64748B] transition-colors group-hover:text-[#94A3B8]" />
                     )}
-                    <span className="font-mono text-xs font-bold text-[#F59E0B]">
-                      DAY {String(group.dayNumber).padStart(2, '0')}
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                      <span className="font-mono text-xs font-bold tracking-wide text-[#F59E0B] sm:text-[13px]">
+                        DAY {String(group.dayNumber).padStart(2, '0')}
+                      </span>
+                      <span className="text-xs text-[#475569]">//</span>
+                      <span className="truncate font-mono text-xs text-[#CBD5E1]">{group.date}</span>
+                    </div>
+                    <span className="shrink-0 rounded border border-[#334155]/70 bg-[#0B1018]/55 px-2 py-1 font-mono text-[10px] tracking-wide text-[#94A3B8] sm:text-[11px]">
+                      {group.items.length} RECORDS
                     </span>
-                    <span className="text-xs text-[#334155]">//</span>
-                    <span className="font-mono text-xs text-[#94A3B8]">{group.date}</span>
                   </div>
-                  <div className="h-px flex-1 bg-gradient-to-r from-[#1E293B] to-transparent" />
-                  <span className="shrink-0 font-mono text-[11px] text-[#64748B]">{group.items.length} RECORDS</span>
                 </button>
 
                 {expanded && (
-                  <div className={`grid grid-cols-1 gap-3 ${group.items.length > 1 ? 'lg:grid-cols-2' : 'lg:max-w-2xl'}`}>
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {group.items.map((location) => (
                       <TimelineRecordCard
                         key={location.id}
                         world={world}
                         location={location}
-                        dayBackgroundPhoto={dayBackgroundPhoto}
                         onSelect={onSelectLocation}
                         onOpenSns={onOpenSns}
                       />
