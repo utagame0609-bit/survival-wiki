@@ -1,6 +1,7 @@
 import { Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { SettingsModal, type BeforeInstallPromptEvent } from '@/components/SettingsModal';
+import { SettingsModal } from '@/components/SettingsModal';
+import type { BeforeInstallPromptEvent } from '@/lib/pwaInstall';
 import { playConfirmSound, playHoverSound } from '@/lib/sound';
 
 type SettingsButtonProps = {
