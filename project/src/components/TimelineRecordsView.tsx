@@ -157,11 +157,7 @@ export function TimelineRecordsView({
                       )}
 
                       <div className="flex items-center gap-2.5 sm:gap-3">
-                        <span
-                          className={`font-mono text-xs font-bold tracking-widest sm:text-sm ${
-                            expanded ? 'text-[#F59E0B]' : 'text-[#64748B]'
-                          }`}
-                        >
+                        <span className="font-mono text-xs font-bold tracking-widest text-[#F59E0B] sm:text-sm">
                           DAY {String(group.dayNumber).padStart(2, '0')}
                         </span>
                         <span className={`text-xs ${expanded ? 'text-[#475569]' : 'text-[#334155]'}`}>//</span>
