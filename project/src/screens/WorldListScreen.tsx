@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Database, Gamepad2, Plus } from 'lucide-react';
 import type { WorldWithMembers } from '@/lib/types';
 import { deleteWorld } from '@/lib/db';
-import { Header } from '@/components/Navigation';
+import { AppHeader } from '@/components/AppHeader';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import { WorldCard } from '@/components/WorldCard';
@@ -58,7 +58,7 @@ export function WorldListScreen({ gameId, gameName: _gameName, navigate }: { gam
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
       <div className="pointer-events-none fixed inset-0 opacity-30 [background-image:radial-gradient(rgba(51,65,85,0.25)_1px,transparent_1px)] [background-size:16px_16px]" />
-      <Header title="WORLD SELECT" />
+      <AppHeader title="WORLD SELECT" />
 
       <main className="relative z-10 mx-auto w-full max-w-4xl px-4 py-6 sm:py-8">
         <div className="mb-6 flex flex-col gap-3 border-b border-[#1E293B] pb-4 text-center sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:text-left">
