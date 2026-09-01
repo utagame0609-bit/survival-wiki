@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Compass, Home, Settings, Volume2, VolumeX } from 'lucide-react';
-import { isBgmEnabled, subscribeBgmEnabled, toggleBgmEnabled } from '@/lib/bgm';
-import { playCancelSound, playHoverSound } from '@/lib/sound';
+import { isBgmEnabled, setBgmEnabled, subscribeBgmEnabled } from '@/lib/bgm';
+import { isSoundEnabled, playCancelSound, playHoverSound, toggleSound } from '@/lib/sound';
 
 export function AppHeader({
   title,
@@ -12,9 +12,11 @@ export function AppHeader({
   onBack?: () => void;
   hideMobileActions?: boolean;
 }) {
-  const [bgmEnabled, setBgmEnabledState] = useState(isBgmEnabled());
+  const [audioEnabled, setAudioEnabled] = useState(() => isBgmEnabled() && isSoundEnabled());
 
-  useEffect(() => subscribeBgmEnabled(setBgmEnabledState), []);
+  useEffect(() => subscribeBgmEnabled((bgmEnabled) => {
+    setAudioEnabled(bgmEnabled && isSoundEnabled());
+  }), []);
 
   const handleHome = () => {
     playCancelSound();
@@ -26,8 +28,11 @@ export function AppHeader({
     window.dispatchEvent(new CustomEvent('survival-wiki:settings'));
   };
 
-  const handleBgmToggle = () => {
-    toggleBgmEnabled();
+  const handleAudioToggle = () => {
+    const next = !(isBgmEnabled() && isSoundEnabled());
+    toggleSound(next);
+    setBgmEnabled(next);
+    setAudioEnabled(next);
   };
 
   const displayTitle = title.replace(/^UTAPEDIA \/\/\s*/, '');
@@ -71,18 +76,18 @@ export function AppHeader({
         <div className={`${hideMobileActions ? 'hidden md:flex' : 'flex'} shrink-0 items-center gap-1.5 sm:gap-2`}>
           <button
             type="button"
-            onClick={handleBgmToggle}
+            onClick={handleAudioToggle}
             onMouseEnter={playHoverSound}
-            aria-label="BGM切替"
-            title={bgmEnabled ? 'BGM ON (クリックでOFF)' : 'BGM OFF (クリックでON)'}
+            aria-label="サウンド切替"
+            title={audioEnabled ? 'サウンドON (クリックで全音ミュート)' : 'ミュート中 (クリックで全音ON)'}
             className={`flex items-center gap-1 rounded border p-2 font-mono text-xs transition-colors active:scale-95 cursor-pointer ${
-              bgmEnabled
+              audioEnabled
                 ? 'border-[#06B6D4]/50 bg-[#0E2030] text-[#06B6D4] shadow-[0_0_8px_rgba(6,182,212,0.2)]'
                 : 'border-[#334155]/40 bg-[#0F172A] text-[#64748B] hover:border-[#64748B]'
             }`}
           >
-            {bgmEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-            <span className="hidden md:inline text-[11px]">{bgmEnabled ? 'BGM' : 'BGM OFF'}</span>
+            {audioEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            <span className="hidden md:inline text-[11px]">{audioEnabled ? 'SOUND' : 'MUTE'}</span>
           </button>
 
           <button
