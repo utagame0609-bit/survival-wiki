@@ -7,7 +7,7 @@ import { LocationBasicFields } from '@/components/LocationBasicFields';
 import { LocationPhotoField } from '@/components/LocationPhotoField';
 import { LocationAdvancedFields } from '@/components/LocationAdvancedFields';
 import { LocationFormActions } from '@/components/LocationFormActions';
-import { useLocationMainPhoto } from '@/components/useLocationMainPhoto';
+import { useLocationMainPhoto } from '@/hooks/useLocationMainPhoto';
 
 type SaveInput = {
   name: string;
