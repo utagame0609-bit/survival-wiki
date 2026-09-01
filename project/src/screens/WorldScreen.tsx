@@ -5,7 +5,6 @@ import { AppHeader } from '@/components/AppHeader';
 import { LocationsTab } from '@/screens/LocationsTab';
 import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
-import type { NavigateFn } from '@/components/Navigation';
 import { playModalOpenSound } from '@/lib/sound';
 import { stopNpcBgm } from '@/lib/bgm';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
@@ -15,7 +14,7 @@ import { MobileBottomHud } from '@/components/MobileBottomHud';
 
 type Tab = 'records' | 'wiki';
 
-export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }: { worldId: string; worldName: string; navigate: NavigateFn; goBack: () => void }) {
+export function WorldScreen({ worldId, worldName, goBack }: { worldId: string; worldName: string; goBack: () => void }) {
   const [world, setWorld] = useState<WorldWithMembers | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
