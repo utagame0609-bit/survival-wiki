@@ -153,9 +153,7 @@ function App() {
       screenContent = (
         <WorldListScreen
           gameId={screen.gameId}
-          gameName={screen.gameName}
           navigate={setScreen}
-          goBack={goBack}
         />
       );
       break;
@@ -164,7 +162,6 @@ function App() {
         <WorldScreen
           worldId={screen.worldId}
           worldName={screen.worldName}
-          navigate={setScreen}
           goBack={goBack}
         />
       );
