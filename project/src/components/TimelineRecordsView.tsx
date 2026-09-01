@@ -4,7 +4,7 @@ import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playHoverSound } from '@/lib/sound';
 import { TimelineRecordCard } from '@/components/TimelineRecordCard';
 import { TimelineRecordsToolbar } from '@/components/TimelineRecordsToolbar';
-import { useTimelineRecordGroups, type TimelineSortOrder } from '@/components/useTimelineRecordGroups';
+import { useTimelineRecordGroups, type TimelineSortOrder } from '@/hooks/useTimelineRecordGroups';
 
 type TimelineRecordsViewProps = {
   world: WorldWithMembers;
