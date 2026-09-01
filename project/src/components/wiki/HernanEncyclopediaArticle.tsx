@@ -27,6 +27,14 @@ export function HernanEncyclopediaArticle({
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('');
   const articleRef = useRef<HTMLElement | null>(null);
+  const hernanLocationLinks = useMemo<HernanLocationLink[]>(() => locationLinks.map((link) => {
+    const photoIndex = photos.findIndex((photo) => photo.locationName === link.name);
+    if (photoIndex < 0) return link;
+    return {
+      ...link,
+      onClick: () => setSelectedPhoto(photoIndex),
+    };
+  }), [locationLinks, photos]);
 
   useEffect(() => {
     if (!article || typeof IntersectionObserver === 'undefined') return;
@@ -125,7 +133,7 @@ export function HernanEncyclopediaArticle({
             </div>
 
             <p className="mb-5 text-left text-[15.5px] leading-[1.85] text-neutral-900 sm:text-[16px]">
-              {renderHernanLinkedText(article.leadParagraph, locationLinks)}
+              {renderHernanLinkedText(article.leadParagraph, hernanLocationLinks)}
             </p>
 
             <HernanMobileTableOfContents
@@ -141,7 +149,7 @@ export function HernanEncyclopediaArticle({
           article={article}
           photos={photos}
           narratorLine={narratorLine}
-          locationLinks={locationLinks}
+          locationLinks={hernanLocationLinks}
           onOpenPhoto={setSelectedPhoto}
         />
       </div>
