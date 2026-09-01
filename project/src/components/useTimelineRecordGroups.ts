@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
+import type { LocationWithPhotos } from '@/lib/types';
 
 export type TimelineSortOrder = 'newest' | 'oldest';
 
@@ -11,12 +11,10 @@ export type TimelineDayGroup = {
 
 export function useTimelineRecordGroups({
   locations,
-  members,
   searchQuery,
   sortOrder,
 }: {
   locations: LocationWithPhotos[];
-  members: WorldWithMembers['members'];
   searchQuery: string;
   sortOrder: TimelineSortOrder;
 }) {
@@ -30,15 +28,14 @@ export function useTimelineRecordGroups({
     const filtered = locations
       .filter((location) => {
         if (!normalized) return true;
-        const memberNames = (location.member_ids ?? [])
-          .map((id) => members.find((member) => member.id === id)?.name ?? '')
+        const memberNames = location.members
+          .map((member) => member.name)
           .join(' ')
           .toLocaleLowerCase();
         return (
           location.name.toLocaleLowerCase().includes(normalized) ||
           location.detail_memo?.toLocaleLowerCase().includes(normalized) ||
-          memberNames.includes(normalized) ||
-          (location.tags ?? []).some((tag) => tag.toLocaleLowerCase().includes(normalized))
+          memberNames.includes(normalized)
         );
       })
       .sort((a, b) => {
@@ -64,7 +61,7 @@ export function useTimelineRecordGroups({
       dayNumber: index + 1,
       items: byDate.get(date) ?? [],
     }));
-  }, [locations, members, searchQuery, sortOrder]);
+  }, [locations, searchQuery, sortOrder]);
 
   return { totalPhotos, groupedByDay };
 }
