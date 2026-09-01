@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Volume2, Waves, Radio, ArrowLeft } from 'lucide-react';
-import { AppHeader } from '@/components/AppHeader';
+import { Sparkles, Volume2, Waves, X } from 'lucide-react';
 import { BgmCandidateCard } from '@/components/sound/BgmCandidateCard';
 import { SoundCandidateCard } from '@/components/sound/SoundCandidateCard';
 import { BGM_CANDIDATES, type BgmCandidate } from '@/lib/bgmCandidates';
@@ -19,11 +18,19 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   useEffect(() => subscribeSoundState((id, isPlaying) => setActivePlayingId(isPlaying ? id : null)), []);
   useEffect(() => {
     stopWorldBgm(0);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
       stopActiveAudio();
       stopWorldBgm(0);
+      document.body.style.overflow = previousOverflow;
     };
   }, []);
+
+  const handleClose = () => {
+    playCancelSound();
+    onBack();
+  };
 
   const handleReverbChange = (value: number) => {
     setReverb(value);
@@ -31,21 +38,21 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   };
 
   const categories = [
-    { id: 'all', label: '全SE (ALL)' },
-    { id: 'system', label: 'システム操作音' },
-    { id: 'screen', label: '画面・ナビゲーション音' },
-    { id: 'action', label: 'キャラクター＆アクション音' },
-    { id: 'wiki', label: 'Wiki編纂・AI演出音' },
-    { id: 'new_high', label: 'V2新規SE【大】' },
-    { id: 'new_medium', label: 'V2新規SE【中】' },
-    { id: 'bgm', label: 'BGM候補' },
+    { id: 'all', label: 'ALL' },
+    { id: 'system', label: 'SYSTEM / UI' },
+    { id: 'screen', label: 'SCREEN / NAV' },
+    { id: 'action', label: 'ACTION & FX' },
+    { id: 'wiki', label: 'WIKI & NPC' },
+    { id: 'new_high', label: 'V2 HIGH' },
+    { id: 'new_medium', label: 'V2 MID' },
+    { id: 'bgm', label: 'BGM' },
   ];
 
-  const filteredCandidates = SOUND_CANDIDATES.filter((candidate) =>
-    selectedCategory === 'all' || selectedCategory === 'bgm'
-      ? selectedCategory === 'all'
-      : candidate.category === selectedCategory,
-  );
+  const filteredCandidates = selectedCategory === 'all'
+    ? SOUND_CANDIDATES
+    : selectedCategory === 'bgm'
+      ? []
+      : SOUND_CANDIDATES.filter((candidate) => candidate.category === selectedCategory);
   const showBgm = selectedCategory === 'all' || selectedCategory === 'bgm';
 
   const handlePlay = (candidate: SoundCandidate) => {
@@ -71,84 +78,133 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
     }
 
     if (isWorldBgmPlaying()) stopWorldBgm(0);
+    setActivePlayingId(candidate.id);
     playSoundCandidatePreview(candidate.id);
   };
 
   return (
-    <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#161922] text-[#f0f0f0] font-sans flex flex-col select-none overflow-x-hidden">
-      <div className="scanline-overlay" />
-      <AppHeader title="SOUND STUDIO // 16BIT 音響研究所" onBack={onBack} />
-
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-3.5 py-4 sm:py-6 sm:px-8 flex-1 flex flex-col space-y-5">
-        <div className="bg-[#1e2330] border-2 border-amber-500/70 p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="text-[10px] sm:text-xs font-bold text-emerald-400 font-mono uppercase">
-                WEB AUDIO API 16BIT SYNTHESIS ENGINE
-              </span>
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) handleClose();
+      }}
+    >
+      <div className="hud-scanlines relative my-auto flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border-2 border-[#F59E0B] bg-[#0F172A] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#F59E0B] bg-[#161F30]">
+              <Sparkles className="h-4 w-4 text-[#F59E0B]" />
             </div>
-            <h1 className="text-base sm:text-lg font-black text-white">効果音・BGM デザインコンソール</h1>
-            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-              本番アプリへ移植可能な各UI・画面アクション用SEの試聴・検証用スタジオです。
-            </p>
+            <div className="min-w-0">
+              <div className="font-mono text-[10px] uppercase leading-none tracking-widest text-[#06B6D4]">
+                16-BIT CHIP-SYNTH CONSOLE
+              </div>
+              <h3 className="mt-0.5 truncate text-sm font-bold tracking-wider text-[#F8FAFC] sm:text-base">
+                SOUND STUDIO // 効果音・BGM検証室
+              </h3>
+            </div>
           </div>
 
           <button
             type="button"
-            onClick={() => {
-              playCancelSound();
-              onBack();
-            }}
+            onClick={handleClose}
             onMouseEnter={playHoverSound}
-            className="min-h-[42px] px-4 py-2 bg-[#141824] border-2 border-slate-700 text-slate-200 hover:text-amber-400 hover:border-amber-500 text-xs sm:text-sm font-bold flex items-center gap-1.5 self-start md:self-auto cursor-pointer"
+            aria-label="Sound Studioを閉じる"
+            className="rounded-lg p-1.5 text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>アプリへ戻る</span>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-4 sm:p-5 bg-[#1e2330] border-2 border-[#2d3548] space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-400 font-bold text-xs sm:text-sm">
-              <Waves className="w-4 h-4" />
-              <span>グローバル空間反響 (MASTER REVERB)</span>
-            </div>
-            <span className="text-sm font-bold text-amber-400 font-mono">{reverb}%</span>
-          </div>
-          <input aria-label="サウンドスタジオの残響量" type="range" min="0" max="100" value={reverb} onChange={(event) => handleReverbChange(Number(event.target.value))}
-          onFocus={playInputFocusSound} onMouseEnter={playHoverSound} className="w-full h-2 bg-[#12151f] rounded-lg appearance-none cursor-pointer accent-amber-500" />
-          <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 font-mono">
-            <span>DRY (0% - クリスプ・直接音)</span><span>DUNGEON (50% - 地下洞窟)</span><span>CATHEDRAL (100% - 深宇宙)</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2 border-b-2 border-[#2d3548] pb-3">
-          {categories.map((category) => {
-            const isSelected = selectedCategory === category.id;
-            return <button key={category.id} type="button" onClick={() => { playConfirmSound(); setSelectedCategory(category.id); }} onMouseEnter={playHoverSound} className={`min-h-[40px] px-3.5 py-2 text-xs sm:text-sm font-bold transition-all border-2 cursor-pointer ${isSelected ? 'border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]' : 'border-slate-700 bg-[#1e2330] text-slate-300 hover:text-white hover:border-slate-500'}`}>{category.label}</button>;
-          })}
-        </div>
-
-        {showBgm && <section className="space-y-3">
-          <div className="flex items-center gap-2 border-b border-cyan-500/30 pb-2"><Volume2 className="w-4 h-4 text-cyan-400" /><h2 className="text-sm sm:text-base font-black text-cyan-300">BGM CANDIDATES // 4 TRACKS</h2><span className="text-[10px] text-slate-500 font-mono">LOOP / PREVIEW</span></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {BGM_CANDIDATES.map((candidate) => (
-              <BgmCandidateCard key={candidate.id} candidate={candidate} isPlaying={activePlayingId === candidate.id} onPlay={handleBgmPlay} />
-            ))}
-          </div>
-        </section>}
-
-        {selectedCategory !== 'bgm' && <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-          {filteredCandidates.map((candidate) => (
-            <SoundCandidateCard
-              key={candidate.id}
-              candidate={candidate}
-              isPlaying={activePlayingId === candidate.id}
-              onPlay={handlePlay}
-            />
+        <div className="flex items-center gap-1.5 overflow-x-auto border-b border-[#1E293B] bg-[#0D1424] px-4 py-2.5">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => {
+                playConfirmSound();
+                setSelectedCategory(category.id);
+              }}
+              onMouseEnter={playHoverSound}
+              className={`whitespace-nowrap rounded px-3 py-1.5 text-xs font-bold transition-all ${
+                selectedCategory === category.id
+                  ? 'bg-[#F59E0B] text-[#0B1018] shadow-[0_0_8px_rgba(245,158,11,0.3)]'
+                  : 'border border-[#334155] bg-[#161F30] text-[#94A3B8] hover:text-[#F8FAFC]'
+              }`}
+            >
+              {category.label}
+            </button>
           ))}
-        </div>}
+        </div>
+
+        <div className="overflow-y-auto p-4 sm:p-5">
+          <div className="mb-4 rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3.5">
+            <div className="mb-1 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-1.5 text-xs font-bold text-[#94A3B8]">
+                <Waves className="h-3.5 w-3.5 shrink-0 text-[#06B6D4]" />
+                <span className="truncate">REVERB DEPTH (空間残響)</span>
+              </div>
+              <span className="shrink-0 font-mono text-xs font-bold text-[#06B6D4]">{reverb}%</span>
+            </div>
+            <input
+              aria-label="サウンドスタジオの残響量"
+              type="range"
+              min="0"
+              max="100"
+              value={reverb}
+              onChange={(event) => handleReverbChange(Number(event.target.value))}
+              onFocus={playInputFocusSound}
+              onMouseEnter={playHoverSound}
+              className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-[#161F30] accent-[#06B6D4]"
+            />
+          </div>
+
+          {showBgm && (
+            <section className="mb-5 space-y-2.5">
+              <div className="flex items-center gap-2 border-b border-[#1E293B] pb-2">
+                <Volume2 className="h-4 w-4 text-[#06B6D4]" />
+                <h4 className="text-xs font-bold tracking-wider text-[#F8FAFC]">BGM CANDIDATES // {BGM_CANDIDATES.length} TRACKS</h4>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {BGM_CANDIDATES.map((candidate) => (
+                  <BgmCandidateCard
+                    key={candidate.id}
+                    candidate={candidate}
+                    isPlaying={activePlayingId === candidate.id}
+                    onPlay={handleBgmPlay}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {selectedCategory !== 'bgm' && (
+            <section className="space-y-2.5">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredCandidates.map((candidate) => (
+                  <SoundCandidateCard
+                    key={candidate.id}
+                    candidate={candidate}
+                    isPlaying={activePlayingId === candidate.id}
+                    onPlay={handlePlay}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-[#1E293B] bg-[#0B1018] px-4 py-3 font-mono text-xs text-[#64748B]">
+          <span className="min-w-0 truncate">WEB AUDIO API // PREVIEW CONSOLE</span>
+          <button
+            type="button"
+            onClick={handleClose}
+            onMouseEnter={playHoverSound}
+            className="shrink-0 rounded bg-[#161F30] px-4 py-1.5 text-xs font-bold text-[#F8FAFC] transition-colors hover:bg-[#1E293B]"
+          >
+            閉じる
+          </button>
+        </div>
       </div>
     </div>
   );
