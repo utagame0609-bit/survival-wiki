@@ -1,13 +1,19 @@
-import { ArrowUpDown, Package, Search } from 'lucide-react';
+import { ArrowUpDown, CalendarDays, Package, Search } from 'lucide-react';
 import { playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
-import type { TimelineSortOrder } from '@/components/useTimelineRecordGroups';
+import type { TimelineSortOrder } from '@/hooks/useTimelineRecordGroups';
 
 type TimelineRecordsToolbarProps = {
   searchQuery: string;
   sortOrder: TimelineSortOrder;
   totalPhotos: number;
+  selectedYear: string;
+  selectedMonth: string;
+  availableYears: string[];
+  availableMonths: string[];
   onSearchChange: (value: string) => void;
   onSortToggle: () => void;
+  onYearChange: (value: string) => void;
+  onMonthChange: (value: string) => void;
   onOpenChest: () => void;
 };
 
@@ -15,13 +21,19 @@ export function TimelineRecordsToolbar({
   searchQuery,
   sortOrder,
   totalPhotos,
+  selectedYear,
+  selectedMonth,
+  availableYears,
+  availableMonths,
   onSearchChange,
   onSortToggle,
+  onYearChange,
+  onMonthChange,
   onOpenChest,
 }: TimelineRecordsToolbarProps) {
   return (
-    <div className="mb-6 flex flex-col items-stretch justify-between gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A]/70 p-3 sm:flex-row sm:items-center">
-      <div className="relative min-w-0 flex-1">
+    <div className="mb-6 grid gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A]/70 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+      <div className="relative min-w-0">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
         <input
           type="text"
@@ -33,7 +45,38 @@ export function TimelineRecordsToolbar({
         />
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded border border-[#334155] bg-[#0B1018] px-2 py-1 sm:flex-none">
+          <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#06B6D4]" />
+          <span className="hidden font-mono text-[10px] font-bold tracking-wider text-[#64748B] sm:inline">DATE</span>
+          <select
+            value={selectedYear}
+            onChange={(event) => onYearChange(event.target.value)}
+            onFocus={playInputFocusSound}
+            className="min-w-0 flex-1 cursor-pointer bg-transparent py-1 text-xs text-[#94A3B8] outline-none sm:w-[5.5rem] sm:flex-none"
+            aria-label="記録年で絞り込み"
+          >
+            <option value="">全年</option>
+            {availableYears.map((year) => (
+              <option key={year} value={year}>{year}年</option>
+            ))}
+          </select>
+          <span className="text-[10px] text-[#334155]">/</span>
+          <select
+            value={selectedMonth}
+            onChange={(event) => onMonthChange(event.target.value)}
+            onFocus={playInputFocusSound}
+            disabled={!selectedYear}
+            className="min-w-0 flex-1 cursor-pointer bg-transparent py-1 text-xs text-[#94A3B8] outline-none disabled:cursor-default disabled:text-[#334155] sm:w-[4.5rem] sm:flex-none"
+            aria-label="記録月で絞り込み"
+          >
+            <option value="">全月</option>
+            {availableMonths.map((month) => (
+              <option key={month} value={month}>{Number(month)}月</option>
+            ))}
+          </select>
+        </div>
+
         <button
           type="button"
           onClick={() => {
