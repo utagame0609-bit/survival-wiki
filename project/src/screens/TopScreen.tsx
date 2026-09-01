@@ -3,7 +3,7 @@ import { Box, Dna, Lock } from 'lucide-react';
 import type { Game } from '@/lib/types';
 import { fetchGames } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
-import type { NavigateFn } from '@/components/Navigation';
+import type { NavigateFn } from '@/lib/screenNavigation';
 import { playConfirmSound, playHoverSound } from '@/lib/sound';
 
 export function TopScreen({ navigate }: { navigate: NavigateFn }) {
