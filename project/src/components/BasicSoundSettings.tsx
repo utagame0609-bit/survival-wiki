@@ -1,6 +1,6 @@
 import { Music2, Volume2, VolumeX, Waves } from 'lucide-react';
 import { playHoverSound, playInputFocusSound } from '@/lib/sound';
-import { useSoundSettingsControls } from '@/components/useSoundSettingsControls';
+import { useSoundSettingsControls } from '@/hooks/useSoundSettingsControls';
 
 export function BasicSoundSettings() {
   const {
