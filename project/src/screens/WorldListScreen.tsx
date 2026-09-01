@@ -12,7 +12,7 @@ import type { NavigateFn } from '@/components/Navigation';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
-export function WorldListScreen({ gameId, gameName: _gameName, navigate }: { gameId: string; gameName: string; navigate: NavigateFn; goBack: () => void }) {
+export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate: NavigateFn }) {
   const { worlds, worldMeta, loading, error, setError, load } = useWorldListData(gameId);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState<WorldWithMembers | null>(null);
