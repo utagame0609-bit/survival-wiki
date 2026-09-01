@@ -2,7 +2,7 @@ import { Calendar, Clock, Edit3, Play, Shield, Trash2, User, Users } from 'lucid
 import type { WorldWithMembers } from '@/lib/types';
 import type { WorldMeta } from '@/lib/worldMeta';
 import { playHoverSound } from '@/lib/sound';
-import { useWorldCardPhotos } from '@/components/useWorldCardPhotos';
+import { useWorldCardPhotos } from '@/hooks/useWorldCardPhotos';
 
 type WorldCardProps = {
   slotNumber: number;
