@@ -9,6 +9,7 @@ import { WorldCard } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
 import { useWorldListData } from '@/hooks/useWorldListData';
 import type { NavigateFn } from '@/lib/screenNavigation';
+import { saveUserWorldListView } from '@/lib/userLastView';
 import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
@@ -17,6 +18,10 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState<WorldWithMembers | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WorldWithMembers | null>(null);
+
+  useEffect(() => {
+    void saveUserWorldListView(gameId).catch((saveError) => console.error('Failed to save last world-list view:', saveError));
+  }, [gameId]);
 
   useEffect(() => {
     playWorldBgm();
@@ -52,7 +57,7 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
   const openWorld = (world: WorldWithMembers) => {
     playConfirmSound();
     localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id);
-    navigate({ name: 'world', worldId: world.id, worldName: world.name });
+    navigate({ name: 'world', gameId, worldId: world.id, worldName: world.name });
   };
 
   return (
