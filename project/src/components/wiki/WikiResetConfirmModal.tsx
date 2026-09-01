@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { playCancelSound, playHoverSound } from '@/lib/sound';
 
 type WikiResetConfirmModalProps = {
@@ -17,23 +17,33 @@ export function WikiResetConfirmModal({ open, onCancel, onConfirm }: WikiResetCo
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-[#05080E]/90 p-4 backdrop-blur-sm"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleCancel();
       }}
     >
-      <div className="w-full max-w-md border-2 border-red-700 bg-[#0d1627] p-5 shadow-[0_0_35px_rgba(0,0,0,.7)]">
-        <div className="game-ui-font flex items-center gap-2 font-bold text-red-300">
-          <AlertTriangle className="h-5 w-5" />旅の書をリセットしますか？
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reset-wiki-title"
+        className="w-full max-w-sm rounded-lg border border-[#EF4444]/60 bg-[#2A1218] p-4 shadow-[0_0_24px_rgba(239,68,68,0.2)]"
+      >
+        <div className="flex items-start gap-2 text-xs font-game font-bold text-[#EF4444]">
+          <Trash2 className="mt-0.5 h-4 w-4 shrink-0" />
+          <span id="reset-wiki-title">この旅の書をリセットしますか？ この操作は取り消せません。</span>
         </div>
-        <p className="mt-2 text-xs text-slate-400">この人物の保存済みWiki記事だけを削除します。他の記事は残ります。</p>
-        <div className="mt-5 grid grid-cols-2 gap-2">
+
+        <p className="mt-2 text-[11px] font-mono text-[#FCA5A5]">
+          この人物の保存済みWiki記事だけを削除します。他の記事は残ります。
+        </p>
+
+        <div className="mt-4 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={handleCancel}
             onMouseEnter={playHoverSound}
-            className="game-ui-font min-h-[42px] border border-slate-700 text-slate-300 transition-all hover:-translate-y-[2px]"
+            className="rounded px-3 py-1.5 text-xs font-game text-[#94A3B8] transition-colors hover:bg-[#1E293B] cursor-pointer"
           >
             キャンセル
           </button>
@@ -41,9 +51,9 @@ export function WikiResetConfirmModal({ open, onCancel, onConfirm }: WikiResetCo
             type="button"
             onClick={onConfirm}
             onMouseEnter={playHoverSound}
-            className="game-ui-font min-h-[42px] bg-red-700 font-bold text-white transition-all hover:-translate-y-[2px] hover:bg-red-600"
+            className="rounded bg-[#EF4444] px-3 py-1.5 text-xs font-game font-bold text-white transition-colors hover:bg-[#DC2626] cursor-pointer"
           >
-            リセットする
+            リセットを実行
           </button>
         </div>
       </div>
