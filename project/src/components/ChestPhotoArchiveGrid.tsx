@@ -1,6 +1,7 @@
 import { Shield } from 'lucide-react';
 import { ChestFullImage } from '@/components/ChestFullImage';
 import type { CollectionItem } from '@/lib/chestCollection';
+import { isCheckpointCollectionLocation } from '@/lib/chestCollection';
 import { playConfirmSound, playHoverSound } from '@/lib/sound';
 
 type ChestPhotoArchiveGridProps = {
@@ -8,14 +9,6 @@ type ChestPhotoArchiveGridProps = {
   selectedIndex: number;
   onSelect: (item: CollectionItem) => void;
 };
-
-type CheckpointLocation = CollectionItem['location'] & {
-  is_checkpoint?: boolean;
-};
-
-function isCheckpointLocation(location: CollectionItem['location']): boolean {
-  return Boolean((location as CheckpointLocation).is_checkpoint);
-}
 
 export function ChestPhotoArchiveGrid({ items, selectedIndex, onSelect }: ChestPhotoArchiveGridProps) {
   return (
@@ -50,7 +43,7 @@ export function ChestPhotoArchiveGrid({ items, selectedIndex, onSelect }: ChestP
                   {item.location.name}
                 </div>
               </div>
-              {isCheckpointLocation(item.location) && (
+              {isCheckpointCollectionLocation(item.location) && (
                 <div className="absolute left-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F59E0B] text-[#0B1018]">
                   <Shield className="h-2.5 w-2.5" />
                 </div>
