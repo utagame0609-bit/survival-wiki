@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { ChestModal } from '@/components/ChestModal';
@@ -48,13 +48,13 @@ export function LocationsTab({
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [snsLocation, setSnsLocation] = useState<LocationWithPhotos | null>(null);
 
-  if (openLocationId && !loading) {
+  useEffect(() => {
+    if (!openLocationId || loading) return;
     const location = locations.find((loc) => loc.id === openLocationId);
-    if (location && selectedLocation?.id !== location.id) {
-      setSelectedLocation(location);
-      onOpenLocationHandled?.();
-    }
-  }
+    if (!location) return;
+    setSelectedLocation(location);
+    onOpenLocationHandled?.();
+  }, [openLocationId, loading, locations, onOpenLocationHandled]);
 
   const handleSave = async (input: LocationSaveInput): Promise<string> => {
     try {
