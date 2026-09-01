@@ -46,14 +46,27 @@ export function TimelineRecordsToolbar({
       </div>
 
       <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded border border-[#334155] bg-[#0B1018] px-2 py-1 sm:flex-none">
+        <button
+          type="button"
+          onClick={() => {
+            playConfirmSound();
+            onSortToggle();
+          }}
+          onMouseEnter={playHoverSound}
+          className="game-ui-font flex h-9 shrink-0 items-center gap-1.5 rounded border border-[#334155] bg-[#161F30] px-3 text-xs text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
+          title="並び順を切り替え"
+        >
+          <ArrowUpDown className="h-3.5 w-3.5 text-[#F59E0B]" />
+          <span>{sortOrder === 'newest' ? '新しい順' : '古い順'}</span>
+        </button>
+
+        <div className="flex h-9 min-w-0 flex-1 items-center gap-1 rounded border border-[#334155] bg-[#0B1018] px-2 sm:w-[9.75rem] sm:flex-none">
           <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#06B6D4]" />
-          <span className="hidden font-mono text-[10px] font-bold tracking-wider text-[#64748B] sm:inline">DATE</span>
           <select
             value={selectedYear}
             onChange={(event) => onYearChange(event.target.value)}
             onFocus={playInputFocusSound}
-            className="min-w-0 flex-1 cursor-pointer bg-transparent py-1 text-xs text-[#94A3B8] outline-none sm:w-[5.5rem] sm:flex-none"
+            className="game-ui-font min-w-0 flex-1 cursor-pointer bg-transparent text-[11px] font-bold tracking-tight text-[#94A3B8] outline-none sm:w-[4.6rem] sm:flex-none"
             aria-label="記録年で絞り込み"
           >
             <option value="">全年</option>
@@ -61,13 +74,13 @@ export function TimelineRecordsToolbar({
               <option key={year} value={year}>{year}年</option>
             ))}
           </select>
-          <span className="text-[10px] text-[#334155]">/</span>
+          <span className="font-mono text-[9px] text-[#334155]">/</span>
           <select
             value={selectedMonth}
             onChange={(event) => onMonthChange(event.target.value)}
             onFocus={playInputFocusSound}
             disabled={!selectedYear}
-            className="min-w-0 flex-1 cursor-pointer bg-transparent py-1 text-xs text-[#94A3B8] outline-none disabled:cursor-default disabled:text-[#334155] sm:w-[4.5rem] sm:flex-none"
+            className="game-ui-font min-w-0 flex-1 cursor-pointer bg-transparent text-[11px] font-bold tracking-tight text-[#94A3B8] outline-none disabled:cursor-default disabled:text-[#334155] sm:w-[3.6rem] sm:flex-none"
             aria-label="記録月で絞り込み"
           >
             <option value="">全月</option>
@@ -81,24 +94,10 @@ export function TimelineRecordsToolbar({
           type="button"
           onClick={() => {
             playConfirmSound();
-            onSortToggle();
-          }}
-          onMouseEnter={playHoverSound}
-          className="game-ui-font flex items-center gap-1.5 rounded border border-[#334155] bg-[#161F30] px-3 py-2 text-xs text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-[#F8FAFC]"
-          title="並び順を切り替え"
-        >
-          <ArrowUpDown className="h-3.5 w-3.5 text-[#F59E0B]" />
-          <span>{sortOrder === 'newest' ? '新しい順' : '古い順'}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            playConfirmSound();
             onOpenChest();
           }}
           onMouseEnter={playHoverSound}
-          className="game-ui-font flex items-center gap-1.5 rounded border border-[#F59E0B]/60 bg-[#161F30] px-3.5 py-2 text-xs text-[#F59E0B] shadow-[0_0_10px_rgba(245,158,11,0.15)] transition-all hover:border-[#F59E0B] hover:bg-[#1E293B] active:scale-95"
+          className="game-ui-font flex h-9 min-w-[9.75rem] shrink-0 items-center justify-center gap-1.5 rounded border border-[#F59E0B]/60 bg-[#161F30] px-3 text-xs text-[#F59E0B] shadow-[0_0_10px_rgba(245,158,11,0.15)] transition-all hover:border-[#F59E0B] hover:bg-[#1E293B] active:scale-95"
           title="CHEST 写真宝箱を開く"
         >
           <Package className="h-4 w-4 text-[#F59E0B]" />
