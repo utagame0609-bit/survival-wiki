@@ -4,7 +4,6 @@ import { Clock, MapPin, Users, X } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
-import { LocationDetailInfo } from '@/components/LocationDetailInfo';
 import { LocationDetailGallery } from '@/components/LocationDetailGallery';
 import { LocationDeleteConfirm } from '@/components/LocationDeleteConfirm';
 import { LocationDetailActions } from '@/components/LocationDetailActions';
@@ -156,8 +155,6 @@ export function LocationDetailModal({
               ))}
             </div>
           )}
-
-          <LocationDetailInfo location={location} />
         </div>
 
         <LocationDetailActions
