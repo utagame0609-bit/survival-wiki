@@ -21,7 +21,7 @@ export function WorldBgmChannelSettings() {
   };
 
   return (
-    <section className="border border-slate-800 bg-[#090d16] p-3 space-y-2.5">
+    <section className="space-y-2.5 rounded-md border border-slate-800 bg-[#090d16] p-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 font-bold text-cyan-400">
           <Music2 className="h-4 w-4" />
@@ -31,7 +31,7 @@ export function WorldBgmChannelSettings() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         {CHANNEL_ROWS.map(({ key, label, detail }) => (
-          <div key={key} className="flex items-center justify-between gap-2 border border-slate-800 bg-[#050a14] px-3 py-2">
+          <div key={key} className="flex items-center justify-between gap-2 rounded-md border border-slate-800 bg-[#050a14] px-3 py-2">
             <div className="min-w-0">
               <p className="truncate text-xs font-bold text-slate-300">{label}</p>
               <p className="mt-0.5 truncate text-[9px] tracking-wider text-slate-600">{detail}</p>
