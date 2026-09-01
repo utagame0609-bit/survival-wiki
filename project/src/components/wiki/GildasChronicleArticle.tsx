@@ -36,6 +36,14 @@ export function GildasChronicleArticle({
   const [heroHeight, setHeroHeight] = useState<number | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
   const heroFigureRef = useRef<HTMLElement | null>(null);
+  const gildasLocationLinks = useMemo<GildasLocationLink[]>(() => locationLinks.map((link) => {
+    const linkedPhotoIndex = photos.findIndex((photo) => photo.locationName === link.name);
+    if (linkedPhotoIndex < 0) return link;
+    return {
+      ...link,
+      onClick: () => setPhotoIndex(linkedPhotoIndex),
+    };
+  }), [locationLinks, photos]);
 
   useEffect(() => {
     setActiveChapterId(chronicle?.chapters[0]?.id ?? '');
@@ -140,7 +148,7 @@ export function GildasChronicleArticle({
         </div>
 
         <p className="mt-5 max-w-4xl text-sm leading-[1.9] text-slate-200/95 sm:text-[15.5px]">
-          {renderGildasLinkedText(chronicle.introduction, locationLinks)}
+          {renderGildasLinkedText(chronicle.introduction, gildasLocationLinks)}
         </p>
       </header>
 
@@ -191,7 +199,7 @@ export function GildasChronicleArticle({
           chronicle={chronicle}
           photos={photos}
           narratorLine={narratorLine}
-          locationLinks={locationLinks}
+          locationLinks={gildasLocationLinks}
           onOpenPhoto={setPhotoIndex}
         />
       </div>
