@@ -1,4 +1,4 @@
-import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
+import type { WorldWithMembers } from '@/lib/types';
 import { fetchLocations } from '@/lib/db';
 
 export type WorldMeta = {
