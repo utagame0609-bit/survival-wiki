@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useScreenHistory } from '@/components/Navigation';
+import { useScreenHistory } from '@/lib/screenNavigation';
 import { SettingsButton } from '@/components/SettingsButton';
 import { AuthScreen } from '@/screens/AuthScreen';
 import { TopScreen } from '@/screens/TopScreen';
