@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useScreenHistory } from '@/components/Navigation';
-import { SettingsButton } from '@/components/SettingsModal';
+import { SettingsButton } from '@/components/SettingsButton';
 import { AuthScreen } from '@/screens/AuthScreen';
 import { TopScreen } from '@/screens/TopScreen';
 import { WorldListScreen } from '@/screens/WorldListScreen';
