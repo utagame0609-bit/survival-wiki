@@ -188,13 +188,13 @@ export function TimelineRecordsView({
 
                     <div className="flex shrink-0 items-center gap-2">
                       <span
-                        className={`rounded px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                        className={`rounded px-3 py-1 font-mono text-[10px] tracking-widest transition-colors ${
                           expanded
                             ? 'border border-[#334155] bg-[#0B1018]/60 text-[#94A3B8]'
                             : 'border border-[#334155]/40 bg-[#0B1018]/40 text-[#475569]'
                         }`}
                       >
-                        {group.items.length} {group.items.length === 1 ? 'RECORD' : 'RECORDS'}
+                        {group.items.length} 件
                       </span>
                     </div>
                   </div>
@@ -242,11 +242,11 @@ export function TimelineRecordsView({
       )}
 
       <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#1E293B] pt-4 text-[#475569] sm:flex-row">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em]">
-          SYSTEM.V4.0.2 // AETHELGARD EXPEDITIONARY FORCE
+        <p className="font-mono text-[10px] tracking-[0.3em]">
+          冒険記録システム
         </p>
         <span className="font-mono text-[10px] text-[#64748B]">
-          TOTAL ARCHIVES: {locations.length} LOCATIONS
+          総記録数: {locations.length} 件
         </span>
       </div>
 
@@ -259,7 +259,7 @@ export function TimelineRecordsView({
           className="flex items-center gap-2 rounded-full bg-[#F59E0B] px-6 py-3 font-mono text-xs font-bold tracking-wider text-[#0B1018] shadow-[0_5px_20px_rgba(245,158,11,0.3)] transition-transform hover:bg-[#D97706] active:scale-95"
         >
           <Plus className="h-4 w-4 stroke-[3]" />
-          <span>ADD NEW RECORD</span>
+          <span>記録を追加</span>
         </button>
       </div>
     </div>
