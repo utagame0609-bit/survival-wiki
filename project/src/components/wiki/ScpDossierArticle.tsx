@@ -77,6 +77,7 @@ export function ScpDossierArticle({ world, locations, content, mainPhotoUrl, nar
   const bodyPaperProps = {
     dossier, evidencePhotos, activeCarouselIdx, setActiveCarouselIdx,
     indexOpen, setIndexOpen, declassifiedMode, setSelectedPhoto,
+    locationLinks: relatedLocationLinks,
   };
 
   const headerPaper = (
