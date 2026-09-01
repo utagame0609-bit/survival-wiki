@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight, Package, Plus } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { playConfirmSound, playHoverSound } from '@/lib/sound';
 import { loadUserTimelineSortOrder, saveUserTimelineSortOrder } from '@/lib/userTimelineSettings';
@@ -94,17 +95,37 @@ export function TimelineRecordsView({
       />
 
       {groupedByDay.length > 0 ? (
-        <div className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-3">
           {groupedByDay.map((group) => {
             const expanded = expandedDate === group.date;
-            const dayBackgroundPhoto = locations
-              .filter((location) => location.created_at.startsWith(group.date))
-              .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-              .find((location) => location.photos[0]?.storage_path)
-              ?.photos[0]?.storage_path;
+
+            const dateObj = new Date(`${group.date}T12:00:00Z`);
+            const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            const dow = Number.isNaN(dateObj.getTime()) ? '' : daysOfWeek[dateObj.getUTCDay()];
+            const formattedDate = `${group.date.replace(/-/g, '.')} ${dow}`.trim();
+
+            const dayLocations = locations.filter((location) =>
+              location.created_at.startsWith(group.date),
+            );
+            const sortedDayLocations = [...dayLocations].sort(
+              (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            );
+            const dayBackgroundPhoto = sortedDayLocations.find(
+              (location) => location.photos[0]?.storage_path,
+            )?.photos[0]?.storage_path;
+
+            const hasCheckpoints = group.items.some((item) => item.is_checkpoint);
+            const hasVideos = group.items.some((item) => item.youtube_url);
 
             return (
-              <div key={group.date} className="space-y-3">
+              <div
+                key={group.date}
+                className={`overflow-hidden rounded-lg transition-all duration-200 ${
+                  expanded
+                    ? 'border border-[#F59E0B]/50 bg-[#182033] shadow-[0_0_20px_rgba(245,158,11,0.05)]'
+                    : 'border border-[#334155]/60 bg-[#161F30] opacity-85 hover:border-[#64748B] hover:opacity-100'
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => {
@@ -113,52 +134,97 @@ export function TimelineRecordsView({
                   }}
                   onMouseEnter={playHoverSound}
                   aria-expanded={expanded}
-                  className={`group relative flex min-h-[3.25rem] w-full items-center overflow-hidden rounded-lg border text-left shadow-sm transition-all sm:min-h-[3.5rem] ${expanded ? 'border-[#F59E0B]/50 bg-[#182033]' : 'border-[#334155]/60 bg-[#161F30] hover:border-[#64748B]'}`}
+                  className="group relative flex w-full items-center gap-4 px-5 py-3.5 text-left outline-none transition-all"
                 >
                   {dayBackgroundPhoto && (
-                    <>
+                    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-30">
                       <LocationPhotoImage
                         storagePath={dayBackgroundPhoto}
                         alt=""
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-0 h-full w-full scale-105 object-cover opacity-[0.18] blur-[0.5px] transition-transform duration-500 group-hover:scale-110"
+                        className="h-full w-full object-cover object-center filter contrast-125"
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0B1018]/96 via-[#111827]/86 to-[#0F172A]/76" />
-                    </>
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#0B1018] via-[#0B1018]/90 to-transparent" />
+                    </div>
                   )}
 
-                  <div className="relative z-10 flex w-full items-center gap-3 px-4 py-2.5 sm:px-5 sm:py-3">
-                    {expanded ? (
-                      <ChevronDown className="h-4 w-4 shrink-0 text-[#F59E0B]" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 shrink-0 text-[#64748B] transition-colors group-hover:text-[#94A3B8]" />
-                    )}
-                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                      <span className="font-mono text-xs font-bold tracking-wide text-[#F59E0B] sm:text-[13px]">
-                        DAY {String(group.dayNumber).padStart(2, '0')}
-                      </span>
-                      <span className="text-xs text-[#475569]">//</span>
-                      <span className="truncate font-mono text-xs text-[#CBD5E1]">{group.date}</span>
+                  <div className="relative z-10 flex w-full items-center justify-between gap-3">
+                    <div className="flex items-center gap-3.5">
+                      {expanded ? (
+                        <ChevronDown className="h-4 w-4 shrink-0 stroke-[2.5] text-[#F59E0B]" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 shrink-0 stroke-[2] text-[#64748B] transition-colors group-hover:text-[#94A3B8]" />
+                      )}
+
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        <span
+                          className={`font-mono text-xs font-bold tracking-widest sm:text-sm ${
+                            expanded ? 'text-[#F59E0B]' : 'text-[#64748B]'
+                          }`}
+                        >
+                          DAY {String(group.dayNumber).padStart(2, '0')}
+                        </span>
+                        <span className={`text-xs ${expanded ? 'text-[#475569]' : 'text-[#334155]'}`}>//</span>
+                        <span
+                          className={`font-mono text-xs tracking-tight ${
+                            expanded ? 'text-[#CBD5E1]' : 'text-[#94A3B8]'
+                          }`}
+                        >
+                          {formattedDate}
+                        </span>
+
+                        {hasCheckpoints && (
+                          <span className="hidden rounded border border-[#F59E0B]/30 bg-[#F59E0B]/10 px-1 py-0.5 font-mono text-[9px] text-[#F59E0B] sm:inline">
+                            CP
+                          </span>
+                        )}
+                        {hasVideos && (
+                          <span className="hidden rounded border border-red-600/40 bg-red-600/20 px-1 py-0.5 font-mono text-[9px] font-bold uppercase text-red-400 sm:inline">
+                            VIDEO
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span className="shrink-0 rounded border border-[#334155]/70 bg-[#0B1018]/55 px-2 py-1 font-mono text-[10px] tracking-wide text-[#94A3B8] sm:text-[11px]">
-                      {group.items.length} RECORDS
-                    </span>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span
+                        className={`rounded px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                          expanded
+                            ? 'border border-[#334155] bg-[#0B1018]/60 text-[#94A3B8]'
+                            : 'border border-[#334155]/40 bg-[#0B1018]/40 text-[#475569]'
+                        }`}
+                      >
+                        {group.items.length} {group.items.length === 1 ? 'RECORD' : 'RECORDS'}
+                      </span>
+                    </div>
                   </div>
                 </button>
 
-                {expanded && (
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    {group.items.map((location) => (
-                      <TimelineRecordCard
-                        key={location.id}
-                        world={world}
-                        location={location}
-                        onSelect={onSelectLocation}
-                        onOpenSns={onOpenSns}
-                      />
-                    ))}
-                  </div>
-                )}
+                <AnimatePresence initial={false}>
+                  {expanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="overflow-hidden border-t border-[#F59E0B]/20"
+                    >
+                      <div className="p-3.5 sm:p-4">
+                        <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2">
+                          {group.items.map((location) => (
+                            <TimelineRecordCard
+                              key={location.id}
+                              world={world}
+                              location={location}
+                              onSelect={onSelectLocation}
+                              onOpenSns={onOpenSns}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
@@ -175,16 +241,25 @@ export function TimelineRecordsView({
         </div>
       )}
 
-      <div className="fixed bottom-[4.25rem] right-2.5 z-30 sm:right-4 md:bottom-6 md:right-8">
+      <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-[#1E293B] pt-4 text-[#475569] sm:flex-row">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em]">
+          SYSTEM.V4.0.2 // AETHELGARD EXPEDITIONARY FORCE
+        </p>
+        <span className="font-mono text-[10px] text-[#64748B]">
+          TOTAL ARCHIVES: {locations.length} LOCATIONS
+        </span>
+      </div>
+
+      <div className="fixed bottom-[4.25rem] right-3 z-30 sm:right-6 md:bottom-8 md:right-10">
         <button
           type="button"
           onClick={onCreate}
           onMouseEnter={playHoverSound}
           aria-label="新規記録を追加"
-          className="game-ui-font flex items-center gap-2 rounded-full bg-[#F59E0B] px-4 py-3 text-xs font-bold tracking-wider text-[#0B1018] shadow-[0_4px_20px_rgba(245,158,11,0.4)] transition-all hover:scale-105 hover:bg-[#D97706] active:scale-95 sm:text-sm"
+          className="flex items-center gap-2 rounded-full bg-[#F59E0B] px-6 py-3 font-mono text-xs font-bold tracking-wider text-[#0B1018] shadow-[0_5px_20px_rgba(245,158,11,0.3)] transition-transform hover:bg-[#D97706] active:scale-95"
         >
           <Plus className="h-4 w-4 stroke-[3]" />
-          <span>記録を追加</span>
+          <span>ADD NEW RECORD</span>
         </button>
       </div>
     </div>
