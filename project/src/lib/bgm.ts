@@ -8,10 +8,19 @@ export type BgmTarget = { type: 'world' } | { type: 'npc'; id: NpcBgmId } | null
 interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
 
 const DEFAULT_BGM_VOLUME = 0.3;
+const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let fadeTimerId: number | null = null;
 let settingsUnsubscribe: (() => void) | null = null;
 let activeNpcBgm: ActiveNpcBgm | null = null;
+let desiredBgmTarget: BgmTarget = null;
+let bgmEnabled = true;
+const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
+
+if (typeof window !== 'undefined') {
+  const storedEnabled = window.localStorage.getItem(BGM_ENABLED_KEY);
+  if (storedEnabled !== null) bgmEnabled = storedEnabled === 'true';
+}
 
 function syncChannels(): void {
   bgmSequencer.channels = getBgmChannelSettings();
@@ -157,42 +166,19 @@ function createAncientBgm(): ActiveNpcBgm {
   return { id: 'npc_bgm_ancient', intervalId: interval, stop: () => window.clearInterval(interval) };
 }
 
-export function getActiveBgmTarget(): BgmTarget {
-  if (activeNpcBgm) return { type: 'npc', id: activeNpcBgm.id };
-  if (bgmSequencer.getIsPlaying()) return { type: 'world' };
-  return null;
-}
-
-export function playNpcBgm(id: NpcBgmId): void {
-  soundEngine.init();
-  if (bgmSequencer.getIsPlaying()) stopWorldBgm(0);
-  syncVolume();
-  if (activeNpcBgm?.id === id) return;
-  stopNpcBgm();
-  if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm();
-  if (id === 'npc_bgm_scp') activeNpcBgm = createScpBgm();
-  if (id === 'npc_bgm_ancient') activeNpcBgm = createAncientBgm();
-}
-
-export function stopNpcBgm(): void {
+function stopNpcPlayback(): void {
   if (!activeNpcBgm) return;
   activeNpcBgm.stop();
   activeNpcBgm = null;
 }
 
-export function playWorldBgm(): void {
-  stopNpcBgm();
-  ensureSettingsSubscription();
+function stopWorldPlayback(fadeMs = 300): void {
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
     fadeTimerId = null;
   }
-  syncVolume();
-  bgmSequencer.play();
-}
+  if (!bgmSequencer.getIsPlaying()) return;
 
-export function stopWorldBgm(fadeMs = 300): void {
-  if (fadeTimerId !== null) window.clearTimeout(fadeTimerId);
   const currentVolume = masterBgmVolume;
   const ctx = soundEngine.getContext();
   const steps = Math.max(1, Math.ceil(fadeMs / 30));
@@ -218,24 +204,139 @@ export function stopWorldBgm(fadeMs = 300): void {
   if (fadeMs <= 0) {
     bgmSequencer.stop();
     soundEngine.setMasterVolume(0);
-    fadeTimerId = null;
-  } else {
-    fadeTimerId = window.setTimeout(fade, stepMs);
+    return;
   }
+  fadeTimerId = window.setTimeout(fade, stepMs);
+}
+
+function startNpcPlayback(id: NpcBgmId): void {
+  soundEngine.init();
+  stopWorldPlayback(0);
+  syncVolume();
+  if (activeNpcBgm?.id === id) return;
+  stopNpcPlayback();
+  if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm();
+  if (id === 'npc_bgm_scp') activeNpcBgm = createScpBgm();
+  if (id === 'npc_bgm_ancient') activeNpcBgm = createAncientBgm();
+}
+
+function startWorldPlayback(): void {
+  stopNpcPlayback();
+  ensureSettingsSubscription();
+  if (fadeTimerId !== null) {
+    window.clearTimeout(fadeTimerId);
+    fadeTimerId = null;
+  }
+  syncVolume();
+  bgmSequencer.play();
+}
+
+function stopPlaybackPreservingTarget(): void {
+  stopNpcPlayback();
+  stopWorldPlayback(0);
+}
+
+export function getActiveBgmTarget(): BgmTarget {
+  if (activeNpcBgm) return { type: 'npc', id: activeNpcBgm.id };
+  if (bgmSequencer.getIsPlaying()) return { type: 'world' };
+  return null;
+}
+
+export function getDesiredBgmTarget(): BgmTarget {
+  return desiredBgmTarget;
+}
+
+export function playNpcBgm(id: NpcBgmId): void {
+  desiredBgmTarget = { type: 'npc', id };
+  if (!bgmEnabled) {
+    stopPlaybackPreservingTarget();
+    return;
+  }
+  startNpcPlayback(id);
+}
+
+export function stopNpcBgm(): void {
+  if (desiredBgmTarget?.type === 'npc') desiredBgmTarget = null;
+  stopNpcPlayback();
+}
+
+export function playWorldBgm(): void {
+  desiredBgmTarget = { type: 'world' };
+  if (!bgmEnabled) {
+    stopPlaybackPreservingTarget();
+    return;
+  }
+  startWorldPlayback();
+}
+
+export function stopWorldBgm(fadeMs = 300): void {
+  if (desiredBgmTarget?.type === 'world') desiredBgmTarget = null;
+  stopWorldPlayback(fadeMs);
 }
 
 export function stopAllBgm(fadeMs = 0): void {
-  stopNpcBgm();
-  stopWorldBgm(fadeMs);
+  desiredBgmTarget = null;
+  stopNpcPlayback();
+  stopWorldPlayback(fadeMs);
+}
+
+export function suspendBgmForPreview(): BgmTarget {
+  const target = desiredBgmTarget;
+  stopPlaybackPreservingTarget();
+  return target;
 }
 
 export function restoreBgmTarget(target: BgmTarget): void {
-  if (!target) return;
+  desiredBgmTarget = target;
+  if (!bgmEnabled || !target) return;
   if (target.type === 'world') {
-    playWorldBgm();
+    startWorldPlayback();
     return;
   }
-  playNpcBgm(target.id);
+  startNpcPlayback(target.id);
+}
+
+export function playNpcBgmPreview(id: NpcBgmId): void {
+  startNpcPlayback(id);
+}
+
+export function stopNpcBgmPreview(): void {
+  stopNpcPlayback();
+}
+
+export function playWorldBgmPreview(): void {
+  startWorldPlayback();
+}
+
+export function stopWorldBgmPreview(fadeMs = 0): void {
+  stopWorldPlayback(fadeMs);
+}
+
+export function isBgmEnabled(): boolean {
+  return bgmEnabled;
+}
+
+export function setBgmEnabled(enabled: boolean): boolean {
+  bgmEnabled = enabled;
+  if (typeof window !== 'undefined') window.localStorage.setItem(BGM_ENABLED_KEY, String(enabled));
+  bgmEnabledListeners.forEach((listener) => listener(enabled));
+
+  if (!enabled) {
+    stopPlaybackPreservingTarget();
+    return bgmEnabled;
+  }
+
+  restoreBgmTarget(desiredBgmTarget);
+  return bgmEnabled;
+}
+
+export function toggleBgmEnabled(): boolean {
+  return setBgmEnabled(!bgmEnabled);
+}
+
+export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () => void {
+  bgmEnabledListeners.add(listener);
+  return () => bgmEnabledListeners.delete(listener);
 }
 
 export function isWorldBgmPlaying(): boolean {
