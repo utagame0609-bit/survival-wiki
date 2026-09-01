@@ -38,6 +38,14 @@ export function ScpDossierArticle({ world, locations, content, mainPhotoUrl, nar
   const [declassifiedMode, setDeclassifiedMode] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<ScpEvidenceView | null>(null);
   const { evidencePhotos, activeCarouselIdx, setActiveCarouselIdx } = useScpEvidencePhotos(locations);
+  const relatedLocationLinks = useMemo<LocationLink[]>(() => locationLinks.map((link) => {
+    const evidencePhoto = evidencePhotos.find((photo) => photo.title === link.name);
+    if (!evidencePhoto) return link;
+    return {
+      ...link,
+      onClick: () => setSelectedPhoto(evidencePhoto),
+    };
+  }), [locationLinks, evidencePhotos]);
 
   if (!dossier) {
     return (
@@ -104,10 +112,10 @@ export function ScpDossierArticle({ world, locations, content, mainPhotoUrl, nar
             <ScpDossierBodyPaper {...bodyPaperProps} />
           </div>
 
-          {locationLinks.length > 0 && (
+          {relatedLocationLinks.length > 0 && (
             <div className="border border-[#333] bg-[#0f0f12] p-3 font-mono">
               <div className="mb-2 text-[10px] font-bold tracking-wider text-[#00ffcc]">RELATED_RECORDS // SOURCE LOCATIONS</div>
-              <div className="flex flex-wrap gap-1.5">{locationLinks.map((location) => <button key={location.name} type="button" onClick={location.onClick} className="border border-[#333] bg-[#16161a] px-2 py-1 text-[10px] text-[#aaa] transition-colors hover:border-[#00ffcc]/60 hover:text-[#00ffcc]">&gt; {location.name}</button>)}</div>
+              <div className="flex flex-wrap gap-1.5">{relatedLocationLinks.map((location) => <button key={location.name} type="button" onClick={location.onClick} className="border border-[#333] bg-[#16161a] px-2 py-1 text-[10px] text-[#aaa] transition-colors hover:border-[#00ffcc]/60 hover:text-[#00ffcc]">&gt; {location.name}</button>)}</div>
             </div>
           )}
         </div>
