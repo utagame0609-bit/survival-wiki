@@ -7,18 +7,31 @@ import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { playModalOpenSound } from '@/lib/sound';
 import { stopNpcBgm } from '@/lib/bgm';
+import { saveUserWorldView, type UserLastWorldTab } from '@/lib/userLastView';
 import { WikiLocationDetailModal } from '@/components/WikiLocationDetailModal';
 import { WorldHeader } from '@/components/WorldHeader';
 import { WorldTabs } from '@/components/WorldTabs';
 import { MobileBottomHud } from '@/components/MobileBottomHud';
 
-type Tab = 'records' | 'wiki';
+type Tab = UserLastWorldTab;
 
-export function WorldScreen({ worldId, worldName, goBack }: { worldId: string; worldName: string; goBack: () => void }) {
+export function WorldScreen({
+  gameId,
+  worldId,
+  worldName,
+  initialTab = 'records',
+  goBack,
+}: {
+  gameId: string;
+  worldId: string;
+  worldName: string;
+  initialTab?: Tab;
+  goBack: () => void;
+}) {
   const [world, setWorld] = useState<WorldWithMembers | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<Tab>('records');
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [reloadKey, setReloadKey] = useState(0);
   const [openLocationId, setOpenLocationId] = useState<string | null>(null);
   const [wikiLocation, setWikiLocation] = useState<LocationWithPhotos | null>(null);
@@ -27,6 +40,10 @@ export function WorldScreen({ worldId, worldName, goBack }: { worldId: string; w
   const [wikiBackRequestKey, setWikiBackRequestKey] = useState(0);
 
   const reload = () => setReloadKey((k) => k + 1);
+
+  useEffect(() => {
+    void saveUserWorldView(gameId, worldId, tab).catch((saveError) => console.error('Failed to save last world view:', saveError));
+  }, [gameId, worldId, tab]);
 
   useEffect(() => {
     let active = true;
