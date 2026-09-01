@@ -35,11 +35,11 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-3 font-mono backdrop-blur-md sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-2 font-mono backdrop-blur-md sm:p-4">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={handleClose} />
 
       <div className="hud-bracket relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] text-slate-100 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3.5">
+        <div className="flex items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3 sm:py-3.5">
           <div className="flex min-w-0 items-center gap-2">
             <Sliders className="h-4 w-4 shrink-0 text-[#F59E0B]" />
             <h2 className="truncate text-sm font-bold tracking-wider text-[#F8FAFC]">
@@ -57,8 +57,10 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           </button>
         </div>
 
-        <div className="max-h-[80vh] space-y-5 overflow-y-auto p-4 sm:p-5">
-          <section className="space-y-3.5 rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3.5">
+        <div
+          className={`${advancedOpen ? 'max-h-[calc(100dvh-8rem)] overflow-y-auto' : 'overflow-visible'} space-y-3 p-3 sm:max-h-[80vh] sm:space-y-5 sm:overflow-y-auto sm:p-5`}
+        >
+          <section className="space-y-2.5 rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3 sm:space-y-3.5 sm:p-3.5">
             <div className="text-xs font-bold text-[#F59E0B]">16-bit 音響システム設定</div>
             <BasicSoundSettings />
             <div className="hidden md:block">
@@ -75,7 +77,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
               }}
               onMouseEnter={playHoverSound}
               aria-expanded={advancedOpen}
-              className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left transition-colors hover:bg-[#161F30]/80"
+              className="flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-[#161F30]/80 sm:py-3"
             >
               <div className="min-w-0">
                 <div className="text-xs font-bold tracking-wide text-[#F8FAFC]">詳細設定</div>
@@ -122,7 +124,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
           </section>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-[#1E293B] bg-[#0B1018] px-4 py-3 text-xs text-[#64748B]">
+        <div className="flex items-center justify-between gap-3 border-t border-[#1E293B] bg-[#0B1018] px-4 py-2.5 text-xs text-[#64748B] sm:py-3">
           <span className="truncate">UTAPEDIA SURVIVAL WIKI</span>
           <button
             type="button"
