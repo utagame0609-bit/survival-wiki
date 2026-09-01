@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Calendar, MapPin, Users, X } from 'lucide-react';
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, MapPin, Users, X } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { parseStoredHernanArticle } from '@/lib/wikiHernan';
 import { HernanArticleBody, renderHernanLinkedText, type HernanLocationLink } from '@/components/wiki/HernanArticleBody';
@@ -59,10 +59,21 @@ export function HernanEncyclopediaArticle({
   const earliestTimestamp = locations.map((location) => location.created_at).filter(Boolean).sort()[0];
   const companions = Array.from(new Set(locations.flatMap((location) => location.members.map((member) => member.name)).filter(Boolean)));
   const selected = selectedPhoto === null ? null : photos[selectedPhoto];
+  const hasMultiplePhotos = photos.length > 1;
 
   const goToSection = (id: string) => {
     setMobileTocOpen(false);
     document.getElementById(`hernan-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const showPreviousPhoto = () => {
+    if (selectedPhoto === null || !hasMultiplePhotos) return;
+    setSelectedPhoto((selectedPhoto - 1 + photos.length) % photos.length);
+  };
+
+  const showNextPhoto = () => {
+    if (selectedPhoto === null || !hasMultiplePhotos) return;
+    setSelectedPhoto((selectedPhoto + 1) % photos.length);
   };
 
   return (
@@ -136,18 +147,71 @@ export function HernanEncyclopediaArticle({
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 p-3 backdrop-blur-sm" onClick={() => setSelectedPhoto(null)}>
-          <div className="w-full max-w-5xl bg-white p-3 shadow-2xl sm:p-4" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-2 flex items-center justify-between gap-2 border-b border-[#a2a9b1] pb-2">
-              <div className="min-w-0 truncate font-serif text-sm text-neutral-800 sm:text-base">図{selectedPhoto! + 1}：{selected.title}</div>
-              <button type="button" onClick={() => setSelectedPhoto(null)} className="shrink-0 p-1 text-neutral-500 hover:text-neutral-900" aria-label="画像を閉じる"><X className="h-5 w-5" /></button>
-            </div>
-            <div className="flex max-h-[72vh] items-center justify-center bg-neutral-950"><img src={selected.url} alt={selected.alt} className="max-h-[72vh] max-w-full object-contain" /></div>
-            {(selected.locationName || selected.timestamp) && <div className="mt-2 font-mono text-[11px] text-neutral-500">{[selected.locationName, selected.timestamp].filter(Boolean).join(' • ')}</div>}
-            {photos.length > 1 && (
-              <div className="mt-3 flex gap-1.5 overflow-x-auto border-t border-[#eaecf0] pt-3">
-                {photos.map((photo, index) => <button key={photo.id} type="button" onClick={() => setSelectedPhoto(index)} className={`h-12 w-16 shrink-0 overflow-hidden border ${selectedPhoto === index ? 'border-[#0645ad] ring-1 ring-[#0645ad]' : 'border-[#c8ccd1]'}`}><img src={photo.url} alt="" className="h-full w-full object-cover" /></button>)}
-              </div>
+        <div
+          id="hernan-image-viewer-modal"
+          className="fixed inset-0 z-[210] flex select-none flex-col justify-between bg-black/85 p-3 backdrop-blur-xs sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="図版ビューア"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div className="z-10 flex items-center justify-between text-neutral-200" onClick={(event) => event.stopPropagation()}>
+            <span className="font-mono text-[13px] tracking-wide text-neutral-300">
+              {hasMultiplePhotos ? `図版 [${selectedPhoto + 1} / ${photos.length}]` : '図版詳細'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedPhoto(null)}
+              className="flex cursor-pointer items-center gap-1.5 rounded-xs border border-neutral-600 bg-neutral-800/80 px-3 py-1.5 text-[13px] text-white transition-colors hover:bg-neutral-700"
+              aria-label="閉じる (Esc)"
+            >
+              <X className="h-4 w-4" />
+              <span className="hidden sm:inline">閉じる (Esc)</span>
+            </button>
+          </div>
+
+          <div className="relative flex max-h-[78vh] flex-1 items-center justify-center px-1 py-2" onClick={(event) => event.stopPropagation()}>
+            {hasMultiplePhotos && (
+              <button
+                type="button"
+                onClick={showPreviousPhoto}
+                className="absolute left-1 z-20 cursor-pointer rounded-full border border-neutral-700 bg-neutral-900/70 p-2 text-white transition-transform hover:bg-neutral-800 active:scale-95 sm:left-4 sm:p-3"
+                aria-label="前の写真"
+              >
+                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+              </button>
+            )}
+
+            <img
+              src={selected.url}
+              alt={selected.alt}
+              className="max-h-[72vh] max-w-[92vw] rounded-xs border border-neutral-800 object-contain shadow-2xl md:max-w-[80vw]"
+              referrerPolicy="no-referrer"
+            />
+
+            {hasMultiplePhotos && (
+              <button
+                type="button"
+                onClick={showNextPhoto}
+                className="absolute right-1 z-20 cursor-pointer rounded-full border border-neutral-700 bg-neutral-900/70 p-2 text-white transition-transform hover:bg-neutral-800 active:scale-95 sm:right-4 sm:p-3"
+                aria-label="次の写真"
+              >
+                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+              </button>
+            )}
+          </div>
+
+          <div
+            className="mx-auto w-full max-w-3xl rounded-xs border border-neutral-800 bg-neutral-900/90 p-3 text-center text-neutral-200"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="font-sans text-[13px] leading-relaxed text-neutral-100 sm:text-[14px]">
+              {selected.title || selected.alt}
+            </p>
+            {(selected.locationName || selected.timestamp) && (
+              <p className="mt-1 font-mono text-[11.5px] text-neutral-400">
+                {[selected.locationName, selected.timestamp].filter(Boolean).join(' • ')}
+              </p>
             )}
           </div>
         </div>
