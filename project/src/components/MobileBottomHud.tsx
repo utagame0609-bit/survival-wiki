@@ -1,7 +1,6 @@
 import { BookOpen, ChevronLeft, Home, ScrollText, Settings, Volume2, VolumeX } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { isBgmEnabled, toggleBgmEnabled } from '@/lib/bgm';
-import { playCancelSound, playHoverSound, playTabSwitchSound } from '@/lib/sound';
+import { useState } from 'react';
+import { isSoundEnabled, playCancelSound, playHoverSound, playTabSwitchSound, toggleSound } from '@/lib/sound';
 
 type Tab = 'records' | 'wiki';
 
@@ -12,18 +11,7 @@ type MobileBottomHudProps = {
 };
 
 export function MobileBottomHud({ activeTab, onTabChange, onBack }: MobileBottomHudProps) {
-  const [bgmEnabled, setBgmEnabledState] = useState(isBgmEnabled());
-
-  useEffect(() => {
-    const handleBgmEnabledChanged = (event: Event) => {
-      const next = event instanceof CustomEvent && typeof event.detail === 'boolean'
-        ? event.detail
-        : isBgmEnabled();
-      setBgmEnabledState(next);
-    };
-    window.addEventListener('survival-wiki:bgm-enabled-changed', handleBgmEnabledChanged);
-    return () => window.removeEventListener('survival-wiki:bgm-enabled-changed', handleBgmEnabledChanged);
-  }, []);
+  const [soundEnabled, setSoundEnabled] = useState(isSoundEnabled());
 
   const handleTabChange = (nextTab: Tab) => {
     if (nextTab === activeTab) return;
@@ -41,9 +29,9 @@ export function MobileBottomHud({ activeTab, onTabChange, onBack }: MobileBottom
     window.dispatchEvent(new CustomEvent('survival-wiki:settings'));
   };
 
-  const handleBgmToggle = () => {
-    const next = toggleBgmEnabled();
-    setBgmEnabledState(next);
+  const handleSoundToggle = () => {
+    const next = toggleSound();
+    setSoundEnabled(next);
   };
 
   const itemClass = 'flex h-10 min-w-0 flex-1 flex-col items-center justify-center rounded px-0.5 text-[#94A3B8] active:bg-[#1E293B]';
@@ -66,9 +54,9 @@ export function MobileBottomHud({ activeTab, onTabChange, onBack }: MobileBottom
           <span className="game-ui-font whitespace-nowrap text-[8px]">戻る</span>
         </button>
 
-        <button type="button" onClick={handleBgmToggle} className={`${itemClass} active:text-[#06B6D4]`}>
-          {bgmEnabled ? <Volume2 className="h-4 w-4 text-[#06B6D4]" /> : <VolumeX className="h-4 w-4 text-[#64748B]" />}
-          <span className="game-ui-font whitespace-nowrap text-[8px]">BGM {bgmEnabled ? 'ON' : 'OFF'}</span>
+        <button type="button" onClick={handleSoundToggle} className={`${itemClass} active:text-[#06B6D4]`}>
+          {soundEnabled ? <Volume2 className="h-4 w-4 text-[#06B6D4]" /> : <VolumeX className="h-4 w-4 text-[#64748B]" />}
+          <span className="game-ui-font whitespace-nowrap text-[8px]">BGM {soundEnabled ? 'ON' : 'OFF'}</span>
         </button>
 
         <button type="button" onClick={handleSettings} className={`${itemClass} active:text-[#F8FAFC]`}>
