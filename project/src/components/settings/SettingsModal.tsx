@@ -1,4 +1,4 @@
-import { Sliders, Sparkles, Smartphone, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Sliders, Sparkles, Smartphone, X } from 'lucide-react';
 import { useState } from 'react';
 import { SoundStudioPanel } from '@/components/settings/SoundStudioPanel';
 import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
@@ -15,6 +15,7 @@ type SettingsModalProps = {
 
 export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: SettingsModalProps) {
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const handleClose = () => {
     playModalCloseSound();
@@ -61,32 +62,57 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
             <div className="text-xs font-bold text-[#F59E0B]">16-bit 音響システム設定</div>
             <BasicSoundSettings />
             <WorldBgmChannelSettings />
-
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  playConfirmSound();
-                  setSoundStudioOpen(true);
-                }}
-                onMouseEnter={playHoverSound}
-                className="flex w-full items-center justify-center gap-1.5 rounded border border-[#F59E0B]/40 bg-[#161F30] px-3 py-2 text-xs font-bold text-[#F59E0B] shadow-sm transition-all hover:border-[#F59E0B] hover:bg-[#1E293B]"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>SOUND STUDIO // 効果音テスト室を開く</span>
-              </button>
-            </div>
           </section>
 
-          <section className="space-y-3 rounded-lg border border-[#1E293B] bg-[#0B1018]/60 p-3.5">
-            <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
-              <Smartphone className="h-3.5 w-3.5 text-[#06B6D4]" />
-              <span>スマートフォン・PWA対応</span>
-            </div>
-            <p className="text-xs leading-relaxed text-[#64748B]">
-              ホーム画面へ追加すると、フルスクリーン起動に対応したスタンドアロンHUDとして利用できます。
-            </p>
-            <SettingsAppActions installPrompt={installPrompt} onInstallPromptUsed={onInstallPromptUsed} />
+          <section className="overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B1018]/60">
+            <button
+              type="button"
+              onClick={() => {
+                playConfirmSound();
+                setAdvancedOpen((current) => !current);
+              }}
+              onMouseEnter={playHoverSound}
+              aria-expanded={advancedOpen}
+              className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left transition-colors hover:bg-[#161F30]/80"
+            >
+              <div className="min-w-0">
+                <div className="text-xs font-bold tracking-wide text-[#F8FAFC]">詳細設定</div>
+                <div className="mt-0.5 truncate text-[10px] text-[#64748B]">SOUND STUDIO / PWA / APP ACTIONS</div>
+              </div>
+              {advancedOpen ? (
+                <ChevronUp className="h-4 w-4 shrink-0 text-[#F59E0B]" />
+              ) : (
+                <ChevronDown className="h-4 w-4 shrink-0 text-[#94A3B8]" />
+              )}
+            </button>
+
+            {advancedOpen && (
+              <div className="space-y-4 border-t border-[#1E293B] p-3.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playConfirmSound();
+                    setSoundStudioOpen(true);
+                  }}
+                  onMouseEnter={playHoverSound}
+                  className="flex w-full items-center justify-center gap-1.5 rounded border border-[#F59E0B]/40 bg-[#161F30] px-3 py-2 text-xs font-bold text-[#F59E0B] shadow-sm transition-all hover:border-[#F59E0B] hover:bg-[#1E293B]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>SOUND STUDIO // 効果音テスト室を開く</span>
+                </button>
+
+                <div className="space-y-3 border-t border-[#1E293B] pt-4">
+                  <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
+                    <Smartphone className="h-3.5 w-3.5 text-[#06B6D4]" />
+                    <span>スマートフォン・PWA対応</span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-[#64748B]">
+                    ホーム画面へ追加すると、フルスクリーン起動に対応したスタンドアロンHUDとして利用できます。
+                  </p>
+                  <SettingsAppActions installPrompt={installPrompt} onInstallPromptUsed={onInstallPromptUsed} />
+                </div>
+              </div>
+            )}
           </section>
         </div>
 
