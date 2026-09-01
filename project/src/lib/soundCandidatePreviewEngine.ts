@@ -1,4 +1,4 @@
-import { playNpcBgm, stopNpcBgm } from './bgm';
+import { playNpcBgmPreview, stopNpcBgmPreview, type NpcBgmId } from './bgm';
 import { createPreviewSounds } from './soundPreviewDefinitions';
 
 let ctx: AudioContext | null = null;
@@ -32,11 +32,10 @@ function getCtx(): AudioContext | null {
 }
 
 const PREVIEW_SOUNDS = createPreviewSounds(getCtx);
-const NPC_BGM_IDS = new Set(['npc_bgm_wikipedia', 'npc_bgm_scp', 'npc_bgm_ancient']);
-type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
+const NPC_BGM_IDS = new Set<NpcBgmId>(['npc_bgm_wikipedia', 'npc_bgm_scp', 'npc_bgm_ancient']);
 
 function isNpcBgmId(id: string): id is NpcBgmId {
-  return NPC_BGM_IDS.has(id);
+  return NPC_BGM_IDS.has(id as NpcBgmId);
 }
 
 export function stopActiveAudio(): void {
@@ -62,8 +61,8 @@ export function playSoundCandidatePreview(id: string): void {
   }
 
   if (isNpcBgmId(id)) {
-    playNpcBgm(id);
-    activeLoop = { id, stop: stopNpcBgm };
+    playNpcBgmPreview(id);
+    activeLoop = { id, stop: stopNpcBgmPreview };
   } else {
     PREVIEW_SOUNDS[id]?.();
   }
