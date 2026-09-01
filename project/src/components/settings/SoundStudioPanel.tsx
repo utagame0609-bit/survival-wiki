@@ -6,7 +6,14 @@ import { BGM_CANDIDATES, type BgmCandidate } from '@/lib/bgmCandidates';
 import { SOUND_CANDIDATES, type SoundCandidate } from '@/lib/soundCandidates';
 import { isAudioPlaying, playSoundCandidatePreview, stopActiveAudio, subscribeSoundState } from '@/lib/soundCandidatePreviewEngine';
 import { getStoredReverbAmount, setStoredReverbAmount, subscribeToReverbAmount } from '@/lib/soundReverb';
-import { getActiveBgmTarget, isWorldBgmPlaying, playWorldBgm, restoreBgmTarget, stopAllBgm, stopWorldBgm, type BgmTarget } from '@/lib/bgm';
+import {
+  isWorldBgmPlaying,
+  playWorldBgmPreview,
+  restoreBgmTarget,
+  stopWorldBgmPreview,
+  suspendBgmForPreview,
+  type BgmTarget,
+} from '@/lib/bgm';
 import { playCancelSound, playConfirmSound, playHoverSound, playInputFocusSound } from '@/lib/sound';
 
 export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
@@ -18,13 +25,12 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   useEffect(() => subscribeToReverbAmount((value) => setReverb(Math.round(value * 100))), []);
   useEffect(() => subscribeSoundState((id, isPlaying) => setActivePlayingId(isPlaying ? id : null)), []);
   useEffect(() => {
-    previousBgmRef.current = getActiveBgmTarget();
-    stopAllBgm(0);
+    previousBgmRef.current = suspendBgmForPreview();
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       stopActiveAudio();
-      stopAllBgm(0);
+      stopWorldBgmPreview(0);
       restoreBgmTarget(previousBgmRef.current);
       document.body.style.overflow = previousOverflow;
     };
@@ -59,7 +65,7 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   const showBgm = selectedCategory === 'all' || selectedCategory === 'bgm';
 
   const handlePlay = (candidate: SoundCandidate) => {
-    if (isWorldBgmPlaying()) stopWorldBgm(0);
+    if (isWorldBgmPlaying()) stopWorldBgmPreview(0);
     setActivePlayingId(candidate.id);
     playSoundCandidatePreview(candidate.id);
     window.setTimeout(() => {
@@ -70,17 +76,17 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
   const handleBgmPlay = (candidate: BgmCandidate) => {
     if (candidate.id === 'bgm_world_select') {
       if (isWorldBgmPlaying()) {
-        stopWorldBgm(0);
+        stopWorldBgmPreview(0);
         setActivePlayingId(null);
         return;
       }
       stopActiveAudio();
-      playWorldBgm();
+      playWorldBgmPreview();
       setActivePlayingId(candidate.id);
       return;
     }
 
-    if (isWorldBgmPlaying()) stopWorldBgm(0);
+    if (isWorldBgmPlaying()) stopWorldBgmPreview(0);
     setActivePlayingId(candidate.id);
     playSoundCandidatePreview(candidate.id);
   };
