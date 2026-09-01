@@ -51,8 +51,10 @@ export function TimelineRecordsView({
   }, []);
 
   useEffect(() => {
-    setExpandedDate(groupedByDay[0]?.date ?? null);
-  }, [groupedByDay]);
+    if (expandedDate && !groupedByDay.some((group) => group.date === expandedDate)) {
+      setExpandedDate(null);
+    }
+  }, [expandedDate, groupedByDay]);
 
   useEffect(() => {
     if (selectedMonth && !availableMonths.includes(selectedMonth)) setSelectedMonth('');
@@ -94,6 +96,12 @@ export function TimelineRecordsView({
         <div className="space-y-4 sm:space-y-5">
           {groupedByDay.map((group) => {
             const expanded = expandedDate === group.date;
+            const dayBackgroundPhoto = locations
+              .filter((location) => location.created_at.startsWith(group.date))
+              .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+              .find((location) => location.photos[0]?.storage_path)
+              ?.photos[0]?.storage_path;
+
             return (
               <div key={group.date} className="space-y-3">
                 <button
@@ -123,12 +131,13 @@ export function TimelineRecordsView({
                 </button>
 
                 {expanded && (
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                  <div className={`grid grid-cols-1 gap-3 ${group.items.length > 1 ? 'lg:grid-cols-2' : 'lg:max-w-2xl'}`}>
                     {group.items.map((location) => (
                       <TimelineRecordCard
                         key={location.id}
                         world={world}
                         location={location}
+                        dayBackgroundPhoto={dayBackgroundPhoto}
                         onSelect={onSelectLocation}
                         onOpenSns={onOpenSns}
                       />
