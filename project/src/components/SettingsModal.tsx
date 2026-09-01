@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { SoundStudioPanel } from '@/components/SoundStudioPanel';
 import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import type { BeforeInstallPromptEvent } from '@/lib/pwaInstall';
-import { BasicSoundSettings } from '@/components/BasicSoundSettings';
-import { WorldBgmChannelSettings } from '@/components/WorldBgmChannelSettings';
-import { SettingsAppActions } from '@/components/SettingsAppActions';
+import { BasicSoundSettings } from '@/components/settings/BasicSoundSettings';
+import { WorldBgmChannelSettings } from '@/components/settings/WorldBgmChannelSettings';
+import { SettingsAppActions } from '@/components/settings/SettingsAppActions';
 
 type SettingsModalProps = {
   onClose: () => void;
