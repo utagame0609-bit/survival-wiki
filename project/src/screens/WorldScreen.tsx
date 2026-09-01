@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { WorldWithMembers, LocationWithPhotos } from '@/lib/types';
 import { fetchLocations, fetchWorld, getPhotoUrl } from '@/lib/db';
-import { Header } from '@/components/Navigation';
+import { AppHeader } from '@/components/AppHeader';
 import { LocationsTab } from '@/screens/LocationsTab';
 import { WikiTab } from '@/screens/WikiTab';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
@@ -103,7 +103,7 @@ export function WorldScreen({ worldId, worldName, navigate: _navigate, goBack }:
   return (
     <div className="relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden pb-14 md:pb-0">
       <div className="scanline-overlay" />
-      <Header title={world?.name || worldName} onBack={handleWorldBack} hideMobileActions />
+      <AppHeader title={world?.name || worldName} onBack={handleWorldBack} hideMobileActions />
 
       <div className={`relative w-full max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 flex-1 flex flex-col ${tab === 'wiki' ? 'pb-0 md:pb-6' : 'pb-4 sm:pb-6'}`}>
         {loading && <Spinner label="ワールドデータを読み込み中..." />}
