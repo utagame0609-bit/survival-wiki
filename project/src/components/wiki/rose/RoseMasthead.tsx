@@ -1,6 +1,8 @@
 import { Flame, Radio, ShieldAlert } from 'lucide-react';
 import type { RoseHazardLevel, RoseMastheadData } from './RoseArticleTypes';
 
+const ROSE_EDITORIAL_SEAL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/rose(%E8%A8%98%E4%BA%8B%E3%83%AD%E3%82%B4%E3%83%BB%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E8%83%8C%E6%99%AF%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png';
+
 type RoseMastheadProps = {
   masthead: RoseMastheadData;
   category?: string;
@@ -86,10 +88,11 @@ export function RoseMasthead({
 
           <div className="flex w-full shrink-0 items-center justify-between gap-3 border-t border-[#171315]/20 pt-2.5 md:w-auto md:flex-col md:items-end md:border-t-0 md:pt-0">
             <div className="flex items-center gap-2.5 md:flex-col md:items-end">
-              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center border-2 border-[#6E1F2B] bg-[#171315] shadow-[2px_2px_0px_#6E1F2B] md:h-24 md:w-24">
-                <div className="font-['Cinzel',serif] text-2xl font-black text-[#D8C6A5] md:text-[40px]">R</div>
-                <div className="absolute -bottom-1.5 -right-1.5 bg-[#6E1F2B] px-1 py-[2px] font-mono text-[8px] font-bold uppercase tracking-wider text-white shadow-sm md:-bottom-2 md:-right-2 md:px-1.5 md:text-[9px]">EDITOR</div>
-              </div>
+              <img
+                src={ROSE_EDITORIAL_SEAL_URL}
+                alt="マダム・ロゼ編集長印"
+                className="h-16 w-auto shrink-0 -rotate-2 object-contain opacity-95 drop-shadow-[1px_2px_0_rgba(110,31,43,0.22)] md:h-24"
+              />
               <div className="text-left font-serif text-[10px] text-[#66504A] sm:text-[11px] md:text-right">
                 <div className="font-bold text-[#171315]">MADAME ROSE</div>
                 <div className="italic text-[#6E1F2B]">「また生きて帰ってきな」</div>
