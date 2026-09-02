@@ -1,7 +1,8 @@
 import type { WikiGenerationInput, WikiGenerationResult, WikiProvider } from './wiki';
 import { getWikiSystemPrompt } from './wiki';
 import { parseScpAiResponse, SCP_STRUCTURED_OUTPUT_INSTRUCTIONS } from './wikiScp';
-import { GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS, parseGildasAiResponse } from './wikiGildas';
+import { MADAME_ROSE_STRUCTURED_OUTPUT_INSTRUCTIONS, parseMadameRoseAiResponse } from './wikiRose';
+import { MADAM_ROSE_SYSTEM_PROMPT } from './wikiRosePrompt';
 import { HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS, parseHernanAiResponse } from './wikiHernan';
 import { supabase } from './supabase';
 import { WIKI_ARTICLE_CHAR_LIMIT, type WikiCoverageMode, type WikiScopeType } from './wikiScope';
@@ -50,7 +51,7 @@ export type WikiGenerationContext = {
 const PLANNING_LENS_BY_STYLE: Record<WikiGenerationInput['style'], string> = {
   wikipedia: '歴史・文化・地理・生活・技術上の変化や発見を重視し、百科事典として整理しやすい節目を選ぶ。',
   scp: '観測上の変化、原因と結果、危険・失敗・反証・管理判断につながる節目を重視する。ただし異常事象を捏造しない。',
-  ancient: '旅の転機、発見、達成、失敗、帰還、再会、土地や記憶の変化など、年代記として流れが生まれる節目を重視する。',
+  ancient: '行動・判断・浪費・失敗・成功・妙な執着・生還など、マダム・ロゼがタブロイド記事として料理しやすい転機を重視する。事実と噂・推測の境界は崩さない。',
 };
 
 function buildSourcePlanningSystemPrompt(maxAiPhotos: number, context: WikiGenerationContext) {
@@ -121,12 +122,12 @@ const NARRATOR_LINE_TONE_INSTRUCTIONS: Record<WikiGenerationInput['style'], stri
 - 大声のホラーや感情的な語尾ではなく、真顔の判断と今回固有の事実の落差を短く残す。
 `,
   ancient: `
-【生成後のギルダス本人の一言 / 口調固定】
-- narratorLine は老吟遊詩人ギルダス本人の発話として書く。
-- 本文と同じ古風だが読みやすい語り口を維持し、「〜であった」「〜であろう」「〜なのだ」「〜おる」等を自然に使う。
-- 一般的なAI応答・接客文の「〜です」「〜ます」「〜いたします」「〜ございます」へ勝手に丁寧化しない。
-- 本人は最後まで真面目であり、自分の語りを「大げさだった」「盛りすぎた」とメタ的に説明しない。
-- 今回固有の記録を一つ拾い、記録を残す価値への愛着・祝福・余韻を短く残す。
+【生成後のマダム・ロゼ本人の一言 / 口調固定】
+- narratorLine はマダム・ロゼ本人の発話として書く。
+- 標準語で、荒野の酒場マスター兼タブロイド編集長らしい短く辛口な常体を基本にする。
+- 今回固有の行動・判断・成功・失敗のどれか一つを拾い、愛情のある毒舌と「また生きて帰ってこい」という温度を残す。
+- 入力にない失敗や危険を作らない。推測を入れる場合は噂・見立て・可能性だと分かる表現にする。
+- エルナンの学術解説、Dr.アークの機密判定、旧吟遊詩人の英雄譚へ寄せない。
 `,
 };
 
@@ -408,10 +409,11 @@ export async function generateWikiArticle(
   const structuredInstructions = style === 'scp'
     ? SCP_STRUCTURED_OUTPUT_INSTRUCTIONS
     : style === 'ancient'
-      ? GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS
+      ? MADAME_ROSE_STRUCTURED_OUTPUT_INSTRUCTIONS
       : HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS;
 
-  const systemPrompt = `${getWikiSystemPrompt(style)}\n\n${structuredInstructions}\n\n${NARRATOR_LINE_TONE_INSTRUCTIONS[style]}`;
+  const personalityPrompt = style === 'ancient' ? MADAM_ROSE_SYSTEM_PROMPT : getWikiSystemPrompt(style);
+  const systemPrompt = `${personalityPrompt}\n\n${structuredInstructions}\n\n${NARRATOR_LINE_TONE_INSTRUCTIONS[style]}`;
   const raw = await invokeWikiAi({
     task: 'article',
     systemPrompt,
@@ -427,9 +429,9 @@ export async function generateWikiArticle(
   }
 
   if (style === 'ancient') {
-    const { chronicle, narratorLine } = parseGildasAiResponse(raw);
+    const { article, narratorLine } = parseMadameRoseAiResponse(raw);
     return {
-      content: withPhotoPathMarker(`${JSON.stringify(chronicle)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
+      content: withPhotoPathMarker(`${JSON.stringify(article)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
     };
   }
 
