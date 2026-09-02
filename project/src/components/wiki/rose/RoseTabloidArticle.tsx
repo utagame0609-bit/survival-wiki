@@ -102,6 +102,7 @@ export function RoseTabloidArticle({
 
       {relatedLocation && (
         <RoseRelatedRecordModal
+          worldId={world.id}
           location={relatedLocation}
           onClose={() => setRelatedLocation(null)}
         />
