@@ -73,7 +73,8 @@ export function RoseArticleShell({ article, body, isMobile = false }: RoseArticl
         <footer className="-mx-3.5 -mb-3.5 mt-8 flex flex-col items-center justify-between gap-2 border-t-4 border-[#6E1F2B] bg-[#171315] px-3.5 py-3.5 text-center font-serif text-[11px] text-[#D8C6A5] sm:-mx-8 sm:-mb-8 sm:flex-row sm:px-8 sm:text-left md:-mx-10 md:-mb-10 md:px-10">
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
             <span className="font-['Cinzel',serif] font-black tracking-wider text-[#E7D9BE]">SURVIVAL WIKI</span>
-            <span className="text-[#D8C6A5]/80">❖ 編纂官：マダム・ロゼ（荒野酒場『LAST CALL』）</span>
+            <span className="text-[#D8C6A5]/80 sm:hidden">❖ 編纂官：マダム・ロゼ / LAST CALL</span>
+            <span className="hidden text-[#D8C6A5]/80 sm:inline">❖ 編纂官：マダム・ロゼ（荒野酒場『LAST CALL』）</span>
           </div>
           <div className="font-mono text-[10px] font-bold text-[#D8C6A5]/60">ROSE'S LAST CALL ❖ PRESS ARCHIVE</div>
         </footer>
