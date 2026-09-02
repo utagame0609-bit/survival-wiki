@@ -20,7 +20,7 @@ export function RoseArticleShell({ article, body, isMobile = false }: RoseArticl
       className={`relative mx-auto box-border overflow-hidden border-2 border-[#171315] bg-[#D8C6A5] text-[#171315] transition-all duration-200 sm:border-4 ${
         isMobile
           ? 'w-full max-w-[390px] p-3.5 shadow-[5px_5px_0px_#171315]'
-          : 'w-full max-w-full p-3.5 shadow-[5px_5px_0px_#171315] sm:max-w-[880px] sm:p-8 sm:shadow-[10px_10px_0px_#171315] md:p-10'
+          : 'w-full max-w-full p-3.5 shadow-[5px_5px_0px_#171315] sm:max-w-[880px] sm:p-8 sm:shadow-[10px_10px_0px_#171315] md:p-10 lg:max-w-[1040px]'
       }`}
     >
       <div
