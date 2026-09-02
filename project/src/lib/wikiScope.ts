@@ -43,10 +43,10 @@ export function getWikiAvailablePeriods(locations: LocationWithPhotos[]): WikiAv
 
 export function formatWikiScopeLabel(type: WikiScopeType, key: string) {
   if (type === 'world') return 'ワールド全体';
-  if (type === 'year') return `${key}年`;
+  if (type === 'year') return /^\d{4}$/.test(key) ? `${key}年` : '対象年なし';
+  if (!/^\d{4}-\d{2}$/.test(key)) return '対象月なし';
   const [year, month] = key.split('-');
-  const monthNumber = Number(month);
-  return `${year}年${Number.isFinite(monthNumber) ? monthNumber : month}月`;
+  return `${year}年${Number(month)}月`;
 }
 
 export function filterWikiLocations(
@@ -55,6 +55,7 @@ export function filterWikiLocations(
   key: string,
 ) {
   if (type === 'world') return locations;
+  if (!key) return [];
   if (type === 'year') {
     return locations.filter((location) => recordDate(location).startsWith(`${key}-`));
   }
