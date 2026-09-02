@@ -14,6 +14,8 @@ const AI_TIMEOUT_MS = 12000;
 const AI_TOTAL_BUDGET_MS = 30000;
 const MAX_IMAGE_INPUTS = 5;
 
+type WikiAiTask = "article" | "photo_selection";
+
 type ImageInput = {
   storagePath?: string;
   imageUrl?: string;
@@ -21,6 +23,7 @@ type ImageInput = {
 };
 
 type RequestBody = {
+  task?: WikiAiTask;
   message?: string;
   imageUrl?: string;
   imageStoragePath?: string;
@@ -30,6 +33,7 @@ type RequestBody = {
 
 function safeBodyLog(body: RequestBody) {
   return {
+    task: body.task ?? "article",
     keys: Object.keys(body),
     messageLength: typeof body.message === "string" ? body.message.length : 0,
     hasImageUrl: typeof body.imageUrl === "string" && body.imageUrl.length > 0,
@@ -95,16 +99,21 @@ async function appendImageInput(
 }
 
 async function buildMessages(body: RequestBody, authorization: string) {
+  const task = body.task ?? "article";
+  const taskInstruction = task === "photo_selection"
+    ? "重要: Wiki本文はまだ執筆しません。与えられた記録テキストと写真メタデータだけを使い、指定されたJSON形式で編集計画と確認すべき写真候補だけを返してください。写真の実内容は見えていないため、写っている内容を推測・断定してはいけません。"
+    : "重要: 安全性確認や分類結果だけを返さず、必ず依頼されたWiki記事本文だけを指定された形式で返してください。";
+
   const instruction = [
     body.systemPrompt ?? "あなたはWiki記事を作成するAIです。",
     "",
-    "重要: 安全性確認や分類結果だけを返さず、必ず依頼されたWiki記事本文だけを指定された形式で返してください。",
+    taskInstruction,
     "",
     body.message ?? "接続テストです。短く返答してください。",
   ].join("\n");
 
   const content: Array<Record<string, unknown>> = [{ type: "text", text: instruction }];
-  const imageInputs = Array.isArray(body.imageInputs)
+  const imageInputs = task === "article" && Array.isArray(body.imageInputs)
     ? body.imageInputs.slice(0, MAX_IMAGE_INPUTS).filter((input) => input?.storagePath || input?.imageUrl)
     : [];
 
@@ -112,9 +121,9 @@ async function buildMessages(body: RequestBody, authorization: string) {
     for (let index = 0; index < imageInputs.length; index += 1) {
       await appendImageInput(content, imageInputs[index], authorization, index);
     }
-  } else if (body.imageStoragePath) {
+  } else if (task === "article" && body.imageStoragePath) {
     await appendImageInput(content, { storagePath: body.imageStoragePath, label: "代表写真" }, authorization, 0);
-  } else if (body.imageUrl) {
+  } else if (task === "article" && body.imageUrl) {
     await appendImageInput(content, { imageUrl: body.imageUrl, label: "代表写真" }, authorization, 0);
   }
 
