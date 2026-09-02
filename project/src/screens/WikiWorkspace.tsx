@@ -227,10 +227,18 @@ export function WikiWorkspace({
     return () => observer.disconnect();
   }, [article]);
 
-  const articlePhotos = useMemo(() => uniqueWikiPhotos(locations), [locations]);
+  const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
+  const articleLocations = useMemo(() => {
+    if (parsedArticle.photoStoragePaths.length === 0) return locations;
+    const selectedPaths = new Set(parsedArticle.photoStoragePaths);
+    return locations.map((location) => ({
+      ...location,
+      photos: location.photos.filter((photo) => selectedPaths.has(photo.storage_path)),
+    }));
+  }, [locations, parsedArticle.photoStoragePaths.join('|')]);
+  const articlePhotos = useMemo(() => uniqueWikiPhotos(articleLocations), [articleLocations]);
   const mainPhoto = articlePhotos[0] ?? null;
   const additionalPhotos = articlePhotos.slice(1, 5);
-  const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
   const isStructuredGildas = style === 'ancient' && Boolean(parseStoredGildasChronicle(parsedArticle.content));
   const isStructuredHernan = style === 'wikipedia' && Boolean(parseStoredHernanArticle(parsedArticle.content));
   const articleExportText = useMemo(() => {
@@ -424,7 +432,7 @@ export function WikiWorkspace({
           <WikiArticleContent
             style={style}
             world={world}
-            locations={locations}
+            locations={articleLocations}
             parsedContent={parsedArticle.content}
             articleWithPhotos={articleWithPhotos}
             mainPhotoUrl={mainPhotoUrl}
