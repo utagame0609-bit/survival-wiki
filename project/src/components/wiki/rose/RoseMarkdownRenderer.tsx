@@ -69,7 +69,7 @@ export function RoseMarkdownRenderer({ content, photos = [], locationLinks = [],
     if (paragraph.length === 0) return;
     const text = paragraph.join(' ').trim();
     if (text) {
-      blocks.push(<p key={`p-${blocks.length}`} className="mb-4 text-left font-serif text-[15px] leading-[1.8] text-[#171315] sm:mb-5 sm:text-justify sm:text-[17.5px]">{inlineText(text, locationLinks)}</p>);
+      blocks.push(<p key={`p-${blocks.length}`} className="mb-4 text-left font-serif text-[15px] leading-[1.68] text-[#171315] sm:mb-5 sm:text-justify sm:text-[17.5px] sm:leading-[1.8]">{inlineText(text, locationLinks)}</p>);
     }
     paragraph = [];
   };
