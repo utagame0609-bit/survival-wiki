@@ -30,6 +30,8 @@ type WikiPlanSection = {
 
 type WikiSourcePlan = {
   storyArc: string;
+  openingRecordKey: string;
+  closingRecordKey: string;
   importantRecordKeys: string[];
   selectedPhotoKeys: string[];
   omittedRecordKeys: string[];
@@ -54,7 +56,14 @@ const PLANNING_LENS_BY_STYLE: Record<WikiGenerationInput['style'], string> = {
 function buildSourcePlanningSystemPrompt(maxAiPhotos: number, context: WikiGenerationContext) {
   const coverageRule = context.mode === 'full'
     ? 'FULL編纂です。入力された全記録を落とさず、各記録を最低1回はsectionsのprimaryRecordKeysまたはsupportingRecordKeysへ含めてください。omittedRecordKeysは空配列にしてください。'
-    : 'DIGEST編纂です。全記録を理解した上で、記事の流れに重要な記録を優先してください。本文で個別に扱わない記録はomittedRecordKeysへ入れてください。';
+    : `DIGEST編纂です。まず全記録を読んで記事全体の「起・承・転・結」を設計してから、関連性の薄い記録だけを省略候補にしてください。
+- 重要度ランキングだけで先に記録を削らないでください。先に物語上の役割を決め、その後に不要記録を省きます。
+- openingRecordKey には記事の「起」として機能する記録を1件選び、closingRecordKey には記事の「結」または現在地点として機能する記録を1件選んでください。
+- 対象期間の最古記録が自然に「起」として機能するなら、それをopeningRecordKeyに選び、omittedRecordKeysへ入れてはいけません。
+- 対象期間の最新記録が自然に「結」または現在地点として機能するなら、それをclosingRecordKeyに選び、omittedRecordKeysへ入れてはいけません。
+- 最古・最新という理由だけで無条件に採用する必要はありません。記事の流れと明確に無関係なら別の記録を起点・終点に選んで構いません。
+- データが少ない場合ほど過剰に削らず、起承転結の連続性を優先してください。ただし関連性のない単発記録まで無理につなげないでください。
+- openingRecordKey と closingRecordKey に選んだ記録は本文に必ず意味のある形で反映させてください。`;
 
   return `
 あなたはSurvival Wikiの記事を書く前段階を担当する資料編集者です。
@@ -78,9 +87,11 @@ ${coverageRule}
 
 次のJSONだけを返す。Markdownコードフェンスや説明文は付けない。
 {
-  "storyArc": "確認事実だけを土台にした記事全体の流れを2〜4文で記述",
-  "importantRecordKeys": ["R1", "R2"],
-  "selectedPhotoKeys": ["P1", "P2"],
+  "storyArc": "確認事実だけを土台にした記事全体の起・承・転・結を2〜4文で記述",
+  "openingRecordKey": "R1",
+  "closingRecordKey": "R7",
+  "importantRecordKeys": ["R1", "R4", "R7"],
+  "selectedPhotoKeys": ["P1", "P4", "P7"],
   "omittedRecordKeys": [],
   "sections": [
     {
@@ -157,6 +168,9 @@ function buildSourcePlanningMessage(
     `プレイヤー: ${input.world.player || 'なし'}`,
     `総記録数: ${locations.length}`,
     `AI参照候補のメイン写真数: ${candidates.length}`,
+    context.mode === 'digest' && locations.length > 0
+      ? `時系列アンカー候補: 最古 R1 (${locations[0].created_at}) / 最新 R${locations.length} (${locations[locations.length - 1].created_at})`
+      : '',
     '',
     ...locations.map((location, index) => {
       const photo = candidateByLocation.get(location.id);
@@ -173,7 +187,7 @@ function buildSourcePlanningMessage(
         '',
       ].join('\n');
     }),
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 function stringArray(value: unknown) {
@@ -204,6 +218,8 @@ function parseSourcePlan(raw: string): WikiSourcePlan | null {
 
     return {
       storyArc: typeof parsed.storyArc === 'string' ? parsed.storyArc.trim() : '',
+      openingRecordKey: typeof parsed.openingRecordKey === 'string' ? parsed.openingRecordKey.trim() : '',
+      closingRecordKey: typeof parsed.closingRecordKey === 'string' ? parsed.closingRecordKey.trim() : '',
       importantRecordKeys: stringArray(parsed.importantRecordKeys),
       selectedPhotoKeys: stringArray(parsed.selectedPhotoKeys),
       omittedRecordKeys: stringArray(parsed.omittedRecordKeys),
@@ -212,6 +228,32 @@ function parseSourcePlan(raw: string): WikiSourcePlan | null {
   } catch {
     return null;
   }
+}
+
+function protectDigestStoryAnchors(
+  plan: WikiSourcePlan,
+  input: WikiGenerationInput,
+  context: WikiGenerationContext,
+): WikiSourcePlan {
+  if (context.mode !== 'digest') return plan;
+
+  const validRecordKeys = new Set(chronologicalLocations(input).map((_, index) => `R${index + 1}`));
+  const openingRecordKey = validRecordKeys.has(plan.openingRecordKey) ? plan.openingRecordKey : '';
+  const closingRecordKey = validRecordKeys.has(plan.closingRecordKey) ? plan.closingRecordKey : '';
+  const protectedKeys = new Set([openingRecordKey, closingRecordKey].filter(Boolean));
+
+  return {
+    ...plan,
+    openingRecordKey,
+    closingRecordKey,
+    importantRecordKeys: Array.from(new Set([
+      ...(openingRecordKey ? [openingRecordKey] : []),
+      ...plan.importantRecordKeys.filter((key) => validRecordKeys.has(key)),
+      ...(closingRecordKey ? [closingRecordKey] : []),
+    ])),
+    omittedRecordKeys: plan.omittedRecordKeys
+      .filter((key) => validRecordKeys.has(key) && !protectedKeys.has(key)),
+  };
 }
 
 async function invokeWikiAi(body: Record<string, unknown>) {
@@ -238,8 +280,9 @@ async function selectWikiSources(
       systemPrompt: buildSourcePlanningSystemPrompt(maxAiPhotos, context),
       message: buildSourcePlanningMessage(input, candidates, context),
     });
-    const plan = parseSourcePlan(raw);
-    if (!plan) throw new Error('資料編集計画を解析できませんでした。');
+    const parsedPlan = parseSourcePlan(raw);
+    if (!parsedPlan) throw new Error('資料編集計画を解析できませんでした。');
+    const plan = protectDigestStoryAnchors(parsedPlan, input, context);
 
     const candidateByKey = new Map(candidates.map((candidate) => [candidate.key, candidate]));
     const selected = Array.from(new Set(plan.selectedPhotoKeys))
@@ -275,6 +318,9 @@ function buildArticleMessage(
     ? [
         '【第1段階の資料編集計画】',
         `記事全体の大枠: ${plan.storyArc || '指定なし'}`,
+        context.mode === 'digest'
+          ? `起点記録: ${plan.openingRecordKey || '指定なし'} / 終点記録: ${plan.closingRecordKey || '指定なし'}`
+          : '',
         `重点記録候補: ${plan.importantRecordKeys.join('・') || '指定なし'}`,
         context.mode === 'digest'
           ? `個別掲載を省略してよい記録候補: ${plan.omittedRecordKeys.join('・') || 'なし'}`
@@ -290,9 +336,12 @@ function buildArticleMessage(
               ].join('\n')),
             ]
           : []),
+        context.mode === 'digest'
+          ? '起点記録と終点記録が指定されている場合は、個別の章にする必要はありませんが、記事の始まりと現在地点・着地点が読者に伝わるよう本文へ必ず意味のある形で反映してください。関連性の薄い省略候補を無理につなげる必要はありません。'
+          : '',
         'この計画は実画像を見る前の編集案です。入力事実と実画像で確認できる内容を最優先し、人格固有の正式出力構造に合わせて必要なら章名や配分を調整してください。',
         '',
-      ]
+      ].filter(Boolean)
     : [];
 
   return [
@@ -301,7 +350,7 @@ function buildArticleMessage(
     `【記事本文の上限】日本語の表示本文は最大${maxArticleChars}文字。途中で切らず、この文字数内で必ず結論まで完結させること。`,
     context.mode === 'full'
       ? '【情報密度】対象期間の全記録を最低1回は意味のある形で扱う。重複説明を避け、必要なら短く圧縮する。'
-      : '【情報密度】対象期間の全記録を理解した上で、流れ・転機・重要事実を優先するダイジェストとする。全件を個別列挙する必要はない。',
+      : '【情報密度】対象期間の全記録を理解した上で、まず起承転結を作り、その流れに必要な記録・転機・重要事実を優先する。関連性の薄い記録は省略してよいが、起点と終点として選ばれた記録は落とさない。全件を個別列挙する必要はない。',
     '',
     `ワールド名: ${input.world.name}`,
     `ワールド概要: ${input.world.memo || 'なし'}`,
