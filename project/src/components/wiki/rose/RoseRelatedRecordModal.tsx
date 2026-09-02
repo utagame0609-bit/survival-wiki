@@ -1,10 +1,13 @@
 import { createPortal } from 'react-dom';
+import { useEffect, useState } from 'react';
 import { CalendarDays, FileText, MapPin, X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
+import { fetchLocations } from '@/lib/db';
 import { LocationPhotoImage } from '@/components/LocationPhotoImage';
 import { playHoverSound, playModalCloseSound } from '@/lib/sound';
 
 type Props = {
+  worldId: string;
   location: LocationWithPhotos;
   onClose: () => void;
 };
@@ -21,8 +24,29 @@ function formatRecordedAt(value: string) {
   }).format(date);
 }
 
-export function RoseRelatedRecordModal({ location, onClose }: Props) {
-  const mainPhoto = location.photos.find((photo) => photo.is_main) ?? location.photos[0] ?? null;
+export function RoseRelatedRecordModal({ worldId, location, onClose }: Props) {
+  const [resolvedLocation, setResolvedLocation] = useState(location);
+
+  useEffect(() => {
+    let active = true;
+    setResolvedLocation(location);
+
+    fetchLocations(worldId)
+      .then((locations) => {
+        if (!active) return;
+        const fullLocation = locations.find((item) => item.id === location.id);
+        if (fullLocation) setResolvedLocation(fullLocation);
+      })
+      .catch(() => {
+        // Keep the article-side location data as a safe fallback.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [worldId, location.id]);
+
+  const mainPhoto = resolvedLocation.photos.find((photo) => photo.is_main) ?? resolvedLocation.photos[0] ?? null;
 
   const handleClose = () => {
     playModalCloseSound();
@@ -71,7 +95,7 @@ export function RoseRelatedRecordModal({ location, onClose }: Props) {
                 {mainPhoto ? (
                   <LocationPhotoImage
                     storagePath={mainPhoto.storage_path}
-                    alt={location.name}
+                    alt={resolvedLocation.name}
                     className="aspect-[4/3] w-full object-cover contrast-[1.03] sepia-[0.08]"
                   />
                 ) : (
@@ -88,17 +112,17 @@ export function RoseRelatedRecordModal({ location, onClose }: Props) {
 
             <div className="min-w-0">
               <div className="inline-block border border-[#6E1F2B] bg-[#6E1F2B] px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest text-[#E7D9BE]">REPORT CARD</div>
-              <h3 className="mt-2 break-words border-b-2 border-[#171315] pb-2 font-['Shippori_Mincho',serif] text-xl font-black leading-snug sm:text-2xl">{location.name}</h3>
+              <h3 className="mt-2 break-words border-b-2 border-[#171315] pb-2 font-['Shippori_Mincho',serif] text-xl font-black leading-snug sm:text-2xl">{resolvedLocation.name}</h3>
 
               <dl className="mt-3 divide-y divide-[#171315]/25 border-y border-[#171315]/35 text-xs sm:text-sm">
                 <div className="grid grid-cols-[72px_1fr] gap-3 py-2">
                   <dt className="flex items-center gap-1 font-black text-[#6E1F2B]"><CalendarDays className="h-3.5 w-3.5" />日時</dt>
-                  <dd className="min-w-0 font-mono font-bold">{formatRecordedAt(location.created_at)}</dd>
+                  <dd className="min-w-0 font-mono font-bold">{formatRecordedAt(resolvedLocation.created_at)}</dd>
                 </div>
-                {location.has_coordinates && (
+                {resolvedLocation.has_coordinates && (
                   <div className="grid grid-cols-[72px_1fr] gap-3 py-2">
                     <dt className="flex items-center gap-1 font-black text-[#6E1F2B]"><MapPin className="h-3.5 w-3.5" />座標</dt>
-                    <dd className="min-w-0 break-words font-mono font-bold">X:{location.x} Y:{location.y} Z:{location.z}</dd>
+                    <dd className="min-w-0 break-words font-mono font-bold">X:{resolvedLocation.x} Y:{resolvedLocation.y} Z:{resolvedLocation.z}</dd>
                   </div>
                 )}
               </dl>
@@ -109,7 +133,7 @@ export function RoseRelatedRecordModal({ location, onClose }: Props) {
                   RECORD MEMO
                 </div>
                 <p className="whitespace-pre-wrap break-words font-['Shippori_Mincho',serif] text-sm leading-[1.8] sm:text-[15px]">
-                  {location.detail_memo || 'この記録には詳細メモが残されていない。'}
+                  {resolvedLocation.detail_memo || 'この記録には詳細メモが残されていない。'}
                 </p>
               </div>
             </div>
