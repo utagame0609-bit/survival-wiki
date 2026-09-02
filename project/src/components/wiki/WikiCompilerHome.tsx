@@ -1,20 +1,45 @@
-import { AlertCircle, ArrowRight, CheckCircle2, Play, ScrollText, Sparkles } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  CalendarRange,
+  CheckCircle2,
+  Globe2,
+  Play,
+  ScrollText,
+  Sparkles,
+} from 'lucide-react';
 import { NARRATORS, PixelNarrator } from '@/components/wiki/WikiNarrator';
 import { WIKI_STYLES } from '@/lib/wiki';
 import { playHoverSound } from '@/lib/sound';
+import type { WikiCoverageMode, WikiScopeType } from '@/lib/wikiScope';
 
 export type WikiCompilerStyleId = 'wikipedia' | 'scp' | 'ancient';
 export type WikiCompilerSavedState = Record<WikiCompilerStyleId, boolean>;
+export type WikiCompilerSavedCountState = Record<WikiCompilerStyleId, number>;
 
 type Props = {
   style: WikiCompilerStyleId | null;
   saved: WikiCompilerSavedState;
+  savedCountByStyle: WikiCompilerSavedCountState;
+  savedArticleCount: number;
   locationCount: number;
   generating: boolean;
   resetting: boolean;
   cooldownUntil: number;
+  scopeType: WikiScopeType;
+  scopeKey: string;
+  scopeLabel: string;
+  scopeDescription: string;
+  scopeMode: WikiCoverageMode;
+  availableMonths: string[];
+  availableYears: string[];
+  scopeSlotLocked: boolean;
   onSelectStyle: (style: WikiCompilerStyleId) => void;
-  onGenerate: () => void;
+  onSelectScopeType: (scope: WikiScopeType) => void;
+  onSelectScopeKey: (key: string) => void;
+  onPrimaryAction: () => void;
 };
 
 const styleMeta: Record<WikiCompilerStyleId, { title: string; shortTitle: string; subtitle: string }> = {
@@ -41,18 +66,64 @@ const styleCardAccent: Record<WikiCompilerStyleId, { selected: string; idle: str
   },
 };
 
+const scopeMeta: Record<WikiScopeType, {
+  label: string;
+  shortLabel: string;
+  helper: string;
+  icon: typeof CalendarDays;
+}> = {
+  month: {
+    label: '月刊記録',
+    shortLabel: '月',
+    helper: 'その月を細かく',
+    icon: CalendarDays,
+  },
+  year: {
+    label: '年間記録',
+    shortLabel: '年',
+    helper: '一年の流れ',
+    icon: CalendarRange,
+  },
+  world: {
+    label: 'ワールド史',
+    shortLabel: '全期間',
+    helper: '世界の歩み',
+    icon: Globe2,
+  },
+};
+
+function monthOptionLabel(value: string) {
+  const [year, month] = value.split('-');
+  return `${year}年${Number(month)}月`;
+}
+
 export function WikiCompilerHome({
   style,
   saved,
+  savedCountByStyle,
+  savedArticleCount,
   locationCount,
   generating,
   resetting,
   cooldownUntil,
+  scopeType,
+  scopeKey,
+  scopeLabel,
+  scopeDescription,
+  scopeMode,
+  availableMonths,
+  availableYears,
+  scopeSlotLocked,
   onSelectStyle,
-  onGenerate,
+  onSelectScopeType,
+  onSelectScopeKey,
+  onPrimaryAction,
 }: Props) {
   const narrator = style ? NARRATORS[style] : null;
   const selectedWikiStyle = style ? WIKI_STYLES.find((item) => item.id === style) : null;
+  const currentScopeMeta = scopeMeta[scopeType];
+  const currentScopeSaved = style ? saved[style] : false;
+  const hasScopeRecords = locationCount > 0;
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 pb-4 sm:space-y-6">
@@ -67,14 +138,14 @@ export function WikiCompilerHome({
               冒険譚・年代記 自動編纂
             </h2>
             <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#94A3B8]">
-              蓄積された探索記録をもとに、3名の編纂官がそれぞれの世界観・流派で旅の書を編纂します。
+              編纂官と振り返る範囲を選ぶと、蓄積した記録から一冊の記事を編纂します。
             </p>
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-2 rounded-lg border border-[#334155] bg-[#0B1018] px-3.5 py-2 text-center sm:flex-col sm:gap-1">
             <span className="game-ui-font text-[10px] text-[#64748B]">保存済み記事</span>
             <div className="game-ui-font text-sm font-bold text-[#06B6D4]">
-              {Object.values(saved).filter(Boolean).length} / 3 STYLES
+              {savedArticleCount} / 9 ARTICLES
             </div>
           </div>
         </div>
@@ -93,6 +164,7 @@ export function WikiCompilerHome({
             const meta = styleMeta[id];
             const npc = NARRATORS[id];
             const accent = styleCardAccent[id];
+            const savedCount = savedCountByStyle[id];
             return (
               <button
                 key={id}
@@ -100,14 +172,14 @@ export function WikiCompilerHome({
                 onClick={() => onSelectStyle(id)}
                 onMouseEnter={playHoverSound}
                 disabled={generating || resetting}
-                title={`${meta.title}${saved[id] ? '・保存済み' : ''}`}
+                title={`${meta.title}・保存済み${savedCount}/3`}
                 className={`relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? accent.selected : accent.idle}`}
               >
                 <div className="absolute right-1.5 top-1.5 sm:right-2 sm:top-2">
-                  {saved[id] ? (
+                  {savedCount > 0 ? (
                     <span className="game-ui-font flex items-center gap-0.5 rounded border border-[#10B981]/40 bg-[#10B981]/20 px-1 py-0.5 text-[8px] text-[#10B981] sm:px-1.5 sm:text-[10px]">
                       <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                      <span className="hidden sm:inline">保存済</span>
+                      <span>{savedCount}/3</span>
                     </span>
                   ) : (
                     <span className="game-ui-font rounded bg-[#1E293B] px-1 py-0.5 text-[8px] text-[#64748B] sm:px-1.5 sm:text-[9px]">未編纂</span>
@@ -146,28 +218,117 @@ export function WikiCompilerHome({
             {selectedWikiStyle.description}。{styleMeta[style].subtitle}を基調に、このワールドの記録を再構成します。
           </div>
 
+          <div className="space-y-3 border-t border-[#1E293B] pt-3">
+            <div>
+              <div className="game-ui-font text-xs font-bold text-[#E2E8F0]">どこまでを一冊にする？</div>
+              <p className="mt-1 text-[11px] leading-relaxed text-[#64748B]">
+                月・年・ワールド全体で、記事の役割と情報密度が変わります。
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(scopeMeta) as WikiScopeType[]).map((id) => {
+                const meta = scopeMeta[id];
+                const Icon = meta.icon;
+                const selected = scopeType === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => onSelectScopeType(id)}
+                    onMouseEnter={playHoverSound}
+                    disabled={generating || resetting}
+                    className={`min-w-0 rounded-lg border px-2 py-2.5 text-left transition-all sm:px-3 ${selected
+                      ? 'border-[#06B6D4]/70 bg-[#102330] shadow-[0_0_12px_rgba(6,182,212,0.12)]'
+                      : 'border-[#273449] bg-[#0B1018] hover:border-[#475569]'}`}
+                  >
+                    <div className={`flex items-center gap-1.5 ${selected ? 'text-[#67E8F9]' : 'text-[#94A3B8]'}`}>
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <span className="game-ui-font truncate text-[10px] font-bold sm:text-xs">{meta.label}</span>
+                    </div>
+                    <div className="mt-1 hidden text-[10px] leading-tight text-[#64748B] sm:block">{meta.helper}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="rounded-lg border border-[#263247] bg-[#0B1018]/85 p-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="game-ui-font flex flex-wrap items-center gap-2 text-[11px] font-bold text-[#F8FAFC]">
+                    <span>{currentScopeMeta.label}</span>
+                    <span className={`rounded border px-1.5 py-0.5 text-[9px] ${scopeMode === 'full'
+                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                      : 'border-amber-500/30 bg-amber-500/10 text-amber-300'}`}>
+                      {scopeMode === 'full' ? '詳細編纂' : 'ダイジェスト'}
+                    </span>
+                    {scopeSlotLocked && (
+                      <span className="rounded border border-[#10B981]/30 bg-[#10B981]/10 px-1.5 py-0.5 text-[9px] text-[#6EE7B7]">保存済み</span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-[#94A3B8]">{scopeDescription}</p>
+                </div>
+
+                {scopeType === 'month' && (
+                  <select
+                    value={scopeKey}
+                    onChange={(event) => onSelectScopeKey(event.target.value)}
+                    disabled={scopeSlotLocked || generating || resetting || availableMonths.length === 0}
+                    className="game-ui-font min-h-[38px] rounded border border-[#334155] bg-[#111827] px-2.5 text-[11px] text-[#E2E8F0] outline-none focus:border-[#06B6D4] disabled:opacity-65"
+                    aria-label="編纂する月"
+                  >
+                    {availableMonths.map((month) => <option key={month} value={month}>{monthOptionLabel(month)}</option>)}
+                  </select>
+                )}
+
+                {scopeType === 'year' && (
+                  <select
+                    value={scopeKey}
+                    onChange={(event) => onSelectScopeKey(event.target.value)}
+                    disabled={scopeSlotLocked || generating || resetting || availableYears.length === 0}
+                    className="game-ui-font min-h-[38px] rounded border border-[#334155] bg-[#111827] px-2.5 text-[11px] text-[#E2E8F0] outline-none focus:border-[#06B6D4] disabled:opacity-65"
+                    aria-label="編纂する年"
+                  >
+                    {availableYears.map((year) => <option key={year} value={year}>{year}年</option>)}
+                  </select>
+                )}
+
+                {scopeType === 'world' && (
+                  <div className="game-ui-font rounded border border-[#334155] bg-[#111827] px-3 py-2 text-[11px] text-[#CBD5E1]">全期間</div>
+                )}
+              </div>
+
+              <div className="game-ui-font mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[#1E293B] pt-2 text-[10px] text-[#64748B]">
+                <span>対象: {scopeLabel}</span>
+                <span>探索ログ: {locationCount}件</span>
+                <span>本文上限: 3000文字</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col items-stretch justify-between gap-3 pt-1 sm:flex-row sm:items-center">
             <div className="game-ui-font text-[11px] text-[#64748B]">
-              {locationCount > 0 ? (
-                <span>参照可能な探索ログ: {locationCount} 件</span>
+              {hasScopeRecords ? (
+                <span>この範囲の探索ログ: {locationCount} 件</span>
               ) : (
                 <span className="flex items-center gap-1 text-[#EF4444]">
-                  <AlertCircle className="h-3 w-3" />記録が0件のため編纂できません
+                  <AlertCircle className="h-3 w-3" />この範囲には記録がありません
                 </span>
               )}
             </div>
 
             <button
               type="button"
-              onClick={onGenerate}
+              onClick={onPrimaryAction}
               onMouseEnter={playHoverSound}
-              disabled={saved[style] || locationCount === 0 || generating || resetting || cooldownUntil > Date.now()}
-              className="game-ui-font inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg bg-[#F59E0B] px-6 py-3 text-xs font-bold tracking-wider text-[#0B1018] shadow-[0_0_15px_rgba(245,158,11,0.35)] transition-all hover:bg-[#D97706] active:scale-95 disabled:opacity-40 sm:text-sm"
+              disabled={!hasScopeRecords || generating || resetting || cooldownUntil > Date.now()}
+              className={`game-ui-font inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg px-6 py-3 text-xs font-bold tracking-wider text-[#0B1018] shadow-lg transition-all active:scale-95 disabled:opacity-40 sm:text-sm ${currentScopeSaved
+                ? 'bg-[#06B6D4] shadow-[0_0_15px_rgba(6,182,212,0.35)] hover:bg-[#0891B2]'
+                : 'bg-[#F59E0B] shadow-[0_0_15px_rgba(245,158,11,0.35)] hover:bg-[#D97706]'}`}
             >
-              <Sparkles className="h-4 w-4" />
-              <span>{saved[style] ? '保存済み記事を開いています' : 'この流派でWikiを自動編纂する'}</span>
-              {!saved[style] && <Play className="h-3.5 w-3.5 fill-current" />}
-              {saved[style] && <ArrowRight className="h-4 w-4" />}
+              {currentScopeSaved ? <BookOpen className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+              <span>{currentScopeSaved ? `${scopeLabel}の記事を読む` : `${scopeLabel}をこの流派で編纂する`}</span>
+              {currentScopeSaved ? <ArrowRight className="h-4 w-4" /> : <Play className="h-3.5 w-3.5 fill-current" />}
             </button>
           </div>
         </section>
