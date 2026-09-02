@@ -1,6 +1,0 @@
-{
-  "name": "Utapedia - 冒険の書 // Adventure Log & AI Wiki",
-  "description": "スマートフォンファーストの冒険・日常・体験記録＆AI Wiki（旅の書）自動編纂システム。1つの記録を中心に時系列・宝箱写真・地点索引をシームレスに統合。",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

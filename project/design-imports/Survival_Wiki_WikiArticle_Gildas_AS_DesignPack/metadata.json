@@ -1,7 +1,0 @@
-{
-  "name": "Survival Wiki - 老吟遊詩人ギルダス記事設計プロトタイプ",
-  "description": "古代伝承／老吟遊詩人ギルダスのWiki記事閲覧UI/UX設計プロトタイプ（A/B/C 3案実動比較・検証）",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
-

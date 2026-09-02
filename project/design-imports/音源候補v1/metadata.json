@@ -1,6 +1,0 @@
-{
-  "name": "16bit × Switch Sound Studio",
-  "description": "Web Audio APIを活用した16bitレトロ×Nintendo Switch風のサウンドシステム＆音響試聴プレイヤー",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

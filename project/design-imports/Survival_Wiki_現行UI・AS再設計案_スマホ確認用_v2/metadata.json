@@ -1,6 +1,0 @@
-{
-  "name": "Survival Wiki",
-  "description": "ゲーム・日常・旅の体験を自然に記録・蓄積し、AIが独自のWiki・年代記へと作品化するスマートフォンファースト冒険記録アプリ",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
