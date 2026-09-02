@@ -11,7 +11,7 @@ type RoseMastheadProps = {
 export function RoseMasthead({
   masthead,
   category,
-  hazardLevel = 'Moderate',
+  hazardLevel,
   isMobile = false,
 }: RoseMastheadProps) {
   const getHazardBadge = () => {
@@ -23,8 +23,9 @@ export function RoseMasthead({
       case 'Saloon Rumor':
         return { text: '酒場噂話 [真偽未確認]', bg: 'bg-[#B78A45] text-[#171315]', border: 'border-[#B78A45]' };
       case 'Moderate':
-      default:
         return { text: '荒野危険度：中度 [要武装]', bg: 'bg-[#9A3D49] text-[#E7D9BE]', border: 'border-[#9A3D49]' };
+      default:
+        return null;
     }
   };
 
@@ -37,17 +38,21 @@ export function RoseMasthead({
           <span className="inline-block h-2 w-2 bg-[#6E1F2B]" />
           Wasteland Final Edition | 荒野最終版
         </span>
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          {masthead.weatherCondition && (
-            <span className="border border-[#171315]/40 bg-[#171315]/5 px-1.5 py-0.5 font-mono text-[10px] text-[#171315] sm:px-2 sm:text-[11px]">
-              {masthead.weatherCondition}
-            </span>
-          )}
-          <span className={`inline-flex items-center gap-1 border px-1.5 py-0.5 text-[10px] font-bold tracking-wide sm:px-2 sm:text-[11px] ${hazard.border} ${hazard.bg}`}>
-            <ShieldAlert className="h-3 w-3" />
-            {hazard.text}
-          </span>
-        </div>
+        {(masthead.weatherCondition || hazard) && (
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {masthead.weatherCondition && (
+              <span className="border border-[#171315]/40 bg-[#171315]/5 px-1.5 py-0.5 font-mono text-[10px] text-[#171315] sm:px-2 sm:text-[11px]">
+                {masthead.weatherCondition}
+              </span>
+            )}
+            {hazard && (
+              <span className={`inline-flex items-center gap-1 border px-1.5 py-0.5 text-[10px] font-bold tracking-wide sm:px-2 sm:text-[11px] ${hazard.border} ${hazard.bg}`}>
+                <ShieldAlert className="h-3 w-3" />
+                {hazard.text}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {isMobile ? (
