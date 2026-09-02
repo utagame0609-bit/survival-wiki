@@ -4,6 +4,8 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { ScpDossierArticle } from '@/components/wiki/ScpDossierArticle';
 import { GildasChronicleArticle } from '@/components/wiki/GildasChronicleArticle';
 import { HernanEncyclopediaArticle } from '@/components/wiki/HernanEncyclopediaArticle';
+import { RoseTabloidArticle } from '@/components/wiki/rose/RoseTabloidArticle';
+import { parseStoredMadameRoseArticle } from '@/lib/wikiRose';
 
 type WikiStyleId = 'wikipedia' | 'scp' | 'ancient';
 
@@ -15,7 +17,7 @@ type LocationLink = {
 const styleShortTitle: Record<WikiStyleId, string> = {
   wikipedia: '百科事典',
   scp: 'SCP報告',
-  ancient: '古代伝承',
+  ancient: '荒野タブロイド',
 };
 
 export function WikiArticleContent({
@@ -41,6 +43,8 @@ export function WikiArticleContent({
   isStructuredGildas: boolean;
   isStructuredHernan: boolean;
 }) {
+  const isStructuredRose = style === 'ancient' && Boolean(parseStoredMadameRoseArticle(parsedContent));
+
   return (
     <section className="hud-bracket min-w-0 max-w-full overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
       <div className="border-b border-[#1E293B] bg-[#0B1018] px-4 py-2.5 sm:px-5">
@@ -56,6 +60,14 @@ export function WikiArticleContent({
           locations={locations}
           content={articleWithPhotos}
           mainPhotoUrl={mainPhotoUrl}
+          narratorLine={narratorLine}
+          locationLinks={locationLinks}
+        />
+      ) : isStructuredRose ? (
+        <RoseTabloidArticle
+          world={world}
+          locations={locations}
+          content={parsedContent}
           narratorLine={narratorLine}
           locationLinks={locationLinks}
         />
