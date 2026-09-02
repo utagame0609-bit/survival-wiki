@@ -11,7 +11,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { NARRATORS, PixelNarrator } from '@/components/wiki/WikiNarrator';
-import { WIKI_STYLES } from '@/lib/wiki';
 import { playHoverSound } from '@/lib/sound';
 import type { WikiCoverageMode, WikiScopeType } from '@/lib/wikiScope';
 
@@ -42,10 +41,27 @@ type Props = {
   onPrimaryAction: () => void;
 };
 
-const styleMeta: Record<WikiCompilerStyleId, { title: string; shortTitle: string; subtitle: string }> = {
-  wikipedia: { title: '百科事典 Wiki風', shortTitle: '百科事典', subtitle: '体系的・客観的解説' },
-  scp: { title: '特異事象報告 (SCP風)', shortTitle: 'SCP報告', subtitle: '調査員ログ・異常観測' },
-  ancient: { title: '古代伝承の詩', shortTitle: '古代伝承', subtitle: '語り継がれる叙事詩・神話' },
+const WIKI_STYLE_ORDER: WikiCompilerStyleId[] = ['wikipedia', 'scp', 'ancient'];
+
+const styleMeta: Record<WikiCompilerStyleId, { title: string; shortTitle: string; description: string; subtitle: string }> = {
+  wikipedia: {
+    title: '百科事典 Wiki風',
+    shortTitle: '百科事典',
+    description: '百科事典風の客観的な記述',
+    subtitle: '体系的・客観的解説',
+  },
+  scp: {
+    title: '特異事象報告 (SCP風)',
+    shortTitle: 'SCP報告',
+    description: '機密文書風の冷徹な報告書',
+    subtitle: '調査員ログ・異常観測',
+  },
+  ancient: {
+    title: "ROSE'S LAST CALL",
+    shortTitle: '荒野新聞',
+    description: '荒野酒場のタブロイド新聞風の記事',
+    subtitle: '噂・寸評・赤鉛筆注釈を交えた編集記事',
+  },
 };
 
 const styleCardAccent: Record<WikiCompilerStyleId, { selected: string; idle: string; pill: string }> = {
@@ -120,7 +136,7 @@ export function WikiCompilerHome({
   onPrimaryAction,
 }: Props) {
   const narrator = style ? NARRATORS[style] : null;
-  const selectedWikiStyle = style ? WIKI_STYLES.find((item) => item.id === style) : null;
+  const selectedStyleMeta = style ? styleMeta[style] : null;
   const currentScopeMeta = scopeMeta[scopeType];
   const currentScopeSaved = style ? saved[style] : false;
   const hasScopeRecords = locationCount > 0;
@@ -132,10 +148,10 @@ export function WikiCompilerHome({
           <div className="min-w-0">
             <div className="game-ui-font flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-[#06B6D4] sm:text-[11px]">
               <ScrollText className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">AI CHRONICLE COMPILER // 旅の書 (WIKI)</span>
+              <span className="truncate">AI WIKI COMPILER // 旅の書 (WIKI)</span>
             </div>
             <h2 className="game-ui-font mt-1 text-lg font-bold tracking-wider text-[#F8FAFC] sm:text-xl">
-              冒険譚・年代記 自動編纂
+              WIKI記事 自動編纂
             </h2>
             <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#94A3B8]">
               編纂官と振り返る範囲を選ぶと、蓄積した記録から一冊の記事を編纂します。
@@ -158,8 +174,7 @@ export function WikiCompilerHome({
         </div>
 
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
-          {WIKI_STYLES.map((wikiStyle) => {
-            const id = wikiStyle.id as WikiCompilerStyleId;
+          {WIKI_STYLE_ORDER.map((id) => {
             const selected = style === id;
             const meta = styleMeta[id];
             const npc = NARRATORS[id];
@@ -200,7 +215,7 @@ export function WikiCompilerHome({
         </div>
       </section>
 
-      {style && narrator && selectedWikiStyle && (
+      {style && narrator && selectedStyleMeta && (
         <section className="hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
           <div className="flex items-start gap-3.5">
             <PixelNarrator style={style} />
@@ -215,7 +230,7 @@ export function WikiCompilerHome({
 
           <div className="border-t border-[#1E293B] pt-3 text-xs leading-relaxed text-[#94A3B8]">
             <span className="game-ui-font mr-1.5 font-bold text-[#F59E0B]">【スタイル特徴】</span>
-            {selectedWikiStyle.description}。{styleMeta[style].subtitle}を基調に、このワールドの記録を再構成します。
+            {selectedStyleMeta.description}。{selectedStyleMeta.subtitle}を基調に、このワールドの記録を再構成します。
           </div>
 
           <div className="space-y-3 border-t border-[#1E293B] pt-3">
