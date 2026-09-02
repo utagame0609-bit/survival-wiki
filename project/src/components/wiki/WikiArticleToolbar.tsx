@@ -10,7 +10,7 @@ type SavedState = Record<WikiArticleToolbarStyleId, boolean>;
 const styleMeta: Record<WikiArticleToolbarStyleId, { title: string; shortTitle: string }> = {
   wikipedia: { title: '百科事典 Wiki風', shortTitle: '百科事典' },
   scp: { title: '特異事象報告 (SCP風)', shortTitle: 'SCP報告' },
-  ancient: { title: '古代伝承の詩', shortTitle: '古代伝承' },
+  ancient: { title: "ROSE'S LAST CALL", shortTitle: '荒野新聞' },
 };
 
 const scopeIcon = {
