@@ -43,24 +43,21 @@ type Props = {
 
 const WIKI_STYLE_ORDER: WikiCompilerStyleId[] = ['wikipedia', 'scp', 'ancient'];
 
-const styleMeta: Record<WikiCompilerStyleId, { title: string; shortTitle: string; description: string; subtitle: string }> = {
+const styleMeta: Record<WikiCompilerStyleId, { title: string; shortTitle: string; description: string }> = {
   wikipedia: {
     title: '百科事典 Wiki風',
     shortTitle: '百科事典',
-    description: '百科事典風の客観的な記述',
-    subtitle: '体系的・客観的解説',
+    description: '記録の背景や由来を読み解く、好奇心旺盛な民俗学者。あなたの冒険を百科事典として丁寧に編纂します。',
   },
   scp: {
     title: '特異事象報告 (SCP風)',
     shortTitle: 'SCP報告',
-    description: '機密文書風の冷徹な報告書',
-    subtitle: '調査員ログ・異常観測',
+    description: 'あらゆる異常を冷静に分析する上級研究員。あなたの行動を機密調査記録として報告します。',
   },
   ancient: {
     title: "ROSE'S LAST CALL",
     shortTitle: '荒野新聞',
-    description: '荒野酒場のタブロイド新聞風の記事',
-    subtitle: '噂・寸評・赤鉛筆注釈を交えた編集記事',
+    description: '酒場と荒野のゴシップを仕切る毒舌編集長。大事な常連客であるあなたの騒動を、愛のある辛口記事に仕立てます。',
   },
 };
 
@@ -229,8 +226,8 @@ export function WikiCompilerHome({
           </div>
 
           <div className="border-t border-[#1E293B] pt-3 text-xs leading-relaxed text-[#94A3B8]">
-            <span className="game-ui-font mr-1.5 font-bold text-[#F59E0B]">【スタイル特徴】</span>
-            {selectedStyleMeta.description}。{selectedStyleMeta.subtitle}を基調に、このワールドの記録を再構成します。
+            <span className="game-ui-font mr-1.5 font-bold text-[#F59E0B]">【この編纂官について】</span>
+            {selectedStyleMeta.description}
           </div>
 
           <div className="space-y-3 border-t border-[#1E293B] pt-3">
