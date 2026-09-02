@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { parseStoredMadameRoseArticle } from '@/lib/wikiRose';
+import { NARRATOR_PORTRAITS } from '@/components/wiki/WikiNarrator';
 import { RoseArticleShell } from './RoseArticleShell';
 import { RoseMarkdownRenderer } from './RoseMarkdownRenderer';
 import { formatRoseRecordedDate, useRosePhotos } from './useRosePhotos';
@@ -16,7 +17,7 @@ type Props = {
   content: string;
   narratorLine: string;
   locationLinks: RoseLocationLink[];
-  portraitUrl: string;
+  portraitUrl?: string;
 };
 
 export function RoseTabloidArticle({
@@ -25,7 +26,7 @@ export function RoseTabloidArticle({
   content,
   narratorLine,
   locationLinks,
-  portraitUrl,
+  portraitUrl = NARRATOR_PORTRAITS.ancient,
 }: Props) {
   const storedArticle = useMemo(() => parseStoredMadameRoseArticle(content), [content]);
   const photos = useRosePhotos(locations, world.name);
