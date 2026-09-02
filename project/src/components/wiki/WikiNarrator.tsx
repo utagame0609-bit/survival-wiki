@@ -25,9 +25,9 @@ export const NARRATORS: Record<string, NarratorStyle> = {
 };
 
 export const NARRATOR_PORTRAITS: Record<string, string> = {
-  wikipedia: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/uta(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png',
-  scp: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/ark(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png',
-  ancient: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/Rose(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png',
+  wikipedia: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/uta(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png?v=20260902-320',
+  scp: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/ark(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png?v=20260902-320',
+  ancient: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/Rose(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png?v=20260902-320',
 };
 
 export function PixelNarrator({ style, compact = false }: { style: string; compact?: boolean }) {
