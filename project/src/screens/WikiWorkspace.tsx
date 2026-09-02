@@ -21,6 +21,7 @@ import { addWikiPhotoMarkers, splitWikiNarrator, uniqueWikiPhotos } from '@/lib/
 import { scpDossierToPlainText } from '@/lib/wikiScp';
 import { gildasChronicleToPlainText, parseStoredGildasChronicle } from '@/lib/wikiGildas';
 import { hernanArticleToPlainText, parseStoredHernanArticle } from '@/lib/wikiHernan';
+import { madameRoseArticleToPlainText, parseStoredMadameRoseArticle } from '@/lib/wikiRose';
 import { generateWikiArticle } from '@/lib/wikiOpenRouter';
 import {
   fetchScopedWikiArticles,
@@ -64,7 +65,7 @@ const WIKI_GENERATE_COOLDOWN_MS = 5000;
 const WAITING_LINES: Record<WikiStyleId, string> = {
   wikipedia: '少し待ちたまえ。君の散らかった足跡を、せめて学術資料として読める形に整えているところだ。',
   scp: 'そのまま待機しろ。君の行動記録を機密資料として成立させるため、現在照合処理を行っている。',
-  ancient: 'しばし待つがよい。旅人よ……そなたの足跡を、後世に残す物語へと編み直しておる。',
+  ancient: 'ちょっと待ちな。常連客の騒動を一面記事にするなら、見出しは慎重に選ばないとね。赤鉛筆を入れてるところさ。',
 };
 
 export function WikiWorkspace({
@@ -306,10 +307,15 @@ export function WikiWorkspace({
   const mainPhoto = articlePhotos[0] ?? null;
   const additionalPhotos = articlePhotos.slice(1, 5);
   const isStructuredGildas = style === 'ancient' && Boolean(parseStoredGildasChronicle(parsedArticle.content));
+  const isStructuredRose = style === 'ancient' && Boolean(parseStoredMadameRoseArticle(parsedArticle.content));
   const isStructuredHernan = style === 'wikipedia' && Boolean(parseStoredHernanArticle(parsedArticle.content));
   const articleExportText = useMemo(() => {
     if (style === 'scp') return scpDossierToPlainText(parsedArticle.content) ?? parsedArticle.content;
-    if (style === 'ancient') return gildasChronicleToPlainText(parsedArticle.content, parsedArticle.line) ?? parsedArticle.content;
+    if (style === 'ancient') {
+      return madameRoseArticleToPlainText(parsedArticle.content, parsedArticle.line)
+        ?? gildasChronicleToPlainText(parsedArticle.content, parsedArticle.line)
+        ?? parsedArticle.content;
+    }
     if (style === 'wikipedia') return hernanArticleToPlainText(parsedArticle.content, parsedArticle.line) ?? parsedArticle.content;
     return parsedArticle.content;
   }, [style, parsedArticle.content, parsedArticle.line]);
@@ -594,7 +600,7 @@ export function WikiWorkspace({
       )}
 
       {hasArticle && style && narrator && articleRecord && (
-        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' || isStructuredGildas || isStructuredHernan ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
+        <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' || isStructuredGildas || isStructuredRose || isStructuredHernan ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
           <WikiArticleToolbar
             style={style}
             saved={saved}
@@ -604,7 +610,7 @@ export function WikiWorkspace({
             onBack={handleBackToCompilers}
           />
 
-          {style !== 'scp' && !isStructuredGildas && !isStructuredHernan && <NarratorDialogue style={style} quote={parsedArticle.line} />}
+          {style !== 'scp' && !isStructuredGildas && !isStructuredRose && !isStructuredHernan && <NarratorDialogue style={style} quote={parsedArticle.line} />}
 
           <WikiArticleContent
             style={style}
