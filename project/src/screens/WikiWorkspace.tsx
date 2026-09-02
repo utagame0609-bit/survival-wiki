@@ -4,10 +4,14 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { fetchLocations, fetchWikiArticle, resetWikiArticle, saveWikiArticle, getPhotoUrl } from '@/lib/db';
+import { fetchLocations, getPhotoUrl } from '@/lib/db';
 import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { NARRATORS, NarratorDialogue } from '@/components/wiki/WikiNarrator';
-import { WikiCompilerHome } from '@/components/wiki/WikiCompilerHome';
+import {
+  WikiCompilerHome,
+  type WikiCompilerSavedCountState,
+  type WikiCompilerSavedState,
+} from '@/components/wiki/WikiCompilerHome';
 import { WikiGenerationRevealModal } from '@/components/wiki/WikiGenerationRevealModal';
 import { WikiArticleToolbar } from '@/components/wiki/WikiArticleToolbar';
 import { WikiArticleActions } from '@/components/wiki/WikiArticleActions';
@@ -17,7 +21,22 @@ import { addWikiPhotoMarkers, splitWikiNarrator, uniqueWikiPhotos } from '@/lib/
 import { scpDossierToPlainText } from '@/lib/wikiScp';
 import { gildasChronicleToPlainText, parseStoredGildasChronicle } from '@/lib/wikiGildas';
 import { hernanArticleToPlainText, parseStoredHernanArticle } from '@/lib/wikiHernan';
-import { openRouterTestProvider } from '@/lib/wikiOpenRouter';
+import { generateWikiArticle } from '@/lib/wikiOpenRouter';
+import {
+  fetchScopedWikiArticles,
+  findScopedWikiArticle,
+  resetScopedWikiArticle,
+  saveScopedWikiArticle,
+  type ScopedWikiArticle,
+} from '@/lib/wikiScopedArticles';
+import {
+  filterWikiLocations,
+  formatWikiScopeLabel,
+  getWikiAvailablePeriods,
+  resolveWikiScope,
+  WIKI_ARTICLE_CHAR_LIMIT,
+  type WikiScopeType,
+} from '@/lib/wikiScope';
 import {
   playCancelSound,
   playConfirmSound,
@@ -30,7 +49,6 @@ import {
 import { playNpcBgm, stopNpcBgm } from '@/lib/bgm';
 
 type WikiStyleId = 'wikipedia' | 'scp' | 'ancient';
-type SavedState = Record<WikiStyleId, boolean>;
 type RevealPhase = 'waiting' | 'result' | 'ready';
 type GenerationReveal = {
   style: WikiStyleId;
@@ -39,7 +57,8 @@ type GenerationReveal = {
   line: string;
 };
 
-const EMPTY_SAVED: SavedState = { wikipedia: false, scp: false, ancient: false };
+const EMPTY_SAVED: WikiCompilerSavedState = { wikipedia: false, scp: false, ancient: false };
+const EMPTY_SAVED_COUNTS: WikiCompilerSavedCountState = { wikipedia: 0, scp: 0, ancient: 0 };
 const WIKI_GENERATE_COOLDOWN_MS = 5000;
 
 const WAITING_LINES: Record<WikiStyleId, string> = {
@@ -65,8 +84,12 @@ export function WikiWorkspace({
 }) {
   const [style, setStyle] = useState<WikiStyleId | null>(null);
   const [locations, setLocations] = useState<LocationWithPhotos[]>([]);
-  const [article, setArticle] = useState<string | null>(null);
-  const [saved, setSaved] = useState<SavedState>(EMPTY_SAVED);
+  const [articles, setArticles] = useState<ScopedWikiArticle[]>([]);
+  const [articleRecord, setArticleRecord] = useState<ScopedWikiArticle | null>(null);
+  const [scopeType, setScopeType] = useState<WikiScopeType>('world');
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [pendingGeneratedArticle, setPendingGeneratedArticle] = useState<ScopedWikiArticle | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -86,27 +109,17 @@ export function WikiWorkspace({
   const footerRef = useRef<HTMLDivElement | null>(null);
   const lastBackRequestRef = useRef(backRequestKey);
 
-  const load = async (nextStyle: WikiStyleId | null = style) => {
+  const load = async () => {
     setLoading(true);
     setError('');
     try {
-      const locs = await fetchLocations(world.id);
+      const [locs, storedArticles] = await Promise.all([
+        fetchLocations(world.id),
+        fetchScopedWikiArticles(world.id),
+      ]);
       setLocations(locs);
-
-      const entries = await Promise.all(
-        (Object.keys(EMPTY_SAVED) as WikiStyleId[]).map(async (id) => {
-          const item = await fetchWikiArticle(world.id, id);
-          return [id, Boolean(item?.content)] as const;
-        }),
-      );
-      setSaved(Object.fromEntries(entries) as SavedState);
-
-      if (nextStyle === null) {
-        setArticle(null);
-      } else {
-        const item = await fetchWikiArticle(world.id, nextStyle);
-        setArticle(item?.content ?? null);
-      }
+      setArticles(storedArticles);
+      setArticleRecord(null);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -115,11 +128,56 @@ export function WikiWorkspace({
   };
 
   useEffect(() => {
-    void load(style);
+    void load();
     return () => {
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
     };
-  }, [world.id, reloadKey, style]);
+  }, [world.id, reloadKey]);
+
+  const availablePeriods = useMemo(() => getWikiAvailablePeriods(locations), [locations]);
+
+  useEffect(() => {
+    if (availablePeriods.months.length > 0 && !availablePeriods.months.includes(selectedMonth)) {
+      setSelectedMonth(availablePeriods.months[0]);
+    }
+    if (availablePeriods.years.length > 0 && !availablePeriods.years.includes(selectedYear)) {
+      setSelectedYear(availablePeriods.years[0]);
+    }
+  }, [availablePeriods.months.join('|'), availablePeriods.years.join('|')]);
+
+  const scopeKey = scopeType === 'month'
+    ? selectedMonth || availablePeriods.months[0] || ''
+    : scopeType === 'year'
+      ? selectedYear || availablePeriods.years[0] || ''
+      : 'all';
+
+  const scopeResolution = useMemo(
+    () => resolveWikiScope(locations, scopeType, scopeKey),
+    [locations, scopeType, scopeKey],
+  );
+
+  const currentScopeArticle = useMemo(
+    () => style ? findScopedWikiArticle(articles, style, scopeType) : null,
+    [articles, style, scopeType],
+  );
+
+  const saved = useMemo<WikiCompilerSavedState>(() => {
+    if (articles.length === 0) return EMPTY_SAVED;
+    return {
+      wikipedia: Boolean(findScopedWikiArticle(articles, 'wikipedia', scopeType)),
+      scp: Boolean(findScopedWikiArticle(articles, 'scp', scopeType)),
+      ancient: Boolean(findScopedWikiArticle(articles, 'ancient', scopeType)),
+    };
+  }, [articles, scopeType]);
+
+  const savedCountByStyle = useMemo<WikiCompilerSavedCountState>(() => {
+    if (articles.length === 0) return EMPTY_SAVED_COUNTS;
+    return {
+      wikipedia: articles.filter((item) => item.style === 'wikipedia').length,
+      scp: articles.filter((item) => item.style === 'scp').length,
+      ancient: articles.filter((item) => item.style === 'ancient').length,
+    };
+  }, [articles]);
 
   useEffect(() => {
     const bgmByStyle: Record<WikiStyleId, 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient'> = {
@@ -136,31 +194,32 @@ export function WikiWorkspace({
   }, [style]);
 
   useEffect(() => {
-    onArticleStateChange?.(article !== null);
-  }, [article, onArticleStateChange]);
+    onArticleStateChange?.(articleRecord !== null);
+  }, [articleRecord, onArticleStateChange]);
 
   useEffect(() => {
-    onInternalBackAvailableChange?.(style !== null);
-  }, [style, onInternalBackAvailableChange]);
+    onInternalBackAvailableChange?.(style !== null || articleRecord !== null);
+  }, [style, articleRecord, onInternalBackAvailableChange]);
 
   useEffect(() => {
     if (lastBackRequestRef.current === backRequestKey) return;
     lastBackRequestRef.current = backRequestKey;
+    if (articleRecord) {
+      playCancelSound();
+      setCopied(false);
+      setShared(false);
+      setArticleRecord(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     if (style === null) return;
 
     playCancelSound();
     setCopied(false);
     setShared(false);
-    setArticle(null);
-
-    const previousStyle: WikiStyleId | null = style === 'ancient'
-      ? 'scp'
-      : style === 'scp'
-        ? 'wikipedia'
-        : null;
-    setStyle(previousStyle);
+    setStyle(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [backRequestKey, style]);
+  }, [backRequestKey, style, articleRecord]);
 
   useEffect(() => {
     if (!generationReveal) {
@@ -203,6 +262,8 @@ export function WikiWorkspace({
     return () => window.clearTimeout(timer);
   }, [generationReveal?.phase, generationReveal?.article, waitingComplete]);
 
+  const article = articleRecord?.content ?? null;
+
   useEffect(() => {
     if (!article) return;
     const updateTarget = () => {
@@ -227,15 +288,20 @@ export function WikiWorkspace({
     return () => observer.disconnect();
   }, [article]);
 
+  const articleSourceLocations = useMemo(() => {
+    if (!articleRecord) return scopeResolution.locations;
+    return filterWikiLocations(locations, articleRecord.scope_type, articleRecord.scope_key);
+  }, [articleRecord, locations, scopeResolution.locations]);
+
   const parsedArticle = useMemo(() => splitWikiNarrator(article ?? ''), [article]);
   const articleLocations = useMemo(() => {
-    if (parsedArticle.photoStoragePaths.length === 0) return locations;
+    if (parsedArticle.photoStoragePaths.length === 0) return articleSourceLocations;
     const selectedPaths = new Set(parsedArticle.photoStoragePaths);
-    return locations.map((location) => ({
+    return articleSourceLocations.map((location) => ({
       ...location,
       photos: location.photos.filter((photo) => selectedPaths.has(photo.storage_path)),
     }));
-  }, [locations, parsedArticle.photoStoragePaths.join('|')]);
+  }, [articleSourceLocations, parsedArticle.photoStoragePaths.join('|')]);
   const articlePhotos = useMemo(() => uniqueWikiPhotos(articleLocations), [articleLocations]);
   const mainPhoto = articlePhotos[0] ?? null;
   const additionalPhotos = articlePhotos.slice(1, 5);
@@ -271,22 +337,61 @@ export function WikiWorkspace({
     };
   }, [parsedArticle.content, mainPhoto?.storage_path, additionalPhotos.map((photo) => photo.storage_path).join('|')]);
 
+  const syncScopeKeyToArticle = (item: ScopedWikiArticle | null) => {
+    if (!item) return;
+    setScopeType(item.scope_type);
+    if (item.scope_type === 'month') setSelectedMonth(item.scope_key);
+    if (item.scope_type === 'year') setSelectedYear(item.scope_key);
+  };
+
+  const replaceStoredArticle = (next: ScopedWikiArticle) => {
+    setArticles((current) => [
+      next,
+      ...current.filter((item) => !(item.style === next.style && item.scope_type === next.scope_type)),
+    ]);
+  };
+
   const handleGenerate = async () => {
     const now = Date.now();
-    if (generating || resetting || article !== null || !style || locations.length === 0 || now < cooldownUntil) return;
+    if (
+      generating
+      || resetting
+      || articleRecord !== null
+      || !style
+      || scopeResolution.locations.length === 0
+      || currentScopeArticle
+      || now < cooldownUntil
+    ) return;
 
     const selectedStyle = style;
     setGenerating(true);
     setError('');
     setTypedReveal('');
     setWaitingComplete(false);
+    setPendingGeneratedArticle(null);
     setGenerationReveal({ style: selectedStyle, phase: 'waiting', article: '', line: '' });
     playWikiGeneratingNoiseSound();
 
     try {
-      const result = await openRouterTestProvider.generate({ world, locations, style: selectedStyle });
-      await saveWikiArticle(world.id, selectedStyle, result.content);
-      setSaved((current) => ({ ...current, [selectedStyle]: true }));
+      const result = await generateWikiArticle(
+        { world, locations: scopeResolution.locations, style: selectedStyle },
+        {
+          scopeType: scopeResolution.type,
+          scopeKey: scopeResolution.key,
+          scopeLabel: scopeResolution.label,
+          mode: scopeResolution.mode,
+          maxArticleChars: WIKI_ARTICLE_CHAR_LIMIT,
+        },
+      );
+      const storedArticle = await saveScopedWikiArticle(
+        world.id,
+        selectedStyle,
+        scopeResolution.type,
+        scopeResolution.key,
+        result.content,
+      );
+      replaceStoredArticle(storedArticle);
+      setPendingGeneratedArticle(storedArticle);
       const parsed = splitWikiNarrator(result.content);
       setGenerationReveal((current) => current ? {
         ...current,
@@ -295,6 +400,7 @@ export function WikiWorkspace({
       } : current);
     } catch (e) {
       setGenerationReveal(null);
+      setPendingGeneratedArticle(null);
       setError((e as Error).message);
     } finally {
       const until = Date.now() + WIKI_GENERATE_COOLDOWN_MS;
@@ -305,25 +411,39 @@ export function WikiWorkspace({
     }
   };
 
+  const handlePrimaryAction = () => {
+    if (currentScopeArticle) {
+      playConfirmSound();
+      syncScopeKeyToArticle(currentScopeArticle);
+      setArticleRecord(currentScopeArticle);
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      return;
+    }
+    void handleGenerate();
+  };
+
   const openGeneratedArticle = () => {
-    if (!generationReveal?.article || generationReveal.phase !== 'ready') return;
-    setArticle(generationReveal.article);
+    if (!generationReveal?.article || generationReveal.phase !== 'ready' || !pendingGeneratedArticle) return;
+    setArticleRecord(pendingGeneratedArticle);
+    syncScopeKeyToArticle(pendingGeneratedArticle);
     setGenerationReveal(null);
+    setPendingGeneratedArticle(null);
     playWikiCompleteSound();
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   const confirmReset = async () => {
-    if (!resetTarget || !style || !article || resetting) return;
+    if (!resetTarget || !style || !articleRecord || resetting) return;
+    const target = articleRecord;
     setResetTarget(false);
     setResetting(true);
     setError('');
     playDeleteSound();
     try {
-      await resetWikiArticle(world.id, style);
-      setSaved((current) => ({ ...current, [style]: false }));
-      setArticle(null);
-      setStyle(null);
+      await resetScopedWikiArticle(world.id, style, target.scope_type);
+      setArticles((current) => current.filter((item) => !(item.style === style && item.scope_type === target.scope_type)));
+      setArticleRecord(null);
+      syncScopeKeyToArticle(target);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -332,24 +452,64 @@ export function WikiWorkspace({
   };
 
   const selectStyle = (id: WikiStyleId, preserveScrollPosition = false) => {
-    if (id === style) return;
+    if (id === style && articleRecord === null) return;
 
     playConfirmSound();
     setCopied(false);
     setShared(false);
-    setArticle(null);
+    setArticleRecord(null);
     setStyle(id);
+
+    const storedForScope = findScopedWikiArticle(articles, id, scopeType);
+    if (storedForScope) syncScopeKeyToArticle(storedForScope);
 
     if (!preserveScrollPosition) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
+  const selectStyleFromArticle = (id: WikiStyleId) => {
+    if (!articleRecord || id === style) return;
+    playConfirmSound();
+    setCopied(false);
+    setShared(false);
+    setStyle(id);
+
+    const target = findScopedWikiArticle(articles, id, articleRecord.scope_type);
+    if (target) {
+      syncScopeKeyToArticle(target);
+      setArticleRecord(target);
+    } else {
+      setScopeType(articleRecord.scope_type);
+      if (articleRecord.scope_type === 'month') setSelectedMonth(articleRecord.scope_key);
+      if (articleRecord.scope_type === 'year') setSelectedYear(articleRecord.scope_key);
+      setArticleRecord(null);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectScopeType = (nextScope: WikiScopeType) => {
+    if (nextScope === scopeType) return;
+    playConfirmSound();
+    setArticleRecord(null);
+    setScopeType(nextScope);
+    if (!style) return;
+    const stored = findScopedWikiArticle(articles, style, nextScope);
+    if (stored?.scope_type === 'month') setSelectedMonth(stored.scope_key);
+    if (stored?.scope_type === 'year') setSelectedYear(stored.scope_key);
+  };
+
+  const handleSelectScopeKey = (key: string) => {
+    playConfirmSound();
+    if (scopeType === 'month') setSelectedMonth(key);
+    if (scopeType === 'year') setSelectedYear(key);
+  };
+
   const handleBackToCompilers = () => {
     playCancelSound();
     setCopied(false);
     setShared(false);
-    setArticle(null);
+    setArticleRecord(null);
     setStyle(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -394,12 +554,15 @@ export function WikiWorkspace({
 
   if (loading) return <Spinner label="旅の書（Wiki）を読み込み中" />;
 
-  const hasArticle = article !== null;
+  const hasArticle = articleRecord !== null && article !== null;
   const narrator = style ? NARRATORS[style] : null;
-  const locationLinks = locations.map((location) => ({
+  const locationLinks = articleSourceLocations.map((location) => ({
     name: location.name,
     onClick: () => onOpenLocation?.(location.id),
   }));
+  const articleScopeLabel = articleRecord
+    ? formatWikiScopeLabel(articleRecord.scope_type, articleRecord.scope_key)
+    : scopeResolution.label;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-3 overflow-x-hidden sm:space-y-4 font-sans">
@@ -409,21 +572,35 @@ export function WikiWorkspace({
         <WikiCompilerHome
           style={style}
           saved={saved}
-          locationCount={locations.length}
+          savedCountByStyle={savedCountByStyle}
+          savedArticleCount={articles.length}
+          locationCount={scopeResolution.locations.length}
           generating={generating}
           resetting={resetting}
           cooldownUntil={cooldownUntil}
+          scopeType={scopeType}
+          scopeKey={scopeResolution.key}
+          scopeLabel={scopeResolution.label}
+          scopeDescription={scopeResolution.description}
+          scopeMode={scopeResolution.mode}
+          availableMonths={availablePeriods.months}
+          availableYears={availablePeriods.years}
+          scopeSlotLocked={Boolean(currentScopeArticle)}
           onSelectStyle={(id) => selectStyle(id, true)}
-          onGenerate={handleGenerate}
+          onSelectScopeType={handleSelectScopeType}
+          onSelectScopeKey={handleSelectScopeKey}
+          onPrimaryAction={handlePrimaryAction}
         />
       )}
 
-      {hasArticle && style && narrator && (
+      {hasArticle && style && narrator && articleRecord && (
         <div className={`mx-auto w-full space-y-4 pb-5 sm:space-y-5 ${style === 'scp' || isStructuredGildas || isStructuredHernan ? 'max-w-[96rem]' : 'max-w-4xl'}`}>
           <WikiArticleToolbar
             style={style}
             saved={saved}
-            onSelectStyle={(id) => selectStyle(id)}
+            scopeType={articleRecord.scope_type}
+            scopeLabel={articleScopeLabel}
+            onSelectStyle={selectStyleFromArticle}
             onBack={handleBackToCompilers}
           />
 
