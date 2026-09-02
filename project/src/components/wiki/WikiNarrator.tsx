@@ -18,16 +18,16 @@ export const NARRATORS: Record<string, NarratorStyle> = {
     quote: '……記録を受領した。現時点では異常事象より、君の行動経路の方が少し気になっている。',
   },
   ancient: {
-    name: '老吟遊詩人 ギルダス',
-    role: '狂学者・古文書の語り部',
-    quote: 'おお……また一つ物語が始まったか。些細な出来事ほど、語り継ぐには都合がよいのだよ。',
+    name: 'マダム・ロゼ',
+    role: '荒野酒場店主・タブロイド編集長',
+    quote: '記録は読んだよ。無事に帰ったなら結構。で、今度は何をやらかしたんだい？',
   },
 };
 
-const NARRATOR_PORTRAITS: Record<string, string> = {
-  wikipedia: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/uta.t.2-removebg-preview.png',
-  scp: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/ark.t.1-removebg-preview.png',
-  ancient: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/gildas.t.1-removebg-preview.png',
+export const NARRATOR_PORTRAITS: Record<string, string> = {
+  wikipedia: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/uta(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png',
+  scp: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/ark(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png',
+  ancient: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/Rose(%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png',
 };
 
 export function PixelNarrator({ style, compact = false }: { style: string; compact?: boolean }) {
