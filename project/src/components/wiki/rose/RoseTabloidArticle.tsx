@@ -4,6 +4,7 @@ import { parseStoredMadameRoseArticle } from '@/lib/wikiRose';
 import { NARRATOR_PORTRAITS } from '@/components/wiki/WikiNarrator';
 import { RoseArticleShell } from './RoseArticleShell';
 import { RoseMarkdownRenderer } from './RoseMarkdownRenderer';
+import { RoseRelatedRecordModal } from './RoseRelatedRecordModal';
 import { formatRoseRecordedDate, useRosePhotos } from './useRosePhotos';
 
 type RoseLocationLink = {
@@ -31,6 +32,7 @@ export function RoseTabloidArticle({
   const storedArticle = useMemo(() => parseStoredMadameRoseArticle(content), [content]);
   const photos = useRosePhotos(locations, world.name);
   const [isMobile, setIsMobile] = useState(false);
+  const [relatedLocation, setRelatedLocation] = useState<LocationWithPhotos | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
@@ -77,19 +79,33 @@ export function RoseTabloidArticle({
     tags: storedArticle.tags,
   };
 
+  const roseLocationLinks = locations.map((location) => ({
+    name: location.name,
+    onClick: () => setRelatedLocation(location),
+  }));
+
   return (
-    <div className="bg-[#09090b] px-2 py-4 sm:px-4 sm:py-6">
-      <RoseArticleShell
-        article={article}
-        isMobile={isMobile}
-        body={(
-          <RoseMarkdownRenderer
-            content={storedArticle.contentMarkdown}
-            photos={photos}
-            locationLinks={locationLinks}
-          />
-        )}
-      />
-    </div>
+    <>
+      <div className="bg-[#09090b] px-2 py-4 sm:px-4 sm:py-6">
+        <RoseArticleShell
+          article={article}
+          isMobile={isMobile}
+          body={(
+            <RoseMarkdownRenderer
+              content={storedArticle.contentMarkdown}
+              photos={photos}
+              locationLinks={roseLocationLinks.length > 0 ? roseLocationLinks : locationLinks}
+            />
+          )}
+        />
+      </div>
+
+      {relatedLocation && (
+        <RoseRelatedRecordModal
+          location={relatedLocation}
+          onClose={() => setRelatedLocation(null)}
+        />
+      )}
+    </>
   );
 }
