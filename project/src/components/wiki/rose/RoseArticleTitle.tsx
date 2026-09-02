@@ -14,7 +14,7 @@ export function RoseArticleTitle({ title, className = '' }: RoseArticleTitleProp
         <span className="h-[2px] flex-1 bg-[#6E1F2B]/40" />
       </div>
 
-      <h1 className="break-words font-['Shippori_Mincho',serif] text-[22px] font-black leading-[1.32] tracking-normal text-[#171315] underline decoration-[#6E1F2B] decoration-[3px] underline-offset-[6px] selection:bg-[#6E1F2B] selection:text-[#E7D9BE] sm:text-3xl sm:leading-[1.28] sm:tracking-tight sm:decoration-[4px] sm:underline-offset-8 md:text-4xl lg:text-[34px]">
+      <h1 className="break-words font-['Shippori_Mincho',serif] text-[22px] font-black leading-[1.36] tracking-normal text-[#171315] underline decoration-[#6E1F2B] decoration-[2px] underline-offset-[7px] selection:bg-[#6E1F2B] selection:text-[#E7D9BE] sm:text-3xl sm:leading-[1.38] sm:tracking-tight sm:decoration-[2px] sm:underline-offset-[7px] md:text-4xl lg:text-[34px]">
         {title}
       </h1>
 
