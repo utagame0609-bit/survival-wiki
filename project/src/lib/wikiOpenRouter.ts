@@ -4,6 +4,7 @@ import { parseScpAiResponse, SCP_STRUCTURED_OUTPUT_INSTRUCTIONS } from './wikiSc
 import { GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS, parseGildasAiResponse } from './wikiGildas';
 import { HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS, parseHernanAiResponse } from './wikiHernan';
 import { supabase } from './supabase';
+import { WIKI_ARTICLE_CHAR_LIMIT, type WikiCoverageMode, type WikiScopeType } from './wikiScope';
 
 const DEFAULT_MAX_WIKI_AI_PHOTOS = 5;
 
@@ -31,7 +32,17 @@ type WikiSourcePlan = {
   storyArc: string;
   importantRecordKeys: string[];
   selectedPhotoKeys: string[];
+  omittedRecordKeys: string[];
   sections: WikiPlanSection[];
+};
+
+export type WikiGenerationContext = {
+  scopeType: WikiScopeType;
+  scopeKey: string;
+  scopeLabel: string;
+  mode: WikiCoverageMode;
+  maxArticleChars?: number;
+  maxAiPhotos?: number;
 };
 
 const PLANNING_LENS_BY_STYLE: Record<WikiGenerationInput['style'], string> = {
@@ -40,10 +51,18 @@ const PLANNING_LENS_BY_STYLE: Record<WikiGenerationInput['style'], string> = {
   ancient: '旅の転機、発見、達成、失敗、帰還、再会、土地や記憶の変化など、年代記として流れが生まれる節目を重視する。',
 };
 
-function buildSourcePlanningSystemPrompt(maxAiPhotos: number) {
+function buildSourcePlanningSystemPrompt(maxAiPhotos: number, context: WikiGenerationContext) {
+  const coverageRule = context.mode === 'full'
+    ? 'FULL編纂です。入力された全記録を落とさず、各記録を最低1回はsectionsのprimaryRecordKeysまたはsupportingRecordKeysへ含めてください。omittedRecordKeysは空配列にしてください。'
+    : 'DIGEST編纂です。全記録を理解した上で、記事の流れに重要な記録を優先してください。本文で個別に扱わない記録はomittedRecordKeysへ入れてください。';
+
   return `
 あなたはSurvival Wikiの記事を書く前段階を担当する資料編集者です。
-この段階では記事本文を書きません。全記録のテキスト、時系列、メイン写真の有無とメタデータだけを読み、最終記事の編集計画と「実画像を確認する価値が高いメイン写真」を選びます。
+この段階では記事本文を書きません。対象期間の全記録テキスト、時系列、メイン写真の有無とメタデータだけを読み、最終記事の編集計画と「実画像を確認する価値が高いメイン写真」を選びます。
+
+編纂対象: ${context.scopeLabel}
+編纂モード: ${context.mode.toUpperCase()}
+${coverageRule}
 
 最優先ルール:
 - 入力にない出来事、感情、写真内容を事実として追加しない。
@@ -51,7 +70,7 @@ function buildSourcePlanningSystemPrompt(maxAiPhotos: number) {
 - 記録全体の時系列を把握し、記事の導入・展開・転機・着地点が自然につながる大枠を作る。
 - importantRecordKeys は、最終記事で特に重点を置く価値がある記録だけを選ぶ。
 - sections は、全体を読みやすく整理するための編集設計である。同じ記録を理由なく複数章へ重複させない。
-- 写真候補は記事全体を代表できるよう、同じ時期や同じ記録へ不必要に偏らせない。
+- 写真候補は記事全体を代表できるよう、同じ時期へ不必要に偏らせない。
 - 写真候補は最大${maxAiPhotos}枚。候補が存在する場合は1枚以上選ぶ。
 - 写真キーは入力に存在する P1, P2... のみ使用する。
 - 記録キーは入力に存在する R1, R2... のみ使用する。
@@ -62,6 +81,7 @@ function buildSourcePlanningSystemPrompt(maxAiPhotos: number) {
   "storyArc": "確認事実だけを土台にした記事全体の流れを2〜4文で記述",
   "importantRecordKeys": ["R1", "R2"],
   "selectedPhotoKeys": ["P1", "P2"],
+  "omittedRecordKeys": [],
   "sections": [
     {
       "title": "章の役割が分かる短い仮タイトル",
@@ -119,12 +139,18 @@ function collectWikiPhotoCandidates(input: WikiGenerationInput): WikiPhotoCandid
     }));
 }
 
-function buildSourcePlanningMessage(input: WikiGenerationInput, candidates: WikiPhotoCandidate[]) {
+function buildSourcePlanningMessage(
+  input: WikiGenerationInput,
+  candidates: WikiPhotoCandidate[],
+  context: WikiGenerationContext,
+) {
   const locations = chronologicalLocations(input);
   const candidateByLocation = new Map(candidates.map((candidate) => [candidate.locationId, candidate]));
 
   return [
     `記事スタイル: ${input.style}`,
+    `編纂対象: ${context.scopeLabel}`,
+    `編纂モード: ${context.mode.toUpperCase()}`,
     `スタイル別の編集観点: ${PLANNING_LENS_BY_STYLE[input.style]}`,
     `ワールド名: ${input.world.name}`,
     `ワールド概要: ${input.world.memo || 'なし'}`,
@@ -180,6 +206,7 @@ function parseSourcePlan(raw: string): WikiSourcePlan | null {
       storyArc: typeof parsed.storyArc === 'string' ? parsed.storyArc.trim() : '',
       importantRecordKeys: stringArray(parsed.importantRecordKeys),
       selectedPhotoKeys: stringArray(parsed.selectedPhotoKeys),
+      omittedRecordKeys: stringArray(parsed.omittedRecordKeys),
       sections,
     };
   } catch {
@@ -197,17 +224,19 @@ async function invokeWikiAi(body: Record<string, unknown>) {
 async function selectWikiSources(
   input: WikiGenerationInput,
   candidates: WikiPhotoCandidate[],
-  maxAiPhotos = DEFAULT_MAX_WIKI_AI_PHOTOS,
+  context: WikiGenerationContext,
 ) {
-  if (candidates.length <= maxAiPhotos) {
-    return { photos: candidates, plan: null as WikiSourcePlan | null };
+  const maxAiPhotos = context.maxAiPhotos ?? DEFAULT_MAX_WIKI_AI_PHOTOS;
+  const needsPlanner = context.mode === 'digest' || candidates.length > maxAiPhotos;
+  if (!needsPlanner) {
+    return { photos: candidates.slice(0, maxAiPhotos), plan: null as WikiSourcePlan | null };
   }
 
   try {
     const raw = await invokeWikiAi({
       task: 'photo_selection',
-      systemPrompt: buildSourcePlanningSystemPrompt(maxAiPhotos),
-      message: buildSourcePlanningMessage(input, candidates),
+      systemPrompt: buildSourcePlanningSystemPrompt(maxAiPhotos, context),
+      message: buildSourcePlanningMessage(input, candidates, context),
     });
     const plan = parseSourcePlan(raw);
     if (!plan) throw new Error('資料編集計画を解析できませんでした。');
@@ -219,7 +248,9 @@ async function selectWikiSources(
       .slice(0, maxAiPhotos)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
-    if (selected.length === 0) throw new Error('資料編集計画に有効なメイン写真がありませんでした。');
+    if (candidates.length > 0 && selected.length === 0) {
+      throw new Error('資料編集計画に有効なメイン写真がありませんでした。');
+    }
     return { photos: selected, plan };
   } catch (error) {
     console.warn('[wiki] source planning failed; using chronological main-photo fallback', error);
@@ -231,18 +262,23 @@ function buildArticleMessage(
   input: WikiGenerationInput,
   selectedPhotos: WikiPhotoCandidate[],
   plan: WikiSourcePlan | null,
+  context: WikiGenerationContext,
 ) {
   const locations = chronologicalLocations(input);
   const allMainPhotoCandidates = collectWikiPhotoCandidates(input);
   const mainPhotoByLocation = new Map(allMainPhotoCandidates.map((photo) => [photo.locationId, photo]));
   const photoNumberByPath = new Map(selectedPhotos.map((photo, index) => [photo.storagePath, index + 1]));
   const selectedByLocation = new Map(selectedPhotos.map((photo) => [photo.locationId, photo]));
+  const maxArticleChars = context.maxArticleChars ?? WIKI_ARTICLE_CHAR_LIMIT;
 
   const planningContext = plan
     ? [
         '【第1段階の資料編集計画】',
         `記事全体の大枠: ${plan.storyArc || '指定なし'}`,
         `重点記録候補: ${plan.importantRecordKeys.join('・') || '指定なし'}`,
+        context.mode === 'digest'
+          ? `個別掲載を省略してよい記録候補: ${plan.omittedRecordKeys.join('・') || 'なし'}`
+          : 'FULL編纂のため、全記録を記事内で最低1回は意味のある形で扱ってください。',
         ...(plan.sections.length > 0
           ? [
               '章構成案:',
@@ -260,6 +296,13 @@ function buildArticleMessage(
     : [];
 
   return [
+    `【今回の編纂範囲】${context.scopeLabel}`,
+    `【編纂モード】${context.mode.toUpperCase()}`,
+    `【記事本文の上限】日本語の表示本文は最大${maxArticleChars}文字。途中で切らず、この文字数内で必ず結論まで完結させること。`,
+    context.mode === 'full'
+      ? '【情報密度】対象期間の全記録を最低1回は意味のある形で扱う。重複説明を避け、必要なら短く圧縮する。'
+      : '【情報密度】対象期間の全記録を理解した上で、流れ・転機・重要事実を優先するダイジェストとする。全件を個別列挙する必要はない。',
+    '',
     `ワールド名: ${input.world.name}`,
     `ワールド概要: ${input.world.memo || 'なし'}`,
     `プレイヤー: ${input.world.player || 'なし'}`,
@@ -304,44 +347,58 @@ function withPhotoPathMarker(content: string, selectedPhotos: WikiPhotoCandidate
   return `${content}\n\n<!--WIKI_PHOTO_PATHS:${JSON.stringify(selectedPhotos.map((photo) => photo.storagePath))}-->`;
 }
 
+export async function generateWikiArticle(
+  input: WikiGenerationInput,
+  context: WikiGenerationContext,
+): Promise<WikiGenerationResult> {
+  const { style } = input;
+  const allPhotoCandidates = collectWikiPhotoCandidates(input);
+  const { photos: selectedPhotos, plan } = await selectWikiSources(input, allPhotoCandidates, context);
+  const wikiPhotos = toWikiPhotoInputs(selectedPhotos);
+
+  const structuredInstructions = style === 'scp'
+    ? SCP_STRUCTURED_OUTPUT_INSTRUCTIONS
+    : style === 'ancient'
+      ? GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS
+      : HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS;
+
+  const systemPrompt = `${getWikiSystemPrompt(style)}\n\n${structuredInstructions}\n\n${NARRATOR_LINE_TONE_INSTRUCTIONS[style]}`;
+  const raw = await invokeWikiAi({
+    task: 'article',
+    systemPrompt,
+    message: buildArticleMessage(input, selectedPhotos, plan, context),
+    imageInputs: wikiPhotos,
+  });
+
+  if (style === 'scp') {
+    const { dossier, narratorLine } = parseScpAiResponse(raw);
+    return {
+      content: withPhotoPathMarker(`${JSON.stringify(dossier)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
+    };
+  }
+
+  if (style === 'ancient') {
+    const { chronicle, narratorLine } = parseGildasAiResponse(raw);
+    return {
+      content: withPhotoPathMarker(`${JSON.stringify(chronicle)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
+    };
+  }
+
+  const { article, narratorLine } = parseHernanAiResponse(raw);
+  return {
+    content: withPhotoPathMarker(`${JSON.stringify(article)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
+  };
+}
+
 export const openRouterTestProvider: WikiProvider = {
   async generate(input: WikiGenerationInput): Promise<WikiGenerationResult> {
-    const { style } = input;
-    const allPhotoCandidates = collectWikiPhotoCandidates(input);
-    const { photos: selectedPhotos, plan } = await selectWikiSources(input, allPhotoCandidates);
-    const wikiPhotos = toWikiPhotoInputs(selectedPhotos);
-
-    const structuredInstructions = style === 'scp'
-      ? SCP_STRUCTURED_OUTPUT_INSTRUCTIONS
-      : style === 'ancient'
-        ? GILDAS_STRUCTURED_OUTPUT_INSTRUCTIONS
-        : HERNAN_STRUCTURED_OUTPUT_INSTRUCTIONS;
-
-    const systemPrompt = `${getWikiSystemPrompt(style)}\n\n${structuredInstructions}\n\n${NARRATOR_LINE_TONE_INSTRUCTIONS[style]}`;
-    const raw = await invokeWikiAi({
-      task: 'article',
-      systemPrompt,
-      message: buildArticleMessage(input, selectedPhotos, plan),
-      imageInputs: wikiPhotos,
+    return generateWikiArticle(input, {
+      scopeType: 'world',
+      scopeKey: 'all',
+      scopeLabel: 'ワールド全体',
+      mode: 'digest',
+      maxArticleChars: WIKI_ARTICLE_CHAR_LIMIT,
+      maxAiPhotos: DEFAULT_MAX_WIKI_AI_PHOTOS,
     });
-
-    if (style === 'scp') {
-      const { dossier, narratorLine } = parseScpAiResponse(raw);
-      return {
-        content: withPhotoPathMarker(`${JSON.stringify(dossier)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
-      };
-    }
-
-    if (style === 'ancient') {
-      const { chronicle, narratorLine } = parseGildasAiResponse(raw);
-      return {
-        content: withPhotoPathMarker(`${JSON.stringify(chronicle)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
-      };
-    }
-
-    const { article, narratorLine } = parseHernanAiResponse(raw);
-    return {
-      content: withPhotoPathMarker(`${JSON.stringify(article)}\n\n<!--WIKI_NARRATOR:${narratorLine}-->`, selectedPhotos),
-    };
   },
 };
