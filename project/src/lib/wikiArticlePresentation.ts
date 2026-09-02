@@ -2,6 +2,7 @@ import { getPhotoUrl } from '@/lib/db';
 import type { LocationWithPhotos } from '@/lib/types';
 
 const NARRATOR_MARKER = /<!--WIKI_NARRATOR:([\s\S]*?)-->/;
+const PHOTO_PATHS_MARKER = /<!--WIKI_PHOTO_PATHS:([\s\S]*?)-->/;
 
 export function uniqueWikiPhotos(locations: LocationWithPhotos[]) {
   return locations
@@ -11,10 +12,25 @@ export function uniqueWikiPhotos(locations: LocationWithPhotos[]) {
 }
 
 export function splitWikiNarrator(content: string) {
-  const match = content.match(NARRATOR_MARKER);
+  const narratorMatch = content.match(NARRATOR_MARKER);
+  const photoPathsMatch = content.match(PHOTO_PATHS_MARKER);
+  let photoStoragePaths: string[] = [];
+
+  if (photoPathsMatch?.[1]) {
+    try {
+      const parsed = JSON.parse(photoPathsMatch[1]);
+      if (Array.isArray(parsed)) {
+        photoStoragePaths = parsed.filter((value): value is string => typeof value === 'string' && value.length > 0);
+      }
+    } catch {
+      photoStoragePaths = [];
+    }
+  }
+
   return {
-    content: content.replace(NARRATOR_MARKER, '').trim(),
-    line: match?.[1]?.trim() ?? '',
+    content: content.replace(NARRATOR_MARKER, '').replace(PHOTO_PATHS_MARKER, '').trim(),
+    line: narratorMatch?.[1]?.trim() ?? '',
+    photoStoragePaths,
   };
 }
 
