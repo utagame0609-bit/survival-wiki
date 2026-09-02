@@ -187,7 +187,7 @@ export function WikiCompilerHome({
                 title={`${meta.title}・保存済み${savedCount}/3`}
                 className={`relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? accent.selected : accent.idle}`}
               >
-                <div className="absolute right-1.5 top-1.5 sm:right-2 sm:top-2">
+                <div className="absolute right-1.5 top-1.5 z-10 sm:right-2 sm:top-2">
                   {savedCount > 0 ? (
                     <span className="game-ui-font flex items-center gap-0.5 rounded border border-[#10B981]/40 bg-[#10B981]/20 px-1 py-0.5 text-[8px] text-[#10B981] sm:px-1.5 sm:text-[10px]">
                       <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -214,7 +214,7 @@ export function WikiCompilerHome({
 
       {style && narrator && selectedStyleMeta && (
         <section className="hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
-          <div className="flex items-start gap-3.5">
+          <div className="flex items-center gap-3.5 sm:items-start">
             <PixelNarrator style={style} />
             <div className="min-w-0 flex-1">
               <div className="game-ui-font text-xs font-bold text-[#06B6D4]">{narrator.role}</div>
