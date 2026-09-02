@@ -87,11 +87,11 @@ export function RoseMasthead({
           </div>
 
           <div className="flex w-full shrink-0 items-center justify-between gap-3 border-t border-[#171315]/20 pt-2.5 md:w-auto md:flex-col md:items-end md:border-t-0 md:pt-0">
-            <div className="flex items-center gap-2.5 md:flex-col md:items-end">
+            <div className="flex items-center gap-2.5 md:mr-4 md:translate-y-1.5 md:flex-col md:items-end">
               <img
                 src={ROSE_EDITORIAL_SEAL_URL}
                 alt="マダム・ロゼ編集長印"
-                className="h-16 w-auto shrink-0 -rotate-2 object-contain opacity-95 drop-shadow-[1px_2px_0_rgba(110,31,43,0.22)] md:h-24"
+                className="h-16 w-auto shrink-0 -rotate-2 object-contain opacity-95 drop-shadow-[1px_2px_0_rgba(110,31,43,0.22)] md:h-28"
               />
               <div className="text-left font-serif text-[10px] text-[#66504A] sm:text-[11px] md:text-right">
                 <div className="font-bold text-[#171315]">MADAME ROSE</div>
