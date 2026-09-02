@@ -59,9 +59,16 @@ export function RoseMasthead({
 
       {isMobile ? (
         <div className="flex flex-col gap-2">
-          <h1 className="m-0 select-none whitespace-normal break-normal font-['Cinzel',serif] text-[26px] font-black uppercase leading-[1.05] tracking-normal text-[#171315] drop-shadow-[0_1px_0_rgba(255,255,255,0.7)]">
-            ROSE&apos;S LAST CALL
-          </h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="m-0 min-w-0 select-none whitespace-normal break-normal font-['Cinzel',serif] text-[26px] font-black uppercase leading-[1.05] tracking-normal text-[#171315] drop-shadow-[0_1px_0_rgba(255,255,255,0.7)]">
+              ROSE&apos;S LAST CALL
+            </h1>
+            <img
+              src={ROSE_EDITORIAL_SEAL_URL}
+              alt="マダム・ロゼ編集長印"
+              className="h-12 w-auto shrink-0 -rotate-2 object-contain opacity-95 drop-shadow-[1px_2px_0_rgba(110,31,43,0.18)]"
+            />
+          </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#171315]/30 pt-1.5">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-serif text-[10px] font-bold uppercase text-[#171315]/80">
               <span className="text-[#6E1F2B]">Est. Post-Collapse</span>
@@ -69,7 +76,6 @@ export function RoseMasthead({
               <span>•</span><span>{masthead.issueNumber}</span>
               {masthead.priceTag && <><span>•</span><span className="text-[#6E1F2B]">{masthead.priceTag}</span></>}
             </div>
-            <div className="border border-[#171315]/20 bg-[#171315]/5 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#6E1F2B]">R-EDITOR</div>
           </div>
         </div>
       ) : (
