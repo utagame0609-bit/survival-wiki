@@ -89,7 +89,7 @@ export function RoseRelatedRecordModal({ worldId, location, onClose }: Props) {
         </header>
 
         <div className="relative z-10 flex-1 overflow-y-auto px-4 py-4 sm:px-7 sm:py-6">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] md:gap-7">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] md:items-center md:gap-7">
             <div className="min-w-0">
               <div className="relative rotate-[-1deg] border-2 border-[#171315] bg-[#E7D9BE] p-2 shadow-[5px_5px_0px_#171315]">
                 {mainPhoto ? (
@@ -110,7 +110,7 @@ export function RoseRelatedRecordModal({ worldId, location, onClose }: Props) {
               </div>
             </div>
 
-            <div className="min-w-0">
+            <div className="min-w-0 md:self-center">
               <div className="inline-block border border-[#6E1F2B] bg-[#6E1F2B] px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest text-[#E7D9BE]">REPORT CARD</div>
               <h3 className="mt-2 break-words border-b-2 border-[#171315] pb-2 font-['Shippori_Mincho',serif] text-xl font-black leading-snug sm:text-2xl">{resolvedLocation.name}</h3>
 
@@ -126,17 +126,17 @@ export function RoseRelatedRecordModal({ worldId, location, onClose }: Props) {
                   </div>
                 )}
               </dl>
-
-              <div className="mt-4 border-l-4 border-[#6E1F2B] bg-[#171315]/5 p-3.5 sm:p-4">
-                <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-[#6E1F2B]">
-                  <FileText className="h-3.5 w-3.5" />
-                  RECORD MEMO
-                </div>
-                <p className="whitespace-pre-wrap break-words font-['Shippori_Mincho',serif] text-sm leading-[1.8] sm:text-[15px]">
-                  {resolvedLocation.detail_memo || 'この記録には詳細メモが残されていない。'}
-                </p>
-              </div>
             </div>
+          </div>
+
+          <div className="mt-6 border-l-4 border-[#6E1F2B] bg-[#171315]/5 p-3.5 sm:mt-7 sm:p-4 md:p-5">
+            <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-[#6E1F2B]">
+              <FileText className="h-3.5 w-3.5" />
+              RECORD MEMO
+            </div>
+            <p className="whitespace-pre-wrap break-words font-['Shippori_Mincho',serif] text-sm leading-[1.8] sm:text-[15px]">
+              {resolvedLocation.detail_memo || 'この記録には詳細メモが残されていない。'}
+            </p>
           </div>
         </div>
 
