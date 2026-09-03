@@ -94,10 +94,7 @@ export function TimelineRecordsToolbar({
 
         <button
           type="button"
-          onClick={() => {
-            playConfirmSound();
-            onOpenChest();
-          }}
+          onClick={onOpenChest}
           onMouseEnter={playHoverSound}
           className="flex items-center gap-2 rounded border border-[#F59E0B]/40 bg-[#161F30] px-4 py-2 text-xs font-mono font-bold text-[#F59E0B] shadow-[0_0_15px_rgba(245,158,11,0.1)] transition-all hover:border-[#F59E0B] hover:bg-[#1E293B] hover:shadow-[0_0_20px_rgba(245,158,11,0.25)] active:scale-95"
           title="CHEST 写真宝箱を開く"
