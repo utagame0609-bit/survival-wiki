@@ -5,6 +5,7 @@ type BgmTrackId = 'world' | NpcBgmId;
 
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
+const TRACK_SWITCH_FADE_MS = 150;
 
 const BGM_TRACK_URLS: Record<BgmTrackId, string> = {
   world: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%83%88%E3%83%83%E3%83%97%E3%83%9A%E3%83%BC%E3%82%B8_bgm_retro_jprg_88bpm_1loop.ogg',
@@ -69,6 +70,42 @@ function clearFadeTimer(): void {
   fadeTimerId = null;
 }
 
+function fadeVolume(
+  audio: HTMLAudioElement,
+  from: number,
+  to: number,
+  durationMs: number,
+  token: number,
+  onComplete?: () => void,
+): void {
+  clearFadeTimer();
+
+  if (durationMs <= 0 || typeof window === 'undefined') {
+    audio.volume = to;
+    onComplete?.();
+    return;
+  }
+
+  const steps = Math.max(1, Math.ceil(durationMs / 25));
+  const stepMs = durationMs / steps;
+  let step = 0;
+
+  const tick = () => {
+    if (token !== playRequestToken) return;
+    step += 1;
+    const progress = Math.min(1, step / steps);
+    audio.volume = from + (to - from) * progress;
+    if (step >= steps) {
+      fadeTimerId = null;
+      onComplete?.();
+      return;
+    }
+    fadeTimerId = window.setTimeout(tick, stepMs);
+  };
+
+  fadeTimerId = window.setTimeout(tick, stepMs);
+}
+
 function syncVolume(): void {
   const audio = audioElement;
   if (!audio || !activeTrackId) return;
@@ -110,24 +147,39 @@ function stopCurrentPlayback(fadeMs = 0): void {
   }
 
   const token = playRequestToken;
-  const startVolume = audio.volume;
-  const steps = Math.max(1, Math.ceil(fadeMs / 30));
-  const stepMs = fadeMs / steps;
-  let step = 0;
-
-  const fade = () => {
+  fadeVolume(audio, audio.volume, 0, fadeMs, token, () => {
     if (token !== playRequestToken || activeTrackId !== trackId) return;
-    step += 1;
-    audio.volume = startVolume * Math.max(0, 1 - step / steps);
-    if (step >= steps) {
-      finishStop(audio);
-      fadeTimerId = null;
-      return;
-    }
-    fadeTimerId = window.setTimeout(fade, stepMs);
-  };
+    finishStop(audio);
+  });
+}
 
-  fadeTimerId = window.setTimeout(fade, stepMs);
+function beginTrack(audio: HTMLAudioElement, trackId: BgmTrackId, token: number, fadeIn: boolean): void {
+  activeTrackId = trackId;
+  audio.loop = true;
+  audio.src = BGM_TRACK_URLS[trackId];
+  audio.volume = fadeIn ? 0 : getOutputVolume(trackId);
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // The new source may not have metadata yet.
+  }
+
+  const playPromise = audio.play();
+  if (!playPromise) return;
+
+  void playPromise.then(() => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    const targetVolume = getOutputVolume(trackId);
+    if (fadeIn) {
+      fadeVolume(audio, 0, targetVolume, TRACK_SWITCH_FADE_MS, token);
+    } else {
+      audio.volume = targetVolume;
+    }
+  }).catch((error) => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    console.warn(`BGM could not start (${trackId}):`, error);
+    activeTrackId = null;
+  });
 }
 
 function startTrack(trackId: BgmTrackId): void {
@@ -143,25 +195,24 @@ function startTrack(trackId: BgmTrackId): void {
 
   playRequestToken += 1;
   const token = playRequestToken;
+  const previousTrackId = activeTrackId;
+  const shouldSmoothSwitch = Boolean(previousTrackId && previousTrackId !== trackId && !audio.paused);
 
-  audio.pause();
-  activeTrackId = trackId;
-  audio.loop = true;
-  audio.src = BGM_TRACK_URLS[trackId];
-  audio.volume = getOutputVolume(trackId);
-  try {
-    audio.currentTime = 0;
-  } catch {
-    // The new source may not have metadata yet.
+  if (!shouldSmoothSwitch) {
+    audio.pause();
+    beginTrack(audio, trackId, token, false);
+    return;
   }
 
-  const playPromise = audio.play();
-  if (!playPromise) return;
-
-  void playPromise.catch((error) => {
-    if (token !== playRequestToken || activeTrackId !== trackId) return;
-    console.warn(`BGM could not start (${trackId}):`, error);
-    activeTrackId = null;
+  fadeVolume(audio, audio.volume, 0, TRACK_SWITCH_FADE_MS, token, () => {
+    if (token !== playRequestToken) return;
+    audio.pause();
+    try {
+      audio.currentTime = 0;
+    } catch {
+      // The outgoing source may not have metadata yet.
+    }
+    beginTrack(audio, trackId, token, true);
   });
 }
 
