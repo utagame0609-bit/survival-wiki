@@ -48,7 +48,6 @@ export function TimelineRecordCard({ world, location, onSelect, onOpenSns }: Tim
               alt={location.name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="pointer-events-none absolute inset-0 bg-[#06B6D4]/10 mix-blend-overlay" />
           </>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center text-[#475569]">
