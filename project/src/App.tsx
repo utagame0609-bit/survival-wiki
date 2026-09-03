@@ -197,6 +197,7 @@ function App() {
       screenContent = (
         <WorldListScreen
           gameId={screen.gameId}
+          gameName={screen.gameName}
           navigate={setScreen}
         />
       );
