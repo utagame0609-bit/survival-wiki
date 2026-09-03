@@ -101,7 +101,7 @@ export function LocationForm({ members, editing, onSave, onComplete, onCancel, s
   };
 
   return (
-    <div className="p-4 sm:p-5 space-y-4 text-slate-100">
+    <div className="sfc-location-form p-4 sm:p-5 space-y-4 text-slate-100">
       {error && (
         <div className="p-3 rounded-lg bg-[#2A1218] border border-[#EF4444]/60 text-[#FCA5A5] text-xs flex items-center gap-2">
           <span className="font-black text-[#EF4444]">[!]</span>
