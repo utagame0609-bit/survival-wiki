@@ -9,11 +9,7 @@ import { buildCollectionItems, type CollectionItem } from '@/lib/chestCollection
 import { TimelineRecordsView } from '@/components/TimelineRecordsView';
 import { SnsShareModal } from '@/components/SnsShareModal';
 import { useLocationsData, type LocationSaveInput } from '@/hooks/useLocationsData';
-import {
-  playRecordSelectSound,
-  playModalCloseSound,
-  playModalOpenSound,
-} from '@/lib/sound';
+import { playModalOpenSound } from '@/lib/sound';
 
 type Mode =
   | { type: 'list' }
@@ -92,12 +88,10 @@ export function LocationsTab({
 
   const closeModal = () => {
     if (saving) return;
-    playModalCloseSound();
     setMode({ type: 'list' });
   };
 
   const closeLocationDetail = () => {
-    playModalCloseSound();
     setSelectedLocation(null);
   };
 
@@ -121,7 +115,6 @@ export function LocationsTab({
           world={world}
           locations={locations}
           onSelectLocation={(location) => {
-            playRecordSelectSound();
             setSelectedLocation(location);
           }}
           onOpenSns={(location) => {
