@@ -139,7 +139,7 @@ export function WikiCompilerHome({
   const hasScopeRecords = locationCount > 0;
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 pb-4 sm:space-y-6">
+    <div className="sfc-wiki-compiler mx-auto w-full max-w-4xl space-y-4 pb-4 sm:space-y-6">
       <section className="hud-bracket-cyan relative overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/80 p-4 sm:p-5">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div className="min-w-0">
