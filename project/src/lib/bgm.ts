@@ -5,6 +5,8 @@ type BgmTrackId = 'world' | NpcBgmId;
 
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
+const BGM_SWITCH_FADE_MS = 90;
+const BGM_SWITCH_START_DELAY_MS = 160;
 
 const BGM_TRACK_URLS: Record<BgmTrackId, string> = {
   world: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%82%BB%E3%83%BC%E3%83%96%E7%94%BB%E9%9D%A2(2)_bgm_88bpm_1loop_seamless_wrapped.ogg',
@@ -27,7 +29,8 @@ let bgmEnabled = true;
 const audioElements: Partial<Record<BgmTrackId, HTMLAudioElement>> = {};
 let activeTrackId: BgmTrackId | null = null;
 let fadeTimerId: number | null = null;
-let playRequestToken = 0;
+let startTimerId: number | null = null;
+let startRequestToken = 0;
 const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
 
 if (typeof window !== 'undefined') {
@@ -70,6 +73,12 @@ function clearFadeTimer(): void {
   fadeTimerId = null;
 }
 
+function clearStartTimer(): void {
+  if (startTimerId === null || typeof window === 'undefined') return;
+  window.clearTimeout(startTimerId);
+  startTimerId = null;
+}
+
 function syncVolume(): void {
   if (!activeTrackId) return;
   const audio = audioElements[activeTrackId];
@@ -89,11 +98,16 @@ export function getMasterBgmVolume(): number {
 
 function finishStop(trackId: BgmTrackId, audio: HTMLAudioElement): void {
   audio.volume = 0;
+  audio.pause();
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // Metadata may not be loaded yet. Pausing is sufficient in that case.
+  }
   if (activeTrackId === trackId) activeTrackId = null;
 }
 
 function stopCurrentPlayback(fadeMs = 0): void {
-  playRequestToken += 1;
   clearFadeTimer();
 
   const trackId = activeTrackId;
@@ -109,14 +123,13 @@ function stopCurrentPlayback(fadeMs = 0): void {
     return;
   }
 
-  const token = playRequestToken;
   const startVolume = audio.volume;
-  const steps = Math.max(1, Math.ceil(fadeMs / 30));
+  const steps = Math.max(1, Math.ceil(fadeMs / 15));
   const stepMs = fadeMs / steps;
   let step = 0;
 
   const fade = () => {
-    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    if (activeTrackId !== trackId) return;
     step += 1;
     audio.volume = startVolume * Math.max(0, 1 - step / steps);
     if (step >= steps) {
@@ -130,19 +143,10 @@ function stopCurrentPlayback(fadeMs = 0): void {
   fadeTimerId = window.setTimeout(fade, stepMs);
 }
 
-function startTrack(trackId: BgmTrackId): void {
+function beginTrackPlayback(trackId: BgmTrackId, token: number): void {
+  if (token !== startRequestToken || !bgmEnabled) return;
   const audio = getAudioElement(trackId);
   if (!audio) return;
-
-  clearFadeTimer();
-
-  if (activeTrackId === trackId && !audio.paused) {
-    audio.volume = getOutputVolume(trackId);
-    return;
-  }
-
-  playRequestToken += 1;
-  const token = playRequestToken;
 
   if (activeTrackId && activeTrackId !== trackId) {
     const previousTrackId = activeTrackId;
@@ -166,14 +170,47 @@ function startTrack(trackId: BgmTrackId): void {
   if (!playPromise) return;
 
   void playPromise.catch((error) => {
-    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    if (token !== startRequestToken || activeTrackId !== trackId) return;
     console.warn(`BGM could not start (${trackId}):`, error);
     activeTrackId = null;
   });
 }
 
-function stopPlaybackPreservingTarget(): void {
-  stopCurrentPlayback(0);
+function startTrack(trackId: BgmTrackId): void {
+  clearStartTimer();
+
+  if (activeTrackId === trackId) {
+    const activeAudio = audioElements[trackId];
+    if (activeAudio && !activeAudio.paused) {
+      clearFadeTimer();
+      activeAudio.volume = getOutputVolume(trackId);
+      return;
+    }
+  }
+
+  startRequestToken += 1;
+  const token = startRequestToken;
+  const switchingTracks = Boolean(activeTrackId && activeTrackId !== trackId);
+
+  if (switchingTracks) {
+    stopCurrentPlayback(BGM_SWITCH_FADE_MS);
+  }
+
+  if (!switchingTracks || typeof window === 'undefined') {
+    beginTrackPlayback(trackId, token);
+    return;
+  }
+
+  startTimerId = window.setTimeout(() => {
+    startTimerId = null;
+    beginTrackPlayback(trackId, token);
+  }, BGM_SWITCH_START_DELAY_MS);
+}
+
+function stopPlaybackPreservingTarget(fadeMs = 0): void {
+  clearStartTimer();
+  startRequestToken += 1;
+  stopCurrentPlayback(fadeMs);
 }
 
 export function getActiveBgmTarget(): BgmTarget {
@@ -190,7 +227,7 @@ export function getDesiredBgmTarget(): BgmTarget {
 export function playNpcBgm(id: NpcBgmId): void {
   desiredBgmTarget = { type: 'npc', id };
   if (!bgmEnabled) {
-    stopPlaybackPreservingTarget();
+    stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
     return;
   }
   startTrack(id);
@@ -198,13 +235,13 @@ export function playNpcBgm(id: NpcBgmId): void {
 
 export function stopNpcBgm(): void {
   if (desiredBgmTarget?.type === 'npc') desiredBgmTarget = null;
-  if (activeTrackId && activeTrackId !== 'world') stopCurrentPlayback(0);
+  if (activeTrackId && activeTrackId !== 'world') stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
 }
 
 export function playWorldBgm(): void {
   desiredBgmTarget = { type: 'world' };
   if (!bgmEnabled) {
-    stopPlaybackPreservingTarget();
+    stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
     return;
   }
   startTrack('world');
@@ -212,12 +249,12 @@ export function playWorldBgm(): void {
 
 export function stopWorldBgm(fadeMs = 300): void {
   if (desiredBgmTarget?.type === 'world') desiredBgmTarget = null;
-  if (activeTrackId === 'world') stopCurrentPlayback(fadeMs);
+  if (activeTrackId === 'world') stopPlaybackPreservingTarget(fadeMs);
 }
 
 export function stopAllBgm(fadeMs = 0): void {
   desiredBgmTarget = null;
-  stopCurrentPlayback(fadeMs);
+  stopPlaybackPreservingTarget(fadeMs);
 }
 
 export function suspendBgmForPreview(): BgmTarget {
@@ -237,7 +274,7 @@ export function playNpcBgmPreview(id: NpcBgmId): void {
 }
 
 export function stopNpcBgmPreview(): void {
-  if (activeTrackId && activeTrackId !== 'world') stopCurrentPlayback(0);
+  if (activeTrackId && activeTrackId !== 'world') stopPlaybackPreservingTarget();
 }
 
 export function playWorldBgmPreview(): void {
@@ -245,7 +282,7 @@ export function playWorldBgmPreview(): void {
 }
 
 export function stopWorldBgmPreview(fadeMs = 0): void {
-  if (activeTrackId === 'world') stopCurrentPlayback(fadeMs);
+  if (activeTrackId === 'world') stopPlaybackPreservingTarget(fadeMs);
 }
 
 export function isBgmEnabled(): boolean {
@@ -258,7 +295,7 @@ export function setBgmEnabled(enabled: boolean): boolean {
   bgmEnabledListeners.forEach((listener) => listener(enabled));
 
   if (!enabled) {
-    stopPlaybackPreservingTarget();
+    stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
     return bgmEnabled;
   }
 
