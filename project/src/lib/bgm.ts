@@ -1,5 +1,5 @@
-import { bgmSequencer } from './bgmSequencer';
 import { BGM_OUTPUT_GAIN, NPC_BGM_OUTPUT_GAIN } from './audioMaster';
+import { worldAudioEngine } from './bgmAs/worldBgmEngineAs';
 import { soundEngine } from './soundEngine';
 
 export type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
@@ -8,11 +8,15 @@ interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
 
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
+// AS原本の内部ミックスは変更せず、最終出力だけ本番BGM MASTERへ合わせる。
+// 4曲を揃えた後、実機比較でこの曲別係数のみ微調整する。
+const WORLD_BGM_OUTPUT_GAIN = 0.8;
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let fadeTimerId: number | null = null;
 let activeNpcBgm: ActiveNpcBgm | null = null;
 let desiredBgmTarget: BgmTarget = null;
 let bgmEnabled = true;
+let worldStartToken = 0;
 const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
 
 if (typeof window !== 'undefined') {
@@ -20,8 +24,14 @@ if (typeof window !== 'undefined') {
   if (storedEnabled !== null) bgmEnabled = storedEnabled === 'true';
 }
 
+function getWorldOutputVolume(ratio = 1): number {
+  return masterBgmVolume * WORLD_BGM_OUTPUT_GAIN * ratio;
+}
+
 function syncVolume(): void {
+  // 旧NPCはこの段階では既存配管を維持。新AS NPC移植時に曲別出力へ置換する。
   soundEngine.setMasterVolume(masterBgmVolume * BGM_OUTPUT_GAIN);
+  worldAudioEngine.setMasterVolume(getWorldOutputVolume());
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -159,28 +169,27 @@ function stopNpcPlayback(): void {
 }
 
 function stopWorldPlayback(fadeMs = 300): void {
+  worldStartToken += 1;
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
     fadeTimerId = null;
   }
-  if (!bgmSequencer.getIsPlaying()) return;
+  if (!worldAudioEngine.getIsPlaying()) {
+    worldAudioEngine.stop();
+    return;
+  }
 
-  const currentVolume = masterBgmVolume;
-  const ctx = soundEngine.getContext();
   const steps = Math.max(1, Math.ceil(fadeMs / 30));
   const stepMs = fadeMs / steps;
   let step = 0;
 
-  if (ctx.state === 'suspended') void ctx.resume();
-  soundEngine.setMasterVolume(currentVolume * BGM_OUTPUT_GAIN);
-
   const fade = () => {
     step += 1;
     const ratio = Math.max(0, 1 - step / steps);
-    soundEngine.setMasterVolume(currentVolume * ratio * BGM_OUTPUT_GAIN);
+    worldAudioEngine.setMasterVolume(getWorldOutputVolume(ratio));
     if (step >= steps) {
-      bgmSequencer.stop();
-      soundEngine.setMasterVolume(0);
+      worldAudioEngine.stop();
+      worldAudioEngine.setMasterVolume(0);
       fadeTimerId = null;
       return;
     }
@@ -188,17 +197,17 @@ function stopWorldPlayback(fadeMs = 300): void {
   };
 
   if (fadeMs <= 0) {
-    bgmSequencer.stop();
-    soundEngine.setMasterVolume(0);
+    worldAudioEngine.stop();
+    worldAudioEngine.setMasterVolume(0);
     return;
   }
   fadeTimerId = window.setTimeout(fade, stepMs);
 }
 
 function startNpcPlayback(id: NpcBgmId): void {
-  soundEngine.init();
   stopWorldPlayback(0);
-  syncVolume();
+  soundEngine.init();
+  soundEngine.setMasterVolume(masterBgmVolume * BGM_OUTPUT_GAIN);
   if (activeNpcBgm?.id === id) return;
   stopNpcPlayback();
   if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm();
@@ -212,8 +221,15 @@ function startWorldPlayback(): void {
     window.clearTimeout(fadeTimerId);
     fadeTimerId = null;
   }
-  syncVolume();
-  bgmSequencer.play();
+  const token = ++worldStartToken;
+  worldAudioEngine.setMasterVolume(getWorldOutputVolume());
+  void worldAudioEngine.play().then(() => {
+    if (token !== worldStartToken || !bgmEnabled || desiredBgmTarget?.type !== 'world') {
+      worldAudioEngine.stop();
+      return;
+    }
+    worldAudioEngine.setMasterVolume(getWorldOutputVolume());
+  });
 }
 
 function stopPlaybackPreservingTarget(): void {
@@ -223,7 +239,7 @@ function stopPlaybackPreservingTarget(): void {
 
 export function getActiveBgmTarget(): BgmTarget {
   if (activeNpcBgm) return { type: 'npc', id: activeNpcBgm.id };
-  if (bgmSequencer.getIsPlaying()) return { type: 'world' };
+  if (worldAudioEngine.getIsPlaying()) return { type: 'world' };
   return null;
 }
 
@@ -325,9 +341,10 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 }
 
 export function isWorldBgmPlaying(): boolean {
-  return bgmSequencer.getIsPlaying();
+  return worldAudioEngine.getIsPlaying();
 }
 
 export function getWorldBgmDurationSec(): number {
-  return bgmSequencer.getTotalDurationSec();
+  const song = worldAudioEngine.getSong();
+  return song.totalBars * song.stepsPerBar * (60 / worldAudioEngine.getBpm() / 4);
 }
