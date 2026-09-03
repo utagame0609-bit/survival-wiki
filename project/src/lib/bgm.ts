@@ -2,11 +2,15 @@ export type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
 export type BgmTarget = { type: 'world' } | { type: 'npc'; id: NpcBgmId } | null;
 
 type BgmTrackId = 'world' | NpcBgmId;
+type BgmAudioGraph = {
+  audio: HTMLAudioElement;
+  source: MediaElementAudioSourceNode;
+  gain: GainNode;
+};
 
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
-const BGM_SWITCH_FADE_MS = 90;
-const BGM_SWITCH_START_DELAY_MS = 160;
+const BGM_NATIVE_FADE_MS = 80;
 
 const BGM_TRACK_URLS: Record<BgmTrackId, string> = {
   world: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%82%BB%E3%83%BC%E3%83%96%E7%94%BB%E9%9D%A2(2)_bgm_88bpm_1loop_seamless_wrapped.ogg',
@@ -15,7 +19,6 @@ const BGM_TRACK_URLS: Record<BgmTrackId, string> = {
   npc_bgm_ancient: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%83%9E%E3%83%80%E3%83%A0%E3%83%AD%E3%82%BC(2)_WastelandTavernSwing_1Loop_31s_Optimized.ogg',
 };
 
-// 完成ミックス自体は変更せず、必要なら4曲を実機比較した後に最終出力だけ微調整する。
 const BGM_TRACK_OUTPUT_GAIN: Record<BgmTrackId, number> = {
   world: 1,
   npc_bgm_wikipedia: 1,
@@ -26,11 +29,11 @@ const BGM_TRACK_OUTPUT_GAIN: Record<BgmTrackId, number> = {
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let desiredBgmTarget: BgmTarget = null;
 let bgmEnabled = true;
-const audioElements: Partial<Record<BgmTrackId, HTMLAudioElement>> = {};
+let audioContext: AudioContext | null = null;
+const audioGraphs: Partial<Record<BgmTrackId, BgmAudioGraph>> = {};
 let activeTrackId: BgmTrackId | null = null;
 let fadeTimerId: number | null = null;
-let startTimerId: number | null = null;
-let startRequestToken = 0;
+let playRequestToken = 0;
 const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
 
 if (typeof window !== 'undefined') {
@@ -50,21 +53,45 @@ function getOutputVolume(id: BgmTrackId, ratio = 1): number {
   return Math.max(0, Math.min(1, masterBgmVolume * BGM_TRACK_OUTPUT_GAIN[id] * ratio));
 }
 
-function getAudioElement(trackId: BgmTrackId): HTMLAudioElement | null {
+function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
-  const existing = audioElements[trackId];
+  if (audioContext) return audioContext;
+
+  const AudioContextClass = window.AudioContext
+    ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  audioContext = new AudioContextClass();
+  return audioContext;
+}
+
+function getAudioGraph(trackId: BgmTrackId): BgmAudioGraph | null {
+  const existing = audioGraphs[trackId];
   if (existing) return existing;
 
-  const audio = new Audio(BGM_TRACK_URLS[trackId]);
+  const context = getAudioContext();
+  if (!context) return null;
+
+  const audio = new Audio();
+  audio.crossOrigin = 'anonymous';
+  audio.src = BGM_TRACK_URLS[trackId];
   audio.preload = 'auto';
   audio.loop = true;
-  audio.volume = 0;
+  audio.volume = 1;
   audio.addEventListener('error', () => {
     const mediaError = audio.error;
     console.error(`BGM playback error (${trackId}):`, mediaError?.message ?? mediaError?.code ?? 'unknown media error');
   });
-  audioElements[trackId] = audio;
-  return audio;
+
+  const source = context.createMediaElementSource(audio);
+  const gain = context.createGain();
+  gain.gain.setValueAtTime(0, context.currentTime);
+  source.connect(gain);
+  gain.connect(context.destination);
+
+  const graph = { audio, source, gain };
+  audioGraphs[trackId] = graph;
+  return graph;
 }
 
 function clearFadeTimer(): void {
@@ -73,17 +100,17 @@ function clearFadeTimer(): void {
   fadeTimerId = null;
 }
 
-function clearStartTimer(): void {
-  if (startTimerId === null || typeof window === 'undefined') return;
-  window.clearTimeout(startTimerId);
-  startTimerId = null;
+function setGraphGain(trackId: BgmTrackId, value: number): void {
+  const context = audioContext;
+  const graph = audioGraphs[trackId];
+  if (!context || !graph) return;
+  graph.gain.gain.cancelScheduledValues(context.currentTime);
+  graph.gain.gain.setValueAtTime(value, context.currentTime);
 }
 
 function syncVolume(): void {
   if (!activeTrackId) return;
-  const audio = audioElements[activeTrackId];
-  if (!audio) return;
-  audio.volume = getOutputVolume(activeTrackId);
+  setGraphGain(activeTrackId, getOutputVolume(activeTrackId));
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -96,127 +123,136 @@ export function getMasterBgmVolume(): number {
   return masterBgmVolume;
 }
 
-function finishStop(trackId: BgmTrackId, audio: HTMLAudioElement): void {
-  audio.volume = 0;
-  audio.pause();
+function finishStop(trackId: BgmTrackId, graph: BgmAudioGraph): void {
+  graph.gain.gain.cancelScheduledValues(audioContext?.currentTime ?? 0);
+  if (audioContext) graph.gain.gain.setValueAtTime(0, audioContext.currentTime);
+  graph.audio.pause();
   try {
-    audio.currentTime = 0;
+    graph.audio.currentTime = 0;
   } catch {
     // Metadata may not be loaded yet. Pausing is sufficient in that case.
   }
   if (activeTrackId === trackId) activeTrackId = null;
 }
 
-function stopCurrentPlayback(fadeMs = 0): void {
+function stopCurrentPlayback(fadeMs = BGM_NATIVE_FADE_MS): void {
+  playRequestToken += 1;
   clearFadeTimer();
 
   const trackId = activeTrackId;
   if (!trackId) return;
-  const audio = audioElements[trackId];
-  if (!audio) {
+  const graph = audioGraphs[trackId];
+  const context = audioContext;
+  if (!graph || !context) {
     activeTrackId = null;
     return;
   }
 
-  if (fadeMs <= 0 || typeof window === 'undefined' || audio.paused) {
-    finishStop(trackId, audio);
+  if (fadeMs <= 0 || typeof window === 'undefined' || graph.audio.paused) {
+    finishStop(trackId, graph);
     return;
   }
 
-  const startVolume = audio.volume;
-  const steps = Math.max(1, Math.ceil(fadeMs / 15));
-  const stepMs = fadeMs / steps;
-  let step = 0;
+  const token = playRequestToken;
+  const now = context.currentTime;
+  const gainParam = graph.gain.gain;
+  const currentGain = gainParam.value;
+  gainParam.cancelScheduledValues(now);
+  gainParam.setValueAtTime(currentGain, now);
+  gainParam.linearRampToValueAtTime(0, now + fadeMs / 1000);
 
-  const fade = () => {
-    if (activeTrackId !== trackId) return;
-    step += 1;
-    audio.volume = startVolume * Math.max(0, 1 - step / steps);
-    if (step >= steps) {
-      finishStop(trackId, audio);
-      fadeTimerId = null;
-      return;
-    }
-    fadeTimerId = window.setTimeout(fade, stepMs);
-  };
-
-  fadeTimerId = window.setTimeout(fade, stepMs);
-}
-
-function beginTrackPlayback(trackId: BgmTrackId, token: number): void {
-  if (token !== startRequestToken || !bgmEnabled) return;
-  const audio = getAudioElement(trackId);
-  if (!audio) return;
-
-  if (activeTrackId && activeTrackId !== trackId) {
-    const previousTrackId = activeTrackId;
-    const previousAudio = audioElements[previousTrackId];
-    if (previousAudio) finishStop(previousTrackId, previousAudio);
-  }
-
-  activeTrackId = trackId;
-  audio.loop = true;
-  audio.volume = 0;
-  try {
-    audio.currentTime = 0;
-  } catch {
-    // Metadata may not be loaded yet.
-  }
-  audio.volume = getOutputVolume(trackId);
-
-  if (!audio.paused) return;
-
-  const playPromise = audio.play();
-  if (!playPromise) return;
-
-  void playPromise.catch((error) => {
-    if (token !== startRequestToken || activeTrackId !== trackId) return;
-    console.warn(`BGM could not start (${trackId}):`, error);
-    activeTrackId = null;
-  });
+  fadeTimerId = window.setTimeout(() => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    finishStop(trackId, graph);
+    fadeTimerId = null;
+  }, fadeMs + 10);
 }
 
 function startTrack(trackId: BgmTrackId): void {
-  clearStartTimer();
+  const graph = getAudioGraph(trackId);
+  const context = audioContext;
+  if (!graph || !context) return;
 
-  if (activeTrackId === trackId) {
-    const activeAudio = audioElements[trackId];
-    if (activeAudio && !activeAudio.paused) {
-      clearFadeTimer();
-      activeAudio.volume = getOutputVolume(trackId);
-      return;
-    }
-  }
+  clearFadeTimer();
 
-  startRequestToken += 1;
-  const token = startRequestToken;
-  const switchingTracks = Boolean(activeTrackId && activeTrackId !== trackId);
-
-  if (switchingTracks) {
-    stopCurrentPlayback(BGM_SWITCH_FADE_MS);
-  }
-
-  if (!switchingTracks || typeof window === 'undefined') {
-    beginTrackPlayback(trackId, token);
+  if (activeTrackId === trackId && !graph.audio.paused) {
+    setGraphGain(trackId, getOutputVolume(trackId));
     return;
   }
 
-  startTimerId = window.setTimeout(() => {
-    startTimerId = null;
-    beginTrackPlayback(trackId, token);
-  }, BGM_SWITCH_START_DELAY_MS);
+  playRequestToken += 1;
+  const token = playRequestToken;
+
+  if (activeTrackId && activeTrackId !== trackId) {
+    const previousTrackId = activeTrackId;
+    const previousGraph = audioGraphs[previousTrackId];
+    if (previousGraph) finishStop(previousTrackId, previousGraph);
+  }
+
+  activeTrackId = trackId;
+  graph.audio.loop = true;
+  try {
+    graph.audio.currentTime = 0;
+  } catch {
+    // Metadata may not be loaded yet.
+  }
+  setGraphGain(trackId, getOutputVolume(trackId));
+
+  void (async () => {
+    try {
+      if (context.state === 'suspended') await context.resume();
+      if (token !== playRequestToken || activeTrackId !== trackId || !bgmEnabled) return;
+      const playPromise = graph.audio.play();
+      if (playPromise) await playPromise;
+    } catch (error) {
+      if (token !== playRequestToken || activeTrackId !== trackId) return;
+      console.warn(`BGM could not start (${trackId}):`, error);
+      activeTrackId = null;
+    }
+  })();
 }
 
-function stopPlaybackPreservingTarget(fadeMs = 0): void {
-  clearStartTimer();
-  startRequestToken += 1;
+function switchTrack(trackId: BgmTrackId): void {
+  if (!activeTrackId || activeTrackId === trackId || typeof window === 'undefined') {
+    startTrack(trackId);
+    return;
+  }
+
+  const previousTrackId = activeTrackId;
+  const previousGraph = audioGraphs[previousTrackId];
+  const context = audioContext;
+  if (!previousGraph || !context) {
+    startTrack(trackId);
+    return;
+  }
+
+  playRequestToken += 1;
+  const token = playRequestToken;
+  clearFadeTimer();
+
+  const now = context.currentTime;
+  const gainParam = previousGraph.gain.gain;
+  const currentGain = gainParam.value;
+  gainParam.cancelScheduledValues(now);
+  gainParam.setValueAtTime(currentGain, now);
+  gainParam.linearRampToValueAtTime(0, now + BGM_NATIVE_FADE_MS / 1000);
+
+  fadeTimerId = window.setTimeout(() => {
+    if (token !== playRequestToken || activeTrackId !== previousTrackId) return;
+    finishStop(previousTrackId, previousGraph);
+    fadeTimerId = null;
+    startTrack(trackId);
+  }, BGM_NATIVE_FADE_MS + 10);
+}
+
+function stopPlaybackPreservingTarget(fadeMs = BGM_NATIVE_FADE_MS): void {
   stopCurrentPlayback(fadeMs);
 }
 
 export function getActiveBgmTarget(): BgmTarget {
   if (!activeTrackId) return null;
-  const audio = audioElements[activeTrackId];
-  if (!audio || audio.paused) return null;
+  const graph = audioGraphs[activeTrackId];
+  if (!graph || graph.audio.paused) return null;
   return trackIdToTarget(activeTrackId);
 }
 
@@ -227,34 +263,34 @@ export function getDesiredBgmTarget(): BgmTarget {
 export function playNpcBgm(id: NpcBgmId): void {
   desiredBgmTarget = { type: 'npc', id };
   if (!bgmEnabled) {
-    stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
+    stopPlaybackPreservingTarget();
     return;
   }
-  startTrack(id);
+  switchTrack(id);
 }
 
 export function stopNpcBgm(): void {
   if (desiredBgmTarget?.type === 'npc') desiredBgmTarget = null;
-  if (activeTrackId && activeTrackId !== 'world') stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
+  if (activeTrackId && activeTrackId !== 'world') stopCurrentPlayback();
 }
 
 export function playWorldBgm(): void {
   desiredBgmTarget = { type: 'world' };
   if (!bgmEnabled) {
-    stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
+    stopPlaybackPreservingTarget();
     return;
   }
-  startTrack('world');
+  switchTrack('world');
 }
 
 export function stopWorldBgm(fadeMs = 300): void {
   if (desiredBgmTarget?.type === 'world') desiredBgmTarget = null;
-  if (activeTrackId === 'world') stopPlaybackPreservingTarget(fadeMs);
+  if (activeTrackId === 'world') stopCurrentPlayback(fadeMs);
 }
 
-export function stopAllBgm(fadeMs = 0): void {
+export function stopAllBgm(fadeMs = BGM_NATIVE_FADE_MS): void {
   desiredBgmTarget = null;
-  stopPlaybackPreservingTarget(fadeMs);
+  stopCurrentPlayback(fadeMs);
 }
 
 export function suspendBgmForPreview(): BgmTarget {
@@ -266,23 +302,23 @@ export function suspendBgmForPreview(): BgmTarget {
 export function restoreBgmTarget(target: BgmTarget): void {
   desiredBgmTarget = target;
   if (!bgmEnabled || !target) return;
-  startTrack(targetToTrackId(target));
+  switchTrack(targetToTrackId(target));
 }
 
 export function playNpcBgmPreview(id: NpcBgmId): void {
-  startTrack(id);
+  switchTrack(id);
 }
 
 export function stopNpcBgmPreview(): void {
-  if (activeTrackId && activeTrackId !== 'world') stopPlaybackPreservingTarget();
+  if (activeTrackId && activeTrackId !== 'world') stopCurrentPlayback();
 }
 
 export function playWorldBgmPreview(): void {
-  startTrack('world');
+  switchTrack('world');
 }
 
-export function stopWorldBgmPreview(fadeMs = 0): void {
-  if (activeTrackId === 'world') stopPlaybackPreservingTarget(fadeMs);
+export function stopWorldBgmPreview(fadeMs = BGM_NATIVE_FADE_MS): void {
+  if (activeTrackId === 'world') stopCurrentPlayback(fadeMs);
 }
 
 export function isBgmEnabled(): boolean {
@@ -295,7 +331,7 @@ export function setBgmEnabled(enabled: boolean): boolean {
   bgmEnabledListeners.forEach((listener) => listener(enabled));
 
   if (!enabled) {
-    stopPlaybackPreservingTarget(BGM_SWITCH_FADE_MS);
+    stopPlaybackPreservingTarget();
     return bgmEnabled;
   }
 
@@ -313,12 +349,12 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 }
 
 export function isWorldBgmPlaying(): boolean {
-  const audio = audioElements.world;
-  return activeTrackId === 'world' && Boolean(audio && !audio.paused);
+  const graph = audioGraphs.world;
+  return activeTrackId === 'world' && Boolean(graph && !graph.audio.paused);
 }
 
 export function getWorldBgmDurationSec(): number {
-  const audio = audioElements.world;
-  if (activeTrackId !== 'world' || !audio || !Number.isFinite(audio.duration)) return 0;
-  return audio.duration;
+  const graph = audioGraphs.world;
+  if (activeTrackId !== 'world' || !graph || !Number.isFinite(graph.audio.duration)) return 0;
+  return graph.audio.duration;
 }
