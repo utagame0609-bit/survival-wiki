@@ -25,12 +25,7 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
 
   useEffect(() => {
     playWorldBgm();
-    const resumeBgm = () => playWorldBgm();
-    window.addEventListener('survival-wiki:settings-closed', resumeBgm);
-    window.addEventListener('survival-wiki:sound-studio-closed', resumeBgm);
     return () => {
-      window.removeEventListener('survival-wiki:settings-closed', resumeBgm);
-      window.removeEventListener('survival-wiki:sound-studio-closed', resumeBgm);
       stopWorldBgm(300);
     };
   }, []);
