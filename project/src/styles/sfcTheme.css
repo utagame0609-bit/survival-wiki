@@ -23,16 +23,16 @@
 
   --accent-red: #e63946;
   --accent-red-hover: #d02b38;
-  --accent-blue: #2a6f97;
-  --accent-blue-hover: #1e5272;
+  --accent-blue: #1D3557;
+  --accent-blue-hover: #162944;
   --accent-yellow: #e9c46a;
   --accent-yellow-hover: #d6af50;
   --accent-green: #2a9d8f;
   --accent-green-hover: #218074;
 
-  --text-main: #1f2024;
-  --text-muted: #5e6068;
-  --text-subtle: #848690;
+  --text-main: #222222;
+  --text-muted: #222222;
+  --text-subtle: #444444;
   --text-inverse: #ffffff;
 
   --dpad-bg: #2d2e33;
@@ -1141,4 +1141,151 @@
 
 [data-theme="sfc"] .sfc-settings-modal [class*="border-slate-"] {
   border-color: var(--border-main) !important;
+}
+
+
+/* Requested SFC contrast and alignment corrections 2026-09-04 */
+
+/* Base text: remove pale gray / cyan text from the light theme. */
+[data-theme="sfc"] body,
+[data-theme="sfc"] .sfc-world-list-root,
+[data-theme="sfc"] .sfc-world-screen,
+[data-theme="sfc"] .sfc-settings-modal,
+[data-theme="sfc"] .sfc-sound-studio {
+  color: #222222 !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-sound-studio
+) [class*="text-[#06B6D4]"] {
+  color: #1D3557 !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-sound-studio
+) [class*="text-[#94A3B8]"],
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-sound-studio
+) [class*="text-[#64748B]"],
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-sound-studio
+) [class*="text-[#475569]"] {
+  color: #222222 !important;
+}
+
+/* Requested tab contrast: selected blue/white, inactive light gray/black. */
+[data-theme="sfc"] .sfc-world-tabs button {
+  background: #D0D0D0 !important;
+  border: 2px solid #4A4A4A !important;
+  color: #222222 !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.8),
+    inset -1px -1px 0 rgba(0,0,0,.18);
+}
+
+[data-theme="sfc"] .sfc-world-tabs button svg {
+  color: #222222 !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#161F30]"],
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#0E2A3A]"] {
+  background: #1D3557 !important;
+  border-color: #1D3557 !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.2),
+    inset -1px -1px 0 rgba(0,0,0,.3),
+    0 3px 0 #222226 !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#161F30]"] svg,
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#0E2A3A]"] svg {
+  color: #ffffff !important;
+}
+
+/* Main CTA buttons use the requested SFC blue. */
+[data-theme="sfc"] .sfc-create-world-button,
+[data-theme="sfc"] .sfc-create-world-button:hover,
+[data-theme="sfc"] .sfc-records-view > .fixed button,
+[data-theme="sfc"] .sfc-records-view > .fixed button:hover {
+  background: #1D3557 !important;
+  color: #ffffff !important;
+  border-color: #4A4A4A !important;
+}
+
+/* Timeline protagonist status panel: restore an independent, visible frame. */
+[data-theme="sfc"] .sfc-world-header {
+  background: #E8E8E8 !important;
+  border: 2px solid #4A4A4A !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.95),
+    inset -1px -1px 0 rgba(0,0,0,.2),
+    0 3px 6px rgba(0,0,0,.12) !important;
+}
+
+/* Wiki compiler cards: light panel instead of leftover dark blue. */
+[data-theme="sfc"] .sfc-compiler-card {
+  background: #E8E8E8 !important;
+  color: #222222 !important;
+  border: 2px solid #4A4A4A !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.9),
+    inset -1px -1px 0 rgba(0,0,0,.16),
+    0 2px 5px rgba(0,0,0,.1) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="sfc"] .sfc-compiler-card[aria-pressed="true"] {
+  border: 3px solid #1D3557 !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.95),
+    inset -1px -1px 0 rgba(0,0,0,.18),
+    0 0 0 2px rgba(29,53,87,.18),
+    0 3px 7px rgba(0,0,0,.14) !important;
+}
+
+[data-theme="sfc"] .sfc-compiler-card h3,
+[data-theme="sfc"] .sfc-compiler-card p {
+  color: #222222 !important;
+}
+
+[data-theme="sfc"] .sfc-compiler-card [class*="bg-[#0B1018]"],
+[data-theme="sfc"] .sfc-compiler-card [class*="bg-[#1E293B]"] {
+  background: #D0D0D0 !important;
+  color: #222222 !important;
+}
+
+/* Wiki header panels: explicit molded frame so they do not disappear into #D8D8D8. */
+[data-theme="sfc"] .sfc-wiki-header-panel {
+  background: #D8D8D8 !important;
+  border: 2px solid #4A4A4A !important;
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.95),
+    inset -2px -2px 0 rgba(0,0,0,.18),
+    0 4px 8px rgba(0,0,0,.12) !important;
+}
+
+/* Mobile tab states follow the same requested contrast language. */
+[data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#1E293B]"],
+[data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#0E2A3A]"] {
+  background: #1D3557 !important;
+  border-color: #1D3557 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#1E293B]"] svg,
+[data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#0E2A3A]"] svg {
+  color: #ffffff !important;
 }
