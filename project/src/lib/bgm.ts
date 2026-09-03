@@ -259,7 +259,7 @@ function resumeMutedPlayback(): boolean {
 
 export function getActiveBgmTarget(): BgmTarget {
   const audio = getActiveAudio();
-  if (!activeTrackId || !audio || audio.paused) return null;
+  if (!bgmEnabled || !activeTrackId || !audio || audio.paused) return null;
   return trackIdToTarget(activeTrackId);
 }
 
@@ -269,10 +269,6 @@ export function getDesiredBgmTarget(): BgmTarget {
 
 export function playNpcBgm(id: NpcBgmId): void {
   desiredBgmTarget = { type: 'npc', id };
-  if (!bgmEnabled) {
-    startTrack(id);
-    return;
-  }
   startTrack(id);
 }
 
@@ -283,10 +279,6 @@ export function stopNpcBgm(): void {
 
 export function playWorldBgm(): void {
   desiredBgmTarget = { type: 'world' };
-  if (!bgmEnabled) {
-    startTrack('world');
-    return;
-  }
   startTrack('world');
 }
 
@@ -359,11 +351,11 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 
 export function isWorldBgmPlaying(): boolean {
   const worldAudio = audioPool.world;
-  return activeTrackId === 'world' && Boolean(worldAudio && !worldAudio.paused);
+  return bgmEnabled && activeTrackId === 'world' && Boolean(worldAudio && !worldAudio.paused);
 }
 
 export function getWorldBgmDurationSec(): number {
   const worldAudio = audioPool.world;
-  if (activeTrackId !== 'world' || !worldAudio || !Number.isFinite(worldAudio.duration)) return 0;
+  if (!bgmEnabled || activeTrackId !== 'world' || !worldAudio || !Number.isFinite(worldAudio.duration)) return 0;
   return worldAudio.duration;
 }
