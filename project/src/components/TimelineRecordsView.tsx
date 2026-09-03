@@ -142,7 +142,7 @@ export function TimelineRecordsView({
                         storagePath={dayBackgroundPhoto}
                         alt=""
                         aria-hidden="true"
-                        className="h-full w-full object-cover object-center filter contrast-125"
+                        className="h-full w-full object-cover object-center"
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-[#0B1018] via-[#0B1018]/90 to-transparent" />
                     </div>
