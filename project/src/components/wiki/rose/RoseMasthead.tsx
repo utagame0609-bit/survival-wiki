@@ -1,7 +1,7 @@
 import { Flame, Radio, ShieldAlert } from 'lucide-react';
 import type { RoseHazardLevel, RoseMastheadData } from './RoseArticleTypes';
 
-const ROSE_EDITORIAL_SEAL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/rose(%E8%A8%98%E4%BA%8B%E3%83%AD%E3%82%B4%E3%83%BB%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E8%83%8C%E6%99%AF%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png';
+const ROSE_EDITORIAL_SEAL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/rose(%E8%A8%98%E4%BA%8B%E3%83%AD%E3%82%B4%E3%83%BB%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E8%83%8C%E6%99%AF%E9%80%8F%E9%81%8E%E6%B8%88%E3%81%BF).png';
 
 type RoseMastheadProps = {
   masthead: RoseMastheadData;
