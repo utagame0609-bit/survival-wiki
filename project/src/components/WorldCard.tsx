@@ -38,7 +38,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-3.5">
-          <div className="relative shrink-0">
+          <div className="relative shrink-0 pt-2">
             <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B]">
               {playerPhotoUrl ? (
                 <img src={playerPhotoUrl} alt="" className="h-full w-full object-cover" />
