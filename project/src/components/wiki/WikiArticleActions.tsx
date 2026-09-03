@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Copy, RotateCcw, Share2 } from 'lucide-react';
-import { playHoverSound } from '@/lib/sound';
+import { playErrorSound, playHoverSound } from '@/lib/sound';
 
 type WikiArticleActionsProps = {
   copied: boolean;
@@ -16,7 +16,10 @@ export const WikiArticleActions = forwardRef<HTMLDivElement, WikiArticleActionsP
       <div ref={ref} className="flex flex-col items-stretch justify-between gap-2.5 rounded-xl border border-[#1E293B] bg-[#0F172A] p-2.5 sm:flex-row sm:items-center sm:p-3.5">
         <button
           type="button"
-          onClick={onReset}
+          onClick={() => {
+            playErrorSound();
+            onReset();
+          }}
           onMouseEnter={playHoverSound}
           className="game-ui-font flex min-h-[40px] items-center justify-center gap-1.5 rounded border border-transparent px-3 text-xs text-[#64748B] transition-colors hover:border-[#EF4444]/40 hover:bg-[#2A161C] hover:text-[#EF4444]"
         >
