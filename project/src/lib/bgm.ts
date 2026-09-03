@@ -6,6 +6,7 @@ type BgmTrackId = 'world' | NpcBgmId;
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
 const TRACK_SWITCH_FADE_MS = 150;
+const BGM_RESUME_FADE_MS = 80;
 
 const BGM_TRACK_URLS: Record<BgmTrackId, string> = {
   world: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%82%BB%E3%83%BC%E3%83%96%E7%94%BB%E9%9D%A2(2)_bgm_88bpm_1loop_seamless_wrapped.ogg',
@@ -153,11 +154,11 @@ function stopCurrentPlayback(fadeMs = 0): void {
   });
 }
 
-function beginTrack(audio: HTMLAudioElement, trackId: BgmTrackId, token: number, fadeIn: boolean): void {
+function beginTrack(audio: HTMLAudioElement, trackId: BgmTrackId, token: number, fadeInMs = 0): void {
   activeTrackId = trackId;
   audio.loop = true;
   audio.src = BGM_TRACK_URLS[trackId];
-  audio.volume = fadeIn ? 0 : getOutputVolume(trackId);
+  audio.volume = fadeInMs > 0 ? 0 : getOutputVolume(trackId);
   try {
     audio.currentTime = 0;
   } catch {
@@ -170,8 +171,8 @@ function beginTrack(audio: HTMLAudioElement, trackId: BgmTrackId, token: number,
   void playPromise.then(() => {
     if (token !== playRequestToken || activeTrackId !== trackId) return;
     const targetVolume = getOutputVolume(trackId);
-    if (fadeIn) {
-      fadeVolume(audio, 0, targetVolume, TRACK_SWITCH_FADE_MS, token);
+    if (fadeInMs > 0) {
+      fadeVolume(audio, 0, targetVolume, fadeInMs, token);
     } else {
       audio.volume = targetVolume;
     }
@@ -182,7 +183,7 @@ function beginTrack(audio: HTMLAudioElement, trackId: BgmTrackId, token: number,
   });
 }
 
-function startTrack(trackId: BgmTrackId): void {
+function startTrack(trackId: BgmTrackId, coldStartFadeMs = 0): void {
   const audio = getAudioElement();
   if (!audio) return;
 
@@ -200,7 +201,7 @@ function startTrack(trackId: BgmTrackId): void {
 
   if (!shouldSmoothSwitch) {
     audio.pause();
-    beginTrack(audio, trackId, token, false);
+    beginTrack(audio, trackId, token, coldStartFadeMs);
     return;
   }
 
@@ -212,7 +213,7 @@ function startTrack(trackId: BgmTrackId): void {
     } catch {
       // The outgoing source may not have metadata yet.
     }
-    beginTrack(audio, trackId, token, true);
+    beginTrack(audio, trackId, token, TRACK_SWITCH_FADE_MS);
   });
 }
 
@@ -304,7 +305,7 @@ export function setBgmEnabled(enabled: boolean): boolean {
     return bgmEnabled;
   }
 
-  restoreBgmTarget(desiredBgmTarget);
+  if (desiredBgmTarget) startTrack(targetToTrackId(desiredBgmTarget), BGM_RESUME_FADE_MS);
   return bgmEnabled;
 }
 
