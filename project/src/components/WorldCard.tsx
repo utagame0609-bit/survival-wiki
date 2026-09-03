@@ -26,7 +26,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
         minute: '2-digit',
       })
     : 'NO DATA';
-  const companions = world.members.filter((member) => member.name !== world.player).slice(0, 4);
+  const companions = world.members.filter((member) => member.name !== world.player).slice(0, 5);
 
   return (
     <article
@@ -36,10 +36,10 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
       <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
       <span className="pointer-events-none absolute -bottom-px -right-px h-2 w-2 border-b-2 border-r-2 border-[#F2A100]" />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:flex-row lg:items-center lg:gap-3">
-        <div className="flex min-w-0 items-start gap-3.5 lg:w-[270px] lg:shrink-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 items-start gap-3.5">
           <div className="relative shrink-0 pt-2">
-            <div className="flex h-14 w-14 translate-y-4 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B] sm:translate-y-3 lg:translate-y-5">
+            <div className="flex h-14 w-14 translate-y-4 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B] sm:translate-y-3">
               {playerPhotoUrl ? (
                 <img src={playerPhotoUrl} alt="" className="h-full w-full object-cover" />
               ) : (
@@ -73,7 +73,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
               </p>
             )}
 
-            <div className="mt-2 flex items-center gap-2 lg:hidden">
+            <div className="mt-2 flex items-center gap-2">
               <div className="flex items-center -space-x-1.5">
                 {companions.map((member) => (
                   <div
@@ -95,24 +95,6 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
             </div>
           </div>
         </div>
-
-        <div className="hidden shrink-0 items-start gap-2 pt-7 lg:flex">
-          {companions.map((member) => (
-            <div
-              key={member.id}
-              className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] shadow-[0_0_8px_rgba(6,182,212,0.08)] transition-colors group-hover:border-[#06B6D4]/70"
-              title={member.name}
-            >
-              {memberPhotoUrls[member.id] ? (
-                <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <Users className="h-6 w-6 text-[#06B6D4]" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="hidden min-w-0 flex-1 lg:block" />
 
         <div className="flex shrink-0 flex-col items-stretch justify-between gap-3 border-t border-[#1E293B]/70 pt-3 sm:flex-row sm:items-center sm:justify-end sm:border-t-0 sm:pt-0">
           <div className="flex items-center justify-around gap-2 sm:justify-start">
