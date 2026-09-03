@@ -5,6 +5,7 @@ import { soundEngine } from './soundEngine';
 export type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
 export type BgmTarget = { type: 'world' } | { type: 'npc'; id: NpcBgmId } | null;
 interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
+type WorldPlaybackMode = 'normal' | 'preview';
 
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
@@ -215,19 +216,37 @@ function startNpcPlayback(id: NpcBgmId): void {
   if (id === 'npc_bgm_ancient') activeNpcBgm = createAncientBgm();
 }
 
-function startWorldPlayback(): void {
+function startWorldPlayback(mode: WorldPlaybackMode = 'normal'): void {
   stopNpcPlayback();
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
     fadeTimerId = null;
   }
+
+  // React navigation/settings effects can request the same BGM repeatedly.
+  // If it is already active, only resync volume; never restart the score.
+  if (worldAudioEngine.getIsPlaying()) {
+    worldAudioEngine.setMasterVolume(getWorldOutputVolume());
+    return;
+  }
+
   const token = ++worldStartToken;
   worldAudioEngine.setMasterVolume(getWorldOutputVolume());
   void worldAudioEngine.play().then(() => {
-    if (token !== worldStartToken || !bgmEnabled || desiredBgmTarget?.type !== 'world') {
+    // A stale async start must never stop a newer playback request.
+    if (token !== worldStartToken) return;
+
+    if (!bgmEnabled) {
       worldAudioEngine.stop();
       return;
     }
+
+    // Sound Studio preview intentionally runs outside the normal desired target.
+    if (mode === 'normal' && desiredBgmTarget?.type !== 'world') {
+      worldAudioEngine.stop();
+      return;
+    }
+
     worldAudioEngine.setMasterVolume(getWorldOutputVolume());
   });
 }
@@ -267,7 +286,7 @@ export function playWorldBgm(): void {
     stopPlaybackPreservingTarget();
     return;
   }
-  startWorldPlayback();
+  startWorldPlayback('normal');
 }
 
 export function stopWorldBgm(fadeMs = 300): void {
@@ -291,7 +310,7 @@ export function restoreBgmTarget(target: BgmTarget): void {
   desiredBgmTarget = target;
   if (!bgmEnabled || !target) return;
   if (target.type === 'world') {
-    startWorldPlayback();
+    startWorldPlayback('normal');
     return;
   }
   startNpcPlayback(target.id);
@@ -306,7 +325,7 @@ export function stopNpcBgmPreview(): void {
 }
 
 export function playWorldBgmPreview(): void {
-  startWorldPlayback();
+  startWorldPlayback('preview');
 }
 
 export function stopWorldBgmPreview(fadeMs = 0): void {
