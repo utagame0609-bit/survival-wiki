@@ -1,5 +1,4 @@
 import { soundEngine } from './soundEngine';
-import { getBgmChannelSettings } from './bgmSettings';
 
 export type BgmChannelState = { lead: boolean; harmony: boolean; bass: boolean; drums: boolean };
 type NoteEvent = { time: number; duration: number; freq: number; velocity?: number };
@@ -38,7 +37,6 @@ export class BgmSequencer {
 
   constructor() {
     this.composeTrack();
-    this.channels = getBgmChannelSettings();
   }
 
   public getTempo(): number {
@@ -167,7 +165,6 @@ export class BgmSequencer {
 
   private scheduleStep(step: number, time: number) {
     const stepDuration = 60 / (this.tempo * 4);
-    this.channels = getBgmChannelSettings();
 
     if (this.onStepCallback) {
       const timeSec = step * stepDuration;
