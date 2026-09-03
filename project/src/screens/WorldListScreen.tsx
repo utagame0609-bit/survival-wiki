@@ -10,7 +10,7 @@ import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
 import { useWorldListData } from '@/hooks/useWorldListData';
 import type { NavigateFn } from '@/lib/screenNavigation';
 import { saveUserWorldListView } from '@/lib/userLastView';
-import { playConfirmSound, playDeleteSound, playErrorSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
+import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
 export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate: NavigateFn }) {
@@ -150,7 +150,7 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
       {deleteTarget && (
         <WorldDeleteConfirmModal
           world={deleteTarget}
-          onCancel={() => { playModalCloseSound(); setDeleteTarget(null); }}
+          onCancel={() => setDeleteTarget(null)}
           onConfirm={confirmDelete}
         />
       )}
