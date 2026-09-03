@@ -375,3 +375,95 @@
     inset -1px -1px 0 rgba(0,0,0,.28),
     0 3px 0 var(--border-dark);
 }
+
+
+/* SFC palette normalization for the existing WORLD LIST DOM.
+   Keep CURRENT layout/semantics, but map legacy dark-theme utility colors
+   to the adopted AI Studio SFC token palette so contrast stays readable. */
+[data-theme="sfc"] .sfc-world-grid {
+  opacity: 1 !important;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 0) !important;
+  background-size: 12px 12px !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#F8FAFC]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#F1F5F9]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#E2E8F0]"] {
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#94A3B8]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#64748B]"] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#06B6D4]"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#F59E0B]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="text-[#F2A100]"] {
+  color: var(--accent-yellow-hover) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="bg-[#0B1018]"] {
+  background-color: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="bg-[#0F172A]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="bg-[#161F30]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="bg-[#131E35]"] {
+  background-color: var(--surface-1) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-root [class*="border-[#1E293B]"],
+[data-theme="sfc"] .sfc-world-list-root [class*="border-[#334155]"] {
+  border-color: var(--border-main) !important;
+}
+
+/* Explicit action colors follow the adopted AS ABXY palette. */
+[data-theme="sfc"] .sfc-create-world-button,
+[data-theme="sfc"] .sfc-create-world-button:hover {
+  background-color: var(--accent-green) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-world-load,
+[data-theme="sfc"] .sfc-world-load:hover {
+  background-color: var(--accent-blue) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-world-card button[title="ワールド設定を編集"] {
+  background-color: var(--accent-yellow) !important;
+  border-color: var(--border-main) !important;
+  color: #222222 !important;
+}
+
+[data-theme="sfc"] .sfc-world-card button[title="ワールドを削除"] {
+  background-color: var(--accent-red) !important;
+  border-color: var(--border-main) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-new-slot-button:hover {
+  border-color: var(--accent-green) !important;
+  background-color: var(--surface-label) !important;
+  color: var(--accent-green-hover) !important;
+}
+
+/* Keep slot badges readable against the light SFC surfaces. */
+[data-theme="sfc"] .sfc-world-card [class*="bg-[#0B1018]"][class*="text-[#F59E0B]"] {
+  background-color: var(--border-dark) !important;
+  color: #ffffff !important;
+  border-color: var(--border-main) !important;
+}
+
+/* Delete modal keeps the CURRENT structure, with the SFC red warning palette. */
+[data-theme="sfc"] .sfc-world-delete-modal [class*="text-[#EF4444]"] {
+  color: var(--accent-red-hover) !important;
+}
+
+[data-theme="sfc"] .sfc-world-delete-modal [class*="text-[#FCA5A5]"] {
+  color: #8f3038 !important;
+}
