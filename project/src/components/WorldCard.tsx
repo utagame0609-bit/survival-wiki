@@ -36,8 +36,8 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
       <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
       <span className="pointer-events-none absolute -bottom-px -right-px h-2 w-2 border-b-2 border-r-2 border-[#F2A100]" />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:grid lg:grid-cols-[minmax(0,270px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
-        <div className="flex min-w-0 flex-1 items-start gap-3.5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:flex-row lg:items-center lg:gap-3">
+        <div className="flex min-w-0 items-start gap-3.5 lg:w-[270px] lg:shrink-0">
           <div className="relative shrink-0 pt-2">
             <div className="flex h-14 w-14 translate-y-4 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B] sm:translate-y-3 lg:translate-y-5">
               {playerPhotoUrl ? (
@@ -96,7 +96,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
           </div>
         </div>
 
-        <div className="hidden min-w-0 self-stretch items-start gap-2 pt-7 lg:flex">
+        <div className="hidden shrink-0 items-start gap-2 pt-7 lg:flex">
           {companions.map((member) => (
             <div
               key={member.id}
@@ -111,6 +111,8 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
             </div>
           ))}
         </div>
+
+        <div className="hidden min-w-0 flex-1 lg:block" />
 
         <div className="flex shrink-0 flex-col items-stretch justify-between gap-3 border-t border-[#1E293B]/70 pt-3 sm:flex-row sm:items-center sm:justify-end sm:border-t-0 sm:pt-0">
           <div className="flex items-center justify-around gap-2 sm:justify-start">
