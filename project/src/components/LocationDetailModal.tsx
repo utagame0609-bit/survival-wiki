@@ -74,7 +74,7 @@ export function LocationDetailModal({
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="relative w-full max-w-2xl max-h-[90vh] bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="sfc-location-detail-modal relative w-full max-w-2xl max-h-[90vh] bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between px-4 py-3 bg-[#0B1018] border-b border-[#1E293B] shrink-0">
           <div className="min-w-0 flex items-center gap-2">
             <span className="text-[11px] font-mono text-[#F59E0B] font-bold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/30 shrink-0">
