@@ -1063,3 +1063,82 @@
 [data-theme="sfc"] .sfc-world-card > span[class*="border-[#F2A100]"] {
   border-color: var(--accent-yellow) !important;
 }
+
+
+/* Sound Studio SFC paint */
+[data-theme="sfc"] .sfc-sound-studio {
+  background: var(--surface-1) !important;
+  border-color: var(--border-main) !important;
+  color: var(--text-main) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.88),
+    inset -1px -1px 0 rgba(0,0,0,.16),
+    0 6px 16px rgba(0,0,0,.18) !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio [class*="bg-[#0B1018]"],
+[data-theme="sfc"] .sfc-sound-studio [class*="bg-[#0D1424]"],
+[data-theme="sfc"] .sfc-sound-studio [class*="bg-[#161F30]"],
+[data-theme="sfc"] .sfc-sound-studio [class*="bg-[#0F172A]"] {
+  background-color: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio [class*="border-[#1E293B]"],
+[data-theme="sfc"] .sfc-sound-studio [class*="border-[#334155]"],
+[data-theme="sfc"] .sfc-sound-studio [class*="border-[#F59E0B]"] {
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio [class*="text-[#F8FAFC]"],
+[data-theme="sfc"] .sfc-sound-studio [class*="text-[#94A3B8]"] {
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio [class*="text-[#64748B]"] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio [class*="text-[#06B6D4]"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio [class*="text-[#F59E0B]"] {
+  color: #9a741f !important;
+}
+
+[data-theme="sfc"] .sfc-sound-studio button[class*="bg-[#F59E0B]"] {
+  background: var(--accent-yellow) !important;
+  color: #222 !important;
+  border: 2px solid var(--border-main);
+}
+
+/* Settings children use named Tailwind colors; normalize them to the AS palette. */
+[data-theme="sfc"] .sfc-settings-modal [class*="text-cyan-"],
+[data-theme="sfc"] .sfc-settings-modal [class*="text-sky-"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal [class*="text-violet-"] {
+  color: #6a5ca8 !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal [class*="text-emerald-"] {
+  color: var(--accent-green-hover) !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal [class*="text-amber-"] {
+  color: #9a741f !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal [class*="text-slate-"] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal [class*="bg-[#090d16]"],
+[data-theme="sfc"] .sfc-settings-modal [class*="bg-[#0d1627]"] {
+  background: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal [class*="border-slate-"] {
+  border-color: var(--border-main) !important;
+}
