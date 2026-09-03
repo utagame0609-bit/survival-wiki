@@ -184,6 +184,7 @@ export function WikiCompilerHome({
                 onClick={() => onSelectStyle(id)}
                 onMouseEnter={playHoverSound}
                 disabled={generating || resetting}
+                aria-pressed={selected}
                 title={`${meta.title}・保存済み${savedCount}/3`}
                 className={`sfc-compiler-card relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? accent.selected : accent.idle}`}
               >
