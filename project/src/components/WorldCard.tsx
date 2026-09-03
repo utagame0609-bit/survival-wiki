@@ -26,7 +26,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
         minute: '2-digit',
       })
     : 'NO DATA';
-  const companions = world.members.filter((member) => member.name !== world.player).slice(0, 5);
+  const companions = world.members.filter((member) => member.name !== world.player).slice(0, 4);
 
   return (
     <article
@@ -38,8 +38,8 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-3.5">
-          <div className="relative shrink-0 pt-2">
-            <div className="flex h-14 w-14 translate-y-4 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B] sm:translate-y-3">
+          <div className="relative shrink-0 self-center">
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B]">
               {playerPhotoUrl ? (
                 <img src={playerPhotoUrl} alt="" className="h-full w-full object-cover" />
               ) : (
@@ -73,7 +73,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
               </p>
             )}
 
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex items-center gap-2 sm:hidden">
               <div className="flex items-center -space-x-1.5">
                 {companions.map((member) => (
                   <div
@@ -95,6 +95,41 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
             </div>
           </div>
         </div>
+
+        {companions.length > 0 && (
+          <div className="hidden shrink-0 flex-col items-start justify-center px-1 sm:flex">
+            <div className="mb-1.5 flex w-full items-center justify-between gap-3 font-mono text-[9px] tracking-wider text-[#64748B]">
+              <span>PARTY</span>
+              <span className="text-[#06B6D4]">{companions.length + 1}/5</span>
+            </div>
+            <div className="flex items-center -space-x-1.5">
+              <div
+                className="relative z-10 flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border-2 border-[#F59E0B] bg-[#0B1018] shadow-[0_0_8px_rgba(245,158,11,0.2)]"
+                title={world.player?.trim() || '開拓者'}
+              >
+                {playerPhotoUrl ? (
+                  <img src={playerPhotoUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-4 w-4 text-[#F59E0B]" />
+                )}
+              </div>
+              {companions.map((member, index) => (
+                <div
+                  key={member.id}
+                  className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#161F30] shadow-sm transition-colors group-hover:border-[#06B6D4]/70"
+                  style={{ zIndex: 9 - index }}
+                  title={member.name}
+                >
+                  {memberPhotoUrls[member.id] ? (
+                    <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <Users className="h-4 w-4 text-[#06B6D4]" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex shrink-0 flex-col items-stretch justify-between gap-3 border-t border-[#1E293B]/70 pt-3 sm:flex-row sm:items-center sm:justify-end sm:border-t-0 sm:pt-0">
           <div className="flex items-center justify-around gap-2 sm:justify-start">
