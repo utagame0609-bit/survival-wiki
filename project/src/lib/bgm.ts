@@ -1,23 +1,33 @@
-import { BGM_OUTPUT_GAIN, NPC_BGM_OUTPUT_GAIN } from './audioMaster';
-import { worldAudioEngine } from './bgmAs/worldBgmEngineAs';
-import { soundEngine } from './soundEngine';
-
 export type NpcBgmId = 'npc_bgm_wikipedia' | 'npc_bgm_scp' | 'npc_bgm_ancient';
 export type BgmTarget = { type: 'world' } | { type: 'npc'; id: NpcBgmId } | null;
-interface ActiveNpcBgm { id: NpcBgmId; intervalId: number; stop: () => void; }
-type WorldPlaybackMode = 'normal' | 'preview';
+
+type BgmTrackId = 'world' | NpcBgmId;
 
 const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
-// AS原本の内部ミックスは変更せず、最終出力だけ本番BGM MASTERへ合わせる。
-// 4曲を揃えた後、実機比較でこの曲別係数のみ微調整する。
-const WORLD_BGM_OUTPUT_GAIN = 0.8;
+
+const BGM_TRACK_URLS: Record<BgmTrackId, string> = {
+  world: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%83%88%E3%83%83%E3%83%97%E3%83%9A%E3%83%BC%E3%82%B8_bgm_retro_jprg_88bpm_1loop.ogg',
+  npc_bgm_wikipedia: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%82%A8%E3%83%AB%E3%83%8A%E3%83%B3_archive_study_bgm_30s_loop.ogg',
+  npc_bgm_scp: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E7%A0%94%E7%A9%B6%E5%93%A1%E3%82%A2%E3%83%BC%E3%82%AF_Anomaly_Investigation_64BPM_30s_1Loop_SpeakerOpt.ogg',
+  npc_bgm_ancient: 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-bgm/%E3%83%9E%E3%83%80%E3%83%A0%E3%83%AD%E3%82%BC_WastelandTavernSwing_1Loop_21s_Optimized.ogg',
+};
+
+// 完成ミックス自体は変更せず、必要なら4曲を実機比較した後に最終出力だけ微調整する。
+const BGM_TRACK_OUTPUT_GAIN: Record<BgmTrackId, number> = {
+  world: 1,
+  npc_bgm_wikipedia: 1,
+  npc_bgm_scp: 1,
+  npc_bgm_ancient: 1,
+};
+
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
-let fadeTimerId: number | null = null;
-let activeNpcBgm: ActiveNpcBgm | null = null;
 let desiredBgmTarget: BgmTarget = null;
 let bgmEnabled = true;
-let worldStartToken = 0;
+let audioElement: HTMLAudioElement | null = null;
+let activeTrackId: BgmTrackId | null = null;
+let fadeTimerId: number | null = null;
+let playRequestToken = 0;
 const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
 
 if (typeof window !== 'undefined') {
@@ -25,14 +35,44 @@ if (typeof window !== 'undefined') {
   if (storedEnabled !== null) bgmEnabled = storedEnabled === 'true';
 }
 
-function getWorldOutputVolume(ratio = 1): number {
-  return masterBgmVolume * WORLD_BGM_OUTPUT_GAIN * ratio;
+function targetToTrackId(target: Exclude<BgmTarget, null>): BgmTrackId {
+  return target.type === 'world' ? 'world' : target.id;
+}
+
+function trackIdToTarget(id: BgmTrackId): Exclude<BgmTarget, null> {
+  return id === 'world' ? { type: 'world' } : { type: 'npc', id };
+}
+
+function getOutputVolume(id: BgmTrackId, ratio = 1): number {
+  return Math.max(0, Math.min(1, masterBgmVolume * BGM_TRACK_OUTPUT_GAIN[id] * ratio));
+}
+
+function getAudioElement(): HTMLAudioElement | null {
+  if (typeof window === 'undefined') return null;
+  if (audioElement) return audioElement;
+
+  const audio = new Audio();
+  audio.preload = 'auto';
+  audio.loop = true;
+  audio.volume = 0;
+  audio.addEventListener('error', () => {
+    const mediaError = audio.error;
+    console.error('BGM playback error:', mediaError?.message ?? mediaError?.code ?? 'unknown media error');
+  });
+  audioElement = audio;
+  return audioElement;
+}
+
+function clearFadeTimer(): void {
+  if (fadeTimerId === null || typeof window === 'undefined') return;
+  window.clearTimeout(fadeTimerId);
+  fadeTimerId = null;
 }
 
 function syncVolume(): void {
-  // 旧NPCはこの段階では既存配管を維持。新AS NPC移植時に曲別出力へ置換する。
-  soundEngine.setMasterVolume(masterBgmVolume * BGM_OUTPUT_GAIN);
-  worldAudioEngine.setMasterVolume(getWorldOutputVolume());
+  const audio = audioElement;
+  if (!audio || !activeTrackId) return;
+  audio.volume = getOutputVolume(activeTrackId);
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -45,221 +85,93 @@ export function getMasterBgmVolume(): number {
   return masterBgmVolume;
 }
 
-function getNpcSourceGain(): number {
-  return NPC_BGM_OUTPUT_GAIN / BGM_OUTPUT_GAIN;
-}
-
-function playNpcTone(freq: number, time: number, duration: number, peak: number, type: OscillatorType, reverbSend = 0.25): void {
-  const c = soundEngine.getContext();
-  const oscillator = c.createOscillator();
-  const gain = c.createGain();
-  oscillator.type = type;
-  oscillator.frequency.setValueAtTime(freq, time);
-  gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.linearRampToValueAtTime(peak * getNpcSourceGain(), time + 0.004);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
-  oscillator.connect(gain);
-  soundEngine.routeSound(gain, reverbSend, 0);
-  oscillator.start(time);
-  oscillator.stop(time + duration + 0.01);
-}
-
-function playNpcHiss(time: number, duration: number, peak: number, filterType: BiquadFilterType, frequency: number, reverbSend = 0.15): void {
-  const c = soundEngine.getContext();
-  const bufferSize = Math.max(1, Math.floor(c.sampleRate * duration));
-  const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
-  const source = c.createBufferSource();
-  const filter = c.createBiquadFilter();
-  const gain = c.createGain();
-  source.buffer = buffer;
-  filter.type = filterType;
-  filter.frequency.value = frequency;
-  gain.gain.setValueAtTime(peak * getNpcSourceGain(), time);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
-  source.connect(filter);
-  filter.connect(gain);
-  soundEngine.routeSound(gain, reverbSend, 0);
-  source.start(time);
-  source.stop(time + duration);
-}
-
-function createWikipediaBgm(): ActiveNpcBgm {
-  let step = 0;
-  const bpm = 112;
-  const stepTime = 60 / bpm / 2;
-  const melodyNotes = [880, 1046.5, 1318.51, 1046.5, 830.61, 987.77, 1244.51, 987.77, 880, 1174.66, 1396.91, 1174.66, 1046.5, 987.77, 880, 830.61];
-  const bassNotes = [220, 0, 220, 0, 207.65, 0, 207.65, 0, 293.66, 0, 293.66, 0, 220, 0, 164.81, 207.65];
-  const interval = window.setInterval(() => {
-    const c = soundEngine.getContext();
-    const t = c.currentTime;
-    const m = melodyNotes[step % 16];
-    const b = bassNotes[step % 16];
-    playNpcTone(m, t, 0.12, 0.08, 'square', 0.25);
-    if (b) playNpcTone(b, t, 0.18, 0.05, 'triangle', 0.15);
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_wikipedia', intervalId: interval, stop: () => window.clearInterval(interval) };
-}
-
-function createScpBgm(): ActiveNpcBgm {
-  const bpm = 96;
-  const stepTime = 60 / bpm / 2;
-  const c = soundEngine.getContext();
-  const droneOsc = c.createOscillator();
-  const droneGain = c.createGain();
-  const droneFilter = c.createBiquadFilter();
-  droneOsc.type = 'sawtooth';
-  droneOsc.frequency.value = 55;
-  droneFilter.type = 'lowpass';
-  droneFilter.frequency.value = 420;
-  droneGain.gain.value = 0.04 * getNpcSourceGain();
-  droneOsc.connect(droneFilter);
-  droneFilter.connect(droneGain);
-  soundEngine.routeSound(droneGain, 0.25, 0);
-  droneOsc.start();
-  let step = 0;
-  const pulseNotes = [110, 110, 123.47, 110, 146.83, 123.47, 110, 98];
-  const interval = window.setInterval(() => {
-    const ctx = soundEngine.getContext();
-    const t = ctx.currentTime;
-    playNpcTone(pulseNotes[step % pulseNotes.length], t, 0.16, 0.05, 'square', 0.2);
-    if (step % 4 === 0) playNpcHiss(t, 0.09, 0.02, 'bandpass', 2400, 0.15);
-    step += 1;
-  }, stepTime * 1000);
-  return {
-    id: 'npc_bgm_scp', intervalId: interval,
-    stop: () => {
-      window.clearInterval(interval);
-      const ctx = soundEngine.getContext();
-      droneGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
-      window.setTimeout(() => { try { droneOsc.stop(); droneOsc.disconnect(); } catch {} }, 350);
-    },
-  };
-}
-
-function createAncientBgm(): ActiveNpcBgm {
-  let step = 0;
-  const bpm = 78;
-  const stepTime = 60 / bpm / 2;
-  const luteNotes = [329.63, 0, 392, 493.88, 587.33, 0, 523.25, 493.88, 392, 0, 329.63, 0, 293.66, 311.13, 329.63, 0];
-  const interval = window.setInterval(() => {
-    const c = soundEngine.getContext();
-    const t = c.currentTime;
-    const note = luteNotes[step % 16];
-    if (note) {
-      playNpcTone(note, t, 0.28, 0.1, 'triangle', 0.25);
-      playNpcTone(note * 0.5, t, 0.32, 0.06, 'sine', 0.2);
-    }
-    if (step % 8 === 0) {
-      playNpcTone(1046.5, t, 0.8, 0.05, 'sine', 0.2);
-      playNpcTone(1567.98, t, 0.6, 0.03, 'triangle', 0.2);
-      playNpcTone(1661.22, t, 0.5, 0.02, 'sine', 0.2);
-      playNpcHiss(t, 0.6, 0.02, 'bandpass', 850, 0.15);
-    }
-    step = (step + 1) % 16;
-  }, stepTime * 1000);
-  return { id: 'npc_bgm_ancient', intervalId: interval, stop: () => window.clearInterval(interval) };
-}
-
-function stopNpcPlayback(): void {
-  if (!activeNpcBgm) return;
-  activeNpcBgm.stop();
-  activeNpcBgm = null;
-}
-
-function stopWorldPlayback(fadeMs = 300): void {
-  worldStartToken += 1;
-  if (fadeTimerId !== null) {
-    window.clearTimeout(fadeTimerId);
-    fadeTimerId = null;
+function finishStop(audio: HTMLAudioElement): void {
+  audio.pause();
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // Metadata may not be loaded yet. Pausing is sufficient in that case.
   }
-  if (!worldAudioEngine.getIsPlaying()) {
-    worldAudioEngine.stop();
+  audio.volume = 0;
+  activeTrackId = null;
+}
+
+function stopCurrentPlayback(fadeMs = 0): void {
+  playRequestToken += 1;
+  clearFadeTimer();
+
+  const audio = audioElement;
+  const trackId = activeTrackId;
+  if (!audio || !trackId) return;
+
+  if (fadeMs <= 0 || typeof window === 'undefined' || audio.paused) {
+    finishStop(audio);
     return;
   }
 
+  const token = playRequestToken;
+  const startVolume = audio.volume;
   const steps = Math.max(1, Math.ceil(fadeMs / 30));
   const stepMs = fadeMs / steps;
   let step = 0;
 
   const fade = () => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
     step += 1;
-    const ratio = Math.max(0, 1 - step / steps);
-    worldAudioEngine.setMasterVolume(getWorldOutputVolume(ratio));
+    audio.volume = startVolume * Math.max(0, 1 - step / steps);
     if (step >= steps) {
-      worldAudioEngine.stop();
-      worldAudioEngine.setMasterVolume(0);
+      finishStop(audio);
       fadeTimerId = null;
       return;
     }
     fadeTimerId = window.setTimeout(fade, stepMs);
   };
 
-  if (fadeMs <= 0) {
-    worldAudioEngine.stop();
-    worldAudioEngine.setMasterVolume(0);
-    return;
-  }
   fadeTimerId = window.setTimeout(fade, stepMs);
 }
 
-function startNpcPlayback(id: NpcBgmId): void {
-  stopWorldPlayback(0);
-  soundEngine.init();
-  soundEngine.setMasterVolume(masterBgmVolume * BGM_OUTPUT_GAIN);
-  if (activeNpcBgm?.id === id) return;
-  stopNpcPlayback();
-  if (id === 'npc_bgm_wikipedia') activeNpcBgm = createWikipediaBgm();
-  if (id === 'npc_bgm_scp') activeNpcBgm = createScpBgm();
-  if (id === 'npc_bgm_ancient') activeNpcBgm = createAncientBgm();
-}
+function startTrack(trackId: BgmTrackId): void {
+  const audio = getAudioElement();
+  if (!audio) return;
 
-function startWorldPlayback(mode: WorldPlaybackMode = 'normal'): void {
-  stopNpcPlayback();
-  if (fadeTimerId !== null) {
-    window.clearTimeout(fadeTimerId);
-    fadeTimerId = null;
-  }
+  clearFadeTimer();
 
-  // React navigation/settings effects can request the same BGM repeatedly.
-  // If it is already active, only resync volume; never restart the score.
-  if (worldAudioEngine.getIsPlaying()) {
-    worldAudioEngine.setMasterVolume(getWorldOutputVolume());
+  if (activeTrackId === trackId && !audio.paused) {
+    audio.volume = getOutputVolume(trackId);
     return;
   }
 
-  const token = ++worldStartToken;
-  worldAudioEngine.setMasterVolume(getWorldOutputVolume());
-  void worldAudioEngine.play().then(() => {
-    // A stale async start must never stop a newer playback request.
-    if (token !== worldStartToken) return;
+  playRequestToken += 1;
+  const token = playRequestToken;
 
-    if (!bgmEnabled) {
-      worldAudioEngine.stop();
-      return;
-    }
+  audio.pause();
+  activeTrackId = trackId;
+  audio.loop = true;
+  audio.src = BGM_TRACK_URLS[trackId];
+  audio.volume = getOutputVolume(trackId);
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // The new source may not have metadata yet.
+  }
 
-    // Sound Studio preview intentionally runs outside the normal desired target.
-    if (mode === 'normal' && desiredBgmTarget?.type !== 'world') {
-      worldAudioEngine.stop();
-      return;
-    }
+  const playPromise = audio.play();
+  if (!playPromise) return;
 
-    worldAudioEngine.setMasterVolume(getWorldOutputVolume());
+  void playPromise.catch((error) => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    console.warn(`BGM could not start (${trackId}):`, error);
+    activeTrackId = null;
   });
 }
 
 function stopPlaybackPreservingTarget(): void {
-  stopNpcPlayback();
-  stopWorldPlayback(0);
+  stopCurrentPlayback(0);
 }
 
 export function getActiveBgmTarget(): BgmTarget {
-  if (activeNpcBgm) return { type: 'npc', id: activeNpcBgm.id };
-  if (worldAudioEngine.getIsPlaying()) return { type: 'world' };
-  return null;
+  if (!activeTrackId || audioElement?.paused) return null;
+  return trackIdToTarget(activeTrackId);
 }
 
 export function getDesiredBgmTarget(): BgmTarget {
@@ -272,12 +184,12 @@ export function playNpcBgm(id: NpcBgmId): void {
     stopPlaybackPreservingTarget();
     return;
   }
-  startNpcPlayback(id);
+  startTrack(id);
 }
 
 export function stopNpcBgm(): void {
   if (desiredBgmTarget?.type === 'npc') desiredBgmTarget = null;
-  stopNpcPlayback();
+  if (activeTrackId && activeTrackId !== 'world') stopCurrentPlayback(0);
 }
 
 export function playWorldBgm(): void {
@@ -286,18 +198,17 @@ export function playWorldBgm(): void {
     stopPlaybackPreservingTarget();
     return;
   }
-  startWorldPlayback('normal');
+  startTrack('world');
 }
 
 export function stopWorldBgm(fadeMs = 300): void {
   if (desiredBgmTarget?.type === 'world') desiredBgmTarget = null;
-  stopWorldPlayback(fadeMs);
+  if (activeTrackId === 'world') stopCurrentPlayback(fadeMs);
 }
 
 export function stopAllBgm(fadeMs = 0): void {
   desiredBgmTarget = null;
-  stopNpcPlayback();
-  stopWorldPlayback(fadeMs);
+  stopCurrentPlayback(fadeMs);
 }
 
 export function suspendBgmForPreview(): BgmTarget {
@@ -309,27 +220,23 @@ export function suspendBgmForPreview(): BgmTarget {
 export function restoreBgmTarget(target: BgmTarget): void {
   desiredBgmTarget = target;
   if (!bgmEnabled || !target) return;
-  if (target.type === 'world') {
-    startWorldPlayback('normal');
-    return;
-  }
-  startNpcPlayback(target.id);
+  startTrack(targetToTrackId(target));
 }
 
 export function playNpcBgmPreview(id: NpcBgmId): void {
-  startNpcPlayback(id);
+  startTrack(id);
 }
 
 export function stopNpcBgmPreview(): void {
-  stopNpcPlayback();
+  if (activeTrackId && activeTrackId !== 'world') stopCurrentPlayback(0);
 }
 
 export function playWorldBgmPreview(): void {
-  startWorldPlayback('preview');
+  startTrack('world');
 }
 
 export function stopWorldBgmPreview(fadeMs = 0): void {
-  stopWorldPlayback(fadeMs);
+  if (activeTrackId === 'world') stopCurrentPlayback(fadeMs);
 }
 
 export function isBgmEnabled(): boolean {
@@ -360,10 +267,10 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 }
 
 export function isWorldBgmPlaying(): boolean {
-  return worldAudioEngine.getIsPlaying();
+  return activeTrackId === 'world' && Boolean(audioElement && !audioElement.paused);
 }
 
 export function getWorldBgmDurationSec(): number {
-  const song = worldAudioEngine.getSong();
-  return song.totalBars * song.stepsPerBar * (60 / worldAudioEngine.getBpm() / 4);
+  if (activeTrackId !== 'world' || !audioElement || !Number.isFinite(audioElement.duration)) return 0;
+  return audioElement.duration;
 }
