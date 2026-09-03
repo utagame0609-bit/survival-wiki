@@ -1,0 +1,6 @@
+{
+  "name": "Survival Wiki - 16-bit SFC Theme",
+  "description": "16-bit retro console (SFC style) light design theme system and UI components for Survival Wiki",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
