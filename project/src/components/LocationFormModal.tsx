@@ -35,7 +35,7 @@ export function LocationFormModal({ world, mode, editingLocation, saving, onSave
 
   return createPortal((
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md"
+      className="sfc-modal-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) closeModal();
       }}
