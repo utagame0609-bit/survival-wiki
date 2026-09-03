@@ -40,7 +40,7 @@ export function LocationFormModal({ world, mode, editingLocation, saving, onSave
         if (event.target === event.currentTarget) closeModal();
       }}
     >
-      <div className="relative w-full max-w-lg bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden my-auto motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="sfc-location-form-modal relative w-full max-w-lg bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden my-auto motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between px-4 py-3.5 bg-[#0B1018] border-b border-[#1E293B]">
           <div className="flex items-center gap-2 min-w-0">
             <Sparkles className="w-4 h-4 text-[#F59E0B] shrink-0" />
