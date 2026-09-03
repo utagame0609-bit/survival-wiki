@@ -21,7 +21,7 @@ export function WorldTabs({ activeTab, onTabChange }: WorldTabsProps) {
   };
 
   return (
-    <div className="sfc-world-tabs hidden md:flex items-center gap-2 mb-6 border-b border-[#1E293B] pb-3">
+    <div className="hidden md:flex items-center gap-2 mb-6 border-b border-[#1E293B] pb-3">
       {tabs.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;

@@ -1,11 +1,10 @@
-import { ChevronDown, ChevronUp, Palette, Sliders, Sparkles, Smartphone, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Sliders, Sparkles, Smartphone, X } from 'lucide-react';
+import { useState } from 'react';
 import { SoundStudioPanel } from '@/components/settings/SoundStudioPanel';
 import { playConfirmSound, playHoverSound, playModalCloseSound } from '@/lib/sound';
 import type { BeforeInstallPromptEvent } from '@/lib/pwaInstall';
 import { BasicSoundSettings } from '@/components/settings/BasicSoundSettings';
 import { SettingsAppActions } from '@/components/settings/SettingsAppActions';
-import { getAppTheme, setAppTheme, subscribeAppTheme, type AppTheme } from '@/lib/theme';
 
 type SettingsModalProps = {
   onClose: () => void;
@@ -16,15 +15,6 @@ type SettingsModalProps = {
 export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: SettingsModalProps) {
   const [soundStudioOpen, setSoundStudioOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [theme, setTheme] = useState<AppTheme>(() => getAppTheme());
-
-  useEffect(() => subscribeAppTheme(setTheme), []);
-
-  const handleThemeChange = (nextTheme: AppTheme) => {
-    if (nextTheme === theme) return;
-    playConfirmSound();
-    setAppTheme(nextTheme);
-  };
 
   const handleClose = () => {
     playModalCloseSound();
@@ -42,10 +32,10 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   }
 
   return (
-    <div className="sfc-modal-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-2 font-mono backdrop-blur-md sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-2 font-mono backdrop-blur-md sm:p-4">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={handleClose} />
 
-      <div className="sfc-settings-modal hud-bracket relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] text-slate-100 shadow-2xl">
+      <div className="hud-bracket relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] text-slate-100 shadow-2xl">
         <div className="flex items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3 sm:py-3.5">
           <div className="flex min-w-0 items-center gap-2">
             <Sliders className="h-4 w-4 shrink-0 text-[#F59E0B]" />
@@ -67,53 +57,6 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
         <div
           className={`${advancedOpen ? 'max-h-[calc(100dvh-8rem)] overflow-y-auto' : 'overflow-visible'} space-y-3 p-3 sm:max-h-[80vh] sm:space-y-5 sm:overflow-y-auto sm:p-5`}
         >
-          <section className="space-y-3 rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3 sm:p-3.5">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#F59E0B]">
-              <Palette className="h-3.5 w-3.5" />
-              <span>外装テーマ切り替え</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleThemeChange('current')}
-                onMouseEnter={playHoverSound}
-                aria-pressed={theme === 'current'}
-                className={`rounded-lg border-2 p-3 text-left transition-all ${
-                  theme === 'current'
-                    ? 'border-[#F59E0B]/80 bg-[#161F30] shadow-[0_0_12px_rgba(245,158,11,0.14)]'
-                    : 'border-[#334155] bg-[#0B1018] opacity-70 hover:opacity-100'
-                }`}
-              >
-                <div className="text-xs font-bold text-[#F8FAFC]">CURRENT</div>
-                <div className="mt-1 text-[10px] leading-relaxed text-[#64748B]">
-                  現在のレトロ端末風ダーク外装
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleThemeChange('sfc')}
-                onMouseEnter={playHoverSound}
-                aria-pressed={theme === 'sfc'}
-                className={`rounded-lg border-2 p-3 text-left transition-all ${
-                  theme === 'sfc'
-                    ? 'border-[#06B6D4]/80 bg-[#0E2030] shadow-[0_0_12px_rgba(6,182,212,0.16)]'
-                    : 'border-[#334155] bg-[#0B1018] opacity-70 hover:opacity-100'
-                }`}
-              >
-                <div className="text-xs font-bold text-[#F8FAFC]">SFC 16-BIT LIGHT</div>
-                <div className="mt-1 text-[10px] leading-relaxed text-[#64748B]">
-                  AS採用候補のライトグレー＋ABXYカラー外装
-                </div>
-              </button>
-            </div>
-
-            <p className="text-[10px] leading-relaxed text-[#64748B]">
-              現段階はテーマ切替基盤のみ有効です。SFC外装本体は次工程でAS原本から移植します。
-            </p>
-          </section>
-
           <section className="space-y-2.5 rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3 sm:space-y-3.5 sm:p-3.5">
             <div className="text-xs font-bold text-[#F59E0B]">16-bit 音響システム設定</div>
             <BasicSoundSettings />

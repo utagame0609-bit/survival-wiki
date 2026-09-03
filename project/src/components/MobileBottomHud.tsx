@@ -44,7 +44,7 @@ export function MobileBottomHud({ activeTab, onTabChange, onBack }: MobileBottom
 
   return (
     <nav
-      className="sfc-mobile-hud md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0B1018]/95 backdrop-blur-lg border-t border-[#1E293B] pb-[env(safe-area-inset-bottom,2px)] pt-0.5 px-1.5 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.6)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0B1018]/95 backdrop-blur-lg border-t border-[#1E293B] pb-[env(safe-area-inset-bottom,2px)] pt-0.5 px-1.5 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.6)]"
       aria-label="モバイル下部HUDナビゲーション"
     >
       <div className="mx-auto flex h-12 w-full max-w-md items-center gap-0.5">

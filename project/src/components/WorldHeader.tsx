@@ -62,7 +62,7 @@ export function WorldHeader({ world, playerPhotoUrl }: WorldHeaderProps) {
   const companions = world.members.filter((member) => member.name !== world.player);
 
   return (
-    <section className="sfc-world-header hud-bracket relative mb-3 w-full overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/80 p-2.5 sm:mb-4 sm:p-4">
+    <section className="hud-bracket relative mb-3 w-full overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/80 p-2.5 sm:mb-4 sm:p-4">
       <div className="flex flex-col justify-between gap-2.5 sm:gap-4 md:flex-row md:items-center">
         <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
           <div className="relative shrink-0">

@@ -93,12 +93,12 @@ export function SoundStudioPanel({ onBack }: { onBack: () => void }) {
 
   return (
     <div
-      className="sfc-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="sfc-sound-studio hud-scanlines relative my-auto flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border-2 border-[#F59E0B] bg-[#0F172A] shadow-2xl">
+      <div className="hud-scanlines relative my-auto flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border-2 border-[#F59E0B] bg-[#0F172A] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3.5">
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#F59E0B] bg-[#161F30]">

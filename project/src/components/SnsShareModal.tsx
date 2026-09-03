@@ -69,12 +69,12 @@ export function SnsShareModal({ world, location, onClose }: SnsShareModalProps) 
 
   return (
     <div
-      className="sfc-modal-backdrop fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-3 backdrop-blur-md sm:p-4"
+      className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-3 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="sfc-sns-modal hud-bracket relative my-auto w-full max-w-lg overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
+      <div className="hud-bracket relative my-auto w-full max-w-lg overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl">
         <div className="flex items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <Share2 className="h-4 w-4 shrink-0 text-[#06B6D4]" />

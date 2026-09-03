@@ -78,7 +78,7 @@ export function TimelineRecordsView({
   const hasActiveFilter = Boolean(searchQuery.trim() || selectedYear || selectedMonth);
 
   return (
-    <div className="sfc-records-view mx-auto w-full max-w-4xl pb-36 md:pb-6">
+    <div className="mx-auto w-full max-w-4xl pb-36 md:pb-6">
       <TimelineRecordsToolbar
         searchQuery={searchQuery}
         sortOrder={sortOrder}
@@ -142,7 +142,7 @@ export function TimelineRecordsView({
                         storagePath={dayBackgroundPhoto}
                         alt=""
                         aria-hidden="true"
-                        className="h-full w-full object-cover object-center"
+                        className="h-full w-full object-cover object-center filter contrast-125"
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-[#0B1018] via-[#0B1018]/90 to-transparent" />
                     </div>

@@ -117,7 +117,7 @@ export function WorldScreen({
   };
 
   return (
-    <div className="sfc-world-screen relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden pb-14 md:pb-0">
+    <div className="relative min-h-screen bg-[#0b1018] text-white font-sans flex flex-col select-none overflow-x-hidden pb-14 md:pb-0">
       <div className="scanline-overlay" />
       <AppHeader title={world?.name || worldName} onBack={handleWorldBack} hideMobileActions />
 

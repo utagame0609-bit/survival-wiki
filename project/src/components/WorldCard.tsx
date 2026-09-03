@@ -30,7 +30,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
   return (
     <article
-      className="sfc-world-card group relative rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-md transition-all duration-200 hover:border-[#F59E0B]/60 hover:bg-[#131E35]"
+      className="group relative rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-md transition-all duration-200 hover:border-[#F59E0B]/60 hover:bg-[#131E35]"
       onMouseEnter={playHoverSound}
     >
       <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
@@ -46,7 +46,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
                 <User className="h-6 w-6 text-[#F59E0B]" />
               )}
             </div>
-            <span className="sfc-slot-badge absolute -left-2 -top-2 rounded border border-[#F59E0B] bg-[#0B1018] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#F59E0B]">
+            <span className="absolute -left-2 -top-2 rounded border border-[#F59E0B] bg-[#0B1018] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#F59E0B]">
               SLOT {slotLabel}
             </span>
           </div>
@@ -127,7 +127,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
               type="button"
               onClick={onOpen}
               onMouseEnter={playHoverSound}
-              className="sfc-world-load flex flex-1 items-center justify-center gap-1.5 rounded bg-[#F59E0B] px-4 py-2 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_10px_rgba(245,158,11,0.25)] transition-all hover:bg-[#D97706] active:scale-95 sm:flex-initial"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded bg-[#F59E0B] px-4 py-2 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_10px_rgba(245,158,11,0.25)] transition-all hover:bg-[#D97706] active:scale-95 sm:flex-initial"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
               <span>LOAD</span>
@@ -149,7 +149,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
 function Stat({ label, value, tone }: { label: string; value: number; tone: 'amber' | 'cyan' }) {
   return (
-    <div className={`sfc-stat sfc-stat-${tone} flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial`}>
+    <div className="flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial">
       <div className="font-mono text-[9px] text-[#64748B]">{label}</div>
       <div className={`font-mono text-sm font-bold ${tone === 'amber' ? 'text-[#F59E0B]' : 'text-[#06B6D4]'}`}>
         {value}

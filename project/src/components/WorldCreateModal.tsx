@@ -225,7 +225,7 @@ export function WorldCreateModal({
 
   return (
     <div
-      className="sfc-modal-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/80 p-3 sm:p-4 backdrop-blur-sm font-sans"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/80 p-3 sm:p-4 backdrop-blur-sm font-sans"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !saving) {
           playModalCloseSound();

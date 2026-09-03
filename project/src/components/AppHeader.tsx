@@ -37,7 +37,7 @@ export function AppHeader({
   const displayTitle = title.replace(/^UTAPEDIA \/\/\s*/, '');
 
   return (
-    <header className="sfc-app-header sticky top-0 z-40 w-full border-b border-[#1E293B] bg-[#0B1018]/95 backdrop-blur-md select-none">
+    <header className="sticky top-0 z-40 w-full border-b border-[#1E293B] bg-[#0B1018]/95 backdrop-blur-md select-none">
       <div className="mx-auto flex h-[52px] sm:h-14 w-full max-w-6xl items-center justify-between px-3 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           {onBack && (

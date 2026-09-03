@@ -26,7 +26,7 @@ export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDel
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-world-title"
-        className="sfc-world-delete-modal w-full max-w-sm rounded-lg border border-[#EF4444]/60 bg-[#2A1218] p-4 shadow-[0_0_24px_rgba(239,68,68,0.2)]"
+        className="w-full max-w-sm rounded-lg border border-[#EF4444]/60 bg-[#2A1218] p-4 shadow-[0_0_24px_rgba(239,68,68,0.2)]"
       >
         <div className="flex items-start gap-2 text-xs font-game font-bold text-[#EF4444]">
           <Trash2 className="mt-0.5 h-4 w-4 shrink-0" />
@@ -50,7 +50,7 @@ export function WorldDeleteConfirmModal({ world, onCancel, onConfirm }: WorldDel
             type="button"
             onClick={onConfirm}
             onMouseEnter={playHoverSound}
-            className="sfc-delete-confirm rounded bg-[#EF4444] px-3 py-1.5 text-xs font-game font-bold text-white transition-colors hover:bg-[#DC2626] cursor-pointer"
+            className="rounded bg-[#EF4444] px-3 py-1.5 text-xs font-game font-bold text-white transition-colors hover:bg-[#DC2626] cursor-pointer"
           >
             削除を実行
           </button>

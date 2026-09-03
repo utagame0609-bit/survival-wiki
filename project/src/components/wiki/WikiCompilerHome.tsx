@@ -139,8 +139,8 @@ export function WikiCompilerHome({
   const hasScopeRecords = locationCount > 0;
 
   return (
-    <div className="sfc-wiki-compiler mx-auto w-full max-w-4xl space-y-4 pb-4 sm:space-y-6">
-      <section className="sfc-wiki-header-panel hud-bracket-cyan relative overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/80 p-4 sm:p-5">
+    <div className="mx-auto w-full max-w-4xl space-y-4 pb-4 sm:space-y-6">
+      <section className="hud-bracket-cyan relative overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/80 p-4 sm:p-5">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div className="min-w-0">
             <div className="game-ui-font flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-[#06B6D4] sm:text-[11px]">
@@ -184,9 +184,8 @@ export function WikiCompilerHome({
                 onClick={() => onSelectStyle(id)}
                 onMouseEnter={playHoverSound}
                 disabled={generating || resetting}
-                aria-pressed={selected}
                 title={`${meta.title}・保存済み${savedCount}/3`}
-                className={`sfc-compiler-card relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? accent.selected : accent.idle}`}
+                className={`relative flex min-w-0 flex-col items-center rounded-xl border-2 p-2.5 text-center transition-all duration-200 sm:p-4 ${selected ? accent.selected : accent.idle}`}
               >
                 <div className="absolute right-1.5 top-1.5 z-10 sm:right-2 sm:top-2">
                   {savedCount > 0 ? (
@@ -214,7 +213,7 @@ export function WikiCompilerHome({
       </section>
 
       {style && narrator && selectedStyleMeta && (
-        <section className="sfc-wiki-header-panel hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
+        <section className="hud-bracket scroll-mt-20 space-y-4 rounded-xl border border-[#1E293B] bg-[#0F172A] p-4 sm:p-5">
           <div className="flex items-center gap-3.5 sm:items-start">
             <PixelNarrator style={style} />
             <div className="min-w-0 flex-1">

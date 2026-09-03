@@ -35,12 +35,12 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
 
   return createPortal((
     <div
-      className="sfc-modal-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="sfc-chest-modal relative my-auto flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="relative my-auto flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-2xl motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex shrink-0 items-center justify-between border-b border-[#1E293B] bg-[#0B1018] px-4 py-3.5">
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#F59E0B]/50 bg-[#161F30]">

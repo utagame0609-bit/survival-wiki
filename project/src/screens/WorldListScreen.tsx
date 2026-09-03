@@ -56,12 +56,12 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
   };
 
   return (
-    <div className="sfc-world-list-root relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
-      <div className="sfc-world-grid pointer-events-none fixed inset-0 opacity-30 [background-image:radial-gradient(rgba(51,65,85,0.25)_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div className="relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
+      <div className="pointer-events-none fixed inset-0 opacity-30 [background-image:radial-gradient(rgba(51,65,85,0.25)_1px,transparent_1px)] [background-size:16px_16px]" />
       <AppHeader title="WORLD SELECT" />
 
-      <main className="sfc-world-list-main relative z-10 mx-auto w-full max-w-4xl px-4 py-6 sm:py-8">
-        <div className="sfc-world-list-heading mb-6 flex flex-col gap-3 border-b border-[#1E293B] pb-4 text-center sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:text-left">
+      <main className="relative z-10 mx-auto w-full max-w-4xl px-4 py-6 sm:py-8">
+        <div className="mb-6 flex flex-col gap-3 border-b border-[#1E293B] pb-4 text-center sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:text-left">
           <div>
             <div className="flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-[#06B6D4] sm:justify-start">
               <Database className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
             type="button"
             onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
             onMouseEnter={playHoverSound}
-            className="sfc-create-world-button inline-flex items-center justify-center gap-2 rounded bg-[#F59E0B] px-4 py-2.5 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all hover:bg-[#D97706] active:translate-y-0.5"
+            className="inline-flex items-center justify-center gap-2 rounded bg-[#F59E0B] px-4 py-2.5 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all hover:bg-[#D97706] active:translate-y-0.5"
           >
             <Plus className="h-4 w-4" />
             <span>＋ 新しいワールドを作成</span>
@@ -87,7 +87,7 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
         {error && <ErrorBanner message={error} />}
 
         {!loading && !error && worlds.length === 0 && (
-          <div className="sfc-empty-worlds mb-4 rounded-lg border border-dashed border-[#1E293B] bg-[#0F172A]/50 px-4 py-10 text-center">
+          <div className="mb-4 rounded-lg border border-dashed border-[#1E293B] bg-[#0F172A]/50 px-4 py-10 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] text-[#F59E0B]">
               <Gamepad2 className="h-6 w-6" />
             </div>
@@ -117,7 +117,7 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
               type="button"
               onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
               onMouseEnter={playHoverSound}
-              className="sfc-new-slot-button group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#1E293B] bg-[#0B1018]/50 py-6 text-[#64748B] transition-all hover:border-[#F59E0B]/60 hover:bg-[#0F172A]/80 hover:text-[#F59E0B]"
+              className="group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#1E293B] bg-[#0B1018]/50 py-6 text-[#64748B] transition-all hover:border-[#F59E0B]/60 hover:bg-[#0F172A]/80 hover:text-[#F59E0B]"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] group-hover:bg-[#1E293B]">
                 <Plus className="h-5 w-5 text-[#F59E0B]" />

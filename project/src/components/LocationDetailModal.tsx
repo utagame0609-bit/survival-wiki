@@ -69,12 +69,12 @@ export function LocationDetailModal({
 
   return createPortal((
     <div
-      className="sfc-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md overflow-y-auto font-sans"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md overflow-y-auto font-sans"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
     >
-      <div className="sfc-location-detail-modal relative w-full max-w-2xl max-h-[90vh] bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
+      <div className="relative w-full max-w-2xl max-h-[90vh] bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden flex flex-col motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
         <div className="flex items-center justify-between px-4 py-3 bg-[#0B1018] border-b border-[#1E293B] shrink-0">
           <div className="min-w-0 flex items-center gap-2">
             <span className="text-[11px] font-mono text-[#F59E0B] font-bold bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/30 shrink-0">
