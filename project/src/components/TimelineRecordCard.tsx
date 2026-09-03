@@ -38,7 +38,7 @@ export function TimelineRecordCard({ world, location, onSelect, onOpenSns }: Tim
         }
       }}
       onMouseEnter={playHoverSound}
-      className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3 shadow-sm outline-none transition-all duration-200 hover:border-[#F59E0B]/40 focus-visible:border-[#F59E0B] sm:flex-row sm:items-stretch sm:gap-4"
+      className="sfc-record-card group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-lg border border-[#1E293B] bg-[#0B1018]/80 p-3 shadow-sm outline-none transition-all duration-200 hover:border-[#F59E0B]/40 focus-visible:border-[#F59E0B] sm:flex-row sm:items-stretch sm:gap-4"
     >
       <div className="relative h-28 w-full shrink-0 overflow-hidden rounded border border-[#334155] bg-slate-800 sm:h-24 sm:w-24">
         {primaryPhoto ? (
