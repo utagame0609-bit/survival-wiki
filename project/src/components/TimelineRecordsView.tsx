@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight, Package, Plus } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
-import { playConfirmSound, playHoverSound } from '@/lib/sound';
+import { playAddSound, playConfirmSound, playHoverSound } from '@/lib/sound';
 import { loadUserTimelineSortOrder, saveUserTimelineSortOrder } from '@/lib/userTimelineSettings';
 import { TimelineRecordCard } from '@/components/TimelineRecordCard';
 import { TimelineRecordsToolbar } from '@/components/TimelineRecordsToolbar';
@@ -249,7 +249,10 @@ export function TimelineRecordsView({
       <div className="fixed bottom-[4.25rem] right-3 z-30 sm:right-6 md:bottom-8 md:right-10">
         <button
           type="button"
-          onClick={onCreate}
+          onClick={() => {
+            playAddSound();
+            onCreate();
+          }}
           onMouseEnter={playHoverSound}
           aria-label="新規記録を追加"
           className="flex items-center gap-2 rounded-full bg-[#F59E0B] px-6 py-3 font-mono text-xs font-bold tracking-wider text-[#0B1018] shadow-[0_5px_20px_rgba(245,158,11,0.3)] transition-transform hover:bg-[#D97706] active:scale-95"
