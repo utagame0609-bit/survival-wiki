@@ -46,7 +46,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
                 <User className="h-6 w-6 text-[#F59E0B]" />
               )}
             </div>
-            <span className="absolute -left-2 -top-2 rounded border border-[#F59E0B] bg-[#0B1018] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#F59E0B]">
+            <span className="sfc-slot-badge absolute -left-2 -top-2 rounded border border-[#F59E0B] bg-[#0B1018] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#F59E0B]">
               SLOT {slotLabel}
             </span>
           </div>
@@ -149,7 +149,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
 function Stat({ label, value, tone }: { label: string; value: number; tone: 'amber' | 'cyan' }) {
   return (
-    <div className="flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial">
+    <div className={`sfc-stat sfc-stat-${tone} flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial`}>
       <div className="font-mono text-[9px] text-[#64748B]">{label}</div>
       <div className={`font-mono text-sm font-bold ${tone === 'amber' ? 'text-[#F59E0B]' : 'text-[#06B6D4]'}`}>
         {value}
