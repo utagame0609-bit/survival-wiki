@@ -40,7 +40,7 @@ export function AppHeader({
 
   const displayTitle = title.replace(/^UTAPEDIA \/\/\s*/, '');
 
-  if (theme === 'sfc') {
+  if (theme === 'sfc' && !onBack) {
     return (
       <header className="sticky top-0 z-40 border-b-2 border-[var(--border-main)] bg-[var(--surface-1)] px-3 py-2 shadow-[0_3px_6px_rgba(0,0,0,0.15)] transition-colors duration-200 sm:px-6 sm:py-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2">
