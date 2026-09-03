@@ -115,7 +115,7 @@ function fadeVolume(
 function syncVolume(): void {
   const audio = getActiveAudio();
   if (!audio || !activeTrackId) return;
-  audio.volume = bgmEnabled ? getOutputVolume(activeTrackId) : 0;
+  audio.volume = getOutputVolume(activeTrackId);
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -168,7 +168,7 @@ function beginTrack(trackId: BgmTrackId, token: number, fadeInMs = 0): void {
   if (!audio) return;
 
   activeTrackId = trackId;
-  audio.volume = fadeInMs > 0 || !bgmEnabled ? 0 : getOutputVolume(trackId);
+  audio.volume = fadeInMs > 0 ? 0 : getOutputVolume(trackId);
   try {
     audio.currentTime = 0;
   } catch {
@@ -180,10 +180,6 @@ function beginTrack(trackId: BgmTrackId, token: number, fadeInMs = 0): void {
 
   void playPromise.then(() => {
     if (token !== playRequestToken || activeTrackId !== trackId) return;
-    if (!bgmEnabled) {
-      audio.volume = 0;
-      return;
-    }
     const targetVolume = getOutputVolume(trackId);
     if (fadeInMs > 0) {
       fadeVolume(audio, 0, targetVolume, fadeInMs, token);
@@ -205,7 +201,7 @@ function startTrack(trackId: BgmTrackId, coldStartFadeMs = 0): void {
   clearFadeTimer();
 
   if (activeTrackId === trackId && !nextAudio.paused) {
-    nextAudio.volume = bgmEnabled ? getOutputVolume(trackId) : 0;
+    nextAudio.volume = getOutputVolume(trackId);
     return;
   }
 
@@ -238,28 +234,9 @@ function stopPlaybackPreservingTarget(): void {
   stopCurrentPlayback(0);
 }
 
-function muteActivePlayback(): void {
-  playRequestToken += 1;
-  clearFadeTimer();
-  const audio = getActiveAudio();
-  if (audio) audio.volume = 0;
-}
-
-function resumeMutedPlayback(): boolean {
-  const trackId = activeTrackId;
-  const audio = getActiveAudio();
-  if (!trackId || !audio || audio.paused) return false;
-
-  playRequestToken += 1;
-  clearFadeTimer();
-  const token = playRequestToken;
-  fadeVolume(audio, 0, getOutputVolume(trackId), BGM_RESUME_FADE_MS, token);
-  return true;
-}
-
 export function getActiveBgmTarget(): BgmTarget {
   const audio = getActiveAudio();
-  if (!bgmEnabled || !activeTrackId || !audio || audio.paused) return null;
+  if (!activeTrackId || !audio || audio.paused) return null;
   return trackIdToTarget(activeTrackId);
 }
 
@@ -269,6 +246,10 @@ export function getDesiredBgmTarget(): BgmTarget {
 
 export function playNpcBgm(id: NpcBgmId): void {
   desiredBgmTarget = { type: 'npc', id };
+  if (!bgmEnabled) {
+    stopPlaybackPreservingTarget();
+    return;
+  }
   startTrack(id);
 }
 
@@ -279,6 +260,10 @@ export function stopNpcBgm(): void {
 
 export function playWorldBgm(): void {
   desiredBgmTarget = { type: 'world' };
+  if (!bgmEnabled) {
+    stopPlaybackPreservingTarget();
+    return;
+  }
   startTrack('world');
 }
 
@@ -330,13 +315,11 @@ export function setBgmEnabled(enabled: boolean): boolean {
   bgmEnabledListeners.forEach((listener) => listener(enabled));
 
   if (!enabled) {
-    muteActivePlayback();
+    stopPlaybackPreservingTarget();
     return bgmEnabled;
   }
 
-  const desiredTrackId = desiredBgmTarget ? targetToTrackId(desiredBgmTarget) : null;
-  if (desiredTrackId && activeTrackId === desiredTrackId && resumeMutedPlayback()) return bgmEnabled;
-  if (desiredTrackId) startTrack(desiredTrackId, BGM_RESUME_FADE_MS);
+  if (desiredBgmTarget) startTrack(targetToTrackId(desiredBgmTarget), BGM_RESUME_FADE_MS);
   return bgmEnabled;
 }
 
@@ -351,11 +334,11 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 
 export function isWorldBgmPlaying(): boolean {
   const worldAudio = audioPool.world;
-  return bgmEnabled && activeTrackId === 'world' && Boolean(worldAudio && !worldAudio.paused);
+  return activeTrackId === 'world' && Boolean(worldAudio && !worldAudio.paused);
 }
 
 export function getWorldBgmDurationSec(): number {
   const worldAudio = audioPool.world;
-  if (!bgmEnabled || activeTrackId !== 'world' || !worldAudio || !Number.isFinite(worldAudio.duration)) return 0;
+  if (activeTrackId !== 'world' || !worldAudio || !Number.isFinite(worldAudio.duration)) return 0;
   return worldAudio.duration;
 }
