@@ -43,43 +43,6 @@
   --led-power-green: #00e676;
 }
 
-/* FC Dark Theme fallback for instant theme toggling comparison */
-[data-theme="fc_dark"] {
-  --app-bg: #141418;
-  --app-bg-darker: #0c0c0e;
-  --surface-1: #222228;
-  --surface-2: #1a1a20;
-  --surface-recessed: #101014;
-  --surface-cartridge: #2c2c34;
-  --surface-label: #1e1e24;
-
-  --border-main: #444450;
-  --border-dark: #000000;
-  --border-light: #505060;
-  --border-groove: #2c2c34;
-
-  --accent-red: #ff4d5a;
-  --accent-red-hover: #e63946;
-  --accent-blue: #3a86c8;
-  --accent-blue-hover: #2a6f97;
-  --accent-yellow: #f4a261;
-  --accent-yellow-hover: #e76f51;
-  --accent-green: #2ec4b6;
-  --accent-green-hover: #20998e;
-
-  --text-main: #f0f0f4;
-  --text-muted: #a0a0b0;
-  --text-subtle: #707080;
-  --text-inverse: #101014;
-
-  --dpad-bg: #16161c;
-  --dpad-highlight: #282832;
-  --rubber-btn: #383842;
-
-  --led-power-red: #ff3344;
-  --led-power-green: #00e676;
-}
-
 [data-theme="sfc"] body {
   background-color: var(--app-bg);
   color: var(--text-main);
@@ -276,20 +239,20 @@
 }
 
 /* Custom Scrollbars in 16-bit Style */
-::-webkit-scrollbar {
+[data-theme="sfc"] ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-::-webkit-scrollbar-track {
+[data-theme="sfc"] ::-webkit-scrollbar-track {
   background: var(--surface-recessed);
   border: 1px solid var(--border-main);
 }
-::-webkit-scrollbar-thumb {
+[data-theme="sfc"] ::-webkit-scrollbar-thumb {
   background: var(--surface-1);
   border: 2px solid var(--border-main);
   box-shadow: inset 1px 1px 0 #fff;
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
+[data-theme="sfc"] ::-webkit-scrollbar-thumb:hover {
   background: #ffffff;
 }
