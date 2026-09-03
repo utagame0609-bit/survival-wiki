@@ -1,7 +1,7 @@
 import { BookOpen, ChevronLeft, Home, ScrollText, Settings, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { isBgmEnabled, setBgmEnabled, subscribeBgmEnabled } from '@/lib/bgm';
-import { isSoundEnabled, playCancelSound, playHoverSound, playTabSwitchSound, toggleSound } from '@/lib/sound';
+import { isSoundEnabled, playCancelSound, playTabSwitchSound, toggleSound } from '@/lib/sound';
 
 type Tab = 'records' | 'wiki';
 
@@ -30,7 +30,6 @@ export function MobileBottomHud({ activeTab, onTabChange, onBack }: MobileBottom
   };
 
   const handleSettings = () => {
-    playHoverSound();
     window.dispatchEvent(new CustomEvent('survival-wiki:settings'));
   };
 
