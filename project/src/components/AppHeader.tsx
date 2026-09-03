@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, Compass, Home, Settings, Volume2, VolumeX } from 'lucide-react';
 import { isBgmEnabled, setBgmEnabled, subscribeBgmEnabled } from '@/lib/bgm';
 import { isSoundEnabled, playCancelSound, playHoverSound, toggleSound } from '@/lib/sound';
-import { getAppTheme, subscribeAppTheme, type AppTheme } from '@/lib/theme';
 
 export function AppHeader({
   title,
@@ -14,13 +13,10 @@ export function AppHeader({
   hideMobileActions?: boolean;
 }) {
   const [audioEnabled, setAudioEnabled] = useState(() => isBgmEnabled() && isSoundEnabled());
-  const [theme, setTheme] = useState<AppTheme>(() => getAppTheme());
 
   useEffect(() => subscribeBgmEnabled((bgmEnabled) => {
     setAudioEnabled(bgmEnabled && isSoundEnabled());
   }), []);
-
-  useEffect(() => subscribeAppTheme(setTheme), []);
 
   const handleHome = () => {
     playCancelSound();
@@ -40,96 +36,8 @@ export function AppHeader({
 
   const displayTitle = title.replace(/^UTAPEDIA \/\/\s*/, '');
 
-  if (theme === 'sfc') {
-    return (
-      <header className="sticky top-0 z-40 border-b-2 border-[var(--border-main)] bg-[var(--surface-1)] px-3 shadow-[0_3px_6px_rgba(0,0,0,0.15)] transition-colors duration-200 sm:px-6">
-        <div className="mx-auto flex h-[52px] w-full max-w-6xl items-center justify-between gap-2 sm:h-14">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex items-center gap-1.5 rounded border border-[var(--border-main)] bg-[var(--surface-recessed)] px-2 py-1 shadow-inner">
-              <span className="sfc-led-red h-2.5 w-2.5 rounded-full" />
-              <span className="hidden font-dot text-[10px] font-bold tracking-wider text-[var(--text-muted)] sm:inline">POWER</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {onBack && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    playCancelSound();
-                    onBack();
-                  }}
-                  onMouseEnter={playHoverSound}
-                  className="sfc-btn sfc-btn-convex sfc-btn-neutral flex items-center gap-1 px-2.5 py-1.5 font-dot text-xs hover:bg-white"
-                  title="前の画面に戻る (BACK)"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">BACK</span>
-                </button>
-              )}
-
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-1.5">
-              <div className="inline-block h-3 w-3 rounded-full border border-black bg-[var(--accent-blue)] shadow-sm" />
-              <div className="inline-block h-3 w-3 rounded-full border border-black bg-[var(--accent-yellow)] shadow-sm" />
-              <div className="inline-block h-3 w-3 rounded-full border border-black bg-[var(--accent-green)] shadow-sm" />
-              <div className="inline-block h-3 w-3 rounded-full border border-black bg-[var(--accent-red)] shadow-sm" />
-              <h1 className="ml-1 font-sfc-title text-sm font-bold tracking-wider text-[var(--text-main)] sm:text-base md:text-lg">
-                SURVIVAL WIKI
-              </h1>
-            </div>
-            <span className="hidden font-dot text-[9px] uppercase tracking-widest text-[var(--text-muted)] sm:inline sm:text-[10px]">
-              16-BIT RETRO CONSOLE EDITION
-            </span>
-          </div>
-
-          <div className={`${hideMobileActions ? 'hidden md:flex' : 'flex'} items-center gap-1.5 sm:gap-2`}>
-            <button
-              type="button"
-              onClick={handleAudioToggle}
-              onMouseEnter={playHoverSound}
-              className={`sfc-btn sfc-btn-convex flex items-center gap-1 px-2.5 py-1.5 font-dot text-xs ${
-                audioEnabled ? 'sfc-btn-b text-white' : 'sfc-btn-neutral text-[var(--text-muted)]'
-              }`}
-              title={audioEnabled ? 'サウンドON' : 'サウンドOFF'}
-            >
-              {audioEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
-              <span className="hidden lg:inline">{audioEnabled ? 'SOUND' : 'MUTE'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSettings}
-              onMouseEnter={playHoverSound}
-              className="sfc-btn sfc-btn-convex sfc-btn-neutral flex items-center gap-1 px-2.5 py-1.5 font-dot text-xs hover:bg-white"
-              title="システム設定 (CONFIG)"
-            >
-              <Settings className="h-3.5 w-3.5 text-[var(--text-main)]" />
-              <span className="hidden sm:inline">CONFIG</span>
-            </button>
-
-            {onBack && (
-              <button
-                type="button"
-                onClick={handleHome}
-                onMouseEnter={playHoverSound}
-                className="sfc-btn sfc-btn-convex sfc-btn-neutral flex items-center gap-1 px-2.5 py-1.5 font-dot text-xs hover:bg-white"
-                title="冒険の書一覧に戻る (SLOTS / HOME)"
-              >
-                <Home className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
-                <span className="hidden sm:inline">SLOTS</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-    );
-  }
-
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#1E293B] bg-[#0B1018]/95 backdrop-blur-md select-none">
+    <header className="sfc-app-header sticky top-0 z-40 w-full border-b border-[#1E293B] bg-[#0B1018]/95 backdrop-blur-md select-none">
       <div className="mx-auto flex h-[52px] sm:h-14 w-full max-w-6xl items-center justify-between px-3 sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           {onBack && (
