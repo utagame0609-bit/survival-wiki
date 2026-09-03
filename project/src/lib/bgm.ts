@@ -71,9 +71,7 @@ function unlockAudioContext(): void {
     if (context.state !== 'running') return;
     removeUnlockListeners();
     const target = desiredBgmTarget;
-    if (bgmEnabled && target && !activeSource) {
-      startTrack(targetToTrackId(target));
-    }
+    if (bgmEnabled && target && !activeSource) startTrack(targetToTrackId(target));
   }).catch(() => {
     // Keep listeners installed so a later user gesture can retry the resume.
   });
@@ -187,6 +185,7 @@ function finishStop(source: AudioBufferSourceNode | null): void {
 
 function stopCurrentPlayback(fadeMs = BGM_NATIVE_FADE_MS): void {
   playRequestToken += 1;
+  const token = playRequestToken;
   clearStopTimer();
 
   const context = audioContext;
@@ -204,7 +203,6 @@ function stopCurrentPlayback(fadeMs = BGM_NATIVE_FADE_MS): void {
     return;
   }
 
-  const token = playRequestToken;
   const now = context.currentTime;
   const gainParam = gain.gain;
   const currentGain = gainParam.value;
@@ -217,6 +215,37 @@ function stopCurrentPlayback(fadeMs = BGM_NATIVE_FADE_MS): void {
     finishStop(source);
     stopTimerId = null;
   }, fadeMs + 10);
+}
+
+function fadeOutForSwitch(token: number): Promise<void> {
+  const context = audioContext;
+  const gain = outputGain;
+  const source = activeSource;
+  const trackId = activeTrackId;
+  if (!context || !gain || !source || !trackId || typeof window === 'undefined') {
+    if (source) finishStop(source);
+    return Promise.resolve();
+  }
+
+  clearStopTimer();
+  const now = context.currentTime;
+  const gainParam = gain.gain;
+  const currentGain = gainParam.value;
+  gainParam.cancelScheduledValues(now);
+  gainParam.setValueAtTime(currentGain, now);
+  gainParam.linearRampToValueAtTime(0, now + BGM_NATIVE_FADE_MS / 1000);
+
+  return new Promise((resolve) => {
+    stopTimerId = window.setTimeout(() => {
+      stopTimerId = null;
+      if (token !== playRequestToken) {
+        resolve();
+        return;
+      }
+      if (activeSource === source && activeTrackId === trackId) finishStop(source);
+      resolve();
+    }, BGM_NATIVE_FADE_MS + 10);
+  });
 }
 
 function beginDecodedTrack(trackId: BgmTrackId, buffer: AudioBuffer, token: number): void {
@@ -252,8 +281,6 @@ function startTrack(trackId: BgmTrackId): void {
   const context = getAudioContext();
   if (!context || !outputGain) return;
 
-  clearStopTimer();
-
   if (activeTrackId === trackId && activeSource) {
     syncVolume();
     return;
@@ -261,14 +288,19 @@ function startTrack(trackId: BgmTrackId): void {
 
   playRequestToken += 1;
   const token = playRequestToken;
+  const switchFade = activeSource ? fadeOutForSwitch(token) : Promise.resolve();
+  const bufferLoad = loadAudioBuffer(trackId, context);
 
-  if (activeSource) stopCurrentPlayback(BGM_NATIVE_FADE_MS);
-
-  void loadAudioBuffer(trackId, context).then((buffer) => {
+  void Promise.all([switchFade, bufferLoad]).then(([, buffer]) => {
     if (token !== playRequestToken || !bgmEnabled) return;
 
-    if (context.state === 'running') {
+    const begin = () => {
+      if (token !== playRequestToken || !bgmEnabled) return;
       beginDecodedTrack(trackId, buffer, token);
+    };
+
+    if (context.state === 'running') {
+      begin();
       return;
     }
 
@@ -276,7 +308,7 @@ function startTrack(trackId: BgmTrackId): void {
     void context.resume().then(() => {
       if (context.state !== 'running') return;
       removeUnlockListeners();
-      beginDecodedTrack(trackId, buffer, token);
+      begin();
     }).catch(() => {
       // Android may require the next explicit user gesture; unlock listeners will retry.
     });
