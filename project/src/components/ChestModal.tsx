@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Box, Camera, X } from 'lucide-react';
 import type { LocationWithPhotos } from '@/lib/types';
-import { playConfirmSound, playModalCloseSound, playHoverSound } from '@/lib/sound';
+import { playChestCloseSound, playConfirmSound, playHoverSound } from '@/lib/sound';
 import { ChestPhotoArchiveGrid } from '@/components/ChestPhotoArchiveGrid';
 import { ChestSelectedPhotoPanel } from '@/components/ChestSelectedPhotoPanel';
 import type { CollectionItem } from '@/lib/chestCollection';
@@ -22,7 +22,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
     : -1;
 
   const handleClose = () => {
-    playModalCloseSound();
+    playChestCloseSound();
     onClose();
   };
 
