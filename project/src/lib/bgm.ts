@@ -88,12 +88,6 @@ export function getMasterBgmVolume(): number {
 }
 
 function finishStop(trackId: BgmTrackId, audio: HTMLAudioElement): void {
-  audio.pause();
-  try {
-    audio.currentTime = 0;
-  } catch {
-    // Metadata may not be loaded yet. Pausing is sufficient in that case.
-  }
   audio.volume = 0;
   if (activeTrackId === trackId) activeTrackId = null;
 }
@@ -158,12 +152,15 @@ function startTrack(trackId: BgmTrackId): void {
 
   activeTrackId = trackId;
   audio.loop = true;
-  audio.volume = getOutputVolume(trackId);
+  audio.volume = 0;
   try {
     audio.currentTime = 0;
   } catch {
     // Metadata may not be loaded yet.
   }
+  audio.volume = getOutputVolume(trackId);
+
+  if (!audio.paused) return;
 
   const playPromise = audio.play();
   if (!playPromise) return;
