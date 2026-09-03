@@ -52,8 +52,6 @@ export function isAudioPlaying(id?: string): boolean {
 }
 
 export function playSoundCandidatePreview(id: string): void {
-  const c = getCtx();
-  if (!c) return;
   if (activeLoop) {
     const same = activeLoop.id === id;
     stopActiveAudio();
@@ -63,9 +61,12 @@ export function playSoundCandidatePreview(id: string): void {
   if (isNpcBgmId(id)) {
     playNpcBgmPreview(id);
     activeLoop = { id, stop: stopNpcBgmPreview };
-  } else {
-    PREVIEW_SOUNDS[id]?.();
+    notifySoundState(id, true);
+    return;
   }
 
+  const c = getCtx();
+  if (!c) return;
+  PREVIEW_SOUNDS[id]?.();
   notifySoundState(id, true);
 }
