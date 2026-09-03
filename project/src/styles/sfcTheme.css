@@ -256,3 +256,122 @@
 [data-theme="sfc"] ::-webkit-scrollbar-thumb:hover {
   background: #ffffff;
 }
+
+
+/* Paint-only migration: keep the CURRENT DOM and repaint it when SFC is active. */
+[data-theme="sfc"] .sfc-world-list-root {
+  background: var(--app-bg) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-main {
+  color: var(--text-main);
+}
+
+[data-theme="sfc"] .sfc-world-list-heading {
+  border-color: var(--border-groove) !important;
+}
+
+[data-theme="sfc"] .sfc-world-list-heading h1 {
+  color: var(--text-main) !important;
+  font-family: var(--font-heading);
+}
+
+[data-theme="sfc"] .sfc-world-list-heading [class*="text-[#06B6D4]"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-create-world-button {
+  background: var(--accent-green) !important;
+  color: #fff !important;
+  border: 2px solid var(--border-main);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.75),
+    inset -1px -1px 0 rgba(0,0,0,.28),
+    0 3px 0 var(--border-dark) !important;
+}
+
+[data-theme="sfc"] .sfc-new-slot-button,
+[data-theme="sfc"] .sfc-empty-worlds {
+  background: var(--surface-1) !important;
+  border-color: var(--border-main) !important;
+  color: var(--text-muted) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.8),
+    inset -1px -1px 0 rgba(0,0,0,.12);
+}
+
+[data-theme="sfc"] .sfc-world-card {
+  background: var(--surface-1) !important;
+  border: 2px solid var(--border-main) !important;
+  color: var(--text-main) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.9),
+    inset -1px -1px 0 rgba(0,0,0,.18),
+    0 3px 6px rgba(0,0,0,.14) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card:hover {
+  background: var(--surface-label) !important;
+  border-color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card h2 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card p,
+[data-theme="sfc"] .sfc-world-card [class*="text-[#64748B]"],
+[data-theme="sfc"] .sfc-world-card [class*="text-[#94A3B8]"] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card [class*="text-[#F59E0B]"] {
+  color: var(--accent-yellow-hover) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card [class*="text-[#06B6D4]"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card [class*="bg-[#0B1018]"],
+[data-theme="sfc"] .sfc-world-card [class*="bg-[#161F30]"] {
+  background: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] .sfc-world-card [class*="border-[#1E293B]"],
+[data-theme="sfc"] .sfc-world-card [class*="border-[#334155]"] {
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-world-load {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.7),
+    inset -1px -1px 0 rgba(0,0,0,.28),
+    0 3px 0 var(--border-dark) !important;
+}
+
+[data-theme="sfc"] .sfc-world-delete-modal {
+  background: var(--surface-1) !important;
+  border: 2px solid var(--accent-red) !important;
+  color: var(--text-main) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.9),
+    inset -1px -1px 0 rgba(0,0,0,.16),
+    0 8px 24px rgba(0,0,0,.25) !important;
+}
+
+[data-theme="sfc"] .sfc-world-delete-modal p {
+  color: #8f3038 !important;
+}
+
+[data-theme="sfc"] .sfc-delete-confirm {
+  background: var(--accent-red) !important;
+  border: 2px solid var(--border-main);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.65),
+    inset -1px -1px 0 rgba(0,0,0,.28),
+    0 3px 0 var(--border-dark);
+}
