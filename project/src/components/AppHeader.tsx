@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, Compass, Home, Settings, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, Compass, Home, Settings, Volume2, VolumeX } from 'lucide-react';
 import { isBgmEnabled, setBgmEnabled, subscribeBgmEnabled } from '@/lib/bgm';
 import { isSoundEnabled, playCancelSound, playHoverSound, toggleSound } from '@/lib/sound';
-import { getAppTheme, setAppTheme, subscribeAppTheme, type AppTheme } from '@/lib/theme';
+import { getAppTheme, subscribeAppTheme, type AppTheme } from '@/lib/theme';
 
 export function AppHeader({
   title,
@@ -98,18 +98,6 @@ export function AppHeader({
           </div>
 
           <div className={`${hideMobileActions ? 'hidden md:flex' : 'flex'} items-center gap-1.5 sm:gap-2`}>
-            <button
-              type="button"
-              onClick={() => setAppTheme('current')}
-              onMouseEnter={playHoverSound}
-              className="sfc-btn sfc-btn-convex flex items-center gap-1 px-2 py-1.5 font-dot text-xs"
-              style={{ backgroundColor: 'var(--surface-2)', color: 'var(--text-main)' }}
-              title="テーマ切替: CURRENTへ戻す"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-[var(--accent-yellow)]" />
-              <span className="hidden font-bold md:inline">SFC</span>
-            </button>
-
             <button
               type="button"
               onClick={handleAudioToggle}
