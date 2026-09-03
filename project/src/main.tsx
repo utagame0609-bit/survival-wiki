@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import './styles/hudBrackets.css';
 import './styles/wikiScpDossier.css';
+import './styles/sfcTheme.css';
 import { initializeUserSoundSettings } from './lib/userSoundSettingsBootstrap';
 import { initializeAppTheme } from './lib/theme';
 
