@@ -460,6 +460,7 @@ export function WikiWorkspace({
   const selectStyle = (id: WikiStyleId, preserveScrollPosition = false) => {
     if (id === style && articleRecord === null) return;
 
+    playConfirmSound();
     setCopied(false);
     setShared(false);
     setArticleRecord(null);
