@@ -35,7 +35,7 @@ export function ChestModal({ collectionItems, onClose, onOpenLocation }: ChestMo
 
   return createPortal((
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
+      className="sfc-modal-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/90 p-2 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
