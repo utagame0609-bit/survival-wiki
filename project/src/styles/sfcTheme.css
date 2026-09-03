@@ -467,3 +467,599 @@
 [data-theme="sfc"] .sfc-world-delete-modal [class*="text-[#FCA5A5]"] {
   color: #8f3038 !important;
 }
+
+
+/* Global paint-only SFC migration */
+[data-theme="sfc"] .sfc-world-screen {
+  background: var(--app-bg) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-world-screen > .scanline-overlay {
+  opacity: .12;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-header,
+  .sfc-world-tabs,
+  .sfc-mobile-hud,
+  .sfc-records-view,
+  .sfc-records-toolbar,
+  .sfc-record-card,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) {
+  color: var(--text-main);
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-header,
+  .sfc-records-toolbar,
+  .sfc-record-card,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) {
+  background-color: var(--surface-1) !important;
+  border-color: var(--border-main) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.88),
+    inset -1px -1px 0 rgba(0,0,0,.16),
+    0 4px 10px rgba(0,0,0,.14) !important;
+}
+
+[data-theme="sfc"] .sfc-modal-backdrop {
+  background: rgba(34,34,38,.58) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Legacy dark utility colors -> adopted AS SFC tokens, scoped only to themed app chrome. */
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#F8FAFC]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#F1F5F9]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#E2E8F0]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-slate-100"] {
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#94A3B8]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#64748B]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#475569]"] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#06B6D4]"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="text-[#F59E0B]"] {
+  color: #9a741f !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="bg-[#0B1018]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="bg-[#111827]"] {
+  background-color: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="bg-[#0F172A]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="bg-[#161F30]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="bg-[#182033]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="bg-[#102330]"] {
+  background-color: var(--surface-1) !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="border-[#1E293B]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="border-[#334155]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="border-[#273449]"],
+[data-theme="sfc"] :is(
+  .sfc-world-screen,
+  .sfc-mobile-hud,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .sfc-wiki-compiler,
+  .sfc-settings-modal,
+  .world-create-modal-panel
+) [class*="border-[#263247]"] {
+  border-color: var(--border-main) !important;
+}
+
+/* World header and tabs retain the CURRENT information structure. */
+[data-theme="sfc"] .sfc-world-header {
+  background: var(--surface-1) !important;
+}
+
+[data-theme="sfc"] .sfc-world-header [class*="border-[#F59E0B]"] {
+  border-color: var(--accent-yellow) !important;
+}
+
+[data-theme="sfc"] .sfc-world-header [class*="border-[#06B6D4]"] {
+  border-color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs {
+  border-color: var(--border-groove) !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button {
+  border: 2px solid transparent;
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button:hover {
+  background: var(--surface-label) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#161F30]"] {
+  background: var(--accent-yellow) !important;
+  border-color: var(--border-main) !important;
+  color: #222 !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.7),
+    inset -1px -1px 0 rgba(0,0,0,.25),
+    0 3px 0 var(--border-dark) !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#0E2A3A]"] {
+  background: var(--accent-blue) !important;
+  border-color: var(--border-main) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.7),
+    inset -1px -1px 0 rgba(0,0,0,.25),
+    0 3px 0 var(--border-dark) !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#0E2A3A]"] svg,
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#161F30]"] svg {
+  color: currentColor !important;
+}
+
+/* Records shell */
+[data-theme="sfc"] .sfc-records-toolbar {
+  background: var(--surface-1) !important;
+}
+
+[data-theme="sfc"] .sfc-records-toolbar input,
+[data-theme="sfc"] .sfc-records-toolbar select {
+  background: var(--surface-recessed) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-records-toolbar option {
+  background: var(--surface-1) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-records-toolbar button {
+  background: var(--surface-1) !important;
+  border-color: var(--border-main) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-records-toolbar button[title*="CHEST"] {
+  background: var(--accent-yellow) !important;
+  color: #222 !important;
+}
+
+[data-theme="sfc"] .sfc-records-toolbar button[title*="CHEST"] * {
+  color: #222 !important;
+}
+
+[data-theme="sfc"] .sfc-records-view > .space-y-3 > div {
+  border: 2px solid var(--border-main) !important;
+  background: var(--surface-1) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.75),
+    inset -1px -1px 0 rgba(0,0,0,.14);
+}
+
+[data-theme="sfc"] .sfc-records-view > .space-y-3 > div:hover {
+  border-color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-record-card {
+  background: var(--surface-label) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-record-card:hover {
+  border-color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-record-card h4 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="sfc"] .sfc-record-card [class*="mix-blend-overlay"] {
+  display: none;
+}
+
+[data-theme="sfc"] .sfc-records-view > .fixed button {
+  background: var(--accent-green) !important;
+  color: #fff !important;
+  border: 2px solid var(--border-main);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.7),
+    inset -1px -1px 0 rgba(0,0,0,.25),
+    0 3px 0 var(--border-dark) !important;
+}
+
+/* Mobile HUD: same actions, SFC molded-console paint. */
+[data-theme="sfc"] .sfc-mobile-hud {
+  background: var(--surface-1) !important;
+  border-color: var(--border-main) !important;
+  box-shadow: 0 -4px 10px rgba(0,0,0,.18) !important;
+}
+
+[data-theme="sfc"] .sfc-mobile-hud button {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#1E293B]"] {
+  background: var(--accent-yellow) !important;
+  border-color: var(--border-main) !important;
+  color: #222 !important;
+}
+
+[data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#0E2A3A]"] {
+  background: var(--accent-blue) !important;
+  border-color: var(--border-main) !important;
+  color: #fff !important;
+}
+
+/* Form and detail modals */
+[data-theme="sfc"] :is(.sfc-location-detail-modal, .sfc-location-form-modal, .world-create-modal-panel) > :first-child,
+[data-theme="sfc"] .sfc-chest-modal > :first-child,
+[data-theme="sfc"] .sfc-sns-modal > :first-child,
+[data-theme="sfc"] .sfc-settings-modal > :first-child {
+  background: var(--surface-1) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-location-detail-modal [class*="bg-[#0B1018]"],
+[data-theme="sfc"] .sfc-location-form-modal [class*="bg-[#0B1018]"],
+[data-theme="sfc"] .world-create-modal-panel [class*="bg-[#0B1018]"] {
+  background: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] .sfc-location-form .location-input {
+  background: var(--surface-recessed) !important;
+  border: 2px solid var(--border-main) !important;
+  color: var(--text-main) !important;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,.12);
+}
+
+[data-theme="sfc"] .sfc-location-form .location-input::placeholder {
+  color: var(--text-subtle) !important;
+}
+
+[data-theme="sfc"] .sfc-location-form .location-input:focus {
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 1px rgba(42,111,151,.15) !important;
+}
+
+/* Chest */
+[data-theme="sfc"] .sfc-chest-modal [class*="border-[#F59E0B]"] {
+  border-color: var(--accent-yellow-hover) !important;
+}
+
+[data-theme="sfc"] .sfc-chest-modal button[class*="bg-[#F59E0B]"] {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+}
+
+[data-theme="sfc"] .sfc-chest-modal button[class*="border-[#F59E0B]"] {
+  border-color: var(--accent-blue) !important;
+}
+
+/* SNS share */
+[data-theme="sfc"] .sfc-sns-modal textarea {
+  background: var(--surface-recessed) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-sns-modal button[class*="bg-[#06B6D4]"] {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+}
+
+[data-theme="sfc"] .sfc-sns-modal button[class*="bg-[#161F30]"] {
+  background: var(--surface-recessed) !important;
+  color: var(--text-main) !important;
+}
+
+/* Wiki compiler shell only. Persona article bodies remain independent design islands. */
+[data-theme="sfc"] .sfc-wiki-compiler > section:first-child,
+[data-theme="sfc"] .sfc-wiki-compiler > section:last-child {
+  background: var(--surface-1) !important;
+  border: 2px solid var(--border-main) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.88),
+    inset -1px -1px 0 rgba(0,0,0,.14),
+    0 3px 6px rgba(0,0,0,.12) !important;
+}
+
+[data-theme="sfc"] .sfc-wiki-compiler button {
+  color: var(--text-main);
+}
+
+[data-theme="sfc"] .sfc-wiki-compiler button[class*="border-[#B89A5A]"],
+[data-theme="sfc"] .sfc-wiki-compiler button[class*="border-[#4F8F9A]"],
+[data-theme="sfc"] .sfc-wiki-compiler button[class*="border-[#9A635D]"] {
+  background: var(--surface-label) !important;
+}
+
+[data-theme="sfc"] .sfc-wiki-compiler select {
+  background: var(--surface-recessed) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-wiki-compiler button[class*="bg-[#06B6D4]"] {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+}
+
+[data-theme="sfc"] .sfc-wiki-compiler button[class*="bg-[#F59E0B]"] {
+  background: var(--accent-green) !important;
+  color: #fff !important;
+}
+
+/* Settings */
+[data-theme="sfc"] .sfc-settings-modal section {
+  background: var(--surface-label) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal button {
+  border-color: var(--border-main);
+}
+
+[data-theme="sfc"] .sfc-settings-modal button[aria-pressed="true"] {
+  background: var(--surface-recessed) !important;
+  border-color: var(--accent-blue) !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 0 0 2px rgba(42,111,151,.18) !important;
+}
+
+[data-theme="sfc"] .sfc-settings-modal button[class*="bg-[#F59E0B]"] {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+}
+
+/* WORLD LIST polish after full-theme normalization. */
+[data-theme="sfc"] .sfc-world-list-heading [class*="text-[#F59E0B]"],
+[data-theme="sfc"] .sfc-world-card [class*="text-[#F59E0B]"] {
+  color: #9a741f !important;
+}
+
+[data-theme="sfc"] .sfc-new-slot-button {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="sfc"] .sfc-new-slot-button > div:first-child {
+  background: var(--surface-recessed) !important;
+  border-color: var(--border-main) !important;
+}
+
+[data-theme="sfc"] .sfc-new-slot-button svg,
+[data-theme="sfc"] .sfc-new-slot-button:hover {
+  color: var(--accent-green-hover) !important;
+}
+
+/* SFC card corner markers use the adopted AS yellow, not CURRENT orange. */
+[data-theme="sfc"] .sfc-world-card > span[class*="border-[#F2A100]"] {
+  border-color: var(--accent-yellow) !important;
+}
