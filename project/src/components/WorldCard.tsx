@@ -36,7 +36,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
       <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
       <span className="pointer-events-none absolute -bottom-px -right-px h-2 w-2 border-b-2 border-r-2 border-[#F2A100]" />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:grid lg:grid-cols-[minmax(0,1fr)_220px_auto] lg:items-center lg:gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:grid lg:grid-cols-[minmax(0,270px)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
         <div className="flex min-w-0 flex-1 items-start gap-3.5">
           <div className="relative shrink-0 pt-2">
             <div className="flex h-14 w-14 translate-y-4 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] transition-colors group-hover:border-[#F59E0B] sm:translate-y-3 lg:translate-y-5">
@@ -96,35 +96,20 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
           </div>
         </div>
 
-        <div className="hidden min-w-0 lg:block">
-          {companions.length > 0 ? (
-            <div className="w-full">
-              <div className="mb-1.5 flex items-center justify-between font-mono text-[9px] tracking-[0.18em] text-[#64748B]">
-                <span>PARTY MEMBERS</span>
-                <span className="text-[#06B6D4]">{companions.length}/4</span>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {companions.map((member) => (
-                  <div key={member.id} className="min-w-0 text-center" title={member.name}>
-                    <div className="mx-auto flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] shadow-[0_0_8px_rgba(6,182,212,0.08)] transition-colors group-hover:border-[#06B6D4]/70">
-                      {memberPhotoUrls[member.id] ? (
-                        <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <Users className="h-5 w-5 text-[#06B6D4]" />
-                      )}
-                    </div>
-                    <div className="mt-1 truncate font-mono text-[9px] text-[#94A3B8]">
-                      {member.name}
-                    </div>
-                  </div>
-                ))}
-              </div>
+        <div className="hidden min-w-0 self-stretch items-start gap-2 pt-7 lg:flex">
+          {companions.map((member) => (
+            <div
+              key={member.id}
+              className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-[#334155] bg-[#0B1018] shadow-[0_0_8px_rgba(6,182,212,0.08)] transition-colors group-hover:border-[#06B6D4]/70"
+              title={member.name}
+            >
+              {memberPhotoUrls[member.id] ? (
+                <img src={memberPhotoUrls[member.id]} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <Users className="h-6 w-6 text-[#06B6D4]" />
+              )}
             </div>
-          ) : (
-            <div className="flex h-16 items-center justify-center font-mono text-[10px] tracking-wider text-[#475569]">
-              SOLO SAVE
-            </div>
-          )}
+          ))}
         </div>
 
         <div className="flex shrink-0 flex-col items-stretch justify-between gap-3 border-t border-[#1E293B]/70 pt-3 sm:flex-row sm:items-center sm:justify-end sm:border-t-0 sm:pt-0">
