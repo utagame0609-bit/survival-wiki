@@ -115,6 +115,7 @@ export function WorldListScreen({ gameId, gameName, navigate }: { gameId: string
         {deleteTarget && (
           <WorldDeleteConfirmModal
             world={deleteTarget}
+            slotNumber={worlds.findIndex((world) => world.id === deleteTarget.id) + 1}
             onCancel={() => setDeleteTarget(null)}
             onConfirm={confirmDelete}
           />
