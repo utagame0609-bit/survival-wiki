@@ -42,7 +42,7 @@ export function SettingsModal({ onClose, installPrompt, onInstallPromptUsed }: S
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-2 font-mono backdrop-blur-md sm:p-4">
+    <div className="sfc-modal-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-2 font-mono backdrop-blur-md sm:p-4">
       <button aria-label="設定を閉じる" className="absolute inset-0" onClick={handleClose} />
 
       <div className="hud-bracket relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-xl border border-[#1E293B] bg-[#0F172A] text-slate-100 shadow-2xl">
