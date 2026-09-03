@@ -30,7 +30,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
   return (
     <article
-      className="group relative rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-md transition-all duration-200 hover:border-[#F59E0B]/60 hover:bg-[#131E35]"
+      className="sfc-world-card group relative rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-md transition-all duration-200 hover:border-[#F59E0B]/60 hover:bg-[#131E35]"
       onMouseEnter={playHoverSound}
     >
       <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
@@ -127,7 +127,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
               type="button"
               onClick={onOpen}
               onMouseEnter={playHoverSound}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded bg-[#F59E0B] px-4 py-2 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_10px_rgba(245,158,11,0.25)] transition-all hover:bg-[#D97706] active:scale-95 sm:flex-initial"
+              className="sfc-world-load flex flex-1 items-center justify-center gap-1.5 rounded bg-[#F59E0B] px-4 py-2 font-mono text-xs font-black tracking-wider text-[#0B1018] shadow-[0_0_10px_rgba(245,158,11,0.25)] transition-all hover:bg-[#D97706] active:scale-95 sm:flex-initial"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
               <span>LOAD</span>
