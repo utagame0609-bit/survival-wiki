@@ -24,13 +24,9 @@ const BGM_TRACK_OUTPUT_GAIN: Record<BgmTrackId, number> = {
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let desiredBgmTarget: BgmTarget = null;
 let bgmEnabled = true;
-let audioContext: AudioContext | null = null;
-let outputGain: GainNode | null = null;
-const audioBuffers: Partial<Record<BgmTrackId, AudioBuffer>> = {};
-const bufferRequests: Partial<Record<BgmTrackId, Promise<AudioBuffer>>> = {};
-let activeSource: AudioBufferSourceNode | null = null;
+const audioElements: Partial<Record<BgmTrackId, HTMLAudioElement>> = {};
 let activeTrackId: BgmTrackId | null = null;
-let stopTimerId: number | null = null;
+let fadeTimerId: number | null = null;
 let playRequestToken = 0;
 const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
 
@@ -51,36 +47,34 @@ function getOutputVolume(id: BgmTrackId, ratio = 1): number {
   return Math.max(0, Math.min(1, masterBgmVolume * BGM_TRACK_OUTPUT_GAIN[id] * ratio));
 }
 
-function getAudioContext(): AudioContext | null {
+function getAudioElement(trackId: BgmTrackId): HTMLAudioElement | null {
   if (typeof window === 'undefined') return null;
-  if (audioContext) return audioContext;
+  const existing = audioElements[trackId];
+  if (existing) return existing;
 
-  const AudioContextClass = window.AudioContext
-    ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioContextClass) return null;
-
-  const context = new AudioContextClass();
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0, context.currentTime);
-  gain.connect(context.destination);
-  audioContext = context;
-  outputGain = gain;
-  return context;
+  const audio = new Audio(BGM_TRACK_URLS[trackId]);
+  audio.preload = 'auto';
+  audio.loop = true;
+  audio.volume = 0;
+  audio.addEventListener('error', () => {
+    const mediaError = audio.error;
+    console.error(`BGM playback error (${trackId}):`, mediaError?.message ?? mediaError?.code ?? 'unknown media error');
+  });
+  audioElements[trackId] = audio;
+  return audio;
 }
 
-function clearStopTimer(): void {
-  if (stopTimerId === null || typeof window === 'undefined') return;
-  window.clearTimeout(stopTimerId);
-  stopTimerId = null;
+function clearFadeTimer(): void {
+  if (fadeTimerId === null || typeof window === 'undefined') return;
+  window.clearTimeout(fadeTimerId);
+  fadeTimerId = null;
 }
 
 function syncVolume(): void {
-  const context = audioContext;
-  const gain = outputGain;
-  const trackId = activeTrackId;
-  if (!context || !gain || !trackId) return;
-  gain.gain.cancelScheduledValues(context.currentTime);
-  gain.gain.setValueAtTime(getOutputVolume(trackId), context.currentTime);
+  if (!activeTrackId) return;
+  const audio = audioElements[activeTrackId];
+  if (!audio) return;
+  audio.volume = getOutputVolume(activeTrackId);
 }
 
 export function setMasterBgmVolume(value: number): number {
@@ -93,132 +87,92 @@ export function getMasterBgmVolume(): number {
   return masterBgmVolume;
 }
 
-async function loadAudioBuffer(trackId: BgmTrackId, context: AudioContext): Promise<AudioBuffer> {
-  const cached = audioBuffers[trackId];
-  if (cached) return cached;
-
-  const pending = bufferRequests[trackId];
-  if (pending) return pending;
-
-  const request = fetch(BGM_TRACK_URLS[trackId])
-    .then((response) => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.arrayBuffer();
-    })
-    .then((data) => context.decodeAudioData(data))
-    .then((buffer) => {
-      audioBuffers[trackId] = buffer;
-      delete bufferRequests[trackId];
-      return buffer;
-    })
-    .catch((error) => {
-      delete bufferRequests[trackId];
-      throw error;
-    });
-
-  bufferRequests[trackId] = request;
-  return request;
-}
-
-function finishStop(source: AudioBufferSourceNode | null): void {
-  if (source) {
-    source.onended = null;
-    try {
-      source.stop();
-    } catch {
-      // Already stopped sources can safely be ignored.
-    }
-    try {
-      source.disconnect();
-    } catch {
-      // Disconnected sources need no further cleanup.
-    }
+function finishStop(trackId: BgmTrackId, audio: HTMLAudioElement): void {
+  audio.pause();
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // Metadata may not be loaded yet. Pausing is sufficient in that case.
   }
-  if (activeSource === source) activeSource = null;
-  activeTrackId = null;
-  if (audioContext && outputGain) {
-    outputGain.gain.cancelScheduledValues(audioContext.currentTime);
-    outputGain.gain.setValueAtTime(0, audioContext.currentTime);
-  }
+  audio.volume = 0;
+  if (activeTrackId === trackId) activeTrackId = null;
 }
 
 function stopCurrentPlayback(fadeMs = 0): void {
   playRequestToken += 1;
-  clearStopTimer();
+  clearFadeTimer();
 
-  const context = audioContext;
-  const gain = outputGain;
-  const source = activeSource;
   const trackId = activeTrackId;
-  if (!context || !gain || !source || !trackId) {
-    activeSource = null;
+  if (!trackId) return;
+  const audio = audioElements[trackId];
+  if (!audio) {
     activeTrackId = null;
     return;
   }
 
-  if (fadeMs <= 0 || typeof window === 'undefined') {
-    finishStop(source);
+  if (fadeMs <= 0 || typeof window === 'undefined' || audio.paused) {
+    finishStop(trackId, audio);
     return;
   }
 
   const token = playRequestToken;
-  const currentGain = gain.gain.value;
-  gain.gain.cancelScheduledValues(context.currentTime);
-  gain.gain.setValueAtTime(currentGain, context.currentTime);
-  gain.gain.linearRampToValueAtTime(0, context.currentTime + fadeMs / 1000);
+  const startVolume = audio.volume;
+  const steps = Math.max(1, Math.ceil(fadeMs / 30));
+  const stepMs = fadeMs / steps;
+  let step = 0;
 
-  stopTimerId = window.setTimeout(() => {
-    if (token !== playRequestToken || activeSource !== source || activeTrackId !== trackId) return;
-    finishStop(source);
-    stopTimerId = null;
-  }, fadeMs);
+  const fade = () => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    step += 1;
+    audio.volume = startVolume * Math.max(0, 1 - step / steps);
+    if (step >= steps) {
+      finishStop(trackId, audio);
+      fadeTimerId = null;
+      return;
+    }
+    fadeTimerId = window.setTimeout(fade, stepMs);
+  };
+
+  fadeTimerId = window.setTimeout(fade, stepMs);
 }
 
 function startTrack(trackId: BgmTrackId): void {
-  const context = getAudioContext();
-  if (!context || !outputGain) return;
+  const audio = getAudioElement(trackId);
+  if (!audio) return;
 
-  clearStopTimer();
+  clearFadeTimer();
 
-  if (activeTrackId === trackId && activeSource) {
-    syncVolume();
+  if (activeTrackId === trackId && !audio.paused) {
+    audio.volume = getOutputVolume(trackId);
     return;
   }
 
   playRequestToken += 1;
   const token = playRequestToken;
 
-  if (activeSource) finishStop(activeSource);
+  if (activeTrackId && activeTrackId !== trackId) {
+    const previousTrackId = activeTrackId;
+    const previousAudio = audioElements[previousTrackId];
+    if (previousAudio) finishStop(previousTrackId, previousAudio);
+  }
 
-  void (async () => {
-    try {
-      if (context.state === 'suspended') await context.resume();
-      const buffer = await loadAudioBuffer(trackId, context);
-      if (token !== playRequestToken || !bgmEnabled) return;
+  activeTrackId = trackId;
+  audio.loop = true;
+  audio.volume = getOutputVolume(trackId);
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // Metadata may not be loaded yet.
+  }
 
-      const source = context.createBufferSource();
-      source.buffer = buffer;
-      source.loop = true;
-      source.connect(outputGain!);
+  const playPromise = audio.play();
+  if (!playPromise) return;
 
-      activeSource = source;
-      activeTrackId = trackId;
-      outputGain!.gain.cancelScheduledValues(context.currentTime);
-      outputGain!.gain.setValueAtTime(getOutputVolume(trackId), context.currentTime);
-
-      source.onended = () => {
-        if (activeSource !== source) return;
-        activeSource = null;
-        activeTrackId = null;
-      };
-      source.start(0);
-    } catch (error) {
-      if (token !== playRequestToken) return;
-      console.warn(`BGM could not start (${trackId}):`, error);
-      activeSource = null;
-      activeTrackId = null;
-    }
-  })();
+  void playPromise.catch((error) => {
+    if (token !== playRequestToken || activeTrackId !== trackId) return;
+    console.warn(`BGM could not start (${trackId}):`, error);
+    activeTrackId = null;
+  });
 }
 
 function stopPlaybackPreservingTarget(): void {
@@ -226,7 +180,9 @@ function stopPlaybackPreservingTarget(): void {
 }
 
 export function getActiveBgmTarget(): BgmTarget {
-  if (!activeTrackId || !activeSource) return null;
+  if (!activeTrackId) return null;
+  const audio = audioElements[activeTrackId];
+  if (!audio || audio.paused) return null;
   return trackIdToTarget(activeTrackId);
 }
 
@@ -323,11 +279,12 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 }
 
 export function isWorldBgmPlaying(): boolean {
-  return activeTrackId === 'world' && Boolean(activeSource);
+  const audio = audioElements.world;
+  return activeTrackId === 'world' && Boolean(audio && !audio.paused);
 }
 
 export function getWorldBgmDurationSec(): number {
-  const buffer = audioBuffers.world;
-  if (!buffer || !Number.isFinite(buffer.duration)) return 0;
-  return buffer.duration;
+  const audio = audioElements.world;
+  if (activeTrackId !== 'world' || !audio || !Number.isFinite(audio.duration)) return 0;
+  return audio.duration;
 }
