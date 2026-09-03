@@ -69,7 +69,7 @@ export function LocationDetailModal({
 
   return createPortal((
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md overflow-y-auto font-sans"
+      className="sfc-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md overflow-y-auto font-sans"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
