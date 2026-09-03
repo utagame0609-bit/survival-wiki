@@ -78,7 +78,7 @@ export function TimelineRecordsView({
   const hasActiveFilter = Boolean(searchQuery.trim() || selectedYear || selectedMonth);
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-36 md:pb-6">
+    <div className="sfc-records-view mx-auto w-full max-w-4xl pb-36 md:pb-6">
       <TimelineRecordsToolbar
         searchQuery={searchQuery}
         sortOrder={sortOrder}
