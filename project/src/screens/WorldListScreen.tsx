@@ -7,21 +7,26 @@ import { Spinner, ErrorBanner } from '@/components/Feedback';
 import { WorldCreateModal } from '@/components/WorldCreateModal';
 import { WorldCard } from '@/components/WorldCard';
 import { WorldDeleteConfirmModal } from '@/components/WorldDeleteConfirmModal';
+import { SfcWorldList } from '@/components/sfc/SfcWorldList';
 import { useWorldListData } from '@/hooks/useWorldListData';
 import type { NavigateFn } from '@/lib/screenNavigation';
 import { saveUserWorldListView } from '@/lib/userLastView';
 import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
+import { getAppTheme, subscribeAppTheme, type AppTheme } from '@/lib/theme';
 
-export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate: NavigateFn }) {
+export function WorldListScreen({ gameId, gameName, navigate }: { gameId: string; gameName: string; navigate: NavigateFn }) {
   const { worlds, worldMeta, loading, error, setError, load } = useWorldListData(gameId);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editTarget, setEditTarget] = useState<WorldWithMembers | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WorldWithMembers | null>(null);
+  const [theme, setTheme] = useState<AppTheme>(() => getAppTheme());
 
   useEffect(() => {
     void saveUserWorldListView(gameId).catch((saveError) => console.error('Failed to save last world-list view:', saveError));
   }, [gameId]);
+
+  useEffect(() => subscribeAppTheme(setTheme), []);
 
   useEffect(() => {
     playWorldBgm();
@@ -54,6 +59,69 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
     localStorage.setItem(`survival-wiki:last-opened-world:${gameId}`, world.id);
     navigate({ name: 'world', gameId, worldId: world.id, worldName: world.name });
   };
+
+  if (theme === 'sfc') {
+    return (
+      <div className="relative min-h-screen overflow-x-hidden bg-[var(--app-bg)] text-[var(--text-main)]">
+        <AppHeader title="WORLD SELECT" />
+
+        {loading && (
+          <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6">
+            <Spinner label="セーブデータをよみこみ中..." />
+          </div>
+        )}
+
+        {error && (
+          <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6">
+            <ErrorBanner message={error} />
+          </div>
+        )}
+
+        {!loading && !error && (
+          <SfcWorldList
+            gameName={gameName}
+            worlds={worlds}
+            worldMeta={worldMeta}
+            onLoadWorld={openWorld}
+            onCreateWorld={() => {
+              playConfirmSound();
+              setShowCreateModal(true);
+            }}
+            onEditWorld={(world) => {
+              playConfirmSound();
+              setEditTarget(world);
+            }}
+            onDeleteWorld={handleDelete}
+          />
+        )}
+
+        {showCreateModal && (
+          <WorldCreateModal
+            gameId={gameId}
+            onClose={() => setShowCreateModal(false)}
+            onCreated={load}
+          />
+        )}
+
+        {editTarget && (
+          <WorldCreateModal
+            gameId={gameId}
+            worldId={editTarget.id}
+            onClose={() => setEditTarget(null)}
+            onCreated={load}
+          />
+        )}
+
+        {deleteTarget && (
+          <WorldDeleteConfirmModal
+            world={deleteTarget}
+            onCancel={() => setDeleteTarget(null)}
+            onConfirm={confirmDelete}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
