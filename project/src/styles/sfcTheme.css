@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap');
+
+:root {
+  --font-pixel: 'DotGothic16', 'Press Start 2P', monospace;
+  --font-heading: 'Silkscreen', 'DotGothic16', monospace;
+  --font-sans: 'Zen Kaku Gothic New', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* SFC (16-bit Retro Console) Theme Tokens */
+[data-theme="sfc"] {
+  --app-bg: #d6d6d8;
+  --app-bg-darker: #c2c2c6;
+  --surface-1: #e6e6e8;
+  --surface-2: #cccccc;
+  --surface-recessed: #b8b8be;
+  --surface-cartridge: #dedede;
+  --surface-label: #f4f4f2;
+  
+  --border-main: #4a4a50;
+  --border-dark: #222226;
+  --border-light: #ffffff;
+  --border-groove: #8e8e96;
+
+  --accent-red: #e63946;
+  --accent-red-hover: #d02b38;
+  --accent-blue: #2a6f97;
+  --accent-blue-hover: #1e5272;
+  --accent-yellow: #e9c46a;
+  --accent-yellow-hover: #d6af50;
+  --accent-green: #2a9d8f;
+  --accent-green-hover: #218074;
+
+  --text-main: #1f2024;
+  --text-muted: #5e6068;
+  --text-subtle: #848690;
+  --text-inverse: #ffffff;
+
+  --dpad-bg: #2d2e33;
+  --dpad-highlight: #45464e;
+  --rubber-btn: #75767c;
+  
+  --led-power-red: #ff3344;
+  --led-power-green: #00e676;
+}
+
+/* FC Dark Theme fallback for instant theme toggling comparison */
+[data-theme="fc_dark"] {
+  --app-bg: #141418;
+  --app-bg-darker: #0c0c0e;
+  --surface-1: #222228;
+  --surface-2: #1a1a20;
+  --surface-recessed: #101014;
+  --surface-cartridge: #2c2c34;
+  --surface-label: #1e1e24;
+
+  --border-main: #444450;
+  --border-dark: #000000;
+  --border-light: #505060;
+  --border-groove: #2c2c34;
+
+  --accent-red: #ff4d5a;
+  --accent-red-hover: #e63946;
+  --accent-blue: #3a86c8;
+  --accent-blue-hover: #2a6f97;
+  --accent-yellow: #f4a261;
+  --accent-yellow-hover: #e76f51;
+  --accent-green: #2ec4b6;
+  --accent-green-hover: #20998e;
+
+  --text-main: #f0f0f4;
+  --text-muted: #a0a0b0;
+  --text-subtle: #707080;
+  --text-inverse: #101014;
+
+  --dpad-bg: #16161c;
+  --dpad-highlight: #282832;
+  --rubber-btn: #383842;
+
+  --led-power-red: #ff3344;
+  --led-power-green: #00e676;
+}
+
+[data-theme="sfc"] body {
+  background-color: var(--app-bg);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+}
+
+/* 16-bit Molded Plastic 3D Panel Styles */
+.sfc-panel {
+  background-color: var(--surface-1);
+  border: 2px solid var(--border-main);
+  box-shadow: 
+    inset 1px 1px 0px rgba(255, 255, 255, 0.95),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.2),
+    0 3px 6px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+}
+
+.sfc-recessed {
+  background-color: var(--surface-recessed);
+  border: 2px solid var(--border-main);
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 0px rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+}
+
+/* Cartridge / Slot 16-bit Beveled Card */
+.sfc-cartridge {
+  background-color: var(--surface-cartridge);
+  border: 2px solid var(--border-main);
+  box-shadow: 
+    inset 2px 2px 0px rgba(255, 255, 255, 0.9),
+    inset -2px -2px 0px rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 12px 12px 6px 6px;
+  position: relative;
+}
+
+.sfc-cartridge-grooves {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.15) 5px,
+    rgba(0, 0, 0, 0.15) 7px,
+    rgba(255, 255, 255, 0.6) 7px,
+    rgba(255, 255, 255, 0.6) 8px
+  );
+}
+
+/* 3D Convex ABXY Push Button Styles */
+.sfc-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 2px solid var(--border-main);
+  transition: all 0.08s ease-in-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sfc-btn-convex {
+  box-shadow: 
+    inset 1px 1px 0px rgba(255, 255, 255, 0.8),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.35),
+    0 3px 0px var(--border-dark),
+    0 4px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sfc-btn-convex:hover {
+  filter: brightness(1.05);
+}
+
+.sfc-btn-convex:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 1px 1px 3px rgba(0, 0, 0, 0.5),
+    0 1px 0px var(--border-dark);
+}
+
+/* Specific ABXY Buttons */
+.sfc-btn-a {
+  background-color: var(--accent-red);
+  color: #ffffff;
+}
+.sfc-btn-x {
+  background-color: var(--accent-blue);
+  color: #ffffff;
+}
+.sfc-btn-y {
+  background-color: var(--accent-yellow);
+  color: #222222;
+}
+.sfc-btn-b {
+  background-color: var(--accent-green);
+  color: #ffffff;
+}
+
+.sfc-btn-neutral {
+  background-color: var(--surface-1);
+  color: var(--text-main);
+}
+
+/* Controller Pill / Rubber buttons (SELECT / START) */
+.sfc-rubber-btn {
+  background-color: var(--rubber-btn);
+  color: #e0e0e0;
+  border-radius: 9999px;
+  transform: rotate(-25deg);
+  box-shadow: 
+    inset 1px 1px 1px rgba(255, 255, 255, 0.5),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.6),
+    0 2px 2px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+}
+
+.sfc-rubber-btn:active {
+  transform: rotate(-25deg) scale(0.95);
+  box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Subtle CRT Micro-Scanlines */
+.sfc-scanlines {
+  position: relative;
+}
+.sfc-scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.04) 50%
+  );
+  background-size: 100% 3px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Dot Grid Texture */
+.sfc-dot-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 0);
+  background-size: 12px 12px;
+}
+
+/* LED Power Indicators */
+@keyframes ledPulse {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px var(--led-power-red));
+  }
+  50% {
+    opacity: 0.65;
+    filter: drop-shadow(0 0 2px var(--led-power-red));
+  }
+}
+
+.sfc-led-red {
+  background-color: var(--led-power-red);
+  box-shadow: 0 0 6px var(--led-power-red), inset -1px -1px 1px rgba(0,0,0,0.5);
+  animation: ledPulse 2s infinite ease-in-out;
+}
+
+.sfc-led-green {
+  background-color: var(--led-power-green);
+  box-shadow: 0 0 6px var(--led-power-green), inset -1px -1px 1px rgba(0,0,0,0.5);
+}
+
+/* Retro Window Double Border */
+.sfc-window {
+  background: var(--surface-1);
+  border: 3px solid var(--border-dark);
+  box-shadow: 
+    0 0 0 2px #e0e0e0,
+    0 0 0 4px var(--border-main),
+    0 10px 25px rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+}
+
+/* Dot Fonts */
+.font-dot {
+  font-family: var(--font-pixel);
+}
+
+.font-sfc-title {
+  font-family: var(--font-heading);
+}
+
+/* Custom Scrollbars in 16-bit Style */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-recessed);
+  border: 1px solid var(--border-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-1);
+  border: 2px solid var(--border-main);
+  box-shadow: inset 1px 1px 0 #fff;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ffffff;
+}
