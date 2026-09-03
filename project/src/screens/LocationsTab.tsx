@@ -83,7 +83,6 @@ export function LocationsTab({
   };
 
   const openCreateModal = () => {
-    playModalOpenSound();
     setMode({ type: 'create' });
   };
 
