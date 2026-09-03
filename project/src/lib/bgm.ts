@@ -1,5 +1,4 @@
 import { bgmSequencer } from './bgmSequencer';
-import { getBgmChannelSettings, subscribeToBgmChannelSettings } from './bgmSettings';
 import { BGM_OUTPUT_GAIN, NPC_BGM_OUTPUT_GAIN } from './audioMaster';
 import { soundEngine } from './soundEngine';
 
@@ -11,7 +10,6 @@ const DEFAULT_BGM_VOLUME = 0.3;
 const BGM_ENABLED_KEY = 'survival-wiki-bgm-enabled';
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let fadeTimerId: number | null = null;
-let settingsUnsubscribe: (() => void) | null = null;
 let activeNpcBgm: ActiveNpcBgm | null = null;
 let desiredBgmTarget: BgmTarget = null;
 let bgmEnabled = true;
@@ -20,10 +18,6 @@ const bgmEnabledListeners = new Set<(enabled: boolean) => void>();
 if (typeof window !== 'undefined') {
   const storedEnabled = window.localStorage.getItem(BGM_ENABLED_KEY);
   if (storedEnabled !== null) bgmEnabled = storedEnabled === 'true';
-}
-
-function syncChannels(): void {
-  bgmSequencer.channels = getBgmChannelSettings();
 }
 
 function syncVolume(): void {
@@ -38,14 +32,6 @@ export function setMasterBgmVolume(value: number): number {
 
 export function getMasterBgmVolume(): number {
   return masterBgmVolume;
-}
-
-function ensureSettingsSubscription(): void {
-  if (settingsUnsubscribe) return;
-  syncChannels();
-  settingsUnsubscribe = subscribeToBgmChannelSettings((settings) => {
-    bgmSequencer.channels = settings;
-  });
 }
 
 function getNpcSourceGain(): number {
@@ -222,7 +208,6 @@ function startNpcPlayback(id: NpcBgmId): void {
 
 function startWorldPlayback(): void {
   stopNpcPlayback();
-  ensureSettingsSubscription();
   if (fadeTimerId !== null) {
     window.clearTimeout(fadeTimerId);
     fadeTimerId = null;
