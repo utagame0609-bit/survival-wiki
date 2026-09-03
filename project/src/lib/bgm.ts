@@ -24,7 +24,7 @@ const BGM_TRACK_OUTPUT_GAIN: Record<BgmTrackId, number> = {
 let masterBgmVolume = DEFAULT_BGM_VOLUME;
 let desiredBgmTarget: BgmTarget = null;
 let bgmEnabled = true;
-let audioElement: HTMLAudioElement | null = null;
+const audioElements: Partial<Record<BgmTrackId, HTMLAudioElement>> = {};
 let activeTrackId: BgmTrackId | null = null;
 let fadeTimerId: number | null = null;
 let playRequestToken = 0;
@@ -47,20 +47,21 @@ function getOutputVolume(id: BgmTrackId, ratio = 1): number {
   return Math.max(0, Math.min(1, masterBgmVolume * BGM_TRACK_OUTPUT_GAIN[id] * ratio));
 }
 
-function getAudioElement(): HTMLAudioElement | null {
+function getAudioElement(trackId: BgmTrackId): HTMLAudioElement | null {
   if (typeof window === 'undefined') return null;
-  if (audioElement) return audioElement;
+  const existing = audioElements[trackId];
+  if (existing) return existing;
 
-  const audio = new Audio();
+  const audio = new Audio(BGM_TRACK_URLS[trackId]);
   audio.preload = 'auto';
   audio.loop = true;
   audio.volume = 0;
   audio.addEventListener('error', () => {
     const mediaError = audio.error;
-    console.error('BGM playback error:', mediaError?.message ?? mediaError?.code ?? 'unknown media error');
+    console.error(`BGM playback error (${trackId}):`, mediaError?.message ?? mediaError?.code ?? 'unknown media error');
   });
-  audioElement = audio;
-  return audioElement;
+  audioElements[trackId] = audio;
+  return audio;
 }
 
 function clearFadeTimer(): void {
@@ -70,8 +71,9 @@ function clearFadeTimer(): void {
 }
 
 function syncVolume(): void {
-  const audio = audioElement;
-  if (!audio || !activeTrackId) return;
+  if (!activeTrackId) return;
+  const audio = audioElements[activeTrackId];
+  if (!audio) return;
   audio.volume = getOutputVolume(activeTrackId);
 }
 
@@ -85,7 +87,7 @@ export function getMasterBgmVolume(): number {
   return masterBgmVolume;
 }
 
-function finishStop(audio: HTMLAudioElement): void {
+function finishStop(trackId: BgmTrackId, audio: HTMLAudioElement): void {
   audio.pause();
   try {
     audio.currentTime = 0;
@@ -93,19 +95,23 @@ function finishStop(audio: HTMLAudioElement): void {
     // Metadata may not be loaded yet. Pausing is sufficient in that case.
   }
   audio.volume = 0;
-  activeTrackId = null;
+  if (activeTrackId === trackId) activeTrackId = null;
 }
 
 function stopCurrentPlayback(fadeMs = 0): void {
   playRequestToken += 1;
   clearFadeTimer();
 
-  const audio = audioElement;
   const trackId = activeTrackId;
-  if (!audio || !trackId) return;
+  if (!trackId) return;
+  const audio = audioElements[trackId];
+  if (!audio) {
+    activeTrackId = null;
+    return;
+  }
 
   if (fadeMs <= 0 || typeof window === 'undefined' || audio.paused) {
-    finishStop(audio);
+    finishStop(trackId, audio);
     return;
   }
 
@@ -120,7 +126,7 @@ function stopCurrentPlayback(fadeMs = 0): void {
     step += 1;
     audio.volume = startVolume * Math.max(0, 1 - step / steps);
     if (step >= steps) {
-      finishStop(audio);
+      finishStop(trackId, audio);
       fadeTimerId = null;
       return;
     }
@@ -131,7 +137,7 @@ function stopCurrentPlayback(fadeMs = 0): void {
 }
 
 function startTrack(trackId: BgmTrackId): void {
-  const audio = getAudioElement();
+  const audio = getAudioElement(trackId);
   if (!audio) return;
 
   clearFadeTimer();
@@ -144,15 +150,19 @@ function startTrack(trackId: BgmTrackId): void {
   playRequestToken += 1;
   const token = playRequestToken;
 
-  audio.pause();
+  if (activeTrackId && activeTrackId !== trackId) {
+    const previousTrackId = activeTrackId;
+    const previousAudio = audioElements[previousTrackId];
+    if (previousAudio) finishStop(previousTrackId, previousAudio);
+  }
+
   activeTrackId = trackId;
   audio.loop = true;
-  audio.src = BGM_TRACK_URLS[trackId];
   audio.volume = getOutputVolume(trackId);
   try {
     audio.currentTime = 0;
   } catch {
-    // The new source may not have metadata yet.
+    // Metadata may not be loaded yet.
   }
 
   const playPromise = audio.play();
@@ -170,7 +180,9 @@ function stopPlaybackPreservingTarget(): void {
 }
 
 export function getActiveBgmTarget(): BgmTarget {
-  if (!activeTrackId || audioElement?.paused) return null;
+  if (!activeTrackId) return null;
+  const audio = audioElements[activeTrackId];
+  if (!audio || audio.paused) return null;
   return trackIdToTarget(activeTrackId);
 }
 
@@ -267,10 +279,12 @@ export function subscribeBgmEnabled(listener: (enabled: boolean) => void): () =>
 }
 
 export function isWorldBgmPlaying(): boolean {
-  return activeTrackId === 'world' && Boolean(audioElement && !audioElement.paused);
+  const audio = audioElements.world;
+  return activeTrackId === 'world' && Boolean(audio && !audio.paused);
 }
 
 export function getWorldBgmDurationSec(): number {
-  if (activeTrackId !== 'world' || !audioElement || !Number.isFinite(audioElement.duration)) return 0;
-  return audioElement.duration;
+  const audio = audioElements.world;
+  if (activeTrackId !== 'world' || !audio || !Number.isFinite(audio.duration)) return 0;
+  return audio.duration;
 }
