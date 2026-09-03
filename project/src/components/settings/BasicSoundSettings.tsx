@@ -36,7 +36,7 @@ export function BasicSoundSettings() {
           onMouseEnter={playHoverSound}
           className="w-full cursor-pointer accent-cyan-400"
         />
-        <p className="text-[10px] leading-4 text-slate-500">ワールド選択画面で再生されるBGM全体の音量です。</p>
+        <p className="text-[10px] leading-4 text-slate-500">トップ画面と各Wiki編纂官で再生されるBGM全体の音量です。</p>
       </section>
 
       <section className="space-y-1.5 rounded-md border border-violet-500/30 bg-[#090d16] p-3">
