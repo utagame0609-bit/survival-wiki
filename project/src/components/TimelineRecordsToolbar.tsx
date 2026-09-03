@@ -32,7 +32,7 @@ export function TimelineRecordsToolbar({
   onOpenChest,
 }: TimelineRecordsToolbarProps) {
   return (
-    <section className="mb-6 grid gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A]/70 p-3 shadow-md backdrop-blur-sm lg:grid-cols-[1fr_auto] lg:items-center">
+    <section className="sfc-records-toolbar mb-6 grid gap-3 rounded-lg border border-[#1E293B] bg-[#0F172A]/70 p-3 shadow-md backdrop-blur-sm lg:grid-cols-[1fr_auto] lg:items-center">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
         <input
