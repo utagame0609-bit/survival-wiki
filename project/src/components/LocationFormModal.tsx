@@ -2,7 +2,7 @@ import { Sparkles, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import type { LocationWithPhotos, WorldWithMembers } from '@/lib/types';
 import { LocationForm } from '@/components/LocationForm';
-import { playCancelSound, playHoverSound } from '@/lib/sound';
+import { playHoverSound, playModalCloseSound } from '@/lib/sound';
 
 type LocationFormInput = {
   name: string;
@@ -28,14 +28,16 @@ type LocationFormModalProps = {
 export function LocationFormModal({ world, mode, editingLocation, saving, onSave, onComplete, onCancel }: LocationFormModalProps) {
   const isEdit = mode === 'edit';
 
+  const closeModal = () => {
+    playModalCloseSound();
+    onCancel();
+  };
+
   return createPortal((
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-4 bg-[#05080E]/85 backdrop-blur-md"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          playCancelSound();
-          onCancel();
-        }
+        if (event.target === event.currentTarget) closeModal();
       }}
     >
       <div className="relative w-full max-w-lg bg-[#0F172A] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden my-auto motion-safe:animate-[modal-enter_180ms_cubic-bezier(.22,.8,.35,1)]">
@@ -49,10 +51,7 @@ export function LocationFormModal({ world, mode, editingLocation, saving, onSave
 
           <button
             type="button"
-            onClick={() => {
-              playCancelSound();
-              onCancel();
-            }}
+            onClick={closeModal}
             onMouseEnter={playHoverSound}
             disabled={saving}
             className="p-1 rounded text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors disabled:opacity-50 cursor-pointer"
