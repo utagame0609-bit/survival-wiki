@@ -21,14 +21,14 @@
   --border-light: #ffffff;
   --border-groove: #8e8e96;
 
-  --accent-red: #e63946;
-  --accent-red-hover: #d02b38;
-  --accent-blue: #1D3557;
-  --accent-blue-hover: #162944;
-  --accent-yellow: #e9c46a;
-  --accent-yellow-hover: #d6af50;
-  --accent-green: #2a9d8f;
-  --accent-green-hover: #218074;
+  --accent-red: #E60012;
+  --accent-red-hover: #C7000F;
+  --accent-blue: #0047BB;
+  --accent-blue-hover: #00378F;
+  --accent-yellow: #FFCC00;
+  --accent-yellow-hover: #D9AD00;
+  --accent-green: #00A968;
+  --accent-green-hover: #008A55;
 
   --text-main: #222222;
   --text-muted: #222222;
@@ -39,7 +39,7 @@
   --dpad-highlight: #45464e;
   --rubber-btn: #75767c;
   
-  --led-power-red: #ff3344;
+  --led-power-red: #E60012;
   --led-power-green: #00e676;
 }
 
@@ -1289,3 +1289,228 @@
 [data-theme="sfc"] .sfc-mobile-hud button[class*="bg-[#0E2A3A]"] svg {
   color: #ffffff !important;
 }
+
+
+/* Final SFC vivid-controller palette + original-structure corrections */
+
+/* Never tint, desaturate or blend user/NPC imagery in the light theme. */
+[data-theme="sfc"] img,
+[data-theme="sfc"] picture {
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Original header layout is preserved; this block only repaints it. */
+[data-theme="sfc"] .sfc-app-header {
+  background: var(--surface-1) !important;
+  border-color: #4A4A4A !important;
+  color: #222222 !important;
+  box-shadow: 0 3px 6px rgba(0,0,0,.14) !important;
+}
+
+[data-theme="sfc"] .sfc-app-header [class*="bg-[#161F30]"],
+[data-theme="sfc"] .sfc-app-header [class*="bg-[#0F172A]"],
+[data-theme="sfc"] .sfc-app-header [class*="bg-[#0E2030]"] {
+  background: var(--surface-recessed) !important;
+}
+
+[data-theme="sfc"] .sfc-app-header [class*="border-[#334155]"],
+[data-theme="sfc"] .sfc-app-header [class*="border-[#06B6D4]"] {
+  border-color: #4A4A4A !important;
+}
+
+[data-theme="sfc"] .sfc-app-header :is(h1, span) {
+  color: #222222 !important;
+}
+
+[data-theme="sfc"] .sfc-app-header .text-\[\#06B6D4\],
+[data-theme="sfc"] .sfc-app-header [class*="text-[#06B6D4]"] {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-app-header button[title*="サウンド"] {
+  background: var(--accent-green) !important;
+  border-color: #4A4A4A !important;
+  color: #ffffff !important;
+}
+[data-theme="sfc"] .sfc-app-header button[title*="サウンド"] * {
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-app-header button[title="冒険の書一覧へ戻る"] {
+  background: var(--accent-yellow) !important;
+  border-color: #4A4A4A !important;
+  color: #111111 !important;
+}
+[data-theme="sfc"] .sfc-app-header button[title="冒険の書一覧へ戻る"] * {
+  color: #111111 !important;
+}
+
+[data-theme="sfc"] .sfc-app-header button[title="システム設定"],
+[data-theme="sfc"] .sfc-app-header button[title="戻る"] {
+  background: #D0D0D0 !important;
+  border-color: #4A4A4A !important;
+  color: #111111 !important;
+}
+[data-theme="sfc"] .sfc-app-header button[title="システム設定"] *,
+[data-theme="sfc"] .sfc-app-header button[title="戻る"] * {
+  color: #111111 !important;
+}
+
+/* Strong dark text on all light-theme application chrome.
+   Persona article bodies remain outside these chrome roots. */
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-sound-studio,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form,
+  .sfc-chest-modal,
+  .sfc-sns-modal,
+  .world-create-modal-panel
+) :is(p, h1, h2, h3, h4, h5, h6, label, span) {
+  color: #222222 !important;
+}
+
+/* Controller colors: blue = load/main/new world/active tabs. */
+[data-theme="sfc"] .sfc-create-world-button,
+[data-theme="sfc"] .sfc-create-world-button:hover,
+[data-theme="sfc"] .sfc-world-load,
+[data-theme="sfc"] .sfc-world-load:hover {
+  background: var(--accent-blue) !important;
+  border-color: #4A4A4A !important;
+  color: #ffffff !important;
+}
+[data-theme="sfc"] .sfc-create-world-button *,
+[data-theme="sfc"] .sfc-world-load * {
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-world-tabs button {
+  background: #D0D0D0 !important;
+  border: 2px solid #4A4A4A !important;
+  color: #111111 !important;
+}
+[data-theme="sfc"] .sfc-world-tabs button * {
+  color: #111111 !important;
+}
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#161F30]"],
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#0E2A3A]"] {
+  background: var(--accent-blue) !important;
+  border-color: var(--accent-blue) !important;
+  color: #ffffff !important;
+}
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#161F30]"] *,
+[data-theme="sfc"] .sfc-world-tabs button[class*="bg-[#0E2A3A]"] * {
+  color: #ffffff !important;
+}
+
+/* Yellow = slot badges, DAYS, chest and star-like emphasis. */
+[data-theme="sfc"] .sfc-slot-badge {
+  background: var(--accent-yellow) !important;
+  border-color: #4A4A4A !important;
+  color: #111111 !important;
+}
+[data-theme="sfc"] .sfc-slot-badge * {
+  color: #111111 !important;
+}
+
+[data-theme="sfc"] .sfc-stat {
+  background: var(--surface-recessed) !important;
+  border-color: #4A4A4A !important;
+}
+[data-theme="sfc"] .sfc-stat-amber > div:last-child {
+  color: #8A6C00 !important;
+  background: var(--accent-yellow);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+[data-theme="sfc"] .sfc-stat-cyan > div:last-child {
+  color: var(--accent-blue) !important;
+}
+
+[data-theme="sfc"] .sfc-records-toolbar button[title*="CHEST"] {
+  background: #D0D0D0 !important;
+  border-color: #4A4A4A !important;
+  color: #111111 !important;
+}
+[data-theme="sfc"] .sfc-records-toolbar button[title*="CHEST"] > svg {
+  color: var(--accent-yellow) !important;
+  fill: var(--accent-yellow);
+}
+[data-theme="sfc"] .sfc-records-toolbar button[title*="CHEST"] span:last-child {
+  background: var(--accent-yellow) !important;
+  color: #111111 !important;
+}
+
+/* Green = add record / saved / success. */
+[data-theme="sfc"] .sfc-records-view > .fixed button,
+[data-theme="sfc"] .sfc-records-view > .fixed button:hover {
+  background: var(--accent-green) !important;
+  border-color: #4A4A4A !important;
+  color: #ffffff !important;
+}
+[data-theme="sfc"] .sfc-records-view > .fixed button * {
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] .sfc-world-card > div:last-child span:last-child {
+  color: var(--accent-green-hover) !important;
+  font-weight: 700;
+}
+
+[data-theme="sfc"] :is(.sfc-world-screen,.sfc-wiki-compiler,.sfc-settings-modal) [class*="text-[#10B981]"],
+[data-theme="sfc"] :is(.sfc-world-screen,.sfc-wiki-compiler,.sfc-settings-modal) [class*="text-emerald-"] {
+  color: var(--accent-green) !important;
+}
+
+/* Red = delete / error / warning. */
+[data-theme="sfc"] .sfc-world-card button[title="ワールドを削除"],
+[data-theme="sfc"] .sfc-delete-confirm {
+  background: var(--accent-red) !important;
+  border-color: #4A4A4A !important;
+  color: #ffffff !important;
+}
+[data-theme="sfc"] .sfc-world-card button[title="ワールドを削除"] *,
+[data-theme="sfc"] .sfc-delete-confirm * {
+  color: #ffffff !important;
+}
+
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form
+) [class*="text-[#EF4444]"],
+[data-theme="sfc"] :is(
+  .sfc-world-list-root,
+  .sfc-world-screen,
+  .sfc-settings-modal,
+  .sfc-location-detail-modal,
+  .sfc-location-form-modal,
+  .sfc-location-form
+) [class*="text-red-"] {
+  color: var(--accent-red) !important;
+}
+
+/* Wiki cards stay light; selected state uses vivid SFC blue. */
+[data-theme="sfc"] .sfc-compiler-card {
+  background: #E8E8E8 !important;
+  border: 2px solid #4A4A4A !important;
+  color: #222222 !important;
+  opacity: 1 !important;
+}
+[data-theme="sfc"] .sfc-compiler-card[aria-pressed="true"] {
+  border: 3px solid var(--accent-blue) !important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.95),
+    inset -1px -1px 0 rgba(0,0,0,.18),
+    0 0 0 2px rgba(0,71,187,.16),
+    0 3px 7px rgba(0,0,0,.14) !important;
+}
+
+/* Keep the requested light-gray background untouched. */
