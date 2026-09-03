@@ -67,18 +67,6 @@ export function AppHeader({
                 </button>
               )}
 
-              {onBack && (
-                <button
-                  type="button"
-                  onClick={handleHome}
-                  onMouseEnter={playHoverSound}
-                  className="sfc-btn sfc-btn-convex sfc-btn-neutral flex items-center gap-1 px-2.5 py-1.5 font-dot text-xs hover:bg-white"
-                  title="冒険の書一覧に戻る (SLOTS / HOME)"
-                >
-                  <Home className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
-                  <span className="hidden sm:inline">SLOTS</span>
-                </button>
-              )}
             </div>
           </div>
 
@@ -121,6 +109,19 @@ export function AppHeader({
               <Settings className="h-3.5 w-3.5 text-[var(--text-main)]" />
               <span className="hidden sm:inline">CONFIG</span>
             </button>
+
+            {onBack && (
+              <button
+                type="button"
+                onClick={handleHome}
+                onMouseEnter={playHoverSound}
+                className="sfc-btn sfc-btn-convex sfc-btn-neutral flex items-center gap-1 px-2.5 py-1.5 font-dot text-xs hover:bg-white"
+                title="冒険の書一覧に戻る (SLOTS / HOME)"
+              >
+                <Home className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                <span className="hidden sm:inline">SLOTS</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
