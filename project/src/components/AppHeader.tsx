@@ -24,7 +24,6 @@ export function AppHeader({
   };
 
   const handleSettings = () => {
-    playHoverSound();
     window.dispatchEvent(new CustomEvent('survival-wiki:settings'));
   };
 
