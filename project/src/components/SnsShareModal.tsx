@@ -69,7 +69,7 @@ export function SnsShareModal({ world, location, onClose }: SnsShareModalProps) 
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-3 backdrop-blur-md sm:p-4"
+      className="sfc-modal-backdrop fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-[#05080E]/85 p-3 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) handleClose();
       }}
