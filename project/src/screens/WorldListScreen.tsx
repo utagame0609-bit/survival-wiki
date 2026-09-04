@@ -56,8 +56,13 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
-      <div className="pointer-events-none fixed inset-0 opacity-30 [background-image:radial-gradient(rgba(51,65,85,0.25)_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div
+      className="relative min-h-screen overflow-x-hidden bg-[#0B1018] bg-repeat text-[#E2E8F0]"
+      style={{
+        backgroundImage: `url("${WORLD_LIST_BACKGROUND_URL}")`,
+        backgroundSize: '512px 512px',
+      }}
+    >
       <AppHeader title="WORLD SELECT" />
 
       <main className="relative z-10 mx-auto w-full max-w-4xl px-4 py-6 sm:py-8">
