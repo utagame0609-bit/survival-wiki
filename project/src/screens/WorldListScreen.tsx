@@ -13,6 +13,8 @@ import { saveUserWorldListView } from '@/lib/userLastView';
 import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
+const WORLD_LIST_BACKGROUND_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/world-bg(1).png';
+
 export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate: NavigateFn }) {
   const { worlds, worldMeta, loading, error, setError, load } = useWorldListData(gameId);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -56,7 +58,13 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#0B1018] text-[#E2E8F0]">
+    <div
+      className="relative min-h-screen overflow-x-hidden bg-[#0B1018] bg-repeat text-[#E2E8F0]"
+      style={{
+        backgroundImage: `url("${WORLD_LIST_BACKGROUND_URL}")`,
+        backgroundSize: '512px 512px',
+      }}
+    >
       <div className="pointer-events-none fixed inset-0 opacity-30 [background-image:radial-gradient(rgba(51,65,85,0.25)_1px,transparent_1px)] [background-size:16px_16px]" />
       <AppHeader title="WORLD SELECT" />
 
