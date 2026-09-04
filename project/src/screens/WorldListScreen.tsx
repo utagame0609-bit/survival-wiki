@@ -14,6 +14,8 @@ import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound } fro
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
 const WORLD_LIST_BACKGROUND_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/world-bg(1).png';
+const WORLD_LIST_PANEL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/panel-surface(3).png';
+const WORLD_LIST_CONTROL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/control-surface(2).png';
 
 export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate: NavigateFn }) {
   const { worlds, worldMeta, loading, error, setError, load } = useWorldListData(gameId);
@@ -95,8 +97,20 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
         {error && <ErrorBanner message={error} />}
 
         {!loading && !error && worlds.length === 0 && (
-          <div className="mb-4 rounded-lg border border-dashed border-[#1E293B] bg-[#0F172A]/50 px-4 py-10 text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] text-[#F59E0B]">
+          <div
+            className="mb-4 rounded-lg border border-dashed border-[#1E293B] bg-[#0F172A]/50 px-4 py-10 text-center"
+            style={{
+              backgroundImage: `url("${WORLD_LIST_PANEL_URL}")`,
+              backgroundSize: '512px 512px',
+            }}
+          >
+            <div
+              className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] text-[#F59E0B]"
+              style={{
+                backgroundImage: `url("${WORLD_LIST_CONTROL_URL}")`,
+                backgroundSize: '512px 512px',
+              }}
+            >
               <Gamepad2 className="h-6 w-6" />
             </div>
             <p className="text-sm font-bold text-[#F8FAFC]">セーブデータがありません</p>
@@ -126,8 +140,18 @@ export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate
               onClick={() => { playConfirmSound(); setShowCreateModal(true); }}
               onMouseEnter={playHoverSound}
               className="group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#1E293B] bg-[#0B1018]/50 py-6 text-[#64748B] transition-all hover:border-[#F59E0B]/60 hover:bg-[#0F172A]/80 hover:text-[#F59E0B]"
+              style={{
+                backgroundImage: `url("${WORLD_LIST_PANEL_URL}")`,
+                backgroundSize: '512px 512px',
+              }}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] group-hover:bg-[#1E293B]">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#161F30] group-hover:bg-[#1E293B]"
+                style={{
+                  backgroundImage: `url("${WORLD_LIST_CONTROL_URL}")`,
+                  backgroundSize: '512px 512px',
+                }}
+              >
                 <Plus className="h-5 w-5 text-[#F59E0B]" />
               </div>
               <div className="font-mono text-xs tracking-wider">
