@@ -4,9 +4,6 @@ import type { WorldMeta } from '@/lib/worldMeta';
 import { playHoverSound } from '@/lib/sound';
 import { useWorldCardPhotos } from '@/hooks/useWorldCardPhotos';
 
-const WORLD_CARD_PANEL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/panel-surface(3).png';
-const WORLD_CARD_CONTROL_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/control-surface(2).png';
-
 type WorldCardProps = {
   slotNumber: number;
   world: WorldWithMembers;
@@ -34,10 +31,6 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
   return (
     <article
       className="group relative rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-md transition-all duration-200 hover:border-[#F59E0B]/60 hover:bg-[#131E35]"
-      style={{
-        backgroundImage: `url("${WORLD_CARD_PANEL_URL}")`,
-        backgroundSize: '512px 512px',
-      }}
       onMouseEnter={playHoverSound}
     >
       <span className="pointer-events-none absolute -left-px -top-px h-2 w-2 border-l-2 border-t-2 border-[#F2A100]" />
@@ -115,7 +108,6 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
               onClick={onEdit}
               onMouseEnter={playHoverSound}
               className="shrink-0 rounded border border-[#334155]/60 bg-[#161F30] p-2.5 text-[#94A3B8] transition-colors hover:border-[#F59E0B]/50 hover:bg-[#1E293B] hover:text-[#F8FAFC] sm:p-2"
-              style={{ backgroundImage: `url("${WORLD_CARD_CONTROL_URL}")`, backgroundSize: '512px 512px' }}
               aria-label={`${world.name}を編集`}
               title="ワールド設定を編集"
             >
@@ -126,7 +118,6 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
               onClick={onDelete}
               onMouseEnter={playHoverSound}
               className="shrink-0 rounded border border-[#334155]/60 bg-[#161F30] p-2.5 text-[#64748B] transition-colors hover:border-[#EF4444]/50 hover:bg-[#2A161C] hover:text-[#EF4444] sm:p-2"
-              style={{ backgroundImage: `url("${WORLD_CARD_CONTROL_URL}")`, backgroundSize: '512px 512px' }}
               aria-label={`${world.name}を削除`}
               title="ワールドを削除"
             >
@@ -158,13 +149,7 @@ export function WorldCard({ slotNumber, world, meta, onOpen, onEdit, onDelete }:
 
 function Stat({ label, value, tone }: { label: string; value: number; tone: 'amber' | 'cyan' }) {
   return (
-    <div
-      className="flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial"
-      style={{
-        backgroundImage: `url("${WORLD_CARD_CONTROL_URL}")`,
-        backgroundSize: '512px 512px',
-      }}
-    >
+    <div className="flex-1 rounded border border-[#1E293B] bg-[#0B1018] px-2.5 py-1.5 text-center sm:flex-initial">
       <div className="font-mono text-[9px] text-[#64748B]">{label}</div>
       <div className={`font-mono text-sm font-bold ${tone === 'amber' ? 'text-[#F59E0B]' : 'text-[#06B6D4]'}`}>
         {value}
