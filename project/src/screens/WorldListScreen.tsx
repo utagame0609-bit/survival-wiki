@@ -13,6 +13,8 @@ import { saveUserWorldListView } from '@/lib/userLastView';
 import { playConfirmSound, playDeleteSound, playErrorSound, playHoverSound } from '@/lib/sound';
 import { playWorldBgm, stopWorldBgm } from '@/lib/bgm';
 
+const WORLD_LIST_BACKGROUND_URL = 'https://pub-b9cb6563a3d6454dbdd3c68ba3b1e615.r2.dev/wiki-image/Survival%20Wiki%20%E3%81%AE%20WORLD%20LIST%20%E7%94%BB%E9%9D%A2%E8%83%8C%E6%99%AF%E7%94%A8%E3%83%86%E3%82%AF%E3%82%B9%E3%83%81%E3%83%A3.%E5%9C%A7%E7%B8%AE%E3%83%AA%E3%82%B5%E3%82%A4%E3%82%BA%E6%B8%88%E3%81%BF.png';
+
 export function WorldListScreen({ gameId, navigate }: { gameId: string; navigate: NavigateFn }) {
   const { worlds, worldMeta, loading, error, setError, load } = useWorldListData(gameId);
   const [showCreateModal, setShowCreateModal] = useState(false);
